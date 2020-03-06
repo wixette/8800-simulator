@@ -59,20 +59,20 @@
         <p>
           INTE&nbsp;<span class="led">&#x25cb;</span>&nbsp;
           PROT&nbsp;<span class="led">&#x25cb;</span>&nbsp;
-          MEMR&nbsp;<span class="led">&#x25cf;</span>&nbsp;
+          MEMR&nbsp;<span id="memr-led" class="led">&#x25cb;</span>&nbsp;
           INP&nbsp;<span class="led">&#x25cb;</span>&nbsp;
-          MI&nbsp;<span class="led">&#x25cf;</span>&nbsp;
+          MI&nbsp;<span id="mi-led" class="led">&#x25cb;</span>&nbsp;
           OUT&nbsp;<span class="led">&#x25cb;</span>&nbsp;
           HLTA&nbsp;<span class="led">&#x25cb;</span>&nbsp;
           STACK&nbsp;<span class="led">&#x25cb;</span>&nbsp;
-          WO&nbsp;<span class="led">&#x25cf;</span>&nbsp;
+          WO&nbsp;<span id="wo-led" class="led">&#x25cb;</span>&nbsp;
           INT&nbsp;<span class="led">&#x25cb;</span>&nbsp;
         </p>
       </div>
 
       <div id="wait-leds">
         <p>
-          WAIT&nbsp;<span id="wait-led" class="led">&#x25cf;</span>&nbsp;
+          WAIT&nbsp;<span id="wait-led" class="led">&#x25cb;</span>&nbsp;
           HLDA&nbsp;<span class="led">&#x25cb;</span>&nbsp;
         </p>
       </div>
@@ -169,24 +169,30 @@
        ledElem.innerHTML = isRunning ? '&#x25cb' : '&#x25cf';
      }
 
+     function setStatusLedsCallback(isPoweredOn) {
+       var ledElems = [
+         document.getElementById('memr-led'),
+         document.getElementById('mi-led'),
+         document.getElementById('wo-led')
+       ];
+       for (let i = 0; i < ledElems.length; i++) {
+         ledElems[i].innerHTML = isPoweredOn ? '&#x25cf' : '&#x25cb';
+       }
+     }
+
      var dumpCpuElem = document.getElementById('cpu');
      var dumpMemElem = document.getElementById('mem');
      var sim = new Sim8800(256, 1000000,
                            setAddressLedsCallback, setDataLedsCallback,
-                           setWaitLedCallback,
+                           setWaitLedCallback, setStatusLedsCallback,
                            dumpCpuElem, dumpMemElem);
 
-     function init() {
-       sim.loadDataAsHexString(0, '00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f');
-       sim.loadData(16, [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07]);
-       sim.dumpCpu();
-       sim.dumpMem()
+     function powerOn() {
+       sim.powerOn();
      }
 
-     function test() {
-       console.log(Sim8800.parseBits(10, 1));
-       console.log(Sim8800.parseBits(0xF8, 1));
-       console.log(Sim8800.parseBits(0xF0, 2));
+     function powerOff() {
+       sim.powerOff();
      }
 
      function run() {
@@ -195,14 +201,10 @@
        // Pattern shift.
        sim.loadDataAsHexString(0, '3e 8c d3 ff 0f c3 02 00');
        sim.start();
-       sim.dumpCpu();
-       sim.dumpMem()
      }
 
      function stop() {
        sim.stop();
-       sim.dumpCpu();
-       sim.dumpMem()
      }
     </script>
   </body>

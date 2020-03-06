@@ -30,6 +30,8 @@ class Sim8800 {
      *     callback to set data LEDs.
      * @param {function(boolean)?} setWaitLedCallback The callback to
      *     set the WAIT LED.
+     * @param {function(boolean)?} setStatusLedsCallback The callback to
+     *     set the STATUS LEDs.
      * @param {Element?} dumpCpuElem The DOM element used to render
      *     dumped CPU status. null to disable the feature.
      * @param {Element?} dumpMemElem The DOM element used to render
@@ -37,13 +39,14 @@ class Sim8800 {
      */
     constructor(memSize, clockRate,
                 setAddressLedsCallback, setDataLedsCallback,
-                setWaitLedCallback,
+                setWaitLedCallback, setStatusLedsCallback,
                 dumpCpuElem, dumpMemElem) {
         this.clockRate = clockRate;
         this.mem = new Array(memSize);
         this.setAddressLedsCallback = setAddressLedsCallback;
         this.setDataLedsCallback = setDataLedsCallback;
         this.setWaitLedCallback = setWaitLedCallback;
+        this.setStatusLedsCallback = setStatusLedsCallback;
         this.dumpCpuElem = dumpCpuElem;
         this.dumpMemElem = dumpMemElem;
         this.running = false;
@@ -85,12 +88,12 @@ class Sim8800 {
      * Fills the memory with dummy bytes.
      */
     initMem(random = false) {
-        for (let i = 0; i < this.mem.length; i++) {
-            if (random) {
+        if (random) {
+            for (let i = 0; i < this.mem.length; i++) {
                 this.mem[i] = Math.floor(Math.random() * 256);
-            } else {
-                this.mem[i] = 0;
             }
+        } else {
+            this.mem.fill(0);
         }
     }
 
@@ -273,8 +276,16 @@ class Sim8800 {
      */
     powerOn() {
         this.stop();
-        reset();
+        this.reset();
         this.initMem();
+        if (this.setStatusLedsCallback) {
+            this.setStatusLedsCallback(true);
+        }
+        if (this.setWaitLedCallback) {
+            this.setWaitLedCallback(false);
+        }
+        this.dumpCpu();
+        this.dumpMem();
     }
 
     /**
@@ -282,8 +293,26 @@ class Sim8800 {
      */
     powerOff() {
         this.stop();
-        reset();
+        this.reset();
         this.initMem();
+        if (this.setStatusLedsCallback) {
+            this.setStatusLedsCallback(false);
+        }
+        if (this.setWaitLedCallback) {
+            this.setWaitLedCallback(true);
+        }
+        if (this.setAddressLedsCallback) {
+            this.setAddressLedsCallback(new Array(16).fill(0));
+        }
+        if (this.setDataLedsCallback) {
+            this.setDataLedsCallback(new Array(8).fill(0));
+        }
+        if (this.dumpCpuElem) {
+            this.dumpCpuElem.innerHTML = '';
+        }
+        if (this.dumpMemElem) {
+            this.dumpMemElem.innerHTML = '';
+        }
     }
 
     /**
