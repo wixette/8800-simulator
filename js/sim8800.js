@@ -28,6 +28,8 @@ class Sim8800 {
      *     callback to set address LEDs.
      * @param {function(Array<number>)?} setDataLedsCallback The
      *     callback to set data LEDs.
+     * @param {function(boolean)?} setWaitLedCallback The callback to
+     *     set the WAIT LED.
      * @param {Element?} dumpCpuElem The DOM element used to render
      *     dumped CPU status. null to disable the feature.
      * @param {Element?} dumpMemElem The DOM element used to render
@@ -35,11 +37,13 @@ class Sim8800 {
      */
     constructor(memSize, clockRate,
                 setAddressLedsCallback, setDataLedsCallback,
+                setWaitLedCallback,
                 dumpCpuElem, dumpMemElem) {
         this.clockRate = clockRate;
         this.mem = new Array(memSize);
         this.setAddressLedsCallback = setAddressLedsCallback;
         this.setDataLedsCallback = setDataLedsCallback;
+        this.setWaitLedCallback = setWaitLedCallback;
         this.dumpCpuElem = dumpCpuElem;
         this.dumpMemElem = dumpMemElem;
         this.running = false;
@@ -294,6 +298,9 @@ class Sim8800 {
      */
     stop() {
         this.running = false;
+        if (this.setWaitLedCallback) {
+            this.setWaitLedCallback(this.running);
+        }
     }
 
     /**
@@ -301,6 +308,9 @@ class Sim8800 {
      */
     start() {
         this.running = true;
+        if (this.setWaitLedCallback) {
+            this.setWaitLedCallback(this.running);
+        }
         window.setTimeout(this.getClockTickerCallback(), 1);
     }
 };

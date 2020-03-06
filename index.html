@@ -4,8 +4,24 @@
     <meta charset="utf-8">
     <style>
      body {
+       border: 0;
        margin: 30px;
        font-family: monospace;
+       font-size: 14px;
+     }
+     div {
+       border: 0;
+       padding: 0;
+       margin: 0;
+     }
+     p, pre {
+       margin: 0;
+       padding: 0;
+       line-height: 20px;
+     }
+     .switch {
+       margin: 0 13px 0 0;
+       padding: 0;
      }
     </style>
   </head>
@@ -15,15 +31,52 @@
     <hr>
 
     <p>
-      <input type="button" value="INIT" onclick="init();">
-      <input type="button" value="TEST" onclick="test();">
+      <input type="button" value="POWER ON" onclick="powerOn();">
+      <input type="button" value="POWER OFF" onclick="powerOff();">&nbsp;
       <input type="button" value="RUN" onclick="run();">
       <input type="button" value="STOP" onclick="stop();">
+      <input type="button" value="SINGLE STEP" onclick="singleStep();">
+    </p>
+    <p>
+      <input type="button" value="EXAMINE" onclick="examine();">
+      <input type="button" value="EXAMINE NEXT" onclick="examineNext();">&nbsp;
+      <input type="button" value="DEPOSIT" onclick="deposit();">
+      <input type="button" value="DEPOSIT NEXT" onclick="depositNext();">&nbsp;
+      <input type="button" value="RESET" onclick="reset();">
+      <input type="button" value="CLR" disabled>
+    </p>
+    <p>
+      <input type="button" value="PROTECT" disabled>
+      <input type="button" value="UNPROTECT" disabled>
+      <input type="button" value="AUX" disabled>
+      <input type="button" value="AUX" disabled>
     </p>
 
     <hr>
 
     <p>LEDs: <!-- &#x25cf; - on. &#x25cb; - off. -->
+      <div id="status-leds">
+        <p>
+          INTE&nbsp;<span class="led">&#x25cb;</span>&nbsp;
+          PROT&nbsp;<span class="led">&#x25cb;</span>&nbsp;
+          MEMR&nbsp;<span class="led">&#x25cf;</span>&nbsp;
+          INP&nbsp;<span class="led">&#x25cb;</span>&nbsp;
+          MI&nbsp;<span class="led">&#x25cf;</span>&nbsp;
+          OUT&nbsp;<span class="led">&#x25cb;</span>&nbsp;
+          HLTA&nbsp;<span class="led">&#x25cb;</span>&nbsp;
+          STACK&nbsp;<span class="led">&#x25cb;</span>&nbsp;
+          WO&nbsp;<span class="led">&#x25cf;</span>&nbsp;
+          INT&nbsp;<span class="led">&#x25cb;</span>&nbsp;
+        </p>
+      </div>
+
+      <div id="wait-leds">
+        <p>
+          WAIT&nbsp;<span id="wait-led" class="led">&#x25cf;</span>&nbsp;
+          HLDA&nbsp;<span class="led">&#x25cb;</span>&nbsp;
+        </p>
+      </div>
+
       <div id="data-leds">
         <p>
           D7&nbsp;D6&nbsp;D5&nbsp;D4&nbsp;D3&nbsp;D2&nbsp;D1&nbsp;D0<br>
@@ -58,6 +111,28 @@
           <span id="a0" class="led">&#x25cb;</span>&nbsp;&nbsp;
         </p>
       </div>
+
+      <div id="switches">
+        <p>
+          <input type="checkbox" id="s15" class="switch" value="">
+          <input type="checkbox" id="s14" class="switch" value="">
+          <input type="checkbox" id="s13" class="switch" value="">
+          <input type="checkbox" id="s12" class="switch" value="">
+          <input type="checkbox" id="s11" class="switch" value="">
+          <input type="checkbox" id="s10" class="switch" value="">
+          <input type="checkbox" id="s9" class="switch" value="">
+          <input type="checkbox" id="s8" class="switch" value="">
+          <input type="checkbox" id="s7" class="switch" value="">
+          <input type="checkbox" id="s6" class="switch" value="">
+          <input type="checkbox" id="s5" class="switch" value="">
+          <input type="checkbox" id="s4" class="switch" value="">
+          <input type="checkbox" id="s3" class="switch" value="">
+          <input type="checkbox" id="s2" class="switch" value="">
+          <input type="checkbox" id="s1" class="switch" value="">
+          <input type="checkbox" id="s0" class="switch" value="">
+        </p>
+      </div>
+
     </p>
 
     <hr>
@@ -89,10 +164,16 @@
        }
      }
 
+     function setWaitLedCallback(isRunning) {
+       var ledElem = document.getElementById('wait-led');
+       ledElem.innerHTML = isRunning ? '&#x25cb' : '&#x25cf';
+     }
+
      var dumpCpuElem = document.getElementById('cpu');
      var dumpMemElem = document.getElementById('mem');
      var sim = new Sim8800(256, 1000000,
                            setAddressLedsCallback, setDataLedsCallback,
+                           setWaitLedCallback,
                            dumpCpuElem, dumpMemElem);
 
      function init() {
