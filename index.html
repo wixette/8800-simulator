@@ -69,7 +69,7 @@
       <input type="button" value="LOAD DATA" onclick="loadData();">
     </p>
     <pre class="comments">
-Examples - binary data of simple programs:
+Examples - binary data of some tiny programs:
 db ff d3 ff c3 00 00       // Switch echo between A2 and A1.
 3e 8c d3 ff 0f c3 02 00    // Pattern shift.</pre>
 
@@ -263,6 +263,14 @@ db ff d3 ff c3 00 00       // Switch echo between A2 and A1.
 
      function examineNext() {
        sim.examineNext();
+     }
+
+     function deposit() {
+       sim.deposit();
+     }
+
+     function depositNext() {
+       sim.depositNext();
      }
     </script>
   </body>

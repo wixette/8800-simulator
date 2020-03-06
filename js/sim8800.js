@@ -418,4 +418,29 @@ class Sim8800 {
         this.lastAddress++;
         this.showAddressAndData();
     }
+
+    /**
+     * Writes a byte to the given address.
+     */
+    deposit() {
+        if (!this.isPoweredOn)
+            return;
+        if (this.getInputAddressCallback) {
+            // Only 8 bits of input is considered.
+            var value = this.getInputAddressCallback() & 0xff;
+            this.getWriteByteCallback()(this.lastAddress, value);
+            this.showAddressAndData();
+            this.dumpMem();
+        }
+    }
+
+    /**
+     * Writes a byte to the next address.
+     */
+    depositNext() {
+        if (!this.isPoweredOn)
+            return;
+        this.lastAddress++;
+        this.deposit();
+    }
 };
