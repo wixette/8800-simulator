@@ -24,15 +24,22 @@ class Sim8800 {
     /**
      * @param {number} memSize The memory size, in bytes.
      * @param {number} clockRate The clock rate.
+     * @param {function(Array<number>)?} setAddressLedsCallback The
+     *     callback to set address LEDs.
+     * @param {function(Array<number>)?} setDataLedsCallback The
+     *     callback to set data LEDs.
      * @param {Element?} dumpCpuElem The DOM element used to render
      *     dumped CPU status. null to disable the feature.
      * @param {Element?} dumpMemElem The DOM element used to render
      *     dumped memory contents. null to disable the feature.
      */
     constructor(memSize, clockRate,
+                setAddressLedsCallback, setDataLedsCallback,
                 dumpCpuElem, dumpMemElem) {
         this.clockRate = clockRate;
         this.mem = new Array(memSize);
+        this.setAddressLedsCallback = setAddressLedsCallback;
+        this.setDataLedsCallback = setDataLedsCallback;
         this.dumpCpuElem = dumpCpuElem;
         this.dumpMemElem = dumpMemElem;
         this.running = false;
@@ -57,13 +64,13 @@ class Sim8800 {
     /**
      * Parses a number into an array of binary bits.
      * @param {number} data The data to be parsed.
-     * @param {number} numBytes Number of bytes to be parsed.
+     * @param {number} numBits Number of bits to be parsed.
      * @return {Array<number>} Sequence of 0 or 1, from the lowest bit to
      *     the highest bit.
      */
-    static parseBits(data, numBytes) {
+    static parseBits(data, numBits) {
         var bits = [];
-        for (let i = 0; i < numBytes * 8; i++) {
+        for (let i = 0; i < numBits; i++) {
             bits.push(data & 1 != 0 ? 1 : 0);
             data >>>= 1;
         }
@@ -205,8 +212,9 @@ class Sim8800 {
     getWritePortCallback() {
         var self = this;
         return function(address, value) {
-            if (address == 0xff) {
-                // We only care about port 0xff.
+            if (address == 0xff && self.setDataLedsCallback) {
+                var bits = Sim8800.parseBits(value, 8);
+                self.setDataLedsCallback(bits);
             }
         };
     }
@@ -235,21 +243,25 @@ class Sim8800 {
         return function(timestamp) {
             if (self.running) {
                 var cycles = self.clockRate / 1000;
-                CPU8080.steps(cycles);
-                self.dumpCpu();
-                self.dumpMem();
+                self.step(cycles);
                 window.setTimeout(self.getClockTickerCallback(), 1);
             }
         };
     }
 
     /**
-     * Runs a single CPU step.
+     * Runs a given number of CPU cycles.
+     * @param {number} cycles The number of CPU cycles to step on.
      */
-    singleStep() {
-        CPU8080.steps(1);
+    step(cycles) {
+        CPU8080.steps(cycles);
         this.dumpCpu();
         this.dumpMem();
+        if (this.setAddressLedsCallback) {
+            var cpu = CPU8080.status();
+            var pcBits = Sim8800.parseBits(cpu.pc, 16);
+            this.setAddressLedsCallback(pcBits);
+        }
     }
 
     /**
