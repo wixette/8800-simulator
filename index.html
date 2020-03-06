@@ -1,23 +1,109 @@
 <!doctype html>
 <html>
   <head>
+    <meta charset="utf-8">
+    <style>
+     body {
+       margin: 30px;
+       font-family: monospace;
+     }
+    </style>
   </head>
-  <body onload="test();">
+  <body>
+    <h2>Text-mode Altair 8800 simulator</h2>
 
-    <h1>test</h1>
+    <hr>
 
-    <div id="cpu"></div>
-    <div id="mem"></div>
+    <p>
+      <input type="button" value="INIT" onclick="init();">
+      <input type="button" value="TEST" onclick="test();">
+      <input type="button" value="RUN" onclick="run();">
+      <input type="button" value="STOP" onclick="stop();">
+    </p>
+
+    <hr>
+
+    <p>LEDs: <!-- &#x25cf; - on. &#x25cb; - off. -->
+      <div id="data-leds">
+        <p>
+          D7&nbsp;D6&nbsp;D5&nbsp;D4&nbsp;D3&nbsp;D2&nbsp;D1&nbsp;D0<br>
+          <span id="d7" class="led">&#x25cb;</span>&nbsp;
+          <span id="d6" class="led">&#x25cb;</span>&nbsp;
+          <span id="d5" class="led">&#x25cb;</span>&nbsp;
+          <span id="d4" class="led">&#x25cb;</span>&nbsp;
+          <span id="d3" class="led">&#x25cb;</span>&nbsp;
+          <span id="d2" class="led">&#x25cb;</span>&nbsp;
+          <span id="d1" class="led">&#x25cb;</span>&nbsp;
+          <span id="d0" class="led">&#x25cb;</span>&nbsp;
+        </p>
+      </div>
+      <div id="address-leds">
+        <p>
+          A15&nbsp;A14&nbsp;A13&nbsp;A12&nbsp;A11&nbsp;A10&nbsp;A9&nbsp;&nbsp;A8&nbsp;&nbsp;A7&nbsp;&nbsp;A6&nbsp;&nbsp;A5&nbsp;&nbsp;A4&nbsp;&nbsp;A3&nbsp;&nbsp;A2&nbsp;&nbsp;A1&nbsp;&nbsp;A0<br>
+          <span id="a15" class="led">&#x25cb;</span>&nbsp;&nbsp;
+          <span id="a14" class="led">&#x25cb;</span>&nbsp;&nbsp;
+          <span id="a13" class="led">&#x25cb;</span>&nbsp;&nbsp;
+          <span id="a12" class="led">&#x25cb;</span>&nbsp;&nbsp;
+          <span id="a11" class="led">&#x25cb;</span>&nbsp;&nbsp;
+          <span id="a10" class="led">&#x25cb;</span>&nbsp;&nbsp;
+          <span id="a9" class="led">&#x25cb;</span>&nbsp;&nbsp;
+          <span id="a8" class="led">&#x25cb;</span>&nbsp;&nbsp;
+          <span id="a7" class="led">&#x25cb;</span>&nbsp;&nbsp;
+          <span id="a6" class="led">&#x25cb;</span>&nbsp;&nbsp;
+          <span id="a5" class="led">&#x25cb;</span>&nbsp;&nbsp;
+          <span id="a4" class="led">&#x25cb;</span>&nbsp;&nbsp;
+          <span id="a3" class="led">&#x25cb;</span>&nbsp;&nbsp;
+          <span id="a2" class="led">&#x25cb;</span>&nbsp;&nbsp;
+          <span id="a1" class="led">&#x25cb;</span>&nbsp;&nbsp;
+          <span id="a0" class="led">&#x25cb;</span>&nbsp;&nbsp;
+        </p>
+      </div>
+    </p>
+
+    <hr>
+
+    <p>CPU dump:
+      <div id="cpu"></div>
+    </p>
+
+    <hr>
+
+    <p>Memory dump:
+      <div id="mem"></div>
+    </p>
 
     <script src="js/8080.js"></script>
     <script src="js/sim8800.js"></script>
     <script>
+     var dumpCpuElem = document.getElementById('cpu');
+     var dumpMemElem = document.getElementById('mem');
+     var sim = new Sim8800(256, 1000000,
+                           dumpCpuElem, dumpMemElem);
+
+     function init() {
+       sim.loadDataAsHexString(0, 'db ff d3 ff c3 00 00');
+       sim.loadData(16, [0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07]);
+       sim.dumpCpu();
+       sim.dumpMem()
+     }
+
      function test() {
-       var sim = new Sim8800(256, 100000);
-       var dumpCpuElem = document.getElementById('cpu');
-       var dumpMemElem = document.getElementById('mem');
-       sim.dumpCpu(dumpCpuElem);
-       sim.dumpMem(dumpMemElem);
+       console.log(Sim8800.parseBits(10, 1));
+       console.log(Sim8800.parseBits(0xF8, 1));
+       console.log(Sim8800.parseBits(0xF0, 2));
+     }
+
+     function run() {
+       sim.loadDataAsHexString(0, 'db ff d3 ff c3 00 00');
+       sim.start();
+       sim.dumpCpu();
+       sim.dumpMem()
+     }
+
+     function stop() {
+       sim.stop();
+       sim.dumpCpu();
+       sim.dumpMem()
      }
     </script>
   </body>
