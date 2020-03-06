@@ -211,6 +211,17 @@ db ff d3 ff c3 00 00       // Switch echo between A2 and A1.
        dumpMemElem.innerHTML = dumpHtml;
      }
 
+     function getInputWord() {
+       var word = 0;
+       for (let i = 0; i < 16; i++) {
+         var switchElem = document.getElementById('s' + i);
+         if (switchElem.checked) {
+           word |= 1 << i;
+         }
+       }
+       return word;
+     }
+
      var sim = new Sim8800(256, 1000000,
                            setAddressLedsCallback, setDataLedsCallback,
                            setWaitLedCallback, setStatusLedsCallback,
@@ -243,6 +254,15 @@ db ff d3 ff c3 00 00       // Switch echo between A2 and A1.
 
      function stop() {
        sim.stop();
+     }
+
+     function examine() {
+       var address = getInputWord();
+       sim.examine(address);
+     }
+
+     function examineNext() {
+       sim.examineNext();
      }
     </script>
   </body>

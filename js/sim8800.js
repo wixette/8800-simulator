@@ -51,6 +51,7 @@ class Sim8800 {
         this.dumpMemCallback = dumpMemCallback;
         this.isPoweredOn = false;
         this.isRunning = false;
+        this.lastAddress = 0;
         this.initMem();
         CPU8080.init(this.getWriteByteCallback(),
                      this.getReadByteCallback(),
@@ -313,6 +314,7 @@ class Sim8800 {
             return;
         CPU8080.reset();
         this.stop();
+        this.lastAddress = 0;
         if (this.setAddressLedsCallback) {
             this.setAddressLedsCallback(new Array(16).fill(1));
         }
@@ -368,9 +370,37 @@ class Sim8800 {
         this.dumpCpu();
         this.dumpMem();
         if (this.setAddressLedsCallback) {
-            var cpu = CPU8080.status();
-            var pcBits = Sim8800.parseBits(cpu.pc, 16);
-            this.setAddressLedsCallback(pcBits);
+            let cpu = CPU8080.status();
+            let bits = Sim8800.parseBits(cpu.pc, 16);
+            this.setAddressLedsCallback(bits);
         }
+    }
+
+    /**
+     * Reads a byte from the given address.
+     * @param {number} address The given address.
+     */
+    examine(address) {
+        if (!this.isPoweredOn)
+            return;
+        this.lastAddress = address;
+        if (this.setAddressLedsCallback) {
+            let bits = Sim8800.parseBits(address, 16);
+            this.setAddressLedsCallback(bits);
+        }
+        if (this.setDataLedsCallback) {
+            let bits = Sim8800.parseBits(this.mem[address], 8);
+            this.setDataLedsCallback(bits);
+        }
+    }
+
+    /**
+     * Reads a byte from the next address.
+     */
+    examineNext() {
+        if (!this.isPoweredOn)
+            return;
+        this.lastAddress++;
+        this.examine(this.lastAddress);
     }
 };
