@@ -180,12 +180,20 @@
        }
      }
 
-     var dumpCpuElem = document.getElementById('cpu');
-     var dumpMemElem = document.getElementById('mem');
+     function dumpCpuCallback(dumpHtml) {
+       var dumpCpuElem = document.getElementById('cpu');
+       dumpCpuElem.innerHTML = dumpHtml;
+     }
+
+     function dumpMemCallback(dumpHtml) {
+       var dumpMemElem = document.getElementById('mem');
+       dumpMemElem.innerHTML = dumpHtml;
+     }
+
      var sim = new Sim8800(256, 1000000,
                            setAddressLedsCallback, setDataLedsCallback,
                            setWaitLedCallback, setStatusLedsCallback,
-                           dumpCpuElem, dumpMemElem);
+                           dumpCpuCallback, dumpMemCallback);
 
      function powerOn() {
        sim.powerOn();

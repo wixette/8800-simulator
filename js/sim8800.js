@@ -32,24 +32,25 @@ class Sim8800 {
      *     set the WAIT LED.
      * @param {function(boolean)?} setStatusLedsCallback The callback to
      *     set the STATUS LEDs.
-     * @param {Element?} dumpCpuElem The DOM element used to render
-     *     dumped CPU status. null to disable the feature.
-     * @param {Element?} dumpMemElem The DOM element used to render
-     *     dumped memory contents. null to disable the feature.
+     * @param {function(string)?} dumpCpuCallback The callback to receive
+     *     CPU status dump, in HTML string.
+     * @param {function(string)?} dumpMemCallback The callback to receive
+     *     memory contents dump, in HTML string.
      */
     constructor(memSize, clockRate,
                 setAddressLedsCallback, setDataLedsCallback,
                 setWaitLedCallback, setStatusLedsCallback,
-                dumpCpuElem, dumpMemElem) {
+                dumpCpuCallback, dumpMemCallback) {
         this.clockRate = clockRate;
         this.mem = new Array(memSize);
         this.setAddressLedsCallback = setAddressLedsCallback;
         this.setDataLedsCallback = setDataLedsCallback;
         this.setWaitLedCallback = setWaitLedCallback;
         this.setStatusLedsCallback = setStatusLedsCallback;
-        this.dumpCpuElem = dumpCpuElem;
-        this.dumpMemElem = dumpMemElem;
-        this.running = false;
+        this.dumpCpuCallback = dumpCpuCallback;
+        this.dumpMemCallback = dumpMemCallback;
+        this.isPoweredOn = false;
+        this.isRunning = false;
         this.initMem();
         CPU8080.init(this.getWriteByteCallback(),
                      this.getReadByteCallback(),
@@ -125,7 +126,7 @@ class Sim8800 {
      * Dumps the memory to HTML, for debugging or monitoring.
      */
     dumpMem() {
-        if (this.dumpMemElem) {
+        if (this.dumpMemCallback) {
             var sb = ['<pre>\n'];
             for (let i = 0; i < this.mem.length; i += 16) {
                 sb.push(Sim8800.toHex(i, 4));
@@ -139,7 +140,7 @@ class Sim8800 {
                 sb.push('\n');
             }
             sb.push('</pre>\n');
-            this.dumpMemElem.innerHTML = sb.join('');
+            this.dumpMemCallback(sb.join(''));
         }
     }
 
@@ -162,7 +163,7 @@ class Sim8800 {
      * Dumps the internal CPU status to HTML, for debugging or mornitoring.
      */
     dumpCpu() {
-        if (this.dumpCpuElem) {
+        if (this.dumpCpuCallback) {
             var cpu = CPU8080.status();
             var sb = ['<pre>\n'];
             sb.push('PC = ' + Sim8800.toHex(cpu.pc, 4) + '  ');
@@ -183,7 +184,7 @@ class Sim8800 {
             if (flags.parity) sb.push('PARITY ');
             if (flags.carry) sb.push('CARRY ');
             sb.push('</pre>\n');
-            this.dumpCpuElem.innerHTML = sb.join('');
+            this.dumpCpuCallback(sb.join(''));
         }
     }
 
@@ -248,7 +249,7 @@ class Sim8800 {
     getClockTickerCallback() {
         var self = this;
         return function(timestamp) {
-            if (self.running) {
+            if (self.isRunning) {
                 var cycles = self.clockRate / 1000;
                 self.step(cycles);
                 window.setTimeout(self.getClockTickerCallback(), 1);
@@ -261,6 +262,8 @@ class Sim8800 {
      * @param {number} cycles The number of CPU cycles to step on.
      */
     step(cycles) {
+        if (!this.isPoweredOn)
+            return;
         CPU8080.steps(cycles);
         this.dumpCpu();
         this.dumpMem();
@@ -286,6 +289,7 @@ class Sim8800 {
         }
         this.dumpCpu();
         this.dumpMem();
+        this.isPoweredOn = true;
     }
 
     /**
@@ -307,18 +311,21 @@ class Sim8800 {
         if (this.setDataLedsCallback) {
             this.setDataLedsCallback(new Array(8).fill(0));
         }
-        if (this.dumpCpuElem) {
-            this.dumpCpuElem.innerHTML = '';
+        if (this.dumpCpuCallback) {
+            this.dumpCpuCallback('');
         }
-        if (this.dumpMemElem) {
-            this.dumpMemElem.innerHTML = '';
+        if (this.dumpMemCallback) {
+            this.dumpMemCallback('');
         }
+        this.isPoweredOn = false;
     }
 
     /**
      * Resets the machine.
      */
     reset() {
+        if (!this.isPoweredOn)
+            return;
         CPU8080.reset();
     }
 
@@ -326,9 +333,11 @@ class Sim8800 {
      * Stops the CPU.
      */
     stop() {
-        this.running = false;
+        if (!this.isPoweredOn)
+            return;
+        this.isRunning = false;
         if (this.setWaitLedCallback) {
-            this.setWaitLedCallback(this.running);
+            this.setWaitLedCallback(this.isRunning);
         }
     }
 
@@ -336,9 +345,11 @@ class Sim8800 {
      * Starts the CPU.
      */
     start() {
-        this.running = true;
+        if (!this.isPoweredOn)
+            return;
+        this.isRunning = true;
         if (this.setWaitLedCallback) {
-            this.setWaitLedCallback(this.running);
+            this.setWaitLedCallback(this.isRunning);
         }
         window.setTimeout(this.getClockTickerCallback(), 1);
     }
