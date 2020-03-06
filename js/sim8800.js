@@ -248,8 +248,10 @@ class Sim8800 {
         var self = this;
         return function(address) {
             var value = 0;
-            if (address == 0xff) {
-                // We only care about port 0xff.
+            // We only care about the port 0xff.
+            if (address == 0xff && this.getInputAddressCallback) {
+                var word = this.getInputAddressCallback();
+                return word >> 8;
             }
             return value;
         };
