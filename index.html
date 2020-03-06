@@ -5,24 +5,19 @@
   <body onload="test();">
 
     <h1>test</h1>
-    <div id="dump"></div>
+
+    <div id="cpu"></div>
+    <div id="mem"></div>
 
     <script src="js/8080.js"></script>
     <script src="js/sim8800.js"></script>
     <script>
      function test() {
        var sim = new Sim8800(256, 100000);
-       var dumpElem = document.getElementById('dump');
-       sim.dumpMem(dumpElem);
-
-       var writeFunc = sim.getWriteByteCallback();
-       var readFunc = sim.getReadByteCallback();
-
-       var i = readFunc(256);
-       writeFunc(256, 16);
-       i = readFunc(256);
-
-       sim.dumpMem(dumpElem);
+       var dumpCpuElem = document.getElementById('cpu');
+       var dumpMemElem = document.getElementById('mem');
+       sim.dumpCpu(dumpCpuElem);
+       sim.dumpMem(dumpMemElem);
      }
     </script>
   </body>

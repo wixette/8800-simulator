@@ -31,6 +31,11 @@ class Sim8800 {
         /** @type {Array<number>} */
         this.mem = new Array(memSize);
         this.initMem();
+        CPU8080.init(this.getWriteByteCallback(),
+                     this.getReadByteCallback(),
+                     null,  /* not used. */
+                     this.getWritePortCallback(),
+                     this.getReadPortCallback());
     }
 
     /**
@@ -57,6 +62,38 @@ class Sim8800 {
             address = address % self.mem.length;
             var value = self.mem[address];
             window.console.log('reading byte @' + Sim8800.toHex(address, 8)
+                               + ' : ' + Sim8800.toHex(value, 2));
+            return value;
+        };
+    }
+
+    /**
+     * Returns the porto (write port) callback.
+     * @return {function(number, number)}
+     */
+    getWritePortCallback() {
+        var self = this;
+        return function(address, value) {
+            window.console.log('writing port @' + Sim8800.toHex(address, 8)
+                               + ' : ' + Sim8800.toHex(value, 2));
+            if (address == 0xff) {
+                // We only care about port 0xff.
+            }
+        };
+    }
+
+    /**
+     * Returns the byteAt (read memory) callback.
+     * @return {function(number): number}
+     */
+    getReadPortCallback() {
+        var self = this;
+        return function(address) {
+            var value = 0;
+            if (address == 0xff) {
+                // We only care about port 0xff.
+            }
+            window.console.log('reading port @' + Sim8800.toHex(address, 8)
                                + ' : ' + Sim8800.toHex(value, 2));
             return value;
         };
@@ -98,6 +135,27 @@ class Sim8800 {
             }
             sb.push('\n');
         }
+        sb.push('</pre>\n');
+        containerElem.innerHTML = sb.join('');
+    }
+
+    /**
+     * Dumps the internal CPU status to HTML, for debugging or mornitoring.
+     * @param {Element} containerElem The DOM element to hold the generated HTML.
+     */
+    dumpCpu(containerElem) {
+        var cpu = CPU8080.status();
+        var sb = ['<pre>\n'];
+        sb.push('PC = ' + Sim8800.toHex(cpu.pc, 4) + '  ');
+        sb.push('SP = ' + Sim8800.toHex(cpu.sp, 4) + '\n');
+        sb.push('A = ' + Sim8800.toHex(cpu.a, 2) + '  ');
+        sb.push('B = ' + Sim8800.toHex(cpu.b, 2) + '  ');
+        sb.push('C = ' + Sim8800.toHex(cpu.c, 2) + '  ');
+        sb.push('D = ' + Sim8800.toHex(cpu.d, 2) + '\n');
+        sb.push('E = ' + Sim8800.toHex(cpu.e, 2) + '  ');
+        sb.push('F = ' + Sim8800.toHex(cpu.f, 2) + '  ');
+        sb.push('H = ' + Sim8800.toHex(cpu.h, 2) + '  ');
+        sb.push('L = ' + Sim8800.toHex(cpu.l, 2) + '\n');
         sb.push('</pre>\n');
         containerElem.innerHTML = sb.join('');
     }
