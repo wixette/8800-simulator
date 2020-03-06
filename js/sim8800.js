@@ -32,6 +32,8 @@ class Sim8800 {
      *     set the WAIT LED.
      * @param {function(boolean)?} setStatusLedsCallback The callback to
      *     set the STATUS LEDs.
+     * @param {function():number?} getInputAddressCallback The
+     *     callback to get the input word from address/data switches.
      * @param {function(string)?} dumpCpuCallback The callback to receive
      *     CPU status dump, in HTML string.
      * @param {function(string)?} dumpMemCallback The callback to receive
@@ -40,6 +42,7 @@ class Sim8800 {
     constructor(memSize, clockRate,
                 setAddressLedsCallback, setDataLedsCallback,
                 setWaitLedCallback, setStatusLedsCallback,
+                getInputAddressCallback,
                 dumpCpuCallback, dumpMemCallback) {
         this.clockRate = clockRate;
         this.mem = new Array(memSize);
@@ -47,6 +50,7 @@ class Sim8800 {
         this.setDataLedsCallback = setDataLedsCallback;
         this.setWaitLedCallback = setWaitLedCallback;
         this.setStatusLedsCallback = setStatusLedsCallback;
+        this.getInputAddressCallback = getInputAddressCallback;
         this.dumpCpuCallback = dumpCpuCallback;
         this.dumpMemCallback = dumpMemCallback;
         this.isPoweredOn = false;
@@ -377,20 +381,29 @@ class Sim8800 {
     }
 
     /**
-     * Reads a byte from the given address.
-     * @param {number} address The given address.
+     * Shows the address and the byte at the address via LEDs.
      */
-    examine(address) {
-        if (!this.isPoweredOn)
-            return;
-        this.lastAddress = address;
+    showAddressAndData() {
         if (this.setAddressLedsCallback) {
-            let bits = Sim8800.parseBits(address, 16);
+            let bits = Sim8800.parseBits(this.lastAddress, 16);
             this.setAddressLedsCallback(bits);
         }
         if (this.setDataLedsCallback) {
-            let bits = Sim8800.parseBits(this.mem[address], 8);
+            let bits = Sim8800.parseBits(this.mem[this.lastAddress], 8);
             this.setDataLedsCallback(bits);
+        }
+    }
+
+    /**
+     * Reads a byte from the given address.
+     */
+    examine() {
+        if (!this.isPoweredOn)
+            return;
+        if (this.getInputAddressCallback) {
+            var address = this.getInputAddressCallback();
+            this.lastAddress = address;
+            this.showAddressAndData();
         }
     }
 
@@ -401,6 +414,6 @@ class Sim8800 {
         if (!this.isPoweredOn)
             return;
         this.lastAddress++;
-        this.examine(this.lastAddress);
+        this.showAddressAndData();
     }
 };
