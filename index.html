@@ -224,6 +224,10 @@ db ff d3 ff c3 00 00       // Switch echo between A2 and A1.
        sim.powerOff();
      }
 
+     function reset() {
+       sim.reset();
+     }
+
      function loadData() {
        var data = document.getElementById("data").value;
        sim.loadDataAsHexString(0, data);

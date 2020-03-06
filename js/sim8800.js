@@ -123,7 +123,9 @@ class Sim8800 {
         var data = hexString.split(' ');
         for (let i = 0; i < data.length && address < this.mem.length; i++) {
 	    var byte = parseInt('0x' + data[i]);
-            this.mem[address++] = byte;
+            if (!isNaN(byte)) {
+                this.mem[address++] = byte;
+            }
         }
         this.dumpMem();
     }
@@ -267,27 +269,21 @@ class Sim8800 {
      * Powers on the machine.
      */
     powerOn() {
-        this.stop();
-        this.reset();
+        this.isPoweredOn = true;
         this.initMem();
+        this.reset();
         if (this.setStatusLedsCallback) {
             this.setStatusLedsCallback(true);
         }
         if (this.setWaitLedCallback) {
             this.setWaitLedCallback(false);
         }
-        this.dumpCpu();
-        this.dumpMem();
-        this.isPoweredOn = true;
     }
 
     /**
      * Powers off the machine.
      */
     powerOff() {
-        this.stop();
-        this.reset();
-        this.initMem();
         if (this.setStatusLedsCallback) {
             this.setStatusLedsCallback(false);
         }
@@ -316,6 +312,24 @@ class Sim8800 {
         if (!this.isPoweredOn)
             return;
         CPU8080.reset();
+        this.stop();
+        if (this.setAddressLedsCallback) {
+            this.setAddressLedsCallback(new Array(16).fill(1));
+        }
+        if (this.setDataLedsCallback) {
+            this.setDataLedsCallback(new Array(8).fill(1));
+        }
+        this.dumpCpu();
+        this.dumpMem();
+        var self = this;
+        window.setTimeout(function() {
+            if (self.setAddressLedsCallback) {
+                self.setAddressLedsCallback(new Array(16).fill(0));
+            }
+            if (self.setDataLedsCallback) {
+                self.setDataLedsCallback(new Array(8).fill(0));
+            }
+        }, 400);
     }
 
     /**
