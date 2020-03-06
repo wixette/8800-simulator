@@ -9,6 +9,11 @@
        font-family: monospace;
        font-size: 14px;
      }
+     hr {
+       border-top: #ccc solid 1px;
+       height: 0;
+       margin: 10px 0 10px 0;
+     }
      div {
        border: 0;
        padding: 0;
@@ -22,6 +27,11 @@
      .switch {
        margin: 0 13px 0 0;
        padding: 0;
+     }
+     .comments {
+       font-size: 11px;
+       color: #666;
+       line-height: 14px;
      }
     </style>
   </head>
@@ -51,6 +61,17 @@
       <input type="button" value="AUX" disabled>
       <input type="button" value="AUX" disabled>
     </p>
+
+    <hr>
+
+    <p>
+      <input id="data" type="text" size="60">&nbsp;
+      <input type="button" value="LOAD DATA" onclick="loadData();">
+    </p>
+    <pre class="comments">
+Examples - binary data of simple programs:
+db ff d3 ff c3 00 00       // Switch echo between A2 and A1.
+3e 8c d3 ff 0f c3 02 00    // Pattern shift.</pre>
 
     <hr>
 
@@ -203,12 +224,17 @@
        sim.powerOff();
      }
 
+     function loadData() {
+       var data = document.getElementById("data").value;
+       sim.loadDataAsHexString(0, data);
+     }
+
      function run() {
-       // Switch echo between A2 and A1.
-       // sim.loadDataAsHexString(0, 'db ff d3 ff c3 00 00');
-       // Pattern shift.
-       sim.loadDataAsHexString(0, '3e 8c d3 ff 0f c3 02 00');
        sim.start();
+     }
+
+     function singleStep() {
+       sim.step(1);
      }
 
      function stop() {

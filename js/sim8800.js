@@ -104,9 +104,12 @@ class Sim8800 {
      * @param {Array<number>} data The array of data.
      */
     loadData(address, data) {
+        if (!this.isPoweredOn)
+            return;
         for (let i = 0; i < data.length && address < this.mem.length; i++) {
             this.mem[address++] = data[i];
         }
+        this.dumpMem();
     }
 
     /**
@@ -115,11 +118,14 @@ class Sim8800 {
      * @param {string} hexString Data encoded in hex string, like 'c3 00 00'.
      */
     loadDataAsHexString(address, hexString) {
+        if (!this.isPoweredOn || !hexString)
+            return;
         var data = hexString.split(' ');
         for (let i = 0; i < data.length && address < this.mem.length; i++) {
 	    var byte = parseInt('0x' + data[i]);
             this.mem[address++] = byte;
         }
+        this.dumpMem();
     }
 
     /**
@@ -258,23 +264,6 @@ class Sim8800 {
     }
 
     /**
-     * Runs a given number of CPU cycles.
-     * @param {number} cycles The number of CPU cycles to step on.
-     */
-    step(cycles) {
-        if (!this.isPoweredOn)
-            return;
-        CPU8080.steps(cycles);
-        this.dumpCpu();
-        this.dumpMem();
-        if (this.setAddressLedsCallback) {
-            var cpu = CPU8080.status();
-            var pcBits = Sim8800.parseBits(cpu.pc, 16);
-            this.setAddressLedsCallback(pcBits);
-        }
-    }
-
-    /**
      * Powers on the machine.
      */
     powerOn() {
@@ -352,5 +341,22 @@ class Sim8800 {
             this.setWaitLedCallback(this.isRunning);
         }
         window.setTimeout(this.getClockTickerCallback(), 1);
+    }
+
+    /**
+     * Runs a given number of CPU cycles.
+     * @param {number} cycles The number of CPU cycles to step on.
+     */
+    step(cycles) {
+        if (!this.isPoweredOn)
+            return;
+        CPU8080.steps(cycles);
+        this.dumpCpu();
+        this.dumpMem();
+        if (this.setAddressLedsCallback) {
+            var cpu = CPU8080.status();
+            var pcBits = Sim8800.parseBits(cpu.pc, 16);
+            this.setAddressLedsCallback(pcBits);
+        }
     }
 };
