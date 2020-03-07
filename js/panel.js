@@ -384,6 +384,10 @@ panel.init = function() {
     var button = document.getElementById('locale');
     button.addEventListener('click', l10n.nextLocale, false);
 
+    // Initializes event listener for debug controls.
+    button = document.getElementById('debug-load-data');
+    button.addEventListener('click', panel.debugLoadData, false);
+
     // Initializes svg components for all LEDs.
     for (let i = 0; i < panel.LED_INFO.length; i++) {
         let info = panel.LED_INFO[i];
@@ -434,9 +438,7 @@ panel.init = function() {
         panel.setAddressLedsCallback, panel.setDataLedsCallback,
         panel.setWaitLedCallback, panel.setStatusLedsCallback,
         panel.getInputAddressCallback,
-        null, /* dumpCpuCallback */
-        null  /* dumpMemcallback */
-    );
+        panel.dumpCpuCallback, panel.dumpMemCallback);
 };
 
 panel.setAddressLedsCallback = function(bits) {
@@ -491,16 +493,20 @@ panel.getInputAddressCallback = function() {
     return word;
 };
 
-// panel.dumpCpuCallback = function(dumpHtml) {
-//     var dumpCpuElem = document.getElementById('cpu');
-//     dumpCpuElem.innerHTML = dumpHtml;
-// };
+panel.dumpCpuCallback = function(dumpHtml) {
+    var dumpCpuElem = document.getElementById('cpu-dump');
+    dumpCpuElem.innerHTML = dumpHtml;
+};
 
-// panel.dumpMemCallback = function(dumpHtml) {
-//     var dumpMemElem = document.getElementById('mem');
-//     dumpMemElem.innerHTML = dumpHtml;
-// };
+panel.dumpMemCallback = function(dumpHtml) {
+    var dumpMemElem = document.getElementById('mem-dump');
+    dumpMemElem.innerHTML = dumpHtml;
+};
 
+panel.debugLoadData = function() {
+    var data = document.getElementById("debug-data-input").value;
+    panel.sim.loadDataAsHexString(0, data);
+};
 
 /**
  * Creates a new LED inside the panel svg.
@@ -696,7 +702,6 @@ panel.switchDownThenBack = function(id) {
  */
 panel.onStop = function() {
     panel.switchUpThenBack('STOP-RUN');
-    window.console.log('STOP');
     panel.sim.stop();
 };
 
@@ -705,7 +710,6 @@ panel.onStop = function() {
  */
 panel.onRun = function() {
     panel.switchDownThenBack('STOP-RUN');
-    window.console.log('RUN');
     panel.sim.start();
 };
 
@@ -714,7 +718,6 @@ panel.onRun = function() {
  */
 panel.onSingle = function() {
     panel.switchUpThenBack('SINGLE');
-    window.console.log('SINGLE STEP');
     panel.sim.step(1);
 };
 
@@ -723,7 +726,6 @@ panel.onSingle = function() {
  */
 panel.onExamine = function() {
     panel.switchUpThenBack('EXAMINE');
-    window.console.log('EXAMINE');
     panel.sim.examine();
 };
 
@@ -732,7 +734,6 @@ panel.onExamine = function() {
  */
 panel.onExamineNext = function() {
     panel.switchDownThenBack('EXAMINE');
-    window.console.log('EXAMINE NEXT');
     panel.sim.examineNext();
 };
 
@@ -741,7 +742,6 @@ panel.onExamineNext = function() {
  */
 panel.onDeposit = function() {
     panel.switchUpThenBack('DEPOSIT');
-    window.console.log('DEPOSIT');
     panel.sim.deposit();
 };
 
@@ -750,7 +750,6 @@ panel.onDeposit = function() {
  */
 panel.onDepositNext = function() {
     panel.switchDownThenBack('DEPOSIT');
-    window.console.log('DEPOSIT NEXT');
     panel.sim.depositNext();
 };
 
@@ -759,7 +758,6 @@ panel.onDepositNext = function() {
  */
 panel.onReset = function() {
     panel.switchUpThenBack('RESET');
-    window.console.log('RESET');
     panel.sim.reset();
 };
 
@@ -767,7 +765,6 @@ panel.onReset = function() {
  * When power is turned on.
  */
 panel.onPowerOn = function() {
-    window.console.log('POWER ON');
     panel.sim.powerOn();
 };
 
@@ -775,7 +772,6 @@ panel.onPowerOn = function() {
  * When power is turned off.
  */
 panel.onPowerOff = function() {
-    window.console.log('POWER OFF');
     panel.sim.powerOff();
 };
 
@@ -788,10 +784,8 @@ panel.onPowerOff = function() {
 panel.onToggle = function(id, state) {
     if (state == 0) {
         panel.switchUp(id);
-        window.console.log('TOGGLE: ' + id + ' 0->1');
     } else {
         panel.switchDown(id);
-        window.console.log('TOGGLE: ' + id + ' 1->0');
     }
     if (id == 'OFF-ON') {
         if (state == 0) {
@@ -803,6 +797,5 @@ panel.onToggle = function(id, state) {
         var bitIndex = parseInt(id.substr(1));
         panel.addressSwitchStates[bitIndex] =
             panel.addressSwitchStates[bitIndex] ? 0 : 1;
-        window.console.log(panel.addressSwitchStates);
     }
 };
