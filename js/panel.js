@@ -373,11 +373,8 @@ panel.SWITCH_INFO = [
 /** The current state of all the address switches. */
 panel.addressSwitchStates = new Array(16);
 
-/** Whether the power is turned on. */
-panel.poweredOn = false;
-
-/** Whether the machine is running. */
-panel.running = false;
+/** The simulator object. */
+panel.sim = null;
 
 /**
  * Initializes thie UI.
@@ -428,9 +425,82 @@ panel.init = function() {
 
     // Initializes internal states.
     panel.addressSwitchStates.fill(0);
-    panel.poweredOn = false;
-    panel.running = false;
+    panel.switchUp('OFF-ON');
+
+    // Initializes the simulator.
+    panel.sim = new Sim8800(
+        256, /* 256B MEM */
+        1000000, /* 1MHz */
+        panel.setAddressLedsCallback, panel.setDataLedsCallback,
+        panel.setWaitLedCallback, panel.setStatusLedsCallback,
+        panel.getInputAddressCallback,
+        null, /* dumpCpuCallback */
+        null  /* dumpMemcallback */
+    );
 };
+
+panel.setAddressLedsCallback = function(bits) {
+    for (let i = 0; i < bits.length; i++) {
+        var ledId = 'A' + i;
+        if (bits[i]) {
+            panel.ledOn(ledId);
+        } else {
+            panel.ledOff(ledId);
+        }
+    }
+};
+
+panel.setDataLedsCallback = function(bits) {
+    for (let i = 0; i < bits.length; i++) {
+        var ledId = 'D' + i;
+        if (bits[i]) {
+            panel.ledOn(ledId);
+        } else {
+            panel.ledOff(ledId);
+        }
+    }
+};
+
+panel.setWaitLedCallback = function(isRunning) {
+    var ledId = 'WAIT';
+    if (!isRunning) {
+        panel.ledOn(ledId);
+    } else {
+        panel.ledOff(ledId);
+    }
+};
+
+panel.setStatusLedsCallback = function(isPoweredOn) {
+    var ledIds = ['MEMR', 'MI', 'WO'];
+    for (let i = 0; i < ledIds.length; i++) {
+        if (isPoweredOn) {
+            panel.ledOn(ledIds[i]);
+        } else {
+            panel.ledOff(ledIds[i]);
+        }
+    }
+};
+
+panel.getInputAddressCallback = function() {
+    var word = 0;
+    for (let i = 0; i < 16; i++) {
+        if (panel.addressSwitchStates[i]) {
+            word |= 1 << i;
+        }
+    }
+    return word;
+};
+
+// panel.dumpCpuCallback = function(dumpHtml) {
+//     var dumpCpuElem = document.getElementById('cpu');
+//     dumpCpuElem.innerHTML = dumpHtml;
+// };
+
+// panel.dumpMemCallback = function(dumpHtml) {
+//     var dumpMemElem = document.getElementById('mem');
+//     dumpMemElem.innerHTML = dumpHtml;
+// };
+
 
 /**
  * Creates a new LED inside the panel svg.
@@ -439,7 +509,7 @@ panel.init = function() {
  * @param {number} x The x position.
  * @param {number} y The y position.
  */
-panel.createLed = function(id, x, y, id) {
+panel.createLed = function(id, x, y) {
     var panelElem = document.getElementById('panel');
     var ledOnElem = document.getElementById('led-on');
     var ledOffElem = document.getElementById('led-off');
@@ -627,6 +697,7 @@ panel.switchDownThenBack = function(id) {
 panel.onStop = function() {
     panel.switchUpThenBack('STOP-RUN');
     window.console.log('STOP');
+    panel.sim.stop();
 };
 
 /**
@@ -635,6 +706,7 @@ panel.onStop = function() {
 panel.onRun = function() {
     panel.switchDownThenBack('STOP-RUN');
     window.console.log('RUN');
+    panel.sim.start();
 };
 
 /**
@@ -643,6 +715,7 @@ panel.onRun = function() {
 panel.onSingle = function() {
     panel.switchUpThenBack('SINGLE');
     window.console.log('SINGLE STEP');
+    panel.sim.step(1);
 };
 
 /**
@@ -651,6 +724,7 @@ panel.onSingle = function() {
 panel.onExamine = function() {
     panel.switchUpThenBack('EXAMINE');
     window.console.log('EXAMINE');
+    panel.sim.examine();
 };
 
 /**
@@ -659,6 +733,7 @@ panel.onExamine = function() {
 panel.onExamineNext = function() {
     panel.switchDownThenBack('EXAMINE');
     window.console.log('EXAMINE NEXT');
+    panel.sim.examineNext();
 };
 
 /**
@@ -667,6 +742,7 @@ panel.onExamineNext = function() {
 panel.onDeposit = function() {
     panel.switchUpThenBack('DEPOSIT');
     window.console.log('DEPOSIT');
+    panel.sim.deposit();
 };
 
 /**
@@ -675,6 +751,7 @@ panel.onDeposit = function() {
 panel.onDepositNext = function() {
     panel.switchDownThenBack('DEPOSIT');
     window.console.log('DEPOSIT NEXT');
+    panel.sim.depositNext();
 };
 
 /**
@@ -683,6 +760,7 @@ panel.onDepositNext = function() {
 panel.onReset = function() {
     panel.switchUpThenBack('RESET');
     window.console.log('RESET');
+    panel.sim.reset();
 };
 
 /**
@@ -690,6 +768,7 @@ panel.onReset = function() {
  */
 panel.onPowerOn = function() {
     window.console.log('POWER ON');
+    panel.sim.powerOn();
 };
 
 /**
@@ -697,6 +776,7 @@ panel.onPowerOn = function() {
  */
 panel.onPowerOff = function() {
     window.console.log('POWER OFF');
+    panel.sim.powerOff();
 };
 
 /**
@@ -715,9 +795,9 @@ panel.onToggle = function(id, state) {
     }
     if (id == 'OFF-ON') {
         if (state == 0) {
-            panel.onPowerOn();
-        } else {
             panel.onPowerOff();
+        } else {
+            panel.onPowerOn();
         }
     } else {
         var bitIndex = parseInt(id.substr(1));
