@@ -1,6 +1,6 @@
 body {
     background-color: #f0f0f0;
-    font-family: monospace;
+    font-family: "Lucida Console","Courier New",Courier,monospace;
     font-size: 14px;
 }
 
@@ -38,7 +38,7 @@ header {
 nav {
     background-color: #ddd;
     border-bottom: 1px #ccc solid;
-    color: #333;
+    color: #222;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
