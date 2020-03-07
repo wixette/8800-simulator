@@ -473,3 +473,86 @@ panel.createSwitch = function(id, type, x, y) {
     panelElem.appendChild(upElem);
     panelElem.appendChild(downElem);
 };
+
+/**
+ * Moves the switch handle up - for TOGGLE_SWITCH only.
+ * @param {string} id The switch ID.
+ */
+panel.switchUp = function(id) {
+    var midElem = document.getElementById(id + '-mid');
+    var upElem = document.getElementById(id + '-up');
+    var downElem = document.getElementById(id + '-down');
+
+    upElem.style.display = 'inline';
+    midElem.style.display = 'none';
+    downElem.style.display = 'none';
+};
+
+/**
+ * Moves the switch handle down - for TOGGLE_SWITCH only.
+ * @param {string} id The switch ID.
+ */
+panel.switchDown = function(id) {
+    var midElem = document.getElementById(id + '-mid');
+    var upElem = document.getElementById(id + '-up');
+    var downElem = document.getElementById(id + '-down');
+
+    upElem.style.display = 'none';
+    midElem.style.display = 'none';
+    downElem.style.display = 'inline';
+};
+
+/**
+ * Moves the switch handle up, then back to the middle position - for
+ * STATELESS_SWITCH only.
+ * @param {string} id The switch ID.
+ */
+panel.switchUpThenBack = function(id) {
+    var midElem = document.getElementById(id + '-mid');
+    var upElem = document.getElementById(id + '-up');
+    var downElem = document.getElementById(id + '-down');
+
+    upElem.style.display = 'none';
+    midElem.style.display = 'inline';
+    downElem.style.display = 'none';
+
+    window.setTimeout(function() {
+        upElem.style.display = 'inline';
+        midElem.style.display = 'none';
+        downElem.style.display = 'none';
+
+        window.setTimeout(function() {
+            upElem.style.display = 'none';
+            midElem.style.display = 'inline';
+            downElem.style.display = 'none';
+        }, 300);
+    }, 300);
+};
+
+/**
+ * Moves the switch handle down, then back to the middle position -
+ * for STATELESS_SWITCH only.
+ * @param {string} id The switch ID.
+ */
+panel.switchDownThenBack = function(id) {
+    var midElem = document.getElementById(id + '-mid');
+    var upElem = document.getElementById(id + '-up');
+    var downElem = document.getElementById(id + '-down');
+
+    upElem.style.display = 'none';
+    midElem.style.display = 'inline';
+    downElem.style.display = 'none';
+
+    window.setTimeout(function() {
+        upElem.style.display = 'none';
+        midElem.style.display = 'none';
+        downElem.style.display = 'inline';
+
+        window.setTimeout(function() {
+            upElem.style.display = 'none';
+            midElem.style.display = 'inline';
+            downElem.style.display = 'none';
+        }, 300);
+    }, 300);
+};
+
