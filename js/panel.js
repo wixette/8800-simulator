@@ -370,12 +370,22 @@ panel.SWITCH_INFO = [
     },
 ];
 
+/** The current state of all the address switches. */
+panel.addressSwitchStates = new Array(16);
+
+/** Whether the power is turned on. */
+panel.poweredOn = false;
+
+/** Whether the machine is running. */
+panel.running = false;
+
 /**
  * Initializes thie UI.
  */
 panel.init = function() {
-    var localeButtonElem = document.getElementById('locale');
-    localeButtonElem.addEventListener('click', l10n.nextLocale, false);
+    // Initializes event listener for nav buttons.
+    var button = document.getElementById('locale');
+    button.addEventListener('click', l10n.nextLocale, false);
 
     // Initializes svg components for all LEDs.
     for (let i = 0; i < panel.LED_INFO.length; i++) {
@@ -389,6 +399,37 @@ panel.init = function() {
         let sw = panel.createSwitch(info.id, info.type,
                                     info.x, info.y);
     }
+
+    // Initializes event listener for STATELESS switches.
+    var cmd = document.getElementById('SW-STOP');
+    cmd.style.cursor = 'pointer';
+    cmd.addEventListener('click', panel.onStop, false);
+    cmd = document.getElementById('SW-RUN');
+    cmd.style.cursor = 'pointer';
+    cmd.addEventListener('click', panel.onRun, false);
+    cmd = document.getElementById('SW-SINGLE');
+    cmd.style.cursor = 'pointer';
+    cmd.addEventListener('click', panel.onSingle, false);
+    cmd = document.getElementById('SW-EXAMINE');
+    cmd.style.cursor = 'pointer';
+    cmd.addEventListener('click', panel.onExamine, false);
+    cmd = document.getElementById('SW-EXAMINE-NEXT');
+    cmd.style.cursor = 'pointer';
+    cmd.addEventListener('click', panel.onExamineNext, false);
+    cmd = document.getElementById('SW-DEPOSIT');
+    cmd.style.cursor = 'pointer';
+    cmd.addEventListener('click', panel.onDeposit, false);
+    cmd = document.getElementById('SW-DEPOSIT-NEXT');
+    cmd.style.cursor = 'pointer';
+    cmd.addEventListener('click', panel.onDepositNext, false);
+    cmd = document.getElementById('SW-RESET');
+    cmd.style.cursor = 'pointer';
+    cmd.addEventListener('click', panel.onReset, false);
+
+    // Initializes internal states.
+    panel.addressSwitchStates.fill(0);
+    panel.poweredOn = false;
+    panel.running = false;
 };
 
 /**
@@ -461,13 +502,37 @@ panel.createSwitch = function(id, type, x, y) {
     upElem.id = id + '-up';
     upElem.x.baseVal.value = '' + x;
     upElem.y.baseVal.value = '' + y;
+    if (type == panel.TOGGLE_SWITCH) {
+        upElem.style.cursor = 'pointer';
+    }
     upElem.style.display = 'none';
 
     var downElem = switchDownElem.cloneNode(true);
     downElem.id = id + '-down';
     downElem.x.baseVal.value = '' + x;
     downElem.y.baseVal.value = '' + y;
+    if (type == panel.TOGGLE_SWITCH) {
+        downElem.style.cursor = 'pointer';
+    }
     downElem.style.display = (type == panel.TOGGLE_SWITCH) ? 'inline' : 'none';
+
+    if (type == panel.TOGGLE_SWITCH) {
+        // Here only sets click listener for all TOGGLE_SWITCH
+        // controls. For STATELESS_SWITCH controls, each control maps
+        // to one or two commands, thus, their listeners will be
+        // installed separatedly in init().
+        var sourceId = id;
+        upElem.addEventListener('click',
+                                function() {
+                                    panel.onToggle(sourceId, 1);
+                                },
+                                false);
+        downElem.addEventListener('click',
+                                function() {
+                                    panel.onToggle(sourceId, 0);
+                                },
+                                false);
+    }
 
     panelElem.appendChild(midElem);
     panelElem.appendChild(upElem);
@@ -552,7 +617,112 @@ panel.switchDownThenBack = function(id) {
             upElem.style.display = 'none';
             midElem.style.display = 'inline';
             downElem.style.display = 'none';
-        }, 300);
-    }, 300);
+        }, 400);
+    }, 100);
 };
 
+/**
+ * When STOP switch is pressed.
+ */
+panel.onStop = function() {
+    panel.switchUpThenBack('STOP-RUN');
+    window.console.log('STOP');
+};
+
+/**
+ * When RUN switch is pressed.
+ */
+panel.onRun = function() {
+    panel.switchDownThenBack('STOP-RUN');
+    window.console.log('RUN');
+};
+
+/**
+ * When SINGLE STEP switch is pressed.
+ */
+panel.onSingle = function() {
+    panel.switchUpThenBack('SINGLE');
+    window.console.log('SINGLE STEP');
+};
+
+/**
+ * When EXAMINE switch is pressed.
+ */
+panel.onExamine = function() {
+    panel.switchUpThenBack('EXAMINE');
+    window.console.log('EXAMINE');
+};
+
+/**
+ * When EXAMINE NEXT switch is pressed.
+ */
+panel.onExamineNext = function() {
+    panel.switchDownThenBack('EXAMINE');
+    window.console.log('EXAMINE NEXT');
+};
+
+/**
+ * When DEPOSIT switch is pressed.
+ */
+panel.onDeposit = function() {
+    panel.switchUpThenBack('DEPOSIT');
+    window.console.log('DEPOSIT');
+};
+
+/**
+ * When DEPOSIT NEXT switch is pressed.
+ */
+panel.onDepositNext = function() {
+    panel.switchDownThenBack('DEPOSIT');
+    window.console.log('DEPOSIT NEXT');
+};
+
+/**
+ * When RESET switch is pressed.
+ */
+panel.onReset = function() {
+    panel.switchUpThenBack('RESET');
+    window.console.log('RESET');
+};
+
+/**
+ * When power is turned on.
+ */
+panel.onPowerOn = function() {
+    window.console.log('POWER ON');
+};
+
+/**
+ * When power is turned off.
+ */
+panel.onPowerOff = function() {
+    window.console.log('POWER OFF');
+};
+
+/**
+ * Handles the click event for all TOGGLE_SWITCH controls.
+ * @param {string} id The switch ID which has been clicked.
+ * @param {number} state The state of the switch before it's clicked.
+ *     0 for the down state. 1 for the up state.
+ */
+panel.onToggle = function(id, state) {
+    if (state == 0) {
+        panel.switchUp(id);
+        window.console.log('TOGGLE: ' + id + ' 0->1');
+    } else {
+        panel.switchDown(id);
+        window.console.log('TOGGLE: ' + id + ' 1->0');
+    }
+    if (id == 'OFF-ON') {
+        if (state == 0) {
+            panel.onPowerOn();
+        } else {
+            panel.onPowerOff();
+        }
+    } else {
+        var bitIndex = parseInt(id.substr(1));
+        panel.addressSwitchStates[bitIndex] =
+            panel.addressSwitchStates[bitIndex] ? 0 : 1;
+        window.console.log(panel.addressSwitchStates);
+    }
+};
