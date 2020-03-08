@@ -15,3 +15,11 @@ Simply open index.html in browser, or copy the entire dir to your web server's r
  * [Altair 8800 Operator's Manual](https://altairclone.com/downloads/manuals/Altair%208800%20Operator's%20Manual.pdf)
  * [Intel 8080 Assembly Language Programming Manual](http://www.classiccmp.org/dunfield/r/8080asm.pdf)
  * [Another Altair 8800 simulator](https://s2js.com/altair/)
+
+## Acknowledgements
+
+I use (https://github.com/maly/8080js) to execute Intel 8080 instruments.
+
+The Quick Tutoral in the simulator UI refers to an example program got from the original [Altair 8800 Operator's Manual](https://altairclone.com/downloads/manuals/Altair%208800%20Operator's%20Manual.pdf).
+
+The interaction design took [another Altair 8800 simulator](https://s2js.com/altair/) as a reference.
