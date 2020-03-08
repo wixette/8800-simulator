@@ -553,6 +553,9 @@ panel.sim = null;
  * Initializes thie UI.
  */
 panel.init = function() {
+    // Restores the last locale if it exists.
+    l10n.restoreLocale();
+
     // Initializes event listener for nav buttons.
     var button = document.getElementById('locale');
     button.addEventListener('click', l10n.nextLocale, false);

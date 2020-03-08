@@ -73,12 +73,32 @@ l10n.MESSAGES = {
 l10n.current = 0;
 
 /**
+ * Local storage key.
+ */
+l10n.localStorageKey = 'sim8800locale';
+
+/**
  * Switches to the next locale.
  */
 l10n.nextLocale = function() {
     l10n.current++;
     l10n.current = l10n.current % l10n.LOCALES.length;
     l10n.updateMessages();
+    localStorage.setItem(l10n.localStorageKey, l10n.current);
+};
+
+/**
+ * Restores the last locale from local storage.
+ */
+l10n.restoreLocale = function() {
+    var val = localStorage.getItem(l10n.localStorageKey);
+    if (val) {
+        var index = parseInt(val);
+        if (!isNaN(index)) {
+            l10n.current = index % l10n.LOCALES.length;
+            l10n.updateMessages();
+        }
+    }
 };
 
 /**
