@@ -214,3 +214,11 @@ footer {
     -ms-user-select: none;
     -webkit-user-select: none;
 }
+
+#tab-debug {
+    display: none;
+}
+
+#tab-ref {
+    display: none;
+}
