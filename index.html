@@ -23,7 +23,7 @@
   </head>
   <body>
     <header>
-      <div id="header-bar">
+      <div class="header-bar">
         <div id="header-title" class="l10n">
           Sim-8800: Altair 8800 Simulator
         </div>
@@ -566,17 +566,35 @@
 
         </svg>
 
-        <div id="subheader-bar">
+        <div class="subheader-bar">
           <div id="switchboard" class="l10n">Soft Switch Board</div>
         </div>
 
       </div>
 
       <div id="tab-debug">
-        <input id="debug-data-input" type="text" size="60">&nbsp;
-        <input id="debug-load-data" type="button" value="LOAD DATA"><br>
-        <div id="cpu-dump"></div>
-        <div id="mem-dump"></div>
+        <div class="subheader-bar">
+          <div id="debug-load-data-title" class="l10n">Load Data to Addr #0</div>
+        </div>
+        <div class="h-box justify-left mt-8 mb-8 align-items-center">
+          <div class="flex-grow-4 mr-8">
+            <input id="debug-data-input" type="text">
+          </div>
+          <div class="flex-grow-1">
+            <input id="debug-load-data" type="button" value="LOAD DATA">
+          </div>
+        </div>
+        <div class="comments">In HEX string, such as 'c3 00 00'</div>
+
+        <div class="subheader-bar mt-8">
+          <div id="debug-cpu-dump-title" class="l10n">8080 CPU Status Dump</div>
+        </div>
+        <div id="cpu-dump" class="mt-8"></div>
+
+        <div class="subheader-bar mt-8">
+          <div id="debug-mem-dump-title" class="l10n">Memory Dump</div>
+        </div>
+        <div id="mem-dump" class="mt-8"></div>
       </div>
 
       <div id="tab-ref">

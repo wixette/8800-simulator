@@ -1,13 +1,88 @@
 body {
     background-color: #f0f0f0;
+    color: #222;
     font-family: "Lucida Console","Courier New",Courier,monospace;
     font-size: 14px;
 }
 
-body, div, img {
+input {
+    font-family: "Lucida Console","Courier New",Courier,monospace;
+}
+
+body, div, img, pre {
     border: 0;
     margin: 0;
     padding: 0;
+}
+
+.h-box {
+    display: flex;
+    flex-direction: row;
+}
+
+.v-box {
+    display: flex;
+    flex-direction: column;
+}
+
+.justify-start {
+    justify-content: start;
+}
+
+.justify-end {
+    justify-content: end;
+}
+
+.justify-center {
+    justify-content: center;
+}
+
+.justify-space-between {
+    justify-content: space-between;
+}
+
+.justify-space-around {
+    justify-content: space-around;
+}
+
+.justify-space-evenly {
+    justify-content: space-evenly;
+}
+
+.align-items-center {
+    align-items: center;
+}
+
+.m-8 {
+    margin: 8px;
+}
+
+.mt-8 {
+    margin-top: 8px;
+}
+
+.ml-8 {
+    margin-left: 8px;
+}
+
+.mr-8 {
+    margin-right: 8px;
+}
+
+.mb-8 {
+    margin-bottom: 8px;
+}
+
+.flex-grow-1 {
+    flex-grow: 1;
+}
+
+.flex-grow-2 {
+    flex-grow: 2;
+}
+
+.flex-grow-4 {
+    flex-grow: 4;
 }
 
 header {
@@ -15,7 +90,7 @@ header {
     overflow: hidden;
 }
 
-#header-bar {
+.header-bar {
     background-color: #333;
     color: #eee;
     display: flex;
@@ -26,8 +101,8 @@ header {
     padding: 5px 20px 5px 20px;
 }
 
-#subheader-bar {
-    background-color: #aaa;
+.subheader-bar {
+    background-color: #999;
     color: #eee;
     display: flex;
     flex-direction: row;
@@ -85,4 +160,29 @@ footer {
     font-size: 11px;
     margin: 20px 8px 0 8px;
     text-align: center;
+}
+
+.comments {
+    font-size: 12px;
+}
+
+#debug-data-input {
+    line-height: 1.5em;
+    width: 100%;
+}
+
+#debug-load-data {
+    border: #ccc 1px solid;
+}
+
+#cpu-dump {
+    color: #222;
+    font-size: 12px;
+    overflow-x: hidden;
+}
+
+#mem-dump {
+    color: #222;
+    font-size: 12px;
+    overflow-x: hidden;
 }
