@@ -20,7 +20,7 @@ The simulator works fine with modern mobile browsers, except that it is a bit ch
 
 ## A Quick Tutorial
 
-With the Altair 8800 simulator, How to input and run the following program to calculate 1 + 2 = 3:
+With a running Altair 8800 simulator, how to input and run the following program to calculate 1 + 2 = 3:
 
 ```
         LDA 0080H  ; 00 111 010
