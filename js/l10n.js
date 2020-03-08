@@ -45,19 +45,19 @@ l10n.MESSAGES = {
         'zh': 'Sim-8800: Altair 8800 模拟器',
     },
 
-    'simulator': {
-        'en': 'Simulator',
+    'nav-sim': {
+        'en': 'Sim',
         'zh': '模拟器',
     },
 
-    'debug': {
+    'nav-debug': {
         'en': 'Debug',
         'zh': '调试',
     },
 
-    'code': {
-        'en': 'Code',
-        'zh': '源码',
+    'nav-ref': {
+        'en': 'Ref',
+        'zh': '参考',
     },
 
     'switchboard': {

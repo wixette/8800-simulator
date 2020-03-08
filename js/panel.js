@@ -557,8 +557,15 @@ panel.init = function() {
     l10n.restoreLocale();
 
     // Initializes event listener for nav buttons.
-    var button = document.getElementById('locale');
+    var button = document.getElementById('nav-locale');
     button.addEventListener('click', l10n.nextLocale, false);
+    button = document.getElementById('nav-sim');
+    button.addEventListener('click', panel.showTabSim, false);
+    button = document.getElementById('nav-debug');
+    button.addEventListener('click', panel.showTabDebug, false);
+    button = document.getElementById('nav-ref');
+    button.addEventListener('click', panel.showTabRes, false);
+    panel.showTabSim();
 
     // Initializes event listener for debug controls.
     button = document.getElementById('debug-load-data');
@@ -874,4 +881,31 @@ panel.playToggle = function() {
  */
 panel.playSwitch = function() {
     panel.playSound('sound-switch');
+};
+
+/**
+ * Shows the simulator tab, and hides the other two.
+ */
+panel.showTabSim = function() {
+    document.getElementById('tab-sim').style.display = 'block';
+    document.getElementById('tab-debug').style.display = 'none';
+    document.getElementById('tab-ref').style.display = 'none';
+};
+
+/**
+ * Shows the debug tab, and hides the other two.
+ */
+panel.showTabDebug = function() {
+    document.getElementById('tab-sim').style.display = 'none';
+    document.getElementById('tab-debug').style.display = 'block';
+    document.getElementById('tab-ref').style.display = 'none';
+};
+
+/**
+ * Shows the resource tab, and hides the other two.
+ */
+panel.showTabRes = function() {
+    document.getElementById('tab-sim').style.display = 'none';
+    document.getElementById('tab-debug').style.display = 'none';
+    document.getElementById('tab-ref').style.display = 'block';
 };
