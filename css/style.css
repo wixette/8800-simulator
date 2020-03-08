@@ -18,11 +18,13 @@ body, div, img, pre {
 .h-box {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
 }
 
 .v-box {
     display: flex;
     flex-direction: column;
+    flex-wrap: nowrap;
 }
 
 .justify-start {
@@ -175,21 +177,28 @@ footer {
 }
 
 #cpu-dump {
+    background-color: #fff;
     color: #222;
     font-size: 12px;
+    min-height: 20px;
     overflow-x: hidden;
 }
 
 #mem-dump {
+    background-color: #fff;
     color: #222;
     font-size: 12px;
+    min-height: 20px;
     overflow-x: hidden;
 }
 
 .button {
-    background-color: #eee;
+    background-color: #fff;
     border: 1px solid #bbb;
     cursor: pointer;
+    font-size: 12px;
+    line-height: 1.5em;
+    padding: 0 5px 0 5px;
     text-align: center;
     user-select: none;
     -moz-user-select: none;
