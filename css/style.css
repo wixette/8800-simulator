@@ -81,7 +81,8 @@ main {
 }
 
 footer {
+    border-top: #ccc 1px solid;
     font-size: 11px;
-    margin-top: 30px;
+    margin: 20px 8px 0 8px;
     text-align: center;
 }
