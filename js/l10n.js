@@ -104,6 +104,106 @@ l10n.MESSAGES = {
         'en': 'Quick Tutorial',
         'zh': '快速教程',
     },
+
+    'tutorial-desc': {
+        'en': 'How to input and run the following program to calculate 1 + 2 = 3:',
+        'zh': '如何输入并运行以下加法程序，并计算 1 + 2 = 3：',
+    },
+
+    'tutorial-1': {
+        'en': 'Turn on Altair 8800 by clicking OFF/ON switch.',
+        'zh': '点击 OFF/ON 开关，打开 Altair 8800',
+    },
+
+    'tutorial-2': {
+        'en': 'Set switches A7-A0 to 00 111 010 (up for 1, down for 0).',
+        'zh': '将地址开关 A7-A0 依次设置为 00 111 010 （开关朝上为 1，开关朝下为 0）',
+    },
+
+    'tutorial-3': {
+        'en': 'Click "DEPOSIT".',
+        'zh': '点击 DEPOSIT',
+    },
+
+    'tutorial-4': {
+        'en': 'Set switches A7-A0 to 10 000 000.',
+        'zh': '将地址开关 A7-A0 依次设置为 10 000 000',
+    },
+
+    'tutorial-5': {
+        'en': 'Click "DEPOSIT NEXT".',
+        'zh': '点击 DEPOSIT NEXT',
+    },
+
+    'tutorial-6': {
+        'en': 'Repeat step 4-5 to input the following bytes one by one: 00 000 000, 01 000 111, 00 111 010, 10 000 001, 00 000 000, 10 000 000, 00 110 010, 10 000 010, 00 000 000, 11 000 011, 00 000 000, 00 000 000.',
+        'zh': '重复步骤 4 到步骤 5，逐个输入以下字节：00 000 000, 01 000 111, 00 111 010, 10 000 001, 00 000 000, 10 000 000, 00 110 010, 10 000 010, 00 000 000, 11 000 011, 00 000 000, 00 000 000',
+    },
+
+    'tutorial-7': {
+        'en': 'Set switches A7-A0 to 10 000 000.',
+        'zh': '将地址开关 A7-A0 依次设置为 10 000 000',
+    },
+
+    'tutorial-8': {
+        'en': 'Click "EXAMINE".',
+        'zh': '点击 EXAMINE',
+    },
+
+    'tutorial-9': {
+        'en': 'Set switches A7-A0 to 00 000 001 (the first number to be added, or 1 in decimal).',
+        'zh': '将地址开关 A7-A0 依次设置为 00 000 001（即第一个加数的值，也就是十进制的 1）',
+    },
+
+    'tutorial-10': {
+        'en': 'Click "DEPOSIT".',
+        'zh': '点击 DEPOSIT',
+    },
+
+    'tutorial-11': {
+        'en': 'Set switches A7-A0 to 00 000 010 (the second number to be added, or 2 in decimal).',
+        'zh': '将地址开关 A7-A0 依次设置为 00 000 010（即第二个加数的值，也就是十进制的 2）',
+    },
+
+    'tutorial-12': {
+        'en': 'Click "DEPOSIT NEXT".',
+        'zh': '点击 DEPOSIT NEXT',
+    },
+
+    'tutorial-13': {
+        'en': 'Click "RESET".',
+        'zh': '点击 RESET',
+    },
+
+    'tutorial-14': {
+        'en': 'Click "RUN" and wait for a few seconds.',
+        'zh': '点击 RUN 并等待几秒钟',
+    },
+
+    'tutorial-15': {
+        'en': 'Click "STOP".',
+        'zh': '点击 STOP',
+    },
+
+    'tutorial-16': {
+        'en': 'Set switches A7-A0 to 10 000 010 (the address that holds the sum).',
+        'zh': '将地址开关 A7-A0 依次设置为 10 000 010（即存储计算结果的地址）',
+    },
+
+    'tutorial-17': {
+        'en': 'Click "EXAMINE".',
+        'zh': '点击 EXAMINE',
+    },
+
+    'tutorial-18': {
+        'en': 'The LEDs D7-D0 show the result 00 000 011 (3 in decimal).',
+        'zh': 'LED 等显示出计算结果 00 000 011（即十进制的 3）',
+    },
+
+    'tutorial-19': {
+        'en': 'Turn off Altair 8800.',
+        'zh': '关闭 Altair 8800',
+    },
 };
 
 /**
