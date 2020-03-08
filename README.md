@@ -6,6 +6,18 @@ A JavaScript simulator to demonstrate the front panel operations of Altair 8800.
 
 Simply open index.html in browser, or copy the entire dir to your web server's root dir.
 
+The simulator UI supports English and Chinese for now. In a desktop browser, you may use mouse to toggle or click the switches on the panel directly.
+
+<img src="https://raw.githubusercontent.com/wixette/8800-simulator/master/design/sim-panel.png" width="960">
+
+There is a DEBUG tab where you can check the internal status of the simulated 8080 CPU, or the contents of the simulator's memory.
+
+<img src="https://raw.githubusercontent.com/wixette/8800-simulator/master/design/sim-debug.png" width="960">
+
+The simulator works fine with modern mobile browsers, except that it is a bit challenging to touch a single switch on the panel on a mobile screen. Although, the helper switch buttons below the panel can be used as an alternative solution.
+
+<img src="https://raw.githubusercontent.com/wixette/8800-simulator/master/design/sim-mobile.png" width="480">
+
 ## References
 
  * [Wikipedia: Altair 8800](https://en.wikipedia.org/wiki/Altair_8800)
