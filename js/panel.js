@@ -546,6 +546,9 @@ panel.STATELESS_SWITCH = 1;
 /** The current state of all the address switches. */
 panel.addressSwitchStates = new Array(16);
 
+/** If the power is turned on. */
+panel.isPoweredOn = false;
+
 /** The simulator object. */
 panel.sim = null;
 
@@ -592,6 +595,7 @@ panel.init = function() {
     }
 
     // Initializes internal states.
+    panel.isPoweredOn = false;
     panel.addressSwitchStates.fill(0);
     panel.switchUp('OFF-ON');
 
@@ -704,16 +708,24 @@ panel.createSwitch = function(id, type, x, y, upperCmd, lowerCmd) {
         var sourceId = id;
         upElem.addEventListener('click',
                                 function() {
-                                    panel.playToggle();
-                                    panel.onToggle(sourceId, 1);
+                                    panel.onToggle(sourceId);
                                 },
                                 false);
         downElem.addEventListener('click',
                                   function() {
-                                      panel.playToggle();
-                                      panel.onToggle(sourceId, 0);
+                                      panel.onToggle(sourceId);
                                   },
                                   false);
+        // Also installs soft switch handlers.
+        let softSwitchId = 'S-' + id;
+        let elem = document.getElementById(softSwitchId);
+        elem.addEventListener(
+            'click',
+            function() {
+                panel.onToggle(sourceId);
+            },
+            false
+        );
     } else {
         if (upperCmd) {
             let cmdElem = document.getElementById(upperCmd.textId);
@@ -831,25 +843,29 @@ panel.switchDownThenBack = function(id) {
 /**
  * Handles the click event for all TOGGLE_SWITCH controls.
  * @param {string} id The switch ID which has been clicked.
- * @param {number} state The state of the switch before it's clicked.
- *     0 for the down state. 1 for the up state.
  */
-panel.onToggle = function(id, state) {
-    if (state == 0) {
-        panel.switchUp(id);
-    } else {
-        panel.switchDown(id);
-    }
-    if (id == 'OFF-ON') {
+panel.onToggle = function(id) {
+    panel.playToggle();
+    if (id[0] == 'S') {
+        var bitIndex = parseInt(id.substr(1));
+        var state = panel.addressSwitchStates[bitIndex];
         if (state == 0) {
+            panel.switchUp(id);
+        } else {
+            panel.switchDown(id);
+        }
+        panel.addressSwitchStates[bitIndex] = state ? 0 : 1;
+    } else if (id == 'OFF-ON') {
+        console.log(panel.isPoweredOn);
+        if (panel.isPoweredOn) {
             panel.onPowerOff();
+            panel.switchUp(id);
+            panel.isPoweredOn = false;
         } else {
             panel.onPowerOn();
+            panel.switchDown(id);
+            panel.isPoweredOn = true;
         }
-    } else {
-        var bitIndex = parseInt(id.substr(1));
-        panel.addressSwitchStates[bitIndex] =
-            panel.addressSwitchStates[bitIndex] ? 0 : 1;
     }
 };
 

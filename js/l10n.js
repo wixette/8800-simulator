@@ -60,8 +60,8 @@ l10n.MESSAGES = {
         'zh': '参考',
     },
 
-    'switchboard': {
-        'en': 'Soft Switch Board',
+    'switchboard-helper': {
+        'en': 'Switch Board Helper',
         'zh': '辅助开关面板',
     },
 
