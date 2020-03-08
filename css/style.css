@@ -52,6 +52,9 @@ nav {
     padding: 3px 10px 3px 10px;
     cursor: pointer;
     user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
 }
 
 .nav-item:hover {
@@ -60,4 +63,11 @@ nav {
 
 main {
     margin: 8px;
+}
+
+#panel {
+    user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
 }
