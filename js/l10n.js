@@ -99,6 +99,11 @@ l10n.MESSAGES = {
         'en': 'Memory Dump',
         'zh': '内存信息',
     },
+
+    'tutorial-title': {
+        'en': 'Quick Tutorial',
+        'zh': '快速教程',
+    },
 };
 
 /**

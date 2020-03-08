@@ -192,6 +192,15 @@ footer {
     overflow-x: hidden;
 }
 
+.tutorial {
+    background-color: #fff;
+    color: #222;
+    font-size: 12px;
+    min-height: 20px;
+    overflow-x: hidden;
+    padding: 5px;
+}
+
 .button {
     background-color: #fff;
     border: 1px solid #bbb;

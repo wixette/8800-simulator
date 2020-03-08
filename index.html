@@ -631,12 +631,81 @@
       </div>
 
       <div id="tab-ref">
-        <p>
-          <span id="source-code" class="l10n">Source code</span>:
-          <a href="https://github.com/wixette/8800-simulator">github.com/wixette/8800-simulator</a>
-        </p>
-      </div>
+        <div class="subheader-bar mt-8">
+          <div id="source-code" class="l10n">Source code</div>
+        </div>
+        <div class="m-8">
+          <p>
+            <ul><li><a href="https://github.com/wixette/8800-simulator">github.com/wixette/8800-simulator</a></li></ul>
+          </p>
+        </div>
 
+        <div class="subheader-bar mt-8">
+          <div id="tutorial-title" class="l10n">Quick Tutorial</div>
+        </div>
+        <div class="tutorial m-8">
+          <p>
+            <ul>
+              <li>How to input and run the following adder program to calculate 1 + 2 = 3:</li>
+            </ul>
+          </p>
+          <pre>
+        LDA 0080H  ; 00 111 010
+                   ; 10 000 000
+                   ; 00 000 000
+        MOV B,A    ; 01 000 111
+        LDA 0081H  ; 00 111 010
+                   ; 10 000 001
+                   ; 00 000 000
+        ADD B      ; 10 000 000
+        STA 0082H  ; 00 110 010
+                   ; 10 000 010
+                   ; 00 000 000
+        JMP 0000H  ; 11 000 011
+                   ; 00 000 000
+                   ; 00 000 000</pre>
+          <p>
+            <ol>
+              <li><span>Turn on the computer.</span></li>
+              <li><span>Set switches A7 - A0 to 00 111 010 (up for 1, down for 0).</span></li>
+              <li><span>Click "DEPOSIT".</span></li>
+              <li><span>Set switches A7 - A0 to 10 000 000.</span></li>
+              <li><span>Click "DEPOSIT NEXT".</span></li>
+              <li><span>Repeat step 4-5 to input the following bytes one by one: 00 000 000, 01 000 111, 00 111 010, 10 000 001, 00 000 000, 10 000 000, 00 110 010, 10 000 010, 00 000 000, 11 000 011, 00 000 000, 00 000 000.</span></li>
+              <li><span>Set switches A7 - A0 to 10 000 000.</span></li>
+              <li><span>Click "EXAMINE"</span></li>
+              <li><span>Set switches A7 - A0 to 00 000 001 (the first number to be added, or 1 in decimal).</span></li>
+              <li><span>Click "DEPOSIT".</span></li>
+              <li><span>Set switches A7 - A0 to 00 000 010 (the second number to be added, or 2 in decimal).</span></li>
+              <li><span>Click "DEPOSIT NEXT".</span></li>
+              <li><span>Click "RESET".</span></li>
+              <li><span>Click "RUN" and wait for a few seconds.</span></li>
+              <li><span>Click "STOP".</span></li>
+              <li><span>Set switches A7 - A0 to 10 000 010 (the address that holds the sum).</span></li>
+              <li><span>Click "EXAMINE"</span></li>
+              <li><span>The LEDs D7 - D0 show the result 00 000 011 (3 in decimal).</span></li>
+              <li><span>Turn off the computer.</span></li>
+            </ol>
+          </p>
+        </div>
+
+        <div class="subheader-bar mt-8">
+          <div id="reference-title" class="l10n">References</div>
+        </div>
+        <div class="m-8">
+          <p>
+            <ul>
+              <li><a href="https://en.wikipedia.org/wiki/Altair_8800">Wikipedia: Altair 8800</a></li>
+              <li><a href="https://en.wikipedia.org/wiki/Intel_8080">Intel 8080 CPU</a></li>
+              <li><a href="http://www.classiccmp.org/dunfield/r/8080.txt">Intel 8080 instruction set</a></li>
+              <li><a href="https://altairclone.com/altair_manuals.html">Original Altair 8800 manuals</a></li>
+              <li><a href="http://www.classiccmp.org/dunfield/r/8080asm.pdf">Intel 8080 Assembly Language Programming Manual</a></li>
+              <li><a href="https://s2js.com/altair/">Another Altair 8800 simulator</a></li>
+            </ul>
+          </p>
+        </div>
+
+      </div>
     </main>
 
     <footer>
