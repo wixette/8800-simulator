@@ -716,7 +716,7 @@ panel.createSwitch = function(id, type, x, y, upperCmd, lowerCmd) {
                                       panel.onToggle(sourceId);
                                   },
                                   false);
-        // Also installs soft switch handlers.
+        // Also installs helper switch handlers.
         let softSwitchId = 'S-' + id;
         let elem = document.getElementById(softSwitchId);
         elem.addEventListener(
@@ -738,10 +738,30 @@ panel.createSwitch = function(id, type, x, y, upperCmd, lowerCmd) {
                     upperCmd.callback();
                 },
                 false);
+            // Also installs helper switch handlers.
+            cmdElem = document.getElementById('S' + upperCmd.textId);
+            cmdElem.addEventListener(
+                'click',
+                function() {
+                    panel.switchUpThenBack(id);
+                    panel.playSwitch();
+                    upperCmd.callback();
+                },
+                false);
         }
         if (lowerCmd) {
             let cmdElem = document.getElementById(lowerCmd.textId);
             cmdElem.style.cursor = 'pointer';
+            cmdElem.addEventListener(
+                'click',
+                function() {
+                    panel.switchDownThenBack(id);
+                    panel.playSwitch();
+                    lowerCmd.callback();
+                },
+                false);
+            // Also installs helper switch handlers.
+            cmdElem = document.getElementById('S' + lowerCmd.textId);
             cmdElem.addEventListener(
                 'click',
                 function() {
