@@ -167,7 +167,6 @@ footer {
 }
 
 #debug-data-input {
-    line-height: 1.5em;
     width: 100%;
 }
 
@@ -185,4 +184,15 @@ footer {
     color: #222;
     font-size: 12px;
     overflow-x: hidden;
+}
+
+.button {
+    background-color: #eee;
+    border: 1px solid #bbb;
+    cursor: pointer;
+    text-align: center;
+    user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
 }

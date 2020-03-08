@@ -74,6 +74,31 @@ l10n.MESSAGES = {
         'en': 'Source code',
         'zh': '源代码',
     },
+
+    'debug-load-data-title': {
+        'en': 'Load Data to Addr #0',
+        'zh': '从地址0开始加载数据',
+    },
+
+    'debug-load-data': {
+        'en': 'Load Data',
+        'zh': '加载数据',
+    },
+
+    'debug-data-sample': {
+        'en': 'Bytes in HEX string, such as \'c3 00 00\'',
+        'zh': '十六进制字节序列，如 c3 00 00',
+    },
+
+    'debug-cpu-dump-title': {
+        'en': '8080 CPU Status Dump',
+        'zh': '8080 CPU 的状态信息',
+    },
+
+    'debug-mem-dump-title': {
+        'en': 'Memory Dump',
+        'zh': '内存信息',
+    },
 };
 
 /**
