@@ -23,6 +23,170 @@
 panel = {};
 
 /**
+ * When STOP switch is pressed.
+ */
+panel.onStop = function() {
+    panel.sim.stop();
+};
+
+/**
+ * When RUN switch is pressed.
+ */
+panel.onRun = function() {
+    panel.sim.start();
+};
+
+/**
+ * When SINGLE STEP switch is pressed.
+ */
+panel.onSingle = function() {
+    panel.sim.step(1);
+};
+
+/**
+ * When EXAMINE switch is pressed.
+ */
+panel.onExamine = function() {
+    panel.sim.examine();
+};
+
+/**
+ * When EXAMINE NEXT switch is pressed.
+ */
+panel.onExamineNext = function() {
+    panel.sim.examineNext();
+};
+
+/**
+ * When DEPOSIT switch is pressed.
+ */
+panel.onDeposit = function() {
+    panel.sim.deposit();
+};
+
+/**
+ * When DEPOSIT NEXT switch is pressed.
+ */
+panel.onDepositNext = function() {
+    panel.sim.depositNext();
+};
+
+/**
+ * When RESET switch is pressed.
+ */
+panel.onReset = function() {
+    panel.sim.reset();
+};
+
+/**
+ * When power is turned on.
+ */
+panel.onPowerOn = function() {
+    panel.sim.powerOn();
+    window.setTimeout(function() {
+        panel.playBeepbeep();
+    }, 500);
+};
+
+/**
+ * When power is turned off.
+ */
+panel.onPowerOff = function() {
+    panel.sim.powerOff();
+};
+
+/**
+ * When CPU sets the address LEDs.
+ */
+panel.setAddressLedsCallback = function(bits) {
+    for (let i = 0; i < bits.length; i++) {
+        var ledId = 'A' + i;
+        if (bits[i]) {
+            panel.ledOn(ledId);
+        } else {
+            panel.ledOff(ledId);
+        }
+    }
+};
+
+/**
+ * When CPU sets the data LEDs.
+ */
+panel.setDataLedsCallback = function(bits) {
+    for (let i = 0; i < bits.length; i++) {
+        var ledId = 'D' + i;
+        if (bits[i]) {
+            panel.ledOn(ledId);
+        } else {
+            panel.ledOff(ledId);
+        }
+    }
+};
+
+/**
+ * When CPU sets the WAIT LED.
+ */
+panel.setWaitLedCallback = function(isRunning) {
+    var ledId = 'WAIT';
+    if (!isRunning) {
+        panel.ledOn(ledId);
+    } else {
+        panel.ledOff(ledId);
+    }
+};
+
+/**
+ * When CPU sets the status LEDs.
+ */
+panel.setStatusLedsCallback = function(isPoweredOn) {
+    var ledIds = ['MEMR', 'MI', 'WO'];
+    for (let i = 0; i < ledIds.length; i++) {
+        if (isPoweredOn) {
+            panel.ledOn(ledIds[i]);
+        } else {
+            panel.ledOff(ledIds[i]);
+        }
+    }
+};
+
+/**
+ * When CPU reads the number input by the address/data switches.
+ */
+panel.getInputAddressCallback = function() {
+    var word = 0;
+    for (let i = 0; i < 16; i++) {
+        if (panel.addressSwitchStates[i]) {
+            word |= 1 << i;
+        }
+    }
+    return word;
+};
+
+/**
+ * When CPU dumps the CPU status for debug.
+ */
+panel.dumpCpuCallback = function(dumpHtml) {
+    var dumpCpuElem = document.getElementById('cpu-dump');
+    dumpCpuElem.innerHTML = dumpHtml;
+};
+
+/**
+ * When CPU dumps the MEM contents for debug.
+ */
+panel.dumpMemCallback = function(dumpHtml) {
+    var dumpMemElem = document.getElementById('mem-dump');
+    dumpMemElem.innerHTML = dumpHtml;
+};
+
+/**
+ * Deposites data into MEM directly in debug panel.
+ */
+panel.debugLoadData = function() {
+    var data = document.getElementById("debug-data-input").value;
+    panel.sim.loadDataAsHexString(0, data);
+};
+
+/**
  * The info of all LEDs.
  */
 panel.LED_INFO = [
@@ -209,166 +373,175 @@ panel.LED_INFO = [
 ];
 
 /**
- * Switch types.
+ * The info of all toggle switches.
+ *
+ * A toggle switch has an upper state (which means 1 for address
+ * switches) and a lower state (which means 0 for address switches).
  */
-panel.TOGGLE_SWITCH = 0;
-panel.STATELESS_SWITCH = 1;
-
-/**
- * The info of all switches.
- */
-panel.SWITCH_INFO = [
+panel.TOGGLE_SWITCH_INFO = [
+    {
+        id: 'OFF-ON',
+        x: 105,
+        y: 439
+    },
     {
         id: 'S15',
-        type: panel.TOGGLE_SWITCH,
         x: 346,
         y: 334
     },
     {
         id: 'S14',
-        type: panel.TOGGLE_SWITCH,
         x: 423,
         y: 334
     },
     {
         id: 'S13',
-        type: panel.TOGGLE_SWITCH,
         x: 473,
         y: 334
     },
     {
         id: 'S12',
-        type: panel.TOGGLE_SWITCH,
         x: 523,
         y: 334
     },
     {
         id: 'S11',
-        type: panel.TOGGLE_SWITCH,
         x: 602,
         y: 334
     },
     {
         id: 'S10',
-        type: panel.TOGGLE_SWITCH,
         x: 652,
         y: 334
     },
     {
         id: 'S9',
-        type: panel.TOGGLE_SWITCH,
         x: 702,
         y: 334
     },
     {
         id: 'S8',
-        type: panel.TOGGLE_SWITCH,
         x: 780,
         y: 334
     },
     {
         id: 'S7',
-        type: panel.TOGGLE_SWITCH,
         x: 830,
         y: 334
     },
     {
         id: 'S6',
-        type: panel.TOGGLE_SWITCH,
         x: 880,
         y: 334
     },
     {
         id: 'S5',
-        type: panel.TOGGLE_SWITCH,
         x: 959,
         y: 334
     },
     {
         id: 'S4',
-        type: panel.TOGGLE_SWITCH,
         x: 1009,
         y: 334
     },
     {
         id: 'S3',
-        type: panel.TOGGLE_SWITCH,
         x: 1059,
         y: 334
     },
     {
         id: 'S2',
-        type: panel.TOGGLE_SWITCH,
         x: 1138,
         y: 334
     },
     {
         id: 'S1',
-        type: panel.TOGGLE_SWITCH,
         x: 1188,
         y: 334
     },
     {
         id: 'S0',
-        type: panel.TOGGLE_SWITCH,
         x: 1238,
         y: 334
     },
-    {
-        id: 'OFF-ON',
-        type: panel.TOGGLE_SWITCH,
-        x: 105,
-        y: 439
-    },
+];
+
+/**
+ * The info of all stateless switches.
+ *
+ * A stateless switch may has a upper command and a lower
+ * command. When a command is clicked, the switch moves up or down
+ * then back to its middle position, without keeping upper or lower
+ * state.
+ */
+panel.STATELESS_SWITCH_INFO = [
     {
         id: 'STOP-RUN',
-        type: panel.STATELESS_SWITCH,
         x: 348,
-        y: 439
+        y: 439,
+        upperCmd: { textId: 'SW-STOP', callback: panel.onStop },
+        lowerCmd: { textId: 'SW-RUN', callback: panel.onRun },
     },
     {
         id: 'SINGLE',
-        type: panel.STATELESS_SWITCH,
         x: 446,
-        y: 439
+        y: 439,
+        upperCmd: { textId: 'SW-SINGLE', callback: panel.onSingle },
+        lowerCmd: null,
     },
     {
         id: 'EXAMINE',
-        type: panel.STATELESS_SWITCH,
         x: 550,
-        y: 439
+        y: 439,
+        upperCmd: { textId: 'SW-EXAMINE', callback: panel.onExamine },
+        lowerCmd: { textId: 'SW-EXAMINE-NEXT', callback: panel.onExamineNext },
     },
     {
         id: 'DEPOSIT',
-        type: panel.STATELESS_SWITCH,
         x: 650,
-        y: 439
+        y: 439,
+        upperCmd: { textId: 'SW-DEPOSIT', callback: panel.onDeposit },
+        lowerCmd: { textId: 'SW-DEPOSIT-NEXT', callback: panel.onDepositNext },
     },
     {
         id: 'RESET',
-        type: panel.STATELESS_SWITCH,
         x: 753,
-        y: 439
+        y: 439,
+        upperCmd: { textId: 'SW-RESET', callback: panel.onReset },
+        lowerCmd: null,
     },
     {
         id: 'PROTECT',
-        type: panel.STATELESS_SWITCH,
         x: 853,
-        y: 439
+        y: 439,
+        upperCmd: null,
+        lowerCmd: null,
     },
     {
         id: 'AUX1',
-        type: panel.STATELESS_SWITCH,
         x: 957,
-        y: 439
+        y: 439,
+        upperCmd: null,
+        lowerCmd: null,
     },
     {
         id: 'AUX2',
-        type: panel.STATELESS_SWITCH,
         x: 1060,
-        y: 439
+        y: 439,
+        upperCmd: null,
+        lowerCmd: null,
     },
 ];
+
+/**
+ * The type ID of toggle switch.
+ */
+panel.TOGGLE_SWITCH = 0;
+
+/**
+ * The type ID of stateless switch.
+ */
+panel.STATELESS_SWITCH = 1;
 
 /** The current state of all the address switches. */
 panel.addressSwitchStates = new Array(16);
@@ -395,37 +568,18 @@ panel.init = function() {
     }
 
     // Initializes svg components for all switches.
-    for (let i = 0; i < panel.SWITCH_INFO.length; i++) {
-        let info = panel.SWITCH_INFO[i];
-        let sw = panel.createSwitch(info.id, info.type,
-                                    info.x, info.y);
+    for (let i = 0; i < panel.TOGGLE_SWITCH_INFO.length; i++) {
+        let info = panel.TOGGLE_SWITCH_INFO[i];
+        let sw = panel.createSwitch(info.id, panel.TOGGLE_SWITCH,
+                                    info.x, info.y,
+                                    null, null);
     }
-
-    // Initializes event listener for STATELESS switches.
-    var cmd = document.getElementById('SW-STOP');
-    cmd.style.cursor = 'pointer';
-    cmd.addEventListener('click', panel.onStop, false);
-    cmd = document.getElementById('SW-RUN');
-    cmd.style.cursor = 'pointer';
-    cmd.addEventListener('click', panel.onRun, false);
-    cmd = document.getElementById('SW-SINGLE');
-    cmd.style.cursor = 'pointer';
-    cmd.addEventListener('click', panel.onSingle, false);
-    cmd = document.getElementById('SW-EXAMINE');
-    cmd.style.cursor = 'pointer';
-    cmd.addEventListener('click', panel.onExamine, false);
-    cmd = document.getElementById('SW-EXAMINE-NEXT');
-    cmd.style.cursor = 'pointer';
-    cmd.addEventListener('click', panel.onExamineNext, false);
-    cmd = document.getElementById('SW-DEPOSIT');
-    cmd.style.cursor = 'pointer';
-    cmd.addEventListener('click', panel.onDeposit, false);
-    cmd = document.getElementById('SW-DEPOSIT-NEXT');
-    cmd.style.cursor = 'pointer';
-    cmd.addEventListener('click', panel.onDepositNext, false);
-    cmd = document.getElementById('SW-RESET');
-    cmd.style.cursor = 'pointer';
-    cmd.addEventListener('click', panel.onReset, false);
+    for (let i = 0; i < panel.STATELESS_SWITCH_INFO.length; i++) {
+        let info = panel.STATELESS_SWITCH_INFO[i];
+        let sw = panel.createSwitch(info.id, panel.STATELESS_SWITCH,
+                                    info.x, info.y,
+                                    info.upperCmd, info.lowerCmd);
+    }
 
     // Initializes internal states.
     panel.addressSwitchStates.fill(0);
@@ -439,91 +593,6 @@ panel.init = function() {
         panel.setWaitLedCallback, panel.setStatusLedsCallback,
         panel.getInputAddressCallback,
         panel.dumpCpuCallback, panel.dumpMemCallback);
-};
-
-panel.setAddressLedsCallback = function(bits) {
-    for (let i = 0; i < bits.length; i++) {
-        var ledId = 'A' + i;
-        if (bits[i]) {
-            panel.ledOn(ledId);
-        } else {
-            panel.ledOff(ledId);
-        }
-    }
-};
-
-panel.setDataLedsCallback = function(bits) {
-    for (let i = 0; i < bits.length; i++) {
-        var ledId = 'D' + i;
-        if (bits[i]) {
-            panel.ledOn(ledId);
-        } else {
-            panel.ledOff(ledId);
-        }
-    }
-};
-
-panel.setWaitLedCallback = function(isRunning) {
-    var ledId = 'WAIT';
-    if (!isRunning) {
-        panel.ledOn(ledId);
-    } else {
-        panel.ledOff(ledId);
-    }
-};
-
-panel.setStatusLedsCallback = function(isPoweredOn) {
-    var ledIds = ['MEMR', 'MI', 'WO'];
-    for (let i = 0; i < ledIds.length; i++) {
-        if (isPoweredOn) {
-            panel.ledOn(ledIds[i]);
-        } else {
-            panel.ledOff(ledIds[i]);
-        }
-    }
-};
-
-panel.getInputAddressCallback = function() {
-    var word = 0;
-    for (let i = 0; i < 16; i++) {
-        if (panel.addressSwitchStates[i]) {
-            word |= 1 << i;
-        }
-    }
-    return word;
-};
-
-panel.dumpCpuCallback = function(dumpHtml) {
-    var dumpCpuElem = document.getElementById('cpu-dump');
-    dumpCpuElem.innerHTML = dumpHtml;
-};
-
-panel.dumpMemCallback = function(dumpHtml) {
-    var dumpMemElem = document.getElementById('mem-dump');
-    dumpMemElem.innerHTML = dumpHtml;
-};
-
-panel.debugLoadData = function() {
-    var data = document.getElementById("debug-data-input").value;
-    panel.sim.loadDataAsHexString(0, data);
-};
-
-panel.playSound = function(id) {
-    var sound = document.getElementById(id);
-    sound.currentTime = 0;
-    sound.play();
-};
-
-panel.playBeepbeep = function() {
-    panel.playSound('sound-beepbeep');
-};
-
-panel.playToggle = function() {
-    panel.playSound('sound-toggle');
-};
-
-panel.playSwitch = function() {
-    panel.playSound('sound-switch');
 };
 
 /**
@@ -573,14 +642,18 @@ panel.ledOff = function(id) {
 };
 
 /**
- * Creates a new switch inside the panel svg.
+ * Creates a new toggle switch inside the panel svg.
  * @param {string} id The switch ID. This ID will be used as the
  *     prefix of DOM element's ID.
  * @param {number} type The type of the switch.
  * @param {number} x The x position.
  * @param {number} y The y position.
+ * @param {Object} upperCmd The upperCmd info, for STATELESS_SWITCH
+ *     only.
+ * @param {Object} lowerCmd The lowerCmd info, for STATELESS_SWITCH
+ *     only.
  */
-panel.createSwitch = function(id, type, x, y) {
+panel.createSwitch = function(id, type, x, y, upperCmd, lowerCmd) {
     var panelElem = document.getElementById('panel');
     var switchMidElem = document.getElementById('switch-mid');
     var switchUpElem = document.getElementById('switch-up');
@@ -611,10 +684,6 @@ panel.createSwitch = function(id, type, x, y) {
     downElem.style.display = (type == panel.TOGGLE_SWITCH) ? 'inline' : 'none';
 
     if (type == panel.TOGGLE_SWITCH) {
-        // Here only sets click listener for all TOGGLE_SWITCH
-        // controls. For STATELESS_SWITCH controls, each control maps
-        // to one or two commands, thus, their listeners will be
-        // installed separatedly in init().
         var sourceId = id;
         upElem.addEventListener('click',
                                 function() {
@@ -628,6 +697,31 @@ panel.createSwitch = function(id, type, x, y) {
                                       panel.onToggle(sourceId, 0);
                                   },
                                   false);
+    } else {
+        if (upperCmd) {
+            let cmdElem = document.getElementById(upperCmd.textId);
+            cmdElem.style.cursor = 'pointer';
+            cmdElem.addEventListener(
+                'click',
+                function() {
+                    panel.switchUpThenBack(id);
+                    panel.playSwitch();
+                    upperCmd.callback();
+                },
+                false);
+        }
+        if (lowerCmd) {
+            let cmdElem = document.getElementById(lowerCmd.textId);
+            cmdElem.style.cursor = 'pointer';
+            cmdElem.addEventListener(
+                'click',
+                function() {
+                    panel.switchDownThenBack(id);
+                    panel.playSwitch();
+                    lowerCmd.callback();
+                },
+                false);
+        }
     }
 
     panelElem.appendChild(midElem);
@@ -718,87 +812,6 @@ panel.switchDownThenBack = function(id) {
 };
 
 /**
- * When STOP switch is pressed.
- */
-panel.onStop = function() {
-    panel.switchUpThenBack('STOP-RUN');
-    panel.sim.stop();
-};
-
-/**
- * When RUN switch is pressed.
- */
-panel.onRun = function() {
-    panel.switchDownThenBack('STOP-RUN');
-    panel.sim.start();
-};
-
-/**
- * When SINGLE STEP switch is pressed.
- */
-panel.onSingle = function() {
-    panel.switchUpThenBack('SINGLE');
-    panel.sim.step(1);
-};
-
-/**
- * When EXAMINE switch is pressed.
- */
-panel.onExamine = function() {
-    panel.switchUpThenBack('EXAMINE');
-    panel.sim.examine();
-};
-
-/**
- * When EXAMINE NEXT switch is pressed.
- */
-panel.onExamineNext = function() {
-    panel.switchDownThenBack('EXAMINE');
-    panel.sim.examineNext();
-};
-
-/**
- * When DEPOSIT switch is pressed.
- */
-panel.onDeposit = function() {
-    panel.switchUpThenBack('DEPOSIT');
-    panel.sim.deposit();
-};
-
-/**
- * When DEPOSIT NEXT switch is pressed.
- */
-panel.onDepositNext = function() {
-    panel.switchDownThenBack('DEPOSIT');
-    panel.sim.depositNext();
-};
-
-/**
- * When RESET switch is pressed.
- */
-panel.onReset = function() {
-    panel.switchUpThenBack('RESET');
-    panel.sim.reset();
-};
-
-/**
- * When power is turned on.
- */
-panel.onPowerOn = function() {
-    panel.sim.powerOn();
-    window.setTimeout(function() {
-        panel.playBeepbeep();
-    }, 500);
-};
-
-/**
- * When power is turned off.
- */
-panel.onPowerOff = function() {
-    panel.sim.powerOff();
-};
-
-/**
  * Handles the click event for all TOGGLE_SWITCH controls.
  * @param {string} id The switch ID which has been clicked.
  * @param {number} state The state of the switch before it's clicked.
@@ -821,4 +834,34 @@ panel.onToggle = function(id, state) {
         panel.addressSwitchStates[bitIndex] =
             panel.addressSwitchStates[bitIndex] ? 0 : 1;
     }
+};
+
+/**
+ * Plays a sound audio.
+ */
+panel.playSound = function(id) {
+    var sound = document.getElementById(id);
+    sound.currentTime = 0;
+    sound.play();
+};
+
+/**
+ * Plays beep beep.
+ */
+panel.playBeepbeep = function() {
+    panel.playSound('sound-beepbeep');
+};
+
+/**
+ * Plays the sound of toggle click.
+ */
+panel.playToggle = function() {
+    panel.playSound('sound-toggle');
+};
+
+/**
+ * Plays the sound of stateless switch click.
+ */
+panel.playSwitch = function() {
+    panel.playSound('sound-switch');
 };
