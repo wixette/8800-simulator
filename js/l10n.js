@@ -204,6 +204,11 @@ l10n.MESSAGES = {
         'en': 'Turn off Altair 8800.',
         'zh': '关闭 Altair 8800',
     },
+
+    'reference-title': {
+        'en': 'References',
+        'zh': '参考资料',
+    },
 };
 
 /**
