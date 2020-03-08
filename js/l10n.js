@@ -64,6 +64,16 @@ l10n.MESSAGES = {
         'en': 'Soft Switch Board',
         'zh': '辅助开关面板',
     },
+
+    'back-home': {
+        'en': 'Home',
+        'zh': '首页',
+    },
+
+    'source-code': {
+        'en': 'Source code',
+        'zh': '源代码',
+    },
 };
 
 /**
@@ -92,12 +102,13 @@ l10n.nextLocale = function() {
  */
 l10n.restoreLocale = function() {
     var val = localStorage.getItem(l10n.localStorageKey);
-    if (val) {
-        var index = parseInt(val);
-        if (!isNaN(index)) {
-            l10n.current = index % l10n.LOCALES.length;
-            l10n.updateMessages();
-        }
+    if (!val) {
+        val = '0';
+    }
+    var index = parseInt(val);
+    if (!isNaN(index)) {
+        l10n.current = index % l10n.LOCALES.length;
+        l10n.updateMessages();
     }
 };
 

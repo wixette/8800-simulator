@@ -71,3 +71,9 @@ main {
     -ms-user-select: none;
     -webkit-user-select: none;
 }
+
+footer {
+    font-size: 11px;
+    margin-top: 30px;
+    text-align: center;
+}
