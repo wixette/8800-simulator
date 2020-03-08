@@ -884,12 +884,28 @@ panel.playSwitch = function() {
 };
 
 /**
+ * Highlights a nav tab or removes the effect.
+ * @param {Element} elem The DOM element of the nav tab.
+ * @param {boolean} highlight Whether highlight the tab.
+ */
+panel.highlightNavTab = function(elem, highlight) {
+    if (highlight) {
+        elem.classList.add('selected');
+    } else {
+        elem.classList.remove('selected');
+    }
+};
+
+/**
  * Shows the simulator tab, and hides the other two.
  */
 panel.showTabSim = function() {
     document.getElementById('tab-sim').style.display = 'block';
     document.getElementById('tab-debug').style.display = 'none';
     document.getElementById('tab-ref').style.display = 'none';
+    panel.highlightNavTab(document.getElementById('nav-sim'), true);
+    panel.highlightNavTab(document.getElementById('nav-debug'), false);
+    panel.highlightNavTab(document.getElementById('nav-ref'), false);
 };
 
 /**
@@ -899,6 +915,9 @@ panel.showTabDebug = function() {
     document.getElementById('tab-sim').style.display = 'none';
     document.getElementById('tab-debug').style.display = 'block';
     document.getElementById('tab-ref').style.display = 'none';
+    panel.highlightNavTab(document.getElementById('nav-sim'), false);
+    panel.highlightNavTab(document.getElementById('nav-debug'), true);
+    panel.highlightNavTab(document.getElementById('nav-ref'), false);
 };
 
 /**
@@ -908,4 +927,7 @@ panel.showTabRes = function() {
     document.getElementById('tab-sim').style.display = 'none';
     document.getElementById('tab-debug').style.display = 'none';
     document.getElementById('tab-ref').style.display = 'block';
+    panel.highlightNavTab(document.getElementById('nav-sim'), false);
+    panel.highlightNavTab(document.getElementById('nav-debug'), false);
+    panel.highlightNavTab(document.getElementById('nav-ref'), true);
 };
