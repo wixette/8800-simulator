@@ -30,7 +30,7 @@ The simulator works fine with modern mobile browsers, except that it is a bit ch
 
 ## Acknowledgements
 
-I use (https://github.com/maly/8080js) to execute Intel 8080 instruments.
+I use https://github.com/maly/8080js to execute Intel 8080 instruments.
 
 The Quick Tutoral in the simulator UI refers to an example program got from the original [Altair 8800 Operator's Manual](https://altairclone.com/downloads/manuals/Altair%208800%20Operator's%20Manual.pdf).
 
