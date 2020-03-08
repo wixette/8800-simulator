@@ -508,6 +508,24 @@ panel.debugLoadData = function() {
     panel.sim.loadDataAsHexString(0, data);
 };
 
+panel.playSound = function(id) {
+    var sound = document.getElementById(id);
+    sound.currentTime = 0;
+    sound.play();
+};
+
+panel.playBeepbeep = function() {
+    panel.playSound('sound-beepbeep');
+};
+
+panel.playToggle = function() {
+    panel.playSound('sound-toggle');
+};
+
+panel.playSwitch = function() {
+    panel.playSound('sound-switch');
+};
+
 /**
  * Creates a new LED inside the panel svg.
  * @param {string} id The LED ID. This ID will be used as the prefix
@@ -600,14 +618,16 @@ panel.createSwitch = function(id, type, x, y) {
         var sourceId = id;
         upElem.addEventListener('click',
                                 function() {
+                                    panel.playToggle();
                                     panel.onToggle(sourceId, 1);
                                 },
                                 false);
         downElem.addEventListener('click',
-                                function() {
-                                    panel.onToggle(sourceId, 0);
-                                },
-                                false);
+                                  function() {
+                                      panel.playToggle();
+                                      panel.onToggle(sourceId, 0);
+                                  },
+                                  false);
     }
 
     panelElem.appendChild(midElem);
@@ -766,6 +786,9 @@ panel.onReset = function() {
  */
 panel.onPowerOn = function() {
     panel.sim.powerOn();
+    window.setTimeout(function() {
+        panel.playBeepbeep();
+    }, 500);
 };
 
 /**
