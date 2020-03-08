@@ -197,7 +197,7 @@ l10n.MESSAGES = {
 
     'tutorial-18': {
         'en': 'The LEDs D7-D0 show the result 00 000 011 (3 in decimal).',
-        'zh': 'LED 等显示出计算结果 00 000 011（即十进制的 3）',
+        'zh': 'LED 灯 D7-D0 显示出计算结果 00 000 011（即十进制的 3）',
     },
 
     'tutorial-19': {
