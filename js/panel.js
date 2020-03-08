@@ -607,6 +607,9 @@ panel.createLed = function(id, x, y) {
     var ledOnElem = document.getElementById('led-on');
     var ledOffElem = document.getElementById('led-off');
 
+    ledOnElem.style.display = 'none';
+    ledOffElem.style.display = 'none';
+
     var onElem = ledOnElem.cloneNode(true);
     onElem.id = id + '-on';
     onElem.x.baseVal.value = '' + x;
@@ -658,6 +661,10 @@ panel.createSwitch = function(id, type, x, y, upperCmd, lowerCmd) {
     var switchMidElem = document.getElementById('switch-mid');
     var switchUpElem = document.getElementById('switch-up');
     var switchDownElem = document.getElementById('switch-down');
+
+    switchMidElem.style.display = 'none';
+    switchUpElem.style.display = 'none';
+    switchDownElem.style.display = 'none';
 
     var midElem = switchMidElem.cloneNode(true);
     midElem.id = id + '-mid';
