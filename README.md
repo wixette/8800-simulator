@@ -39,25 +39,25 @@ With the Altair 8800 simulator, How to input and run the following program to ca
                    ; 00 000 000
 ```
 
- 1 Turn on Altair 8800 by clicking OFF/ON switch.
- 1 Set switches A7-A0 to 00 111 010 (up for 1, down for 0).
- 1 Click "DEPOSIT".
- 1 Set switches A7-A0 to 10 000 000.
- 1 Click "DEPOSIT NEXT".
- 1 Repeat step 4-5 to input the following bytes one by one: 00 000 000, 01 000 111, 00 111 010, 10 000 001, 00 000 000, 10 000 000, 00 110 010, 10 000 010, 00 000 000, 11 000 011, 00 000 000, 00 000 000.
- 1 Set switches A7-A0 to 10 000 000.
- 1 Click "EXAMINE".
- 1 Set switches A7-A0 to 00 000 001 (the first number to be added, or 1 in decimal).
- 1 Click "DEPOSIT".
- 1 Set switches A7-A0 to 00 000 010 (the second number to be added, or 2 in decimal).
- 1 Click "DEPOSIT NEXT".
- 1 Click "RESET".
- 1 Click "RUN" and wait for a few seconds.
- 1 Click "STOP".
- 1 Set switches A7-A0 to 10 000 010 (the address that holds the sum).
- 1 Click "EXAMINE".
- 1 The LEDs D7-D0 show the result 00 000 011 (3 in decimal).
- 1 Turn off Altair 8800.
+ 1. Turn on Altair 8800 by clicking OFF/ON switch.
+ 1. Set switches A7-A0 to 00 111 010 (up for 1, down for 0).
+ 1. Click "DEPOSIT".
+ 1. Set switches A7-A0 to 10 000 000.
+ 1. Click "DEPOSIT NEXT".
+ 1. Repeat step 4-5 to input the following bytes one by one: 00 000 000, 01 000 111, 00 111 010, 10 000 001, 00 000 000, 10 000 000, 00 110 010, 10 000 010, 00 000 000, 11 000 011, 00 000 000, 00 000 000.
+ 1. Set switches A7-A0 to 10 000 000.
+ 1. Click "EXAMINE".
+ 1. Set switches A7-A0 to 00 000 001 (the first number to be added, or 1 in decimal).
+ 1. Click "DEPOSIT".
+ 1. Set switches A7-A0 to 00 000 010 (the second number to be added, or 2 in decimal).
+ 1. Click "DEPOSIT NEXT".
+ 1. Click "RESET".
+ 1. Click "RUN" and wait for a few seconds.
+ 1. Click "STOP".
+ 1. Set switches A7-A0 to 10 000 010 (the address that holds the sum).
+ 1. Click "EXAMINE".
+ 1. The LEDs D7-D0 show the result 00 000 011 (3 in decimal).
+ 1. Turn off Altair 8800.
 
 ## References
 
