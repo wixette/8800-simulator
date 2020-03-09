@@ -876,7 +876,6 @@ panel.onToggle = function(id) {
         }
         panel.addressSwitchStates[bitIndex] = state ? 0 : 1;
     } else if (id == 'OFF-ON') {
-        console.log(panel.isPoweredOn);
         if (panel.isPoweredOn) {
             panel.onPowerOff();
             panel.switchUp(id);
