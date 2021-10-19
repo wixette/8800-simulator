@@ -117,7 +117,7 @@ l10n.MESSAGES = {
 
     'tutorial-2': {
         'en': 'Set switches A7-A0 to 00 111 010 (up for 1, down for 0).',
-        'zh': '将地址开关 A7-A0 依次设置为 00 111 010 （开关朝上为 1，开关朝下为 0）',
+        'zh': '将开关 A7-A0 依次设置为 00 111 010 （开关朝上为 1，开关朝下为 0）',
     },
 
     'tutorial-3': {
@@ -127,7 +127,7 @@ l10n.MESSAGES = {
 
     'tutorial-4': {
         'en': 'Set switches A7-A0 to 10 000 000.',
-        'zh': '将地址开关 A7-A0 依次设置为 10 000 000',
+        'zh': '将开关 A7-A0 依次设置为 10 000 000',
     },
 
     'tutorial-5': {
@@ -142,7 +142,7 @@ l10n.MESSAGES = {
 
     'tutorial-7': {
         'en': 'Set switches A7-A0 to 10 000 000.',
-        'zh': '将地址开关 A7-A0 依次设置为 10 000 000',
+        'zh': '将开关 A7-A0 依次设置为 10 000 000',
     },
 
     'tutorial-8': {
@@ -152,7 +152,7 @@ l10n.MESSAGES = {
 
     'tutorial-9': {
         'en': 'Set switches A7-A0 to 00 000 001 (the first number to be added, or 1 in decimal).',
-        'zh': '将地址开关 A7-A0 依次设置为 00 000 001（即第一个加数的值，也就是十进制的 1）',
+        'zh': '将开关 A7-A0 依次设置为 00 000 001（即第一个加数的值，也就是十进制的 1）',
     },
 
     'tutorial-10': {
@@ -162,7 +162,7 @@ l10n.MESSAGES = {
 
     'tutorial-11': {
         'en': 'Set switches A7-A0 to 00 000 010 (the second number to be added, or 2 in decimal).',
-        'zh': '将地址开关 A7-A0 依次设置为 00 000 010（即第二个加数的值，也就是十进制的 2）',
+        'zh': '将开关 A7-A0 依次设置为 00 000 010（即第二个加数的值，也就是十进制的 2）',
     },
 
     'tutorial-12': {
@@ -187,7 +187,7 @@ l10n.MESSAGES = {
 
     'tutorial-16': {
         'en': 'Set switches A7-A0 to 10 000 010 (the address that holds the sum).',
-        'zh': '将地址开关 A7-A0 依次设置为 10 000 010（即存储计算结果的地址）',
+        'zh': '将开关 A7-A0 依次设置为 10 000 010（即存储计算结果的地址）',
     },
 
     'tutorial-17': {
