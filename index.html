@@ -22,21 +22,20 @@
     <link rel="stylesheet" href="css/style.css">
   </head>
   <body>
-    <header>
+
+    <main>
       <div class="header-bar">
         <div id="header-title" class="l10n">
           Sim-8800: Altair 8800 Simulator
         </div>
+        <div id="switch-locale">En|中文</div>
       </div>
+
       <nav>
         <div id="nav-sim" class="nav-item l10n">Sim</div>
         <div id="nav-debug" class="nav-item l10n">Debug</div>
         <div id="nav-ref" class="nav-item l10n">Ref</div>
-        <div id="nav-locale" class="nav-item">En|中文</div>
       </nav>
-    </header>
-
-    <main>
 
       <div id="tab-sim">
 
@@ -566,11 +565,11 @@
 
         </svg>
 
-        <div class="subheader-bar mt-8">
+        <div class="subheader-bar">
           <div id="switchboard-helper" class="l10n">Switch Board Helper</div>
         </div>
-        <div class="v-box mt-8">
-          <div class="h-box justify-space-around">
+        <div class="v-box">
+          <div class="h-box justify-start">
             <div id="S-S15" class="button m-8">A15</div>
             <div id="S-S14" class="button m-8">A14</div>
             <div id="S-S13" class="button m-8">A13</div>
@@ -588,16 +587,16 @@
             <div id="S-S1" class="button m-8">A01</div>
             <div id="S-S0" class="button m-8">A00</div>
           </div>
-          <div class="h-box justify-space-start">
-            <div id="S-OFF-ON" class="button m-8 flex-grow-1">OFF/ON</div>
-            <div id="SSW-STOP" class="button m-8 flex-grow-1">STOP</div>
-            <div id="SSW-RUN" class="button m-8 flex-grow-1">RUN</div>
-            <div id="SSW-SINGLE" class="button m-8 flex-grow-1">SINGLE STEP</div>
-            <div id="SSW-EXAMINE" class="button m-8 flex-grow-1">EXAMINE</div>
-            <div id="SSW-EXAMINE-NEXT" class="button m-8 flex-grow-1">EXAMINE-NEXT</div>
-            <div id="SSW-DEPOSIT" class="button m-8 flex-grow-1">DEPOSIT</div>
-            <div id="SSW-DEPOSIT-NEXT" class="button m-8 flex-grow-1">DEPOSIT-NEXT</div>
-            <div id="SSW-RESET" class="button m-8 flex-grow-1">RESET</div>
+          <div class="h-box justify-start">
+            <div id="S-OFF-ON" class="button m-8">OFF/ON</div>
+            <div id="SSW-STOP" class="button m-8">STOP</div>
+            <div id="SSW-RUN" class="button m-8">RUN</div>
+            <div id="SSW-SINGLE" class="button m-8">SINGLE STEP</div>
+            <div id="SSW-EXAMINE" class="button m-8">EXAMINE</div>
+            <div id="SSW-EXAMINE-NEXT" class="button m-8">EXAMINE-NEXT</div>
+            <div id="SSW-DEPOSIT" class="button m-8">DEPOSIT</div>
+            <div id="SSW-DEPOSIT-NEXT" class="button m-8">DEPOSIT-NEXT</div>
+            <div id="SSW-RESET" class="button m-8">RESET</div>
           </div>
         </div>
 
@@ -607,13 +606,9 @@
         <div class="subheader-bar">
           <div id="debug-load-data-title" class="l10n">Load Data to Addr #0</div>
         </div>
-        <div class="h-box justify-left mt-8 mb-8 align-items-center">
-          <div class="flex-grow-4 mr-8">
-            <input id="debug-data-input" type="text">
-          </div>
-          <div class="flex-grow-1">
-            <div id="debug-load-data" class="button l10n">Load Data</div>
-          </div>
+        <div class="h-box justify-start mt-8 mb-8 align-items-center">
+          <input id="debug-data-input" class="flex-grow-1 mr-8" type="text">
+          <div id="debug-load-data" class="button l10n">Load Data</div>
         </div>
         <div id="debug-data-sample" class="comments l10n">
           In HEX string, such as 'c3 00 00'
@@ -631,19 +626,10 @@
       </div>
 
       <div id="tab-ref">
-        <div class="subheader-bar mt-8">
-          <div id="source-code" class="l10n">Source code</div>
-        </div>
-        <div class="m-8">
-          <p>
-            <ul><li><a href="https://github.com/wixette/8800-simulator">github.com/wixette/8800-simulator</a></li></ul>
-          </p>
-        </div>
-
-        <div class="subheader-bar mt-8">
+        <div class="subheader-bar">
           <div id="tutorial-title" class="l10n">Quick Tutorial</div>
         </div>
-        <div class="tutorial m-8">
+        <div class="tutorial">
           <p>
             <ul>
               <li><span id="tutorial-desc" class="l10n">How to input and run the following program to calculate 1 + 2 = 3:</span></li>
@@ -689,10 +675,19 @@
           </p>
         </div>
 
-        <div class="subheader-bar mt-8">
+        <div class="subheader-bar">
+          <div id="source-code" class="l10n">Source code</div>
+        </div>
+        <div>
+          <p>
+            <ul><li><a href="https://github.com/wixette/8800-simulator">github.com/wixette/8800-simulator</a></li></ul>
+          </p>
+        </div>
+
+        <div class="subheader-bar">
           <div id="reference-title" class="l10n">References</div>
         </div>
-        <div class="m-8">
+        <div>
           <p>
             <ul>
               <li><a href="https://en.wikipedia.org/wiki/Altair_8800">Wikipedia: Altair 8800</a></li>
@@ -711,7 +706,7 @@
 
     <footer>
       <p>&copy; 2020 wixette
-        <a href="/"><span id="back-home" class="l10n">Home</span></a>
+        <a href="https://github.com/wixette/8800-simulator"><span id="back-home" class="l10n">Source Code</span></a>
       </p>
     </footer>
 
