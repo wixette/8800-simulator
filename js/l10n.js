@@ -41,23 +41,23 @@ l10n.MESSAGES = {
     },
 
     'header-title': {
-        'en': 'Sim-8800: Altair 8800 Simulator',
-        'zh': 'Sim-8800: Altair 8800 模拟器',
+        'en': 'Altair 8800 Simulator',
+        'zh': 'Altair 8800 模拟器',
     },
 
     'nav-sim': {
-        'en': 'Sim',
+        'en': 'Simulator',
         'zh': '模拟器',
     },
 
     'nav-debug': {
-        'en': 'Debug',
-        'zh': '调试',
+        'en': 'Debugger',
+        'zh': '调试器',
     },
 
     'nav-ref': {
-        'en': 'Ref',
-        'zh': '参考',
+        'en': 'Tutorial',
+        'zh': '使用手册',
     },
 
     'switchboard-helper': {
@@ -66,8 +66,8 @@ l10n.MESSAGES = {
     },
 
     'back-home': {
-        'en': 'Home',
-        'zh': '首页',
+        'en': 'Source Code',
+        'zh': '源代码',
     },
 
     'source-code': {

@@ -1,15 +1,17 @@
 body {
     background-color: #f0f0f0;
     color: #222;
-    font-family: "Lucida Console","Courier New",Courier,monospace;
-    font-size: 14px;
+    font-family: 'Consolas', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New', monospace;
+    font-size: 16px;
+    margin: 15px;
+    padding: 0;
 }
 
 input {
-    font-family: "Lucida Console","Courier New",Courier,monospace;
+    font-family: 'Consolas', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New', monospace;
 }
 
-body, div, img, pre {
+div, img, pre {
     border: 0;
     margin: 0;
     padding: 0;
@@ -87,52 +89,73 @@ body, div, img, pre {
     flex-grow: 4;
 }
 
-header {
-    width: 100%;
-    overflow: hidden;
+main {
+    background-color: #222;
+    border-radius: 10px;
+    margin: 0 auto;
+    max-width: 1200px;
+    padding: 10px;
 }
 
 .header-bar {
-    background-color: #333;
+    align-items: center;
     color: #eee;
     display: flex;
     flex-direction: row;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
+    min-height: 64px;
     justify-content: center;
-    line-height: 2em;
-    padding: 5px 20px 5px 20px;
+}
+
+#header-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#switch-locale {
+    background-color: #369;
+    border-radius: 10px;
+    color: #6ad;
+    cursor: pointer;
+    font-size: 12px;
+    margin: 20px;
+    padding: 5px 10px;
+    user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
 }
 
 .subheader-bar {
-    background-color: #999;
+    background-color: #666;
+    border-radius: 10px;
     color: #eee;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     justify-content: center;
-    line-height: 1.5em;
-    padding: 5px 20px 5px 20px;
+    line-height: 3em;
+    padding: 0;
 }
 
 nav {
-    background-color: #ddd;
-    border-bottom: 1px #ccc solid;
     color: #222;
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
-    justify-content: space-between;
-    line-height: 1.5em;
-    padding: 5px 20px 5px 20px;
+    justify-content: space-around;
+    min-height: 40px;
+    padding: 0;
 }
 
 .nav-item {
     background-color: #eee;
-    border-left: 1px solid #fff;
-    border-right: 1px solid #ccc;
+    border-radius: 30px;
     cursor: pointer;
     flex-grow: 1;
-    padding: 3px 10px 3px 10px;
+    line-height: 40px;
+    margin: 0 5px;
+    padding: 0 5px;
     text-align: center;
     user-select: none;
     -moz-user-select: none;
@@ -141,13 +164,9 @@ nav {
 }
 
 nav .selected {
-    background-color: #ccc;
+    background-color: #f90;
     cursor: auto;
     font-weight: bold;
-}
-
-main {
-    margin: 8px;
 }
 
 #panel {
@@ -155,17 +174,19 @@ main {
     -moz-user-select: none;
     -ms-user-select: none;
     -webkit-user-select: none;
+    margin: 20px 0;
 }
 
 footer {
-    border-top: #ccc 1px solid;
-    font-size: 11px;
-    margin: 20px 8px 0 8px;
+    color: #999;
+    font-size: 14px;
+    margin: 40px auto 0 auto;
+    max-width: 960px;
     text-align: center;
 }
 
 .comments {
-    font-size: 12px;
+    font-size: 14px;
 }
 
 #debug-data-input {
@@ -177,37 +198,38 @@ footer {
 }
 
 #cpu-dump {
-    background-color: #fff;
+    background-color: #eee;
     color: #222;
-    font-size: 12px;
+    font-size: 14px;
     min-height: 20px;
     overflow-x: hidden;
 }
 
 #mem-dump {
-    background-color: #fff;
+    background-color: #eee;
     color: #222;
-    font-size: 12px;
+    font-size: 14px;
     min-height: 20px;
     overflow-x: hidden;
 }
 
 .tutorial {
-    background-color: #fff;
+    background-color: #eee;
     color: #222;
-    font-size: 12px;
+    font-size: 14px;
     min-height: 20px;
     overflow-x: hidden;
     padding: 5px;
 }
 
 .button {
-    background-color: #fff;
+    background-color: #eee;
     border: 1px solid #bbb;
+    border-radius: 10px;
     cursor: pointer;
-    font-size: 12px;
-    line-height: 1.5em;
-    padding: 0 5px 0 5px;
+    font-size: 14px;
+    line-height: 2em;
+    padding: 0 10px 0 10px;
     text-align: center;
     user-select: none;
     -moz-user-select: none;

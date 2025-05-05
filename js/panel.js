@@ -560,7 +560,7 @@ panel.init = function() {
     l10n.restoreLocale();
 
     // Initializes event listener for nav buttons.
-    var button = document.getElementById('nav-locale');
+    var button = document.getElementById('switch-locale');
     button.addEventListener('click', l10n.nextLocale, false);
     button = document.getElementById('nav-sim');
     button.addEventListener('click', panel.showTabSim, false);
