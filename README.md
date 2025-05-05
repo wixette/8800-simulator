@@ -8,15 +8,15 @@ Simply open index.html in browser, or copy the entire dir to your web server's r
 
 The simulator UI supports English and Chinese for now. In a desktop browser, you may use mouse to toggle or click the switches on the panel directly.
 
-<img src="https://raw.githubusercontent.com/wixette/8800-simulator/master/design/sim-panel.png" width="960">
+![8800 Panel](./screenshots/sim-panel.png)
 
-There is a DEBUG tab where you can check the internal status of the simulated 8080 CPU, or the contents of the simulator's memory.
+There is a Debugger tab where you can check the internal status of the simulated 8080 CPU, or the contents of the simulator's memory.
 
-<img src="https://raw.githubusercontent.com/wixette/8800-simulator/master/design/sim-debug.png" width="960">
+![8800 Debugger](./screenshots/sim-debug.png)
 
 The simulator works fine with modern mobile browsers, except that it is a bit challenging to touch a single switch on the panel on a mobile screen. Although, the helper switch buttons below the panel can be used as an alternative solution.
 
-<img src="https://raw.githubusercontent.com/wixette/8800-simulator/master/design/sim-mobile.png" width="480">
+![8800 Mobile](./screenshots/sim-mobile.png)
 
 ## A Quick Tutorial
 
@@ -61,13 +61,13 @@ With a running Altair 8800 simulator, how to input and run the following program
 
 ## References
 
- * [Wikipedia: Altair 8800](https://en.wikipedia.org/wiki/Altair_8800)
- * [Wikipedia: Intel 8080 CPU](https://en.wikipedia.org/wiki/Intel_8080)
- * [Intel 8080 instruction set](http://www.classiccmp.org/dunfield/r/8080.txt)
- * [Original Altair 8800 manuals](https://altairclone.com/altair_manuals.html)
- * [Altair 8800 Operator's Manual](https://altairclone.com/downloads/manuals/Altair%208800%20Operator's%20Manual.pdf)
- * [Intel 8080 Assembly Language Programming Manual](http://www.classiccmp.org/dunfield/r/8080asm.pdf)
- * [Another Altair 8800 simulator](https://s2js.com/altair/)
+- [Wikipedia: Altair 8800](https://en.wikipedia.org/wiki/Altair_8800)
+- [Wikipedia: Intel 8080 CPU](https://en.wikipedia.org/wiki/Intel_8080)
+- [Intel 8080 instruction set](http://www.classiccmp.org/dunfield/r/8080.txt)
+- [Original Altair 8800 manuals](https://altairclone.com/altair_manuals.html)
+- [Altair 8800 Operator's Manual](https://altairclone.com/downloads/manuals/Altair%208800%20Operator's%20Manual.pdf)
+- [Intel 8080 Assembly Language Programming Manual](http://www.classiccmp.org/dunfield/r/8080asm.pdf)
+- [Another Altair 8800 simulator](https://s2js.com/altair/)
 
 ## Acknowledgements
 
