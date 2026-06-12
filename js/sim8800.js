@@ -56,6 +56,7 @@ class Sim8800 {
         this.isPoweredOn = false;
         this.isRunning = false;
         this.lastAddress = 0;
+        this.lastTickTime = 0;
         this.initMem();
         CPU8080.init(this.getWriteByteCallback(),
                      this.getReadByteCallback(),
@@ -265,7 +266,16 @@ class Sim8800 {
         var self = this;
         return function(timestamp) {
             if (self.isRunning) {
-                var cycles = self.clockRate / 1000;
+                // Computes the number of cycles based on the wall time
+                // elapsed since the last tick, so that the simulated CPU
+                // runs at clockRate even when the browser clamps timers
+                // to a coarse resolution. The batch is capped in case
+                // the timer was suspended for a long time.
+                var now = Date.now();
+                var elapsed = Math.min(Math.max(now - self.lastTickTime, 1),
+                                       100);
+                self.lastTickTime = now;
+                var cycles = self.clockRate * elapsed / 1000;
                 self.step(cycles);
                 window.setTimeout(self.getClockTickerCallback(), 1);
             }
@@ -362,6 +372,7 @@ class Sim8800 {
         if (this.setWaitLedCallback) {
             this.setWaitLedCallback(this.isRunning);
         }
+        this.lastTickTime = Date.now();
         window.setTimeout(this.getClockTickerCallback(), 1);
     }
 
@@ -372,12 +383,39 @@ class Sim8800 {
     step(cycles) {
         if (!this.isPoweredOn)
             return;
-        CPU8080.steps(cycles);
+        // Runs instruction by instruction, watching for LDAX. On a
+        // real Altair 8800, the memory read cycle of LDAX B/D puts
+        // the BC/DE register pair on the address bus, hence on the
+        // address LEDs. Classic programs like Kill the Bit rely on
+        // this side effect to animate the high address LEDs. See
+        // https://github.com/wixette/8800-simulator/issues/1
+        var ldaxAddress = null;
+        var executed = 0;
+        while (executed < cycles) {
+            let cpu = CPU8080.status();
+            let opcode = this.mem[cpu.pc % this.mem.length];
+            let before = CPU8080.T();
+            CPU8080.steps(1);
+            let consumed = CPU8080.T() - before;
+            executed += consumed;
+            // A halted CPU consumes 1 cycle per step without
+            // executing the opcode at PC.
+            if (consumed > 1) {
+                if (opcode == 0x0a) {
+                    /* LDAX B */
+                    ldaxAddress = (cpu.b << 8) | cpu.c;
+                } else if (opcode == 0x1a) {
+                    /* LDAX D */
+                    ldaxAddress = (cpu.d << 8) | cpu.e;
+                }
+            }
+        }
         this.dumpCpu();
         this.dumpMem();
         if (this.setAddressLedsCallback) {
             let cpu = CPU8080.status();
-            let bits = Sim8800.parseBits(cpu.pc, 16);
+            let address = ldaxAddress != null ? ldaxAddress : cpu.pc;
+            let bits = Sim8800.parseBits(address, 16);
             this.setAddressLedsCallback(bits);
         }
     }
@@ -444,3 +482,9 @@ class Sim8800 {
         this.deposit();
     }
 };
+
+// Exports the class for unit tests when running in Node.js. This has
+// no effect when the script is loaded in a browser.
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = Sim8800;
+}
