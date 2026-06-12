@@ -234,3 +234,43 @@ test('single step on an LDAX D instruction shows DE on the LEDs', () => {
     sim.step(1);  // LDAX D: the address bus shows DE.
     assert.strictEqual(bitsToNumber(state.addressLeds), 0x1234);
 });
+
+test('singleStep shows the next opcode on the data LEDs (issue #2)', () => {
+    const {sim, state} = poweredOnSim();
+    sim.loadDataAsHexString(0, ADDER);  // 3a 80 00 47 3a 81 00 80 ...
+    sim.singleStep();  // LDA 0080h; PC is now 3, next opcode is MOV B,A.
+    assert.strictEqual(bitsToNumber(state.addressLeds), 3);
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0x47);
+    sim.singleStep();  // MOV B,A; next opcode is LDA.
+    assert.strictEqual(bitsToNumber(state.addressLeds), 4);
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0x3a);
+});
+
+test('singleStep on LDAX D shows the byte read at DE (issue #2)', () => {
+    const {sim, state} = poweredOnSim();
+    sim.loadDataAsHexString(0, '16 00 1e 80 1a');  // MVI D,0; MVI E,80h; LDAX D.
+    sim.loadData(0x80, [0xa5]);
+    sim.singleStep();  // MVI D,00h
+    sim.singleStep();  // MVI E,80h
+    sim.singleStep();  // LDAX D: address LEDs show DE, data LEDs the byte read.
+    assert.strictEqual(bitsToNumber(state.addressLeds), 0x0080);
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0xa5);
+});
+
+test('singleStep is a no-op while powered off', () => {
+    const {sim, state} = createSim();
+    sim.singleStep();
+    assert.strictEqual(state.addressLeds, null);
+    assert.strictEqual(state.dataLeds, null);
+});
+
+test('free-running step leaves the data LEDs to OUT FFh', () => {
+    const {sim, state} = poweredOnSim();
+    sim.loadDataAsHexString(0, PATTERN_SHIFT);
+    sim.step(17);  // MVI A,8Ch + OUT FFh: data LEDs show 8Ch.
+    sim.step(100); // Keep running: only OUT may change the data LEDs.
+    const shown = bitsToNumber(state.dataLeds);
+    const validOutputs = [0x8c, 0x46, 0x23, 0x91, 0xc8, 0x64, 0x32, 0x19];
+    assert.ok(validOutputs.includes(shown),
+              'data LEDs must show a rotation of 8Ch, got ' + shown);
+});
