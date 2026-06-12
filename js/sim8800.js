@@ -379,6 +379,7 @@ class Sim8800 {
     /**
      * Runs a given number of CPU cycles.
      * @param {number} cycles The number of CPU cycles to step on.
+     * @return {number|undefined} The address shown on the address LEDs.
      */
     step(cycles) {
         if (!this.isPoweredOn)
@@ -412,11 +413,31 @@ class Sim8800 {
         }
         this.dumpCpu();
         this.dumpMem();
+        var address = ldaxAddress != null ? ldaxAddress : CPU8080.status().pc;
         if (this.setAddressLedsCallback) {
-            let cpu = CPU8080.status();
-            let address = ldaxAddress != null ? ldaxAddress : cpu.pc;
             let bits = Sim8800.parseBits(address, 16);
             this.setAddressLedsCallback(bits);
+        }
+        return address;
+    }
+
+    /**
+     * Runs a single instruction, for the SINGLE STEP switch on the
+     * front panel. Besides the address LEDs, the data LEDs are
+     * updated with the memory byte at the displayed address - the
+     * next opcode to be fetched, or the byte just read by LDAX -
+     * similar to how a real Altair 8800 shows the data bus contents
+     * while stepping. The data LEDs are not touched when the CPU is
+     * free-running, so that OUT FFh keeps full control of them.
+     */
+    singleStep() {
+        if (!this.isPoweredOn)
+            return;
+        var address = this.step(1);
+        if (this.setDataLedsCallback) {
+            let bits = Sim8800.parseBits(this.mem[address % this.mem.length],
+                                         8);
+            this.setDataLedsCallback(bits);
         }
     }
 

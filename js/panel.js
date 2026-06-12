@@ -40,7 +40,7 @@ panel.onRun = function() {
  * When SINGLE STEP switch is pressed.
  */
 panel.onSingle = function() {
-    panel.sim.step(1);
+    panel.sim.singleStep();
 };
 
 /**
