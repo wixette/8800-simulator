@@ -72,7 +72,7 @@ class Sim8800 {
      */
     static toHex(n, len) {
         var leadingZeros = (new Array(len)).fill('0').join('');
-        return (leadingZeros + n.toString(16)).substr(-len);
+        return (leadingZeros + n.toString(16)).toUpperCase().substr(-len);
     }
 
     /**
@@ -94,7 +94,7 @@ class Sim8800 {
     /**
      * Fills the memory with dummy bytes.
      */
-    initMem(random = false) {
+    initMem(random = true) {
         if (random) {
             for (let i = 0; i < this.mem.length; i++) {
                 this.mem[i] = Math.floor(Math.random() * 256);
