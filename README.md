@@ -63,11 +63,13 @@ With a running Altair 8800 simulator, how to input and run the following program
 
 - [Wikipedia: Altair 8800](https://en.wikipedia.org/wiki/Altair_8800)
 - [Wikipedia: Intel 8080 CPU](https://en.wikipedia.org/wiki/Intel_8080)
-- [Intel 8080 instruction set](http://www.classiccmp.org/dunfield/r/8080.txt)
-- [Original Altair 8800 manuals](https://altairclone.com/altair_manuals.html)
-- [Altair 8800 Operator's Manual](https://altairclone.com/downloads/manuals/Altair%208800%20Operator's%20Manual.pdf)
-- [Intel 8080 Assembly Language Programming Manual](http://www.classiccmp.org/dunfield/r/8080asm.pdf)
-- [Another Altair 8800 simulator](https://s2js.com/altair/)
+- [Intel 8080 instruction set - an opcode encoding quick reference (text)](http://www.classiccmp.org/dunfield/r/8080.txt)
+- [Original Altair 8800 manuals - scanned PDFs archived at altairclone.com](https://altairclone.com/altair_manuals.html)
+- [Altair 8800 Operator's Manual - the original manual as a scanned PDF](https://altairclone.com/downloads/manuals/Altair%208800%20Operator's%20Manual.pdf)
+- [Altair 8800 Operator's Manual v2.0 - an HTML edition by Kevin Cole](https://ubuntourist.codeberg.page/Altair-8800/)
+- [Intel 8080 Assembly Language Programming Manual - Intel's original manual as a scanned PDF](http://www.classiccmp.org/dunfield/r/8080asm.pdf)
+- [Demystifying Computers - an open source book by Chris Jones and Jeff Elkner](https://www.openbookproject.net/books/demystcomp/index.html)
+- [MITS Altair Simulator - another JavaScript simulator, running Microsoft BASIC on a simulated teletype](https://s2js.com/altair/)
 
 ## Acknowledgements
 
