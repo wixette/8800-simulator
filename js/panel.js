@@ -616,9 +616,9 @@ panel.init = function() {
         panel.getInputAddressCallback,
         panel.dumpCpuCallback, panel.dumpMemCallback);
 
-    //add handler for 'ZERO ALL MEMORY' Button 
+    // Adds handler for 'ZERO ALL MEMORY' Button 
     // (it doesn't have a corresponding switch on the actual machine)
-    document.getElementById('FILL-ZERO').addEventListener('click', panel.onFillZero)
+    document.getElementById('debug-fill-zero').addEventListener('click', panel.onFillZero)
 
 };
 
