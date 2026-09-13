@@ -209,6 +209,51 @@ l10n.MESSAGES = {
         'en': 'References',
         'zh': '参考资料',
     },
+
+    'ref-wikipedia-altair': {
+        'en': 'Wikipedia: Altair 8800',
+        'zh': '维基百科：Altair 8800',
+    },
+
+    'ref-wikipedia-8080': {
+        'en': 'Wikipedia: Intel 8080 CPU',
+        'zh': '维基百科：Intel 8080 CPU',
+    },
+
+    'ref-instruction-set': {
+        'en': 'Intel 8080 instruction set - an opcode encoding quick reference (text)',
+        'zh': 'Intel 8080 指令集，操作码编码速查表（纯文本）',
+    },
+
+    'ref-original-manuals': {
+        'en': 'Original Altair 8800 manuals - scanned PDFs archived at altairclone.com',
+        'zh': 'Altair 8800 原版手册，altairclone.com 收藏的 PDF 扫描版',
+    },
+
+    'ref-operators-manual': {
+        'en': "Altair 8800 Operator's Manual - the original manual as a scanned PDF",
+        'zh': 'Altair 8800 操作手册，原版手册的 PDF 扫描版',
+    },
+
+    'ref-operators-manual-html': {
+        'en': "Altair 8800 Operator's Manual v2.0 - an HTML edition by Kevin Cole",
+        'zh': 'Altair 8800 操作手册 v2.0，Kevin Cole 制作的 HTML 版本',
+    },
+
+    'ref-asm-manual': {
+        'en': "Intel 8080 Assembly Language Programming Manual - Intel's original manual as a scanned PDF",
+        'zh': 'Intel 8080 汇编语言编程手册，Intel 原版手册的 PDF 扫描版',
+    },
+
+    'ref-demystifying-computers': {
+        'en': 'Demystifying Computers - an open source book by Chris Jones and Jeff Elkner',
+        'zh': 'Demystifying Computers（揭秘计算机），Chris Jones 和 Jeff Elkner 撰写的开源书籍',
+    },
+
+    'ref-altair-simulator': {
+        'en': 'MITS Altair Simulator - another JavaScript simulator, running Microsoft BASIC on a simulated teletype',
+        'zh': 'MITS Altair Simulator，另一个 JavaScript 模拟器，在模拟的电传打字机上运行 Microsoft BASIC',
+    },
 };
 
 /**
