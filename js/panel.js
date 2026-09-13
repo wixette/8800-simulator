@@ -96,6 +96,14 @@ panel.onPowerOff = function() {
 };
 
 /**
+ * When ZERO ALL MEMORY button is pressed.
+ */
+panel.onFillZero = function() {
+    panel.sim.initMem(false);
+    panel.sim.dumpMem();
+};
+
+/**
  * When CPU sets the address LEDs.
  */
 panel.setAddressLedsCallback = function(bits) {
@@ -607,6 +615,11 @@ panel.init = function() {
         panel.setWaitLedCallback, panel.setStatusLedsCallback,
         panel.getInputAddressCallback,
         panel.dumpCpuCallback, panel.dumpMemCallback);
+
+    // Adds handler for 'ZERO ALL MEMORY' Button 
+    // (it doesn't have a corresponding switch on the actual machine)
+    document.getElementById('debug-fill-zero').addEventListener('click', panel.onFillZero)
+
 };
 
 /**
