@@ -266,10 +266,6 @@ footer {
     padding: 5px 10px;
 }
 
-#debug-load-data {
-    border: #ccc 1px solid;
-}
-
 #cpu-dump {
     background-color: #ccc;
     border-radius: 10px;
@@ -313,7 +309,7 @@ footer {
 
 .button {
     background-color: #eee;
-    border: 1px solid #bbb;
+    border: 0;
     border-radius: 10px;
     color: #222;
     cursor: pointer;
@@ -349,7 +345,7 @@ footer {
     flex-direction: row;
     flex-wrap: wrap;
     gap: 2px;
-    margin: 0 0 10px 0;
+    margin: 5px 0 10px 0;
 }
 
 .mem-page {
@@ -378,16 +374,20 @@ footer {
     outline: 2px solid #f90;
 }
 
+.mem-page:hover {
+    outline: 2px solid #eee;
+}
+
 /* Where the program counter and the stack pointer are. These sit on
    cells that may be filled dark, and often on the outlined cell too,
    so they are brighter than the marks used on the light background of
    the dump below. */
-.mem-page-pc { border-bottom-color: #ff5252; }
+.mem-page-pc { border-bottom-color: #3ddc63; }
 .mem-page-sp { border-top-color: #4da3ff; }
 
 /* The same two, on the byte itself inside the dump. */
 .at-pc {
-    background-color: #c33;
+    background-color: #1f9d45;
     color: #eee;
 }
 
@@ -403,9 +403,6 @@ footer {
     font-weight: bold;
 }
 
-#mem-window-label {
-    padding: 0 10px;
-}
 
 /* The Teletype tab. A printer, not a screen: paper coloured stock,
    72 columns wide, scrolled to wherever the carriage is. */
@@ -419,9 +416,9 @@ footer {
     border-radius: 10px;
     color: #222;
     cursor: text;
-    font-size: 14px;
-    height: 576px;          /* 24 lines at the dump's line height */
-    line-height: 24px;
+    font-size: 16px;
+    height: 598px;          /* 23 lines */
+    line-height: 26px;
     overflow-x: auto;
     overflow-y: auto;
     padding: 5px 10px;
@@ -500,10 +497,51 @@ footer {
 }
 
 /* Marks the Teletype tab while its machine is printing and you are
-   looking at something else. */
+   looking at something else. Positioned out of the flow so that it
+   cannot change the tab's height or shift its label off the baseline
+   the other tabs sit on. */
+.nav-item {
+    position: relative;
+}
+
 .nav-item.has-activity::after {
-    color: #f90;
-    content: ' \25CF';
-    font-size: 11px;
-    vertical-align: super;
+    background-color: #f90;
+    border-radius: 50%;
+    content: '';
+    height: 7px;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 7px;
+}
+
+/* The status line along the foot of the machine. Everything the
+   simulator wants to tell you - the power went off, a board was
+   installed, a tape was loaded, something would not work - says it
+   here, so there is one place to look. */
+#status-bar {
+    background-color: #333;
+    border-radius: 10px;
+    color: #ccc;
+    font-size: 14px;
+    line-height: 20px;
+    margin: 10px 0 0 0;
+    min-height: 20px;
+    padding: 8px 12px;
+}
+
+#status-bar.status-warn {
+    background-color: #5a4a1a;
+    color: #ffd98a;
+}
+
+#status-bar.status-error {
+    background-color: #5a2323;
+    color: #ffc2c2;
+}
+
+#mem-window-label {
+    padding: 0 10px 0 8px;
+    white-space: nowrap;
 }

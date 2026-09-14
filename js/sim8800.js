@@ -236,6 +236,11 @@ class Sim8800 {
      * the program counter and the stack pointer are, and outlined on
      * the page the dump is showing. It is how a machine too big to
      * print on one screen still fits on one screen.
+     *
+     * The shading has five steps, by the share of the page's bytes
+     * that are not zero: empty, then up to a quarter, a half, three
+     * quarters, and the rest. Each cell's tooltip gives its address
+     * and that percentage, so the scale does not have to be learnt.
      * @param {{start: number, end: number}} window The shown window.
      * @param {Object} cpu The CPU status.
      * @return {string} The HTML.
@@ -254,9 +259,13 @@ class Sim8800 {
             if (base == window.start) classes.push('mem-page-shown');
             if (cpu.pc >= base && cpu.pc < base + size) classes.push('mem-page-pc');
             if (cpu.sp >= base && cpu.sp < base + size) classes.push('mem-page-sp');
+            let pageSize = Math.min(this.mem.length - base, size);
+            let title = Sim8800.toHex(base, 4) + '-' +
+                Sim8800.toHex(base + pageSize - 1, 4) + '  ' +
+                Math.round(used / pageSize * 100) + '%';
             sb.push('<span class="' + classes.join(' ') +
-                    '" data-address="' + base + '" title="' +
-                    Sim8800.toHex(base, 4) + '"></span>');
+                    '" data-address="' + base + '" title="' + title +
+                    '"></span>');
         }
         sb.push('</div>\n');
         return sb.join('');

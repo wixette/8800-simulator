@@ -494,6 +494,20 @@ test('the dump marks the bytes at PC and SP, and their pages', () => {
               .test(state.memDump));
 });
 
+test('map cells explain their own shading in a tooltip', () => {
+    const {sim, state} = sizedSim(4096);
+    // Page 0 half full, page 1 empty.
+    for (let i = 0; i < 128; i++) {
+        sim.mem[i] = 0xff;
+    }
+    sim.flushDump(true);
+    const titles = [...state.memDump.matchAll(/title="([^"]+)"/g)]
+          .map((m) => m[1]);
+    assert.strictEqual(titles[0], '0000-00FF  50%');
+    assert.strictEqual(titles[1], '0100-01FF  0%');
+    assert.strictEqual(titles[15], '0F00-0FFF  0%');
+});
+
 test('map cells carry the address they jump to', () => {
     const {sim, state} = sizedSim(4096);
     sim.flushDump(true);

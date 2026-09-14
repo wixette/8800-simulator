@@ -163,7 +163,6 @@
           first. In 1975 you would have toggled in a 28 byte boot loader by
           hand and then listened to the tape read for seven minutes.
         </div>
-        <div id="rom-status" class="comments"></div>
 
         <div class="subheader-bar mt-8">
           <div id="debug-cpu-dump-title" class="l10n">8080 CPU Status Dump</div>
@@ -186,14 +185,15 @@
 
         <div class="subheader-bar mt-8">
           <div id="debug-mem-dump-title" class="l10n">Memory Dump</div>
-          <div id="debug-fill-zero" class="button m-8">ZERO ALL MEMORY</div>
         </div>
-        <div id="mem-window-controls"
-             class="h-box justify-start mt-8 align-items-center">
-          <div id="mem-page-prev" class="button m-8">&#9664;</div>
-          <div id="mem-page-next" class="button m-8">&#9654;</div>
-          <div id="mem-follow-pc" class="button m-8 l10n">FOLLOW PC</div>
+        <div class="h-box justify-start mt-8 align-items-center">
           <div id="mem-window-label" class="comments"></div>
+          <div id="mem-window-nav" class="h-box align-items-center">
+            <div id="mem-page-prev" class="button m-8">&#9664;</div>
+            <div id="mem-page-next" class="button m-8">&#9654;</div>
+            <div id="mem-follow-pc" class="button m-8 l10n">FOLLOW PC</div>
+          </div>
+          <div id="debug-fill-zero" class="button m-8">ZERO ALL MEMORY</div>
         </div>
         <div id="mem-dump" class="mt-8"></div>
       </div>
@@ -304,6 +304,9 @@
           </p>
         </div>
 
+      </div>
+      <div id="status-bar">
+        <span id="status-text"></span>
       </div>
     </main>
 

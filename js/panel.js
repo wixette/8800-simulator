@@ -46,6 +46,7 @@ panel.currentTab = 'sim';
  */
 panel.onStop = function() {
     panel.sim.stop();
+    panel.setStatus('status-stopped');
 };
 
 /**
@@ -53,6 +54,7 @@ panel.onStop = function() {
  */
 panel.onRun = function() {
     panel.sim.start();
+    panel.setStatus('status-running');
 };
 
 /**
@@ -95,6 +97,7 @@ panel.onDepositNext = function() {
  */
 panel.onReset = function() {
     panel.sim.reset();
+    panel.setStatus('status-reset');
 };
 
 /**
@@ -104,6 +107,7 @@ panel.onPowerOn = function() {
     panel.sim.powerOn();
     // Only a live machine has a blinking carriage.
     document.body.classList.add('powered-on');
+    panel.setStatus('status-on');
     window.setTimeout(function() {
         panel.playBeepbeep();
     }, 500);
@@ -120,6 +124,7 @@ panel.onPowerOff = function() {
         panel.sio.reset();
     }
     panel.renderTeletype();
+    panel.setStatus('status-off');
 };
 
 /**
@@ -128,6 +133,7 @@ panel.onPowerOff = function() {
 panel.onFillZero = function() {
     panel.sim.initMem(false);
     panel.sim.dumpMem();
+    panel.setStatus('status-zeroed');
 };
 
 /**
@@ -144,34 +150,56 @@ panel.ROM_URL = 'roms/4kbas32.bin';
 panel.MIN_BASIC_MEM = 4096;
 
 /**
- * Shows a message under the loading controls. Kept as a message id
- * rather than text so that it survives a change of language.
- * @param {?string} id The l10n message id, or null to clear.
+ * Says something on the status line at the foot of the machine.
+ *
+ * A lot of what the simulator does is only obvious if you already know
+ * how these machines worked: installing memory switches the power off,
+ * the memory dump goes blank because the machine is off, a tape is
+ * loaded but not started. Rather than leave a newcomer to infer that
+ * from a panel that has gone quiet, every such moment says so here.
+ *
+ * The message is held as an id rather than as text, so that it stays
+ * readable after a change of language.
+ * @param {?string} id The l10n message id, or null to clear the line.
  * @param {Object=} params Values for {placeholders} in the message.
+ * @param {string=} severity '', 'warn' or 'error'.
  */
-panel.setRomStatus = function(id, params) {
-    panel.romStatusId = id;
-    panel.romStatusParams = params || {};
-    panel.refreshRomStatus();
+panel.setStatus = function(id, params, severity = '') {
+    panel.statusId = id;
+    panel.statusParams = params || {};
+    panel.statusSeverity = severity;
+    panel.refreshStatus();
 };
 
 /**
- * Redraws the loading message in the current language.
+ * Redraws the status line in the current language.
  */
-panel.refreshRomStatus = function() {
-    var elem = document.getElementById('rom-status');
-    if (!elem) {
+panel.refreshStatus = function() {
+    var bar = document.getElementById('status-bar');
+    var text = document.getElementById('status-text');
+    if (!bar || !text) {
         return;
     }
-    if (!panel.romStatusId) {
-        elem.textContent = '';
+    bar.classList.toggle('status-warn', panel.statusSeverity == 'warn');
+    bar.classList.toggle('status-error', panel.statusSeverity == 'error');
+    if (!panel.statusId) {
+        text.textContent = '';
         return;
     }
-    var msg = l10n.getMessage(panel.romStatusId);
-    for (let key in panel.romStatusParams) {
-        msg = msg.replace('{' + key + '}', panel.romStatusParams[key]);
+    var msg = l10n.getMessage(panel.statusId);
+    for (let key in panel.statusParams) {
+        msg = msg.replace('{' + key + '}', panel.statusParams[key]);
     }
-    elem.textContent = msg;
+    text.textContent = msg;
+};
+
+/**
+ * How an installed memory size is written in a message.
+ * @param {number} bytes The size.
+ * @return {string} '256 B', '4 KB' and so on.
+ */
+panel.formatMemSize = function(bytes) {
+    return bytes < 1024 ? bytes + ' B' : (bytes / 1024) + ' KB';
 };
 
 /**
@@ -205,7 +233,7 @@ panel.loadImage = function(bytes) {
  */
 panel.onLoadBasic = function() {
     if (panel.sim.mem.length < panel.MIN_BASIC_MEM) {
-        panel.setRomStatus('rom-needs-memory');
+        panel.setStatus('rom-needs-memory', {}, 'warn');
         return;
     }
     window.fetch(panel.ROM_URL).then(function(response) {
@@ -215,9 +243,9 @@ panel.onLoadBasic = function() {
         return response.arrayBuffer();
     }).then(function(buffer) {
         var loaded = panel.loadImage(Array.from(new Uint8Array(buffer)));
-        panel.setRomStatus('rom-loaded', {bytes: loaded});
+        panel.setStatus('rom-loaded', {bytes: loaded});
     }).catch(function() {
-        panel.setRomStatus('rom-missing');
+        panel.setStatus('rom-missing', {}, 'error');
     });
 };
 
@@ -233,8 +261,8 @@ panel.onBinaryFileChosen = function(event) {
     var reader = new FileReader();
     reader.onload = function() {
         var loaded = panel.loadImage(Array.from(new Uint8Array(reader.result)));
-        panel.setRomStatus('rom-file-loaded',
-                           {bytes: loaded, name: file.name});
+        panel.setStatus('rom-file-loaded',
+                        {bytes: loaded, name: file.name});
     };
     reader.readAsArrayBuffer(file);
     // So that choosing the same file twice in a row still fires.
@@ -266,7 +294,8 @@ panel.onSetMemSize = function(memSize) {
         panel.sio.reset();
     }
     panel.renderTeletype();
-    panel.setRomStatus(null);
+    panel.setStatus('status-mem-installed',
+                    {size: panel.formatMemSize(memSize)}, 'warn');
     panel.updateMemoryControls();
 };
 
@@ -282,11 +311,12 @@ panel.updateMemoryControls = function() {
             elem.classList.toggle('selected', panel.MEM_SIZES[i] == memSize);
         }
     }
-    var controls = document.getElementById('mem-window-controls');
-    if (controls) {
+    var nav = document.getElementById('mem-window-nav');
+    if (nav) {
         // On the 256 byte machine the window is the whole machine, so
-        // there is nothing to navigate.
-        controls.style.display =
+        // there is nothing to navigate. ZERO ALL MEMORY sits outside
+        // this group, because it applies at every size.
+        nav.style.display =
             memSize > Sim8800.DUMP_WINDOW_SIZE ? 'flex' : 'none';
     }
     var follow = document.getElementById('mem-follow-pc');
@@ -1106,7 +1136,7 @@ panel.init = function() {
         'click', function() { filePicker.click(); }, false);
     filePicker.addEventListener('change', panel.onBinaryFileChosen, false);
     // Keeps the loading message readable after a change of language.
-    l10n.onUpdate = panel.refreshRomStatus;
+    l10n.onUpdate = panel.refreshStatus;
 
     document.getElementById('mem-page-prev').addEventListener(
         'click', function() { panel.onMemPage(-1); }, false);
@@ -1119,7 +1149,9 @@ panel.init = function() {
     document.getElementById('mem-dump').addEventListener(
         'click', panel.onMemMapClick, false);
     panel.updateMemoryControls();
-
+    // The machine comes up switched off, and the empty dump and dark
+    // panel should say why rather than look broken.
+    panel.setStatus('status-off');
 };
 
 /**
