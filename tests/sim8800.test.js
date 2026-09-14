@@ -20,17 +20,27 @@ const IO_ECHO = 'db ff d3 ff c3 00 00';
 const KILL_THE_BIT =
       '21 00 00 16 80 01 0e 00 1a 1a 1a 1a 09 d2 08 00 db ff aa 0f 57 c3 08 00';
 
-/** Creates a powered-on simulator with the reset LED blink flushed. */
+/**
+ * Creates a powered-on simulator with the reset LED blink flushed and
+ * its memory zeroed.
+ *
+ * powerOn() fills memory with random bytes, the way the real machine
+ * comes up. Tests that are not about that behaviour zero it again, so
+ * that whatever they load is the only thing in memory and a run that
+ * falls off the end of a program behaves the same way every time. The
+ * power-on contents are covered by their own test below.
+ */
 function poweredOnSim() {
     const fixture = createSim();
     fixture.sim.powerOn();
     flushTimers();
+    fixture.sim.initMem(false);
     return fixture;
 }
 
 test('static helpers: toHex and parseBits', () => {
     assert.strictEqual(Sim8800.toHex(0x5, 2), '05');
-    assert.strictEqual(Sim8800.toHex(0xabc, 4), '0abc');
+    assert.strictEqual(Sim8800.toHex(0xabc, 4), '0ABC');
     assert.deepStrictEqual(Sim8800.parseBits(0x80, 8),
                            [0, 0, 0, 0, 0, 0, 0, 1]);
     assert.deepStrictEqual(Sim8800.parseBits(0x03, 4), [1, 1, 0, 0]);
@@ -42,7 +52,13 @@ test('powerOn initializes memory, LEDs and dumps', () => {
     assert.strictEqual(sim.isPoweredOn, true);
     assert.strictEqual(state.statusLedsArg, true);
     assert.strictEqual(state.waitLedArg, false);
-    assert.ok(sim.mem.every((byte) => byte == 0));
+    // The real machine comes up with garbage in memory, so powerOn
+    // fills it with random bytes rather than zeros.
+    assert.strictEqual(sim.mem.length, 256);
+    assert.ok(sim.mem.every(
+        (byte) => Number.isInteger(byte) && byte >= 0 && byte <= 255));
+    assert.ok(sim.mem.some((byte) => byte !== sim.mem[0]),
+              'memory should come up randomized, not uniform');
     // reset() blinks all LEDs on, then a timer turns them off.
     assert.strictEqual(bitsToNumber(state.addressLeds), 0xffff);
     assert.strictEqual(bitsToNumber(state.dataLeds), 0xff);
@@ -66,6 +82,7 @@ test('powerOff clears LEDs and dumps', () => {
 
 test('controls are no-ops while powered off', () => {
     const {sim, state} = createSim();
+    const memBefore = sim.mem.slice();
     state.inputWord = 0x55;
     sim.loadDataAsHexString(0, 'c3 00 00');
     sim.loadData(0, [1, 2, 3]);
@@ -73,7 +90,7 @@ test('controls are no-ops while powered off', () => {
     sim.examine();
     sim.step(100);
     sim.start();
-    assert.ok(sim.mem.every((byte) => byte == 0 || byte === undefined));
+    assert.deepStrictEqual(sim.mem, memBefore);
     assert.strictEqual(sim.isRunning, false);
     assert.strictEqual(state.addressLeds, null);
 });
@@ -140,7 +157,7 @@ test('reset stops the CPU and resets PC to 0', () => {
 
 test('step shows PC on the address LEDs for ordinary programs', () => {
     const {sim, state} = poweredOnSim();
-    // Memory is all NOPs; two NOPs take 8 cycles.
+    sim.loadDataAsHexString(0, '00 00');  // Two NOPs, 8 cycles.
     sim.step(8);
     assert.strictEqual(bitsToNumber(state.addressLeds), 2);
 });
