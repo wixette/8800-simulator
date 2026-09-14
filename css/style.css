@@ -277,7 +277,11 @@ footer {
     font-size: 14px;
     line-height: 24px;
     min-height: 24px;
-    overflow-x: hidden;
+    /* The dumps are fixed width text. Let a narrow window scroll across
+       them rather than cutting the right hand columns off. There is no
+       height here, so the box grows to fit and the page scrolls it
+       vertically; only this axis ever shows a bar. */
+    overflow-x: auto;
     padding: 5px 10px;
 }
 
@@ -288,7 +292,11 @@ footer {
     font-size: 14px;
     line-height: 24px;
     min-height: 24px;
-    overflow-x: hidden;
+    /* The dumps are fixed width text. Let a narrow window scroll across
+       them rather than cutting the right hand columns off. There is no
+       height here, so the box grows to fit and the page scrolls it
+       vertically; only this axis ever shows a bar. */
+    overflow-x: auto;
     padding: 5px 10px;
 }
 
