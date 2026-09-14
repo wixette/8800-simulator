@@ -268,28 +268,59 @@ l10n.current = 0;
 l10n.localStorageKey = 'sim8800locale';
 
 /**
+ * Reads the saved locale from local storage.
+ *
+ * A browser that is set to block site data throws on local storage
+ * instead of returning null. This runs before the panel is built, so a
+ * failure here must not stop the rest of the page from loading.
+ * @return {?string} The saved value, or null if there is none.
+ */
+l10n.readSavedLocale = function() {
+    try {
+        return localStorage.getItem(l10n.localStorageKey);
+    } catch (e) {
+        return null;
+    }
+};
+
+/**
+ * Saves the current locale to local storage.
+ */
+l10n.saveLocale = function() {
+    try {
+        localStorage.setItem(l10n.localStorageKey, l10n.LOCALES[l10n.current]);
+    } catch (e) {
+        // Site data is blocked, so the choice is not remembered. The
+        // simulator itself works either way.
+    }
+};
+
+/**
  * Switches to the next locale.
  */
 l10n.nextLocale = function() {
     l10n.current++;
     l10n.current = l10n.current % l10n.LOCALES.length;
     l10n.updateMessages();
-    localStorage.setItem(l10n.localStorageKey, l10n.current);
+    l10n.saveLocale();
 };
 
 /**
  * Restores the last locale from local storage.
  */
 l10n.restoreLocale = function() {
-    var val = localStorage.getItem(l10n.localStorageKey);
-    if (!val) {
-        val = '0';
+    var val = l10n.readSavedLocale();
+    var index = l10n.LOCALES.indexOf(val);
+    if (index < 0 && val) {
+        // Older versions saved the index into LOCALES rather than the
+        // locale itself, so an existing choice still has to be read.
+        var legacy = parseInt(val);
+        if (!isNaN(legacy)) {
+            index = legacy % l10n.LOCALES.length;
+        }
     }
-    var index = parseInt(val);
-    if (!isNaN(index)) {
-        l10n.current = index % l10n.LOCALES.length;
-        l10n.updateMessages();
-    }
+    l10n.current = index < 0 ? 0 : index;
+    l10n.updateMessages();
 };
 
 /**
