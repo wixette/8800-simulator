@@ -1,16 +1,13 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="100%" height="100%" viewBox="0 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
-    <g transform="matrix(1.09178,0,0,1.09178,-234.48,-360.035)">
-        <circle cx="223.927" cy="338.927" r="8.927" style="fill:rgb(101,29,28);"/>
-    </g>
-    <g transform="matrix(1.04197,0,0,1.04197,-223.769,-343.596)">
-        <circle cx="223.927" cy="338.927" r="8.927" style="fill:rgb(172,30,28);"/>
-    </g>
-    <g transform="matrix(0.700343,0,0,0.700343,-147.347,-226.844)">
-        <circle cx="223.927" cy="338.927" r="8.927" style="fill:rgb(227,30,27);"/>
-    </g>
-    <g transform="matrix(0.287536,0,0,0.11245,-56.5092,-28.6716)">
-        <circle cx="223.927" cy="338.927" r="8.927" style="fill:rgb(255,201,200);"/>
-    </g>
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1_276)">
+<path d="M9.99901 19.7451C15.3818 19.7451 19.7453 15.3815 19.7453 9.99873C19.7453 4.61599 15.3818 0.252411 9.99901 0.252411C4.61626 0.252411 0.252686 4.61599 0.252686 9.99873C0.252686 15.3815 4.61626 19.7451 9.99901 19.7451Z" fill="#651D1C"/>
+<path d="M9.55618 18.8574C14.6934 18.8574 18.8579 14.6929 18.8579 9.55576C18.8579 4.41859 14.6934 0.254089 9.55618 0.254089C4.41902 0.254089 0.254517 4.41859 0.254517 9.55576C0.254517 14.6929 4.41902 18.8574 9.55618 18.8574Z" fill="#AC1E1C"/>
+<path d="M9.47871 16.7731C12.9316 16.7731 15.7307 13.974 15.7307 10.5212C15.7307 7.0683 12.9316 4.2692 9.47871 4.2692C6.02585 4.2692 3.22675 7.0683 3.22675 10.5212C3.22675 13.974 6.02585 16.7731 9.47871 16.7731Z" fill="#E31E1B"/>
+<path d="M7.87787 10.4446C9.29549 10.4446 10.4447 9.99514 10.4447 9.44073C10.4447 8.88632 9.29549 8.43689 7.87787 8.43689C6.46025 8.43689 5.31104 8.88632 5.31104 9.44073C5.31104 9.99514 6.46025 10.4446 7.87787 10.4446Z" fill="#FFC9C8"/>
+</g>
+<defs>
+<clipPath id="clip0_1_276">
+<rect width="20" height="20" fill="white"/>
+</clipPath>
+</defs>
 </svg>
