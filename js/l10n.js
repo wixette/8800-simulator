@@ -877,15 +877,15 @@ l10n.MESSAGES = {
     },
 
     'basic-7': {
-        'en': 'It prints how many bytes are free, then OK. Try PRINT 22/7, or type a program: 10 FOR I=1 TO 10, 20 PRINT I,I*I, 30 NEXT I, then RUN.',
-        'es': 'Imprime cuántos bytes quedan libres y luego OK. Prueba PRINT 22/7, o escribe un programa: 10 FOR I=1 TO 10, 20 PRINT I,I*I, 30 NEXT I, y luego RUN.',
-        'fr': 'Il affiche le nombre d’octets libres, puis OK. Essayez PRINT 22/7, ou tapez un programme : 10 FOR I=1 TO 10, 20 PRINT I,I*I, 30 NEXT I, puis RUN.',
-        'de': 'Es zeigt die freien Bytes und dann OK. Versuchen Sie PRINT 22/7, oder tippen Sie ein Programm: 10 FOR I=1 TO 10, 20 PRINT I,I*I, 30 NEXT I, dann RUN.',
-        'it': 'Stampa quanti byte sono liberi, poi OK. Prova PRINT 22/7, o scrivi un programma: 10 FOR I=1 TO 10, 20 PRINT I,I*I, 30 NEXT I, poi RUN.',
-        'zh': '它会打印剩余字节数，然后显示 OK。试试 PRINT 22/7，或者输入一段程序：10 FOR I=1 TO 10、20 PRINT I,I*I、30 NEXT I，然后 RUN。',
-        'zh-TW': '它會印出剩餘位元組數，然後顯示 OK。試試 PRINT 22/7，或者輸入一段程式：10 FOR I=1 TO 10、20 PRINT I,I*I、30 NEXT I，然後 RUN。',
-        'ja': '空きバイト数を表示してから OK が出ます。PRINT 22/7 を試すか、プログラムを打ってみてください。10 FOR I=1 TO 10、20 PRINT I,I*I、30 NEXT I、そして RUN。',
-        'ko': '남은 바이트 수를 찍은 뒤 OK가 나옵니다. PRINT 22/7을 해보거나 프로그램을 입력해 보세요. 10 FOR I=1 TO 10, 20 PRINT I,I*I, 30 NEXT I, 그리고 RUN.',
+        'en': 'It prints how many bytes are free, then OK. Try PRINT 22/7 for an answer straight away. To enter a program, type these lines one at a time, pressing Enter after each:',
+        'es': 'Imprime cuántos bytes quedan libres y luego OK. Prueba PRINT 22/7 para obtener una respuesta al instante. Para escribir un programa, teclea estas líneas de una en una, pulsando Intro después de cada una:',
+        'fr': 'Il affiche le nombre d’octets libres, puis OK. Essayez PRINT 22/7 pour une réponse immédiate. Pour saisir un programme, tapez ces lignes une par une, en appuyant sur Entrée après chacune :',
+        'de': 'Es zeigt die freien Bytes und dann OK. Für eine sofortige Antwort probieren Sie PRINT 22/7. Um ein Programm einzugeben, tippen Sie diese Zeilen einzeln und drücken nach jeder Enter:',
+        'it': 'Stampa quanti byte sono liberi, poi OK. Prova PRINT 22/7 per una risposta immediata. Per scrivere un programma, digita queste righe una alla volta, premendo Invio dopo ciascuna:',
+        'zh': '它会打印剩余字节数，然后显示 OK。输入 PRINT 22/7 可以立刻得到答案。要输入程序，请逐行键入下面几行，每行按一次回车：',
+        'zh-TW': '它會印出剩餘位元組數，然後顯示 OK。輸入 PRINT 22/7 可以立刻得到答案。要輸入程式，請逐行鍵入下面幾行，每行按一次 Enter：',
+        'ja': '空きバイト数を表示してから OK が出ます。PRINT 22/7 と打てばすぐ答えが返ります。プログラムを入れるときは、次の行を一行ずつ、それぞれの後で Enter を押しながら打ってください。',
+        'ko': '남은 바이트 수를 찍은 뒤 OK가 나옵니다. PRINT 22/7을 치면 곧바로 답이 나옵니다. 프로그램을 입력하려면 아래 줄을 한 줄씩, 각 줄마다 Enter를 누르며 입력하세요:',
     },
 
     'basic-8': {
@@ -1018,6 +1018,42 @@ l10n.MESSAGES = {
         'zh-TW': 'Demystifying Computers（揭開電腦的神秘面紗），Chris Jones 與 Jeff Elkner 撰寫的開源書籍',
         'ja': 'Demystifying Computers: Chris Jones と Jeff Elkner によるオープンソースの書籍',
         'ko': 'Demystifying Computers: Chris Jones와 Jeff Elkner가 쓴 오픈 소스 책',
+    },
+
+    'ref-altair-basic': {
+        'en': 'Wikipedia: Altair BASIC - what it is, and how Microsoft started with it',
+        'es': 'Wikipedia: Altair BASIC - qué es y cómo Microsoft empezó con él',
+        'fr': 'Wikipédia : Altair BASIC - ce que c’est, et comment Microsoft a commencé avec',
+        'de': 'Wikipedia: Altair BASIC - was es ist und wie Microsoft damit anfing',
+        'it': 'Wikipedia: Altair BASIC - che cos’è e come Microsoft è nata con esso',
+        'zh': '维基百科：Altair BASIC——它是什么，以及微软如何由此起家',
+        'zh-TW': '維基百科：Altair BASIC——它是什麼，以及微軟如何由此起家',
+        'ja': 'Wikipedia: Altair BASIC — それが何か、そしてマイクロソフトがこれで始まった話',
+        'ko': '위키백과: Altair BASIC — 무엇인지, 그리고 마이크로소프트가 여기서 시작한 이야기',
+    },
+
+    'ref-basic-manual': {
+        'en': 'MITS Altair BASIC Reference Manual (1975) - the language itself: a tutorial, every statement and function, the startup questions in Appendix B, and the error codes in Appendix C',
+        'es': 'Manual de referencia de MITS Altair BASIC (1975) - el lenguaje en sí: un tutorial, cada sentencia y función, las preguntas de arranque en el Apéndice B y los códigos de error en el Apéndice C',
+        'fr': 'Manuel de référence MITS Altair BASIC (1975) - le langage lui-même : un tutoriel, chaque instruction et fonction, les questions de démarrage en Annexe B et les codes d’erreur en Annexe C',
+        'de': 'MITS Altair BASIC Reference Manual (1975) - die Sprache selbst: eine Einführung, jede Anweisung und Funktion, die Startfragen in Anhang B und die Fehlercodes in Anhang C',
+        'it': 'Manuale di riferimento MITS Altair BASIC (1975) - il linguaggio stesso: un tutorial, ogni istruzione e funzione, le domande di avvio nell’Appendice B e i codici di errore nell’Appendice C',
+        'zh': 'MITS Altair BASIC 参考手册（1975）——语言本身：入门教程、全部语句与函数、附录 B 的启动提问，以及附录 C 的错误代码',
+        'zh-TW': 'MITS Altair BASIC 參考手冊（1975）——語言本身：入門教學、全部語句與函式、附錄 B 的啟動提問，以及附錄 C 的錯誤代碼',
+        'ja': 'MITS Altair BASIC リファレンスマニュアル（1975）— 言語そのもの。入門、全ステートメントと関数、付録 B の起動時の質問、付録 C のエラーコード',
+        'ko': 'MITS Altair BASIC 참조 매뉴얼(1975) — 언어 자체: 입문, 모든 문과 함수, 부록 B의 시작 질문, 부록 C의 오류 코드',
+    },
+
+    'ref-basic-disassembly': {
+        'en': 'Altair BASIC 3.2 (4K) - an annotated disassembly of the exact program this simulator runs',
+        'es': 'Altair BASIC 3.2 (4K) - un desensamblado comentado del programa exacto que ejecuta este simulador',
+        'fr': 'Altair BASIC 3.2 (4K) - un désassemblage commenté du programme exact que ce simulateur exécute',
+        'de': 'Altair BASIC 3.2 (4K) - ein kommentiertes Disassembly genau des Programms, das dieser Simulator ausführt',
+        'it': 'Altair BASIC 3.2 (4K) - un disassemblato commentato esattamente del programma che questo simulatore esegue',
+        'zh': 'Altair BASIC 3.2（4K）——本模拟器所运行的那个程序的带注释反汇编',
+        'zh-TW': 'Altair BASIC 3.2（4K）——本模擬器所執行的那個程式的帶註解反組譯',
+        'ja': 'Altair BASIC 3.2（4K）— このシミュレータが動かしているまさにそのプログラムの注釈付き逆アセンブル',
+        'ko': 'Altair BASIC 3.2 (4K) — 이 시뮬레이터가 실행하는 바로 그 프로그램의 주석 달린 역어셈블',
     },
 
     'ref-altair-simulator': {

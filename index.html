@@ -265,7 +265,12 @@
               <li><span id="basic-4" class="l10n">Check that the address switches A15-A8 are all down. BASIC reads them at startup to decide which terminal board to talk to, and down means the 88-SIO the Teletype tab is wired to.</span></li>
               <li><span id="basic-5" class="l10n">Go to the Simulator tab and click RUN.</span></li>
               <li><span id="basic-6" class="l10n">Go to the Teletype tab. BASIC asks MEMORY SIZE? - press Enter to take everything it found. Press Enter again for TERMINAL WIDTH?, then Y for WANT SIN? to keep the maths functions.</span></li>
-              <li><span id="basic-7" class="l10n">It prints how many bytes are free, then OK. Try PRINT 22/7, or type a program: 10 FOR I=1 TO 10, 20 PRINT I,I*I, 30 NEXT I, then RUN.</span></li>
+              <li><span id="basic-7" class="l10n">It prints how many bytes are free, then OK. Try PRINT 22/7 for an answer straight away. To enter a program, type these lines one at a time, pressing Enter after each:</span>
+                <pre>10 FOR I=1 TO 10
+20 PRINT I,I*I
+30 NEXT I
+RUN</pre>
+              </li>
               <li><span id="basic-8" class="l10n">The keyboard is upper case only. Underscore rubs out the last character, at-sign throws away the line, and Ctrl-C stops a running program.</span></li>
             </ol>
           </p>
@@ -299,6 +304,9 @@
               <li><a href="https://ubuntourist.codeberg.page/Altair-8800/"><span id="ref-operators-manual-html" class="l10n">Altair 8800 Operator's Manual v2.0 - an HTML edition by Kevin Cole</span></a></li>
               <li><a href="http://www.classiccmp.org/dunfield/r/8080asm.pdf"><span id="ref-asm-manual" class="l10n">Intel 8080 Assembly Language Programming Manual - Intel's original manual as a scanned PDF</span></a></li>
               <li><a href="https://www.openbookproject.net/books/demystcomp/index.html"><span id="ref-demystifying-computers" class="l10n">Demystifying Computers - an open source book by Chris Jones and Jeff Elkner</span></a></li>
+              <li><a href="https://en.wikipedia.org/wiki/Altair_BASIC"><span id="ref-altair-basic" class="l10n">Wikipedia: Altair BASIC - what it is, and how Microsoft started with it</span></a></li>
+              <li><a href="https://altairclone.com/downloads/manuals/BASIC%20Manual%2075.pdf"><span id="ref-basic-manual" class="l10n">MITS Altair BASIC Reference Manual (1975) - the language itself: a tutorial, every statement and function, the startup questions in Appendix B, and the error codes in Appendix C</span></a></li>
+              <li><a href="http://altairbasic.org"><span id="ref-basic-disassembly" class="l10n">Altair BASIC 3.2 (4K) - an annotated disassembly of the exact program this simulator runs</span></a></li>
               <li><a href="https://s2js.com/altair/"><span id="ref-altair-simulator" class="l10n">MITS Altair Simulator - another JavaScript simulator, running Microsoft BASIC on a simulated teletype</span></a></li>
             </ul>
           </p>
