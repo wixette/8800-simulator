@@ -74,10 +74,9 @@ loading it. They double as the golden set the tests run against.
 npm test
 ```
 
-Node.js 20 or newer, no dependencies to install. The suite covers the
-8080 CPU, the front panel, and every program in
-[examples/](examples/). It runs on each push and pull request against
-Node 20, 22 and 24.
+Node.js 24, no dependencies to install. The suite covers the 8080 CPU,
+the front panel, and every program in [examples/](examples/), and runs
+on each push and pull request.
 
 ## References
 
