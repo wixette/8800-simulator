@@ -487,35 +487,91 @@ panel.STATELESS_SWITCH_INFO = [
         id: 'STOP-RUN',
         x: 348,
         y: 439,
-        upperCmd: { textId: 'SW-STOP', callback: panel.onStop },
-        lowerCmd: { textId: 'SW-RUN', callback: panel.onRun },
+        upperCmd: {
+            id: 'SW-STOP',
+            x: 341.22,
+            y: 427.03,
+            width: 33.82,
+            height: 13.87,
+            callback: panel.onStop,
+        },
+        lowerCmd: {
+            id: 'SW-RUN',
+            x: 344.63,
+            y: 467.68,
+            width: 27.08,
+            height: 13.87,
+            callback: panel.onRun,
+        },
     },
     {
         id: 'SINGLE',
         x: 446,
         y: 439,
-        upperCmd: { textId: 'SW-SINGLE', callback: panel.onSingle },
+        upperCmd: {
+            id: 'SW-SINGLE',
+            x: 434.31,
+            y: 416.02,
+            width: 46.54,
+            height: 26.38,
+            callback: panel.onSingle,
+        },
         lowerCmd: null,
     },
     {
         id: 'EXAMINE',
         x: 550,
         y: 439,
-        upperCmd: { textId: 'SW-EXAMINE', callback: panel.onExamine },
-        lowerCmd: { textId: 'SW-EXAMINE-NEXT', callback: panel.onExamineNext },
+        upperCmd: {
+            id: 'SW-EXAMINE',
+            x: 530.88,
+            y: 426.76,
+            width: 56.96,
+            height: 13.87,
+            callback: panel.onExamine,
+        },
+        lowerCmd: {
+            id: 'SW-EXAMINE-NEXT',
+            x: 531.44,
+            y: 469.77,
+            width: 56.96,
+            height: 26.38,
+            callback: panel.onExamineNext,
+        },
     },
     {
         id: 'DEPOSIT',
         x: 650,
         y: 439,
-        upperCmd: { textId: 'SW-DEPOSIT', callback: panel.onDeposit },
-        lowerCmd: { textId: 'SW-DEPOSIT-NEXT', callback: panel.onDepositNext },
+        upperCmd: {
+            id: 'SW-DEPOSIT',
+            x: 633,
+            y: 426.76,
+            width: 54.87,
+            height: 13.87,
+            callback: panel.onDeposit,
+        },
+        lowerCmd: {
+            id: 'SW-DEPOSIT-NEXT',
+            x: 633,
+            y: 469.77,
+            width: 54.87,
+            height: 26.38,
+            callback: panel.onDepositNext,
+        },
     },
     {
         id: 'RESET',
         x: 753,
         y: 439,
-        upperCmd: { textId: 'SW-RESET', callback: panel.onReset },
+        upperCmd: {
+            id: 'SW-RESET',
+            x: 741.71,
+            y: 426.76,
+            width: 41.68,
+            height: 13.87,
+            callback: panel.onReset,
+        },
         lowerCmd: null,
     },
     {
@@ -672,6 +728,45 @@ panel.ledOff = function(id) {
 };
 
 /**
+ * The SVG namespace, for creating SVG elements.
+ * @type {string}
+ */
+panel.SVG_NS = 'http://www.w3.org/2000/svg';
+
+/**
+ * Creates the click target of a command label inside the panel svg.
+ *
+ * The labels themselves (STOP, RUN, EXAMINE, ...) are part of the panel
+ * artwork in images/panel.svg, where they are drawn as outlined paths
+ * and cannot be clicked. This covers a label with an invisible rect so
+ * that clicking it operates the switch, the way it does on the real
+ * machine. The rect's position and size are the label's bounding box in
+ * the panel's coordinate system.
+ * @param {Object} cmd The command info, holding the label's ID and
+ *     bounding box plus the callback to run.
+ * @param {function()} callback Called when the label is clicked.
+ */
+panel.createCmdLabel = function(cmd, callback) {
+    var panelElem = document.getElementById('panel');
+
+    var elem = document.createElementNS(panel.SVG_NS, 'rect');
+    elem.id = cmd.id;
+    elem.setAttribute('x', cmd.x);
+    elem.setAttribute('y', cmd.y);
+    elem.setAttribute('width', cmd.width);
+    elem.setAttribute('height', cmd.height);
+    elem.setAttribute('fill', 'transparent');
+    elem.setAttribute('pointer-events', 'all');
+    elem.style.cursor = 'pointer';
+    elem.addEventListener('click', callback, false);
+    panelElem.appendChild(elem);
+
+    // Also installs the helper switch board handler.
+    var softElem = document.getElementById('S' + cmd.id);
+    softElem.addEventListener('click', callback, false);
+};
+
+/**
  * Creates a new toggle switch inside the panel svg.
  * @param {string} id The switch ID. This ID will be used as the
  *     prefix of DOM element's ID.
@@ -741,48 +836,18 @@ panel.createSwitch = function(id, type, x, y, upperCmd, lowerCmd) {
         );
     } else {
         if (upperCmd) {
-            let cmdElem = document.getElementById(upperCmd.textId);
-            cmdElem.style.cursor = 'pointer';
-            cmdElem.addEventListener(
-                'click',
-                function() {
-                    panel.switchUpThenBack(id);
-                    panel.playSwitch();
-                    upperCmd.callback();
-                },
-                false);
-            // Also installs helper switch handlers.
-            cmdElem = document.getElementById('S' + upperCmd.textId);
-            cmdElem.addEventListener(
-                'click',
-                function() {
-                    panel.switchUpThenBack(id);
-                    panel.playSwitch();
-                    upperCmd.callback();
-                },
-                false);
+            panel.createCmdLabel(upperCmd, function() {
+                panel.switchUpThenBack(id);
+                panel.playSwitch();
+                upperCmd.callback();
+            });
         }
         if (lowerCmd) {
-            let cmdElem = document.getElementById(lowerCmd.textId);
-            cmdElem.style.cursor = 'pointer';
-            cmdElem.addEventListener(
-                'click',
-                function() {
-                    panel.switchDownThenBack(id);
-                    panel.playSwitch();
-                    lowerCmd.callback();
-                },
-                false);
-            // Also installs helper switch handlers.
-            cmdElem = document.getElementById('S' + lowerCmd.textId);
-            cmdElem.addEventListener(
-                'click',
-                function() {
-                    panel.switchDownThenBack(id);
-                    panel.playSwitch();
-                    lowerCmd.callback();
-                },
-                false);
+            panel.createCmdLabel(lowerCmd, function() {
+                panel.switchDownThenBack(id);
+                panel.playSwitch();
+                lowerCmd.callback();
+            });
         }
     }
 
