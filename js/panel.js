@@ -131,6 +131,117 @@ panel.onFillZero = function() {
 };
 
 /**
+ * Where the 4K BASIC image lives. It is optional: see roms/NOTICE.
+ * @type {string}
+ */
+panel.ROM_URL = 'roms/4kbas32.bin';
+
+/**
+ * The least memory 4K BASIC will boot in. Below this its own memory
+ * probe has nowhere to put anything.
+ * @type {number}
+ */
+panel.MIN_BASIC_MEM = 4096;
+
+/**
+ * Shows a message under the loading controls. Kept as a message id
+ * rather than text so that it survives a change of language.
+ * @param {?string} id The l10n message id, or null to clear.
+ * @param {Object=} params Values for {placeholders} in the message.
+ */
+panel.setRomStatus = function(id, params) {
+    panel.romStatusId = id;
+    panel.romStatusParams = params || {};
+    panel.refreshRomStatus();
+};
+
+/**
+ * Redraws the loading message in the current language.
+ */
+panel.refreshRomStatus = function() {
+    var elem = document.getElementById('rom-status');
+    if (!elem) {
+        return;
+    }
+    if (!panel.romStatusId) {
+        elem.textContent = '';
+        return;
+    }
+    var msg = l10n.getMessage(panel.romStatusId);
+    for (let key in panel.romStatusParams) {
+        msg = msg.replace('{' + key + '}', panel.romStatusParams[key]);
+    }
+    elem.textContent = msg;
+};
+
+/**
+ * Puts an image into memory at 0000H and presses RESET, powering the
+ * machine up first if it is off.
+ *
+ * It deliberately stops there rather than running. On the real machine
+ * loading and starting were two separate acts, and stopping here lets
+ * the memory map above show what was just loaded before the program
+ * starts writing over it - which for BASIC is fifteen of the sixteen
+ * pages of a 4 KB machine.
+ * @param {Array<number>} bytes The image.
+ * @return {number} How many bytes actually fit in the machine.
+ */
+panel.loadImage = function(bytes) {
+    if (!panel.isPoweredOn) {
+        panel.onPowerOn();
+        panel.switchDown('off-on');
+        panel.isPoweredOn = true;
+    }
+    panel.sim.initMem(false);
+    panel.sim.loadData(0, bytes);
+    panel.sim.reset();
+    panel.sim.flushDump(true);
+    panel.updateMemoryControls();
+    return Math.min(bytes.length, panel.sim.mem.length);
+};
+
+/**
+ * When LOAD 4K BASIC is pressed.
+ */
+panel.onLoadBasic = function() {
+    if (panel.sim.mem.length < panel.MIN_BASIC_MEM) {
+        panel.setRomStatus('rom-needs-memory');
+        return;
+    }
+    window.fetch(panel.ROM_URL).then(function(response) {
+        if (!response.ok) {
+            throw new Error('HTTP ' + response.status);
+        }
+        return response.arrayBuffer();
+    }).then(function(buffer) {
+        var loaded = panel.loadImage(Array.from(new Uint8Array(buffer)));
+        panel.setRomStatus('rom-loaded', {bytes: loaded});
+    }).catch(function() {
+        panel.setRomStatus('rom-missing');
+    });
+};
+
+/**
+ * When a binary file is chosen with LOAD BINARY FILE.
+ * @param {Event} event The change event from the file input.
+ */
+panel.onBinaryFileChosen = function(event) {
+    var file = event.target.files && event.target.files[0];
+    if (!file) {
+        return;
+    }
+    var reader = new FileReader();
+    reader.onload = function() {
+        var loaded = panel.loadImage(Array.from(new Uint8Array(reader.result)));
+        panel.setRomStatus('rom-file-loaded',
+                           {bytes: loaded, name: file.name});
+    };
+    reader.readAsArrayBuffer(file);
+    // So that choosing the same file twice in a row still fires.
+    event.target.value = '';
+};
+
+/**
  * The memory sizes the machine can be built with. 256 bytes is the
  * Altair as it shipped; the larger two are one and two 88-4MCS static
  * memory boards. See docs/ms-basic-4k.md.
@@ -155,6 +266,7 @@ panel.onSetMemSize = function(memSize) {
         panel.sio.reset();
     }
     panel.renderTeletype();
+    panel.setRomStatus(null);
     panel.updateMemoryControls();
 };
 
@@ -987,6 +1099,15 @@ panel.init = function() {
             panel.onSetMemSize(memSize);
         }, false);
     }
+    document.getElementById('load-basic').addEventListener(
+        'click', panel.onLoadBasic, false);
+    var filePicker = document.getElementById('binary-file');
+    document.getElementById('load-binary').addEventListener(
+        'click', function() { filePicker.click(); }, false);
+    filePicker.addEventListener('change', panel.onBinaryFileChosen, false);
+    // Keeps the loading message readable after a change of language.
+    l10n.onUpdate = panel.refreshRomStatus;
+
     document.getElementById('mem-page-prev').addEventListener(
         'click', function() { panel.onMemPage(-1); }, false);
     document.getElementById('mem-page-next').addEventListener(

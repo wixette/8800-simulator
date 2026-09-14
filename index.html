@@ -151,6 +151,21 @@
         </div>
 
         <div class="subheader-bar mt-8">
+          <div id="debug-rom-title" class="l10n">Load a Program From a File</div>
+        </div>
+        <div class="h-box justify-start mt-8 align-items-center">
+          <div id="load-basic" class="button m-8 l10n">LOAD 4K BASIC</div>
+          <div id="load-binary" class="button m-8 l10n">LOAD BINARY FILE</div>
+          <input id="binary-file" type="file" hidden>
+        </div>
+        <div id="rom-hint" class="comments l10n">
+          4K BASIC is 4 KB of paper tape, so install at least 4 KB of memory
+          first. In 1975 you would have toggled in a 28 byte boot loader by
+          hand and then listened to the tape read for seven minutes.
+        </div>
+        <div id="rom-status" class="comments"></div>
+
+        <div class="subheader-bar mt-8">
           <div id="debug-cpu-dump-title" class="l10n">8080 CPU Status Dump</div>
         </div>
         <div id="cpu-dump" class="mt-8"></div>
@@ -230,6 +245,34 @@
               <li><span id="tutorial-18" class="l10n">The LEDs D7-D0 show the result 00 000 011 (3 in decimal).</span></li>
               <li><span id="tutorial-19" class="l10n">Turn off Altair 8800.</span></li>
             </ol>
+          </p>
+        </div>
+
+        <div class="subheader-bar">
+          <div id="basic-title" class="l10n">Running Microsoft BASIC</div>
+        </div>
+        <div class="tutorial">
+          <p>
+            <ul>
+              <li><span id="basic-desc" class="l10n">The Altair's first piece of software, and Microsoft's: Altair BASIC 3.2, written in 1975 by Bill Gates, Paul Allen and Monte Davidoff. How to start it:</span></li>
+            </ul>
+          </p>
+          <p>
+            <ol>
+              <li><span id="basic-1" class="l10n">Go to the Debugger tab and choose 4 KB (or 8 KB, for room to write longer programs) under Installed Memory. Installing memory switches the machine off, which is what opening the case would have done.</span></li>
+              <li><span id="basic-2" class="l10n">Click LOAD 4K BASIC. The machine powers up, the tape is read for you, and RESET is pressed.</span></li>
+              <li><span id="basic-3" class="l10n">Before going any further, look at the memory map above the dump. Fifteen of the sixteen pages of a 4 KB machine are full: that is BASIC, and the one page left over is all the room you have for a program. This is what "4K BASIC" means.</span></li>
+              <li><span id="basic-4" class="l10n">Check that the address switches A15-A8 are all down. BASIC reads them at startup to decide which terminal board to talk to, and down means the 88-SIO the Teletype tab is wired to.</span></li>
+              <li><span id="basic-5" class="l10n">Go to the Simulator tab and click RUN.</span></li>
+              <li><span id="basic-6" class="l10n">Go to the Teletype tab. BASIC asks MEMORY SIZE? - press Enter to take everything it found. Press Enter again for TERMINAL WIDTH?, then Y for WANT SIN? to keep the maths functions.</span></li>
+              <li><span id="basic-7" class="l10n">It prints how many bytes are free, then OK. Try PRINT 22/7, or type a program: 10 FOR I=1 TO 10, 20 PRINT I,I*I, 30 NEXT I, then RUN.</span></li>
+              <li><span id="basic-8" class="l10n">The keyboard is upper case only. Underscore rubs out the last character, at-sign throws away the line, and Ctrl-C stops a running program.</span></li>
+            </ol>
+          </p>
+          <p>
+            <ul>
+              <li><span id="basic-note" class="l10n">What the LOAD button skips: on a real Altair you first toggled a 28 byte boot loader in through the front panel, one byte at a time, then started the paper tape reader and waited about seven minutes while BASIC clattered in. Get one switch wrong and you did it again.</span></li>
+            </ul>
           </p>
         </div>
 

@@ -288,6 +288,102 @@ l10n.MESSAGES = {
         'ko': "16진수 바이트 문자열, 예: 'c3 00 00'",
     },
 
+    'debug-rom-title': {
+        'en': 'Load a Program From a File',
+        'es': 'Cargar un programa desde un archivo',
+        'fr': 'Charger un programme depuis un fichier',
+        'de': 'Ein Programm aus einer Datei laden',
+        'it': 'Carica un programma da un file',
+        'zh': '从文件加载程序',
+        'zh-TW': '從檔案載入程式',
+        'ja': 'ファイルからプログラムを読み込む',
+        'ko': '파일에서 프로그램 불러오기',
+    },
+
+    'load-basic': {
+        'en': 'LOAD 4K BASIC',
+        'es': 'CARGAR BASIC 4K',
+        'fr': 'CHARGER BASIC 4K',
+        'de': '4K BASIC LADEN',
+        'it': 'CARICA BASIC 4K',
+        'zh': '加载 4K BASIC',
+        'zh-TW': '載入 4K BASIC',
+        'ja': '4K BASIC を読み込む',
+        'ko': '4K BASIC 불러오기',
+    },
+
+    'load-binary': {
+        'en': 'LOAD BINARY FILE',
+        'es': 'CARGAR ARCHIVO BINARIO',
+        'fr': 'CHARGER UN FICHIER BINAIRE',
+        'de': 'BINÄRDATEI LADEN',
+        'it': 'CARICA FILE BINARIO',
+        'zh': '加载二进制文件',
+        'zh-TW': '載入二進位檔',
+        'ja': 'バイナリファイルを読み込む',
+        'ko': '바이너리 파일 불러오기',
+    },
+
+    'rom-hint': {
+        'en': '4K BASIC is 4 KB of paper tape, so install at least 4 KB of memory first. In 1975 you would have toggled in a 28 byte boot loader by hand and then listened to the tape read for seven minutes.',
+        'es': 'BASIC 4K son 4 KB de cinta de papel, así que instala al menos 4 KB de memoria primero. En 1975 habrías introducido a mano un cargador de 28 bytes y luego escuchado la cinta durante siete minutos.',
+        'fr': 'BASIC 4K tient sur 4 Kio de bande perforée, installez donc au moins 4 Kio de mémoire d\'abord. En 1975, il aurait fallu saisir à la main un chargeur de 28 octets puis écouter la bande pendant sept minutes.',
+        'de': '4K BASIC sind 4 KB Lochstreifen, installieren Sie also zuerst mindestens 4 KB Speicher. 1975 hätten Sie einen 28 Byte langen Urlader von Hand eingegeben und dann dem Band sieben Minuten lang zugehört.',
+        'it': 'BASIC 4K sta in 4 KB di nastro perforato, quindi installa prima almeno 4 KB di memoria. Nel 1975 avresti inserito a mano un boot loader di 28 byte e poi ascoltato il nastro per sette minuti.',
+        'zh': '4K BASIC 是 4 KB 的纸带，所以请先安装至少 4 KB 内存。在 1975 年，你得先用开关手工输入 28 字节的引导程序，然后听着纸带读上七分钟。',
+        'zh-TW': '4K BASIC 是 4 KB 的紙帶，所以請先安裝至少 4 KB 記憶體。在 1975 年，你得先用開關手工輸入 28 位元組的載入程式，然後聽著紙帶讀上七分鐘。',
+        'ja': '4K BASIC は 4 KB の紙テープなので、まず 4 KB 以上のメモリを搭載してください。1975 年なら 28 バイトのブートローダーをスイッチで手入力し、それからテープが読み終わるまで七分間待つことになります。',
+        'ko': '4K BASIC은 4 KB짜리 종이 테이프이므로 먼저 4 KB 이상의 메모리를 설치하세요. 1975년이라면 28바이트짜리 부트로더를 스위치로 직접 입력한 뒤, 테이프가 읽히는 7분을 기다렸을 것입니다.',
+    },
+
+    'rom-needs-memory': {
+        'en': '4K BASIC needs at least 4 KB installed. Choose 4 KB or 8 KB under Installed Memory.',
+        'es': 'BASIC 4K necesita al menos 4 KB instalados. Elige 4 KB u 8 KB en Memoria instalada.',
+        'fr': 'BASIC 4K exige au moins 4 Kio installés. Choisissez 4 Kio ou 8 Kio dans Mémoire installée.',
+        'de': '4K BASIC braucht mindestens 4 KB. Wählen Sie 4 KB oder 8 KB unter Installierter Speicher.',
+        'it': 'BASIC 4K richiede almeno 4 KB installati. Scegli 4 KB o 8 KB in Memoria installata.',
+        'zh': '4K BASIC 至少需要 4 KB 内存。请在“已安装的内存”中选择 4 KB 或 8 KB。',
+        'zh-TW': '4K BASIC 至少需要 4 KB 記憶體。請在「已安裝的記憶體」中選擇 4 KB 或 8 KB。',
+        'ja': '4K BASIC には少なくとも 4 KB が必要です。「搭載メモリ」で 4 KB か 8 KB を選んでください。',
+        'ko': '4K BASIC에는 최소 4 KB가 필요합니다. "설치된 메모리"에서 4 KB 또는 8 KB를 선택하세요.',
+    },
+
+    'rom-loaded': {
+        'en': 'Loaded {bytes} bytes at 0000H and pressed RESET. Go to the Simulator tab, click RUN, then watch the Teletype tab.',
+        'es': 'Cargados {bytes} bytes en 0000H y pulsado RESET. Ve a la pestaña Simulador, pulsa RUN y mira la pestaña Teletipo.',
+        'fr': '{bytes} octets chargés en 0000H et RESET appuyé. Allez dans l\'onglet Simulateur, cliquez sur RUN, puis regardez l\'onglet Téléscripteur.',
+        'de': '{bytes} Bytes bei 0000H geladen und RESET gedrückt. Gehen Sie zum Simulator-Tab, klicken Sie RUN und sehen Sie dann im Fernschreiber-Tab nach.',
+        'it': 'Caricati {bytes} byte a 0000H e premuto RESET. Vai alla scheda Simulatore, premi RUN e poi guarda la scheda Telescrivente.',
+        'zh': '已在 0000H 载入 {bytes} 字节并按下 RESET。请到“模拟器”标签页点击 RUN，然后查看“电传打字机”标签页。',
+        'zh-TW': '已在 0000H 載入 {bytes} 位元組並按下 RESET。請到「模擬器」標籤頁點擊 RUN，然後查看「電傳打字機」標籤頁。',
+        'ja': '0000H に {bytes} バイトを読み込み、RESET を押しました。シミュレータタブで RUN を押し、テレタイプタブを見てください。',
+        'ko': '0000H에 {bytes}바이트를 불러오고 RESET을 눌렀습니다. 시뮬레이터 탭에서 RUN을 누른 뒤 텔레타이프 탭을 보세요.',
+    },
+
+    'rom-file-loaded': {
+        'en': 'Loaded {bytes} bytes of {name} at 0000H and pressed RESET.',
+        'es': 'Cargados {bytes} bytes de {name} en 0000H y pulsado RESET.',
+        'fr': '{bytes} octets de {name} chargés en 0000H et RESET appuyé.',
+        'de': '{bytes} Bytes aus {name} bei 0000H geladen und RESET gedrückt.',
+        'it': 'Caricati {bytes} byte di {name} a 0000H e premuto RESET.',
+        'zh': '已从 {name} 在 0000H 载入 {bytes} 字节并按下 RESET。',
+        'zh-TW': '已從 {name} 在 0000H 載入 {bytes} 位元組並按下 RESET。',
+        'ja': '{name} から 0000H に {bytes} バイトを読み込み、RESET を押しました。',
+        'ko': '{name}에서 0000H에 {bytes}바이트를 불러오고 RESET을 눌렀습니다.',
+    },
+
+    'rom-missing': {
+        'en': 'roms/4kbas32.bin could not be read. It is optional - see roms/NOTICE - so supply your own image with LOAD BINARY FILE.',
+        'es': 'No se pudo leer roms/4kbas32.bin. Es opcional (consulta roms/NOTICE), así que carga tu propia imagen con CARGAR ARCHIVO BINARIO.',
+        'fr': 'Impossible de lire roms/4kbas32.bin. Ce fichier est facultatif (voir roms/NOTICE) : fournissez votre propre image avec CHARGER UN FICHIER BINAIRE.',
+        'de': 'roms/4kbas32.bin konnte nicht gelesen werden. Die Datei ist optional - siehe roms/NOTICE - laden Sie also mit BINÄRDATEI LADEN Ihr eigenes Abbild.',
+        'it': 'Impossibile leggere roms/4kbas32.bin. È facoltativo (vedi roms/NOTICE), quindi carica una tua immagine con CARICA FILE BINARIO.',
+        'zh': '无法读取 roms/4kbas32.bin。该文件是可选的（见 roms/NOTICE），请用“加载二进制文件”提供你自己的映像。',
+        'zh-TW': '無法讀取 roms/4kbas32.bin。該檔案是選用的（見 roms/NOTICE），請用「載入二進位檔」提供你自己的映像。',
+        'ja': 'roms/4kbas32.bin を読み込めませんでした。このファイルは任意です（roms/NOTICE を参照）。「バイナリファイルを読み込む」で自分のイメージを指定してください。',
+        'ko': 'roms/4kbas32.bin을 읽을 수 없습니다. 이 파일은 선택 사항이며(roms/NOTICE 참고), "바이너리 파일 불러오기"로 직접 이미지를 지정하세요.',
+    },
+
     'debug-cpu-dump-title': {
         'en': '8080 CPU Status Dump',
         'es': 'Estado de la CPU 8080',
@@ -600,6 +696,138 @@ l10n.MESSAGES = {
         'ko': 'Altair 8800의 전원을 끕니다',
     },
 
+    'basic-title': {
+        'en': 'Running Microsoft BASIC',
+        'es': 'Ejecutar Microsoft BASIC',
+        'fr': 'Lancer Microsoft BASIC',
+        'de': 'Microsoft BASIC ausführen',
+        'it': 'Eseguire Microsoft BASIC',
+        'zh': '运行 Microsoft BASIC',
+        'zh-TW': '執行 Microsoft BASIC',
+        'ja': 'Microsoft BASIC を動かす',
+        'ko': 'Microsoft BASIC 실행하기',
+    },
+
+    'basic-desc': {
+        'en': 'The Altair\'s first piece of software, and Microsoft\'s: Altair BASIC 3.2, written in 1975 by Bill Gates, Paul Allen and Monte Davidoff. How to start it:',
+        'es': 'El primer software del Altair, y el primero de Microsoft: Altair BASIC 3.2, escrito en 1975 por Bill Gates, Paul Allen y Monte Davidoff. Cómo arrancarlo:',
+        'fr': 'Le premier logiciel de l\'Altair, et celui de Microsoft : Altair BASIC 3.2, écrit en 1975 par Bill Gates, Paul Allen et Monte Davidoff. Comment le lancer :',
+        'de': 'Die erste Software für den Altair und die erste von Microsoft: Altair BASIC 3.2, 1975 geschrieben von Bill Gates, Paul Allen und Monte Davidoff. So starten Sie es:',
+        'it': 'Il primo software dell’Altair, e il primo di Microsoft: Altair BASIC 3.2, scritto nel 1975 da Bill Gates, Paul Allen e Monte Davidoff. Come avviarlo:',
+        'zh': 'Altair 的第一个软件，也是微软的第一个产品：Altair BASIC 3.2，1975 年由 Bill Gates、Paul Allen 和 Monte Davidoff 编写。启动方法：',
+        'zh-TW': 'Altair 的第一個軟體，也是微軟的第一個產品：Altair BASIC 3.2，1975 年由 Bill Gates、Paul Allen 和 Monte Davidoff 編寫。啟動方法：',
+        'ja': 'Altair 最初のソフトウェアであり、マイクロソフト最初の製品でもある Altair BASIC 3.2。1975 年に Bill Gates、Paul Allen、Monte Davidoff が書きました。起動のしかた：',
+        'ko': 'Altair의 첫 소프트웨어이자 마이크로소프트의 첫 제품인 Altair BASIC 3.2. 1975년에 Bill Gates, Paul Allen, Monte Davidoff가 만들었습니다. 시작하는 방법:',
+    },
+
+    'basic-1': {
+        'en': 'Go to the Debugger tab and choose 4 KB (or 8 KB, for room to write longer programs) under Installed Memory. Installing memory switches the machine off, which is what opening the case would have done.',
+        'es': 'Ve a la pestaña Depurador y elige 4 KB (u 8 KB, para escribir programas más largos) en Memoria instalada. Instalar memoria apaga la máquina, que es lo que habría pasado al abrir la caja.',
+        'fr': 'Allez dans l\'onglet Débogueur et choisissez 4 Kio (ou 8 Kio, pour écrire des programmes plus longs) sous Mémoire installée. Installer de la mémoire éteint la machine, comme le ferait l\'ouverture du boîtier.',
+        'de': 'Gehen Sie zum Debugger-Tab und wählen Sie unter Installierter Speicher 4 KB (oder 8 KB für längere Programme). Speicher einzubauen schaltet die Maschine ab - genau wie das Öffnen des Gehäuses.',
+        'it': 'Vai alla scheda Debugger e scegli 4 KB (o 8 KB, per programmi più lunghi) in Memoria installata. Installare memoria spegne la macchina, come sarebbe successo aprendo il contenitore.',
+        'zh': '打开“调试器”标签页，在“已安装的内存”中选择 4 KB（想写长一点的程序就选 8 KB）。安装内存会关闭机器——当年打开机箱也是如此。',
+        'zh-TW': '打開「除錯器」標籤頁，在「已安裝的記憶體」中選擇 4 KB（想寫長一點的程式就選 8 KB）。安裝記憶體會關閉機器——當年打開機殼也是如此。',
+        'ja': 'デバッガタブを開き、「搭載メモリ」で 4 KB（長いプログラムを書くなら 8 KB）を選びます。メモリを増設すると電源が切れます。筐体を開けるのですから当然です。',
+        'ko': '디버거 탭에서 "설치된 메모리"의 4 KB(더 긴 프로그램을 쓰려면 8 KB)를 고르세요. 메모리를 설치하면 기계가 꺼집니다. 케이스를 여는 일이니까요.',
+    },
+
+    'basic-2': {
+        'en': 'Click LOAD 4K BASIC. The machine powers up, the tape is read for you, and RESET is pressed.',
+        'es': 'Pulsa CARGAR BASIC 4K. La máquina se enciende, la cinta se lee por ti y se pulsa RESET.',
+        'fr': 'Cliquez sur CHARGER BASIC 4K. La machine s\'allume, la bande est lue pour vous et RESET est appuyé.',
+        'de': 'Klicken Sie 4K BASIC LADEN. Die Maschine geht an, das Band wird für Sie eingelesen und RESET gedrückt.',
+        'it': 'Premi CARICA BASIC 4K. La macchina si accende, il nastro viene letto per te e viene premuto RESET.',
+        'zh': '点击“加载 4K BASIC”。机器会开机，纸带会替你读入，并按下 RESET。',
+        'zh-TW': '點擊「載入 4K BASIC」。機器會開機，紙帶會替你讀入，並按下 RESET。',
+        'ja': '「4K BASIC を読み込む」を押します。電源が入り、テープが代わりに読み込まれ、RESET が押されます。',
+        'ko': '"4K BASIC 불러오기"를 누르세요. 전원이 켜지고, 테이프가 대신 읽히고, RESET이 눌립니다.',
+    },
+
+    'basic-3': {
+        'en': 'Before going any further, look at the memory map above the dump. Fifteen of the sixteen pages of a 4 KB machine are full: that is BASIC, and the one page left over is all the room you have for a program. This is what "4K BASIC" means.',
+        'es': 'Antes de seguir, mira el mapa de memoria sobre el volcado. Quince de las dieciséis páginas de una máquina de 4 KB están llenas: eso es BASIC, y la página que sobra es todo el espacio que tienes para un programa. Eso significa "BASIC 4K".',
+        'fr': 'Avant d\'aller plus loin, regardez la carte mémoire au-dessus du vidage. Quinze des seize pages d\'une machine de 4 Kio sont pleines : c\'est BASIC, et la page qui reste est toute la place dont vous disposez. Voilà ce que veut dire « BASIC 4K ».',
+        'de': 'Sehen Sie sich zuerst die Speicherkarte über dem Abbild an. Fünfzehn der sechzehn Seiten einer 4-KB-Maschine sind voll: das ist BASIC, und die eine übrige Seite ist der ganze Platz für Ihr Programm. Genau das bedeutet "4K BASIC".',
+        'it': 'Prima di proseguire, guarda la mappa di memoria sopra il dump. Quindici delle sedici pagine di una macchina da 4 KB sono piene: quello è BASIC, e l’unica pagina rimasta è tutto lo spazio per il tuo programma. Questo significa "BASIC 4K".',
+        'zh': '先别急着往下走，看看内存转储上方的内存分布图。4 KB 机器的十六页中有十五页是满的：那就是 BASIC，剩下的一页就是你全部的程序空间。这就是“4K BASIC”的含义。',
+        'zh-TW': '先別急著往下走，看看記憶體傾印上方的分佈圖。4 KB 機器的十六頁中有十五頁是滿的：那就是 BASIC，剩下的一頁就是你全部的程式空間。這就是「4K BASIC」的含義。',
+        'ja': '先に進む前に、ダンプの上のメモリマップを見てください。4 KB マシンの十六ページのうち十五ページが埋まっています。それが BASIC で、残りの一ページがプログラムに使える全部です。これが「4K BASIC」の意味です。',
+        'ko': '더 진행하기 전에 덤프 위의 메모리 맵을 보세요. 4 KB 기계의 열여섯 페이지 중 열다섯 페이지가 차 있습니다. 그것이 BASIC이고, 남은 한 페이지가 프로그램에 쓸 수 있는 전부입니다. 이것이 "4K BASIC"의 뜻입니다.',
+    },
+
+    'basic-4': {
+        'en': 'Check that the address switches A15-A8 are all down. BASIC reads them at startup to decide which terminal board to talk to, and down means the 88-SIO the Teletype tab is wired to.',
+        'es': 'Comprueba que los interruptores A15-A8 estén todos abajo. BASIC los lee al arrancar para decidir con qué placa de terminal hablar, y abajo significa la 88-SIO a la que está conectada la pestaña Teletipo.',
+        'fr': 'Vérifiez que les interrupteurs A15-A8 sont tous en bas. BASIC les lit au démarrage pour choisir la carte de terminal, et en bas désigne la 88-SIO à laquelle l\'onglet Téléscripteur est reliée.',
+        'de': 'Prüfen Sie, dass die Schalter A15-A8 alle unten stehen. BASIC liest sie beim Start, um die Terminalkarte zu wählen; unten bedeutet die 88-SIO, an der der Fernschreiber-Tab hängt.',
+        'it': 'Controlla che gli interruttori A15-A8 siano tutti abbassati. BASIC li legge all’avvio per scegliere la scheda del terminale, e abbassati significa la 88-SIO a cui è collegata la scheda Telescrivente.',
+        'zh': '确认地址开关 A15-A8 全部向下。BASIC 启动时会读取它们来决定和哪块终端板通信，向下就是“电传打字机”标签页所接的 88-SIO。',
+        'zh-TW': '確認位址開關 A15-A8 全部向下。BASIC 啟動時會讀取它們來決定和哪塊終端板通訊，向下就是「電傳打字機」標籤頁所接的 88-SIO。',
+        'ja': 'アドレススイッチ A15-A8 がすべて下がっていることを確認します。BASIC は起動時にこれを読んで、どの端末ボードと話すかを決めます。下はテレタイプタブがつながっている 88-SIO です。',
+        'ko': '주소 스위치 A15-A8이 모두 내려가 있는지 확인하세요. BASIC은 시작할 때 이 스위치를 읽어 어떤 터미널 보드와 통신할지 정하며, 내려간 상태가 텔레타이프 탭이 연결된 88-SIO입니다.',
+    },
+
+    'basic-5': {
+        'en': 'Go to the Simulator tab and click RUN.',
+        'es': 'Ve a la pestaña Simulador y pulsa RUN.',
+        'fr': 'Allez dans l\'onglet Simulateur et cliquez sur RUN.',
+        'de': 'Gehen Sie zum Simulator-Tab und klicken Sie RUN.',
+        'it': 'Vai alla scheda Simulatore e premi RUN.',
+        'zh': '回到“模拟器”标签页，点击 RUN。',
+        'zh-TW': '回到「模擬器」標籤頁，點擊 RUN。',
+        'ja': 'シミュレータタブに戻って RUN を押します。',
+        'ko': '시뮬레이터 탭으로 가서 RUN을 누르세요.',
+    },
+
+    'basic-6': {
+        'en': 'Go to the Teletype tab. BASIC asks MEMORY SIZE? - press Enter to take everything it found. Press Enter again for TERMINAL WIDTH?, then Y for WANT SIN? to keep the maths functions.',
+        'es': 'Ve a la pestaña Teletipo. BASIC pregunta MEMORY SIZE?: pulsa Intro para usar toda la que ha encontrado. Pulsa Intro otra vez en TERMINAL WIDTH? y luego Y en WANT SIN? para conservar las funciones matemáticas.',
+        'fr': 'Allez dans l\'onglet Téléscripteur. BASIC demande MEMORY SIZE? : appuyez sur Entrée pour tout prendre. Entrée à nouveau pour TERMINAL WIDTH?, puis Y pour WANT SIN? afin de garder les fonctions mathématiques.',
+        'de': 'Gehen Sie zum Fernschreiber-Tab. BASIC fragt MEMORY SIZE? - Enter nimmt alles, was es gefunden hat. Noch einmal Enter bei TERMINAL WIDTH?, dann Y bei WANT SIN?, um die Mathematikfunktionen zu behalten.',
+        'it': 'Vai alla scheda Telescrivente. BASIC chiede MEMORY SIZE?: premi Invio per prendere tutta quella trovata. Invio di nuovo per TERMINAL WIDTH?, poi Y per WANT SIN? per tenere le funzioni matematiche.',
+        'zh': '切到“电传打字机”标签页。BASIC 会问 MEMORY SIZE?——直接按回车表示全部使用。TERMINAL WIDTH? 再按一次回车，WANT SIN? 输入 Y 以保留数学函数。',
+        'zh-TW': '切到「電傳打字機」標籤頁。BASIC 會問 MEMORY SIZE?——直接按 Enter 表示全部使用。TERMINAL WIDTH? 再按一次 Enter，WANT SIN? 輸入 Y 以保留數學函式。',
+        'ja': 'テレタイプタブを開きます。BASIC が MEMORY SIZE? と聞くので、Enter で見つかった分を全部使います。TERMINAL WIDTH? でもう一度 Enter、WANT SIN? では Y と答えて数学関数を残します。',
+        'ko': '텔레타이프 탭으로 가세요. BASIC이 MEMORY SIZE?라고 물으면 Enter를 눌러 찾은 메모리를 모두 씁니다. TERMINAL WIDTH?에서 다시 Enter, WANT SIN?에서 Y를 눌러 수학 함수를 남깁니다.',
+    },
+
+    'basic-7': {
+        'en': 'It prints how many bytes are free, then OK. Try PRINT 22/7, or type a program: 10 FOR I=1 TO 10, 20 PRINT I,I*I, 30 NEXT I, then RUN.',
+        'es': 'Imprime cuántos bytes quedan libres y luego OK. Prueba PRINT 22/7, o escribe un programa: 10 FOR I=1 TO 10, 20 PRINT I,I*I, 30 NEXT I, y luego RUN.',
+        'fr': 'Il affiche le nombre d’octets libres, puis OK. Essayez PRINT 22/7, ou tapez un programme : 10 FOR I=1 TO 10, 20 PRINT I,I*I, 30 NEXT I, puis RUN.',
+        'de': 'Es zeigt die freien Bytes und dann OK. Versuchen Sie PRINT 22/7, oder tippen Sie ein Programm: 10 FOR I=1 TO 10, 20 PRINT I,I*I, 30 NEXT I, dann RUN.',
+        'it': 'Stampa quanti byte sono liberi, poi OK. Prova PRINT 22/7, o scrivi un programma: 10 FOR I=1 TO 10, 20 PRINT I,I*I, 30 NEXT I, poi RUN.',
+        'zh': '它会打印剩余字节数，然后显示 OK。试试 PRINT 22/7，或者输入一段程序：10 FOR I=1 TO 10、20 PRINT I,I*I、30 NEXT I，然后 RUN。',
+        'zh-TW': '它會印出剩餘位元組數，然後顯示 OK。試試 PRINT 22/7，或者輸入一段程式：10 FOR I=1 TO 10、20 PRINT I,I*I、30 NEXT I，然後 RUN。',
+        'ja': '空きバイト数を表示してから OK が出ます。PRINT 22/7 を試すか、プログラムを打ってみてください。10 FOR I=1 TO 10、20 PRINT I,I*I、30 NEXT I、そして RUN。',
+        'ko': '남은 바이트 수를 찍은 뒤 OK가 나옵니다. PRINT 22/7을 해보거나 프로그램을 입력해 보세요. 10 FOR I=1 TO 10, 20 PRINT I,I*I, 30 NEXT I, 그리고 RUN.',
+    },
+
+    'basic-8': {
+        'en': 'The keyboard is upper case only. Underscore rubs out the last character, at-sign throws away the line, and Ctrl-C stops a running program.',
+        'es': 'El teclado es solo mayúsculas. El guion bajo borra el último carácter, la arroba descarta la línea y Ctrl-C detiene un programa en marcha.',
+        'fr': 'Le clavier est en majuscules uniquement. Le tiret bas efface le dernier caractère, l\'arobase annule la ligne, et Ctrl-C arrête un programme en cours.',
+        'de': 'Die Tastatur kennt nur Großbuchstaben. Unterstrich löscht das letzte Zeichen, das At-Zeichen verwirft die Zeile, und Strg-C hält ein laufendes Programm an.',
+        'it': 'La tastiera è solo maiuscola. Il trattino basso cancella l’ultimo carattere, la chiocciola scarta la riga e Ctrl-C ferma un programma in esecuzione.',
+        'zh': '键盘只有大写。下划线删除上一个字符，@ 放弃整行，Ctrl-C 中断正在运行的程序。',
+        'zh-TW': '鍵盤只有大寫。底線刪除上一個字元，@ 放棄整行，Ctrl-C 中斷正在執行的程式。',
+        'ja': 'キーボードは大文字だけです。アンダースコアで直前の一文字を消し、アットマークで行を捨て、Ctrl-C で実行中のプログラムを止めます。',
+        'ko': '키보드는 대문자뿐입니다. 밑줄은 마지막 글자를 지우고, @는 줄 전체를 버리고, Ctrl-C는 실행 중인 프로그램을 멈춥니다.',
+    },
+
+    'basic-note': {
+        'en': 'What the LOAD button skips: on a real Altair you first toggled a 28 byte boot loader in through the front panel, one byte at a time, then started the paper tape reader and waited about seven minutes while BASIC clattered in. Get one switch wrong and you did it again.',
+        'es': 'Lo que se salta el botón CARGAR: en un Altair real primero introducías con los interruptores un cargador de 28 bytes, byte a byte, luego arrancabas el lector de cinta y esperabas unos siete minutos mientras BASIC entraba traqueteando. Un interruptor mal puesto y vuelta a empezar.',
+        'fr': 'Ce que le bouton CHARGER escamote : sur un vrai Altair, vous saisissiez d\'abord un chargeur de 28 octets aux interrupteurs, octet par octet, puis vous lanciez le lecteur de bande et attendiez sept minutes pendant que BASIC entrait en cliquetant. Un seul interrupteur de travers et on recommençait.',
+        'de': 'Was der LADEN-Knopf überspringt: an einem echten Altair gaben Sie zuerst einen 28 Byte langen Urlader über die Kippschalter ein, Byte für Byte, starteten dann den Lochstreifenleser und warteten etwa sieben Minuten, während BASIC hereinratterte. Ein falscher Schalter, und Sie fingen von vorn an.',
+        'it': 'Quello che il pulsante CARICA salta: su un Altair vero inserivi prima con gli interruttori un boot loader di 28 byte, un byte alla volta, poi avviavi il lettore di nastro e aspettavi circa sette minuti mentre BASIC entrava sferragliando. Un interruttore sbagliato e si ricominciava.',
+        'zh': '“加载”按钮替你省掉的事：在真正的 Altair 上，你得先用前面板开关一个字节一个字节地输入 28 字节的引导程序，然后启动纸带阅读机，听着 BASIC 哗啦啦读上大约七分钟。有一个开关拨错，就得从头再来。',
+        'zh-TW': '「載入」按鈕替你省掉的事：在真正的 Altair 上，你得先用前面板開關一個位元組一個位元組地輸入 28 位元組的載入程式，然後啟動紙帶閱讀機，聽著 BASIC 嘩啦啦讀上大約七分鐘。有一個開關撥錯，就得從頭再來。',
+        'ja': '「読み込む」ボタンが省いていること。本物の Altair では、まず 28 バイトのブートローダーをフロントパネルのスイッチで一バイトずつ入力し、それから紙テープリーダーを回して、BASIC がガチャガチャと入ってくるのを七分ほど待ちました。スイッチを一つ間違えれば、最初からやり直しです。',
+        'ko': 'LOAD 버튼이 건너뛴 것: 진짜 Altair에서는 먼저 28바이트짜리 부트로더를 앞판 스위치로 한 바이트씩 입력하고, 종이 테이프 리더를 돌린 뒤, BASIC이 달그락거리며 들어오는 7분을 기다렸습니다. 스위치 하나만 틀려도 처음부터 다시였습니다.',
+    },
+
     'reference-title': {
         'en': 'References',
         'es': 'Referencias',
@@ -895,6 +1123,27 @@ l10n.restoreLocale = function() {
 };
 
 /**
+ * Called after every locale change, for text the page sets at runtime
+ * and so cannot be reached through an element id.
+ * @type {?function()}
+ */
+l10n.onUpdate = null;
+
+/**
+ * Looks up one message in the current locale.
+ * @param {string} id The message id.
+ * @return {string} The message, falling back to English, then to ''.
+ */
+l10n.getMessage = function(id) {
+    const entry = l10n.MESSAGES[id];
+    if (!entry) {
+        return '';
+    }
+    const locale = l10n.LOCALES[l10n.current];
+    return entry.hasOwnProperty(locale) ? entry[locale] : entry['en'];
+};
+
+/**
  * Updates UI messages to the current locale.
  */
 l10n.updateMessages = function() {
@@ -917,13 +1166,11 @@ l10n.updateMessages = function() {
     elems = document.getElementsByClassName('l10n');
     for (let i = 0; i < elems.length; i++) {
         if (l10n.MESSAGES.hasOwnProperty(elems[i].id)) {
-            var msg = '';
-            if (l10n.MESSAGES[elems[i].id].hasOwnProperty(locale)) {
-                msg = l10n.MESSAGES[elems[i].id][locale];
-            } else {
-                msg = l10n.MESSAGES[elems[i].id]['en'];
-            }
-            elems[i].innerHTML = msg;
+            elems[i].innerHTML = l10n.getMessage(elems[i].id);
         }
+    }
+
+    if (l10n.onUpdate) {
+        l10n.onUpdate();
     }
 };
