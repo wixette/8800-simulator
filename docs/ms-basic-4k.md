@@ -567,8 +567,15 @@ compared this run with the last one. [D15](#d15--one-status-line-at-the-foot-of-
 covers the confusion this might otherwise cause, by saying what just
 happened rather than wiping the evidence of it.
 
-*If this is ever reversed*, the place to do it is `panel.onPowerOff`,
-and it is one line.
+*The one gap, known and accepted for now:* reloading the page does
+clear the paper, because nothing outside the tab holds it. So the rule
+a user actually experiences is "the paper survives everything except a
+reload", which is a slightly odd rule to have to learn. Reviewed and
+kept as it is; the fix, if it ever matters, is to keep the roll in
+`localStorage` so that the model has no exception in it.
+
+*If this is ever reversed* — power off tearing the paper off — the
+place to do it is `panel.onPowerOff`, and it is one line.
 
 ### D12 — Tell the paper-tape story
 
