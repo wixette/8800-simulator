@@ -5,6 +5,6 @@
   "description": "A JavaScript simulator to demonstrate the front panel operations of Altair 8800.",
   "license": "Apache-2.0",
   "scripts": {
-    "test": "node --test \"tests/**/*.test.js\""
+    "test": "node --test"
   }
 }

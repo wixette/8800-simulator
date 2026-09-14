@@ -3,7 +3,7 @@
  * the front panel controls, the CPU wiring and single stepping. The
  * example programs themselves are covered by examples.test.js.
  *
- * Run with: node --test tests/
+ * Run with: npm test
  */
 'use strict';
 

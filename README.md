@@ -1,5 +1,7 @@
 # Altair 8800 simulator.
 
+[![Tests](https://github.com/wixette/8800-simulator/actions/workflows/test.yml/badge.svg)](https://github.com/wixette/8800-simulator/actions/workflows/test.yml)
+
 A JavaScript simulator to demonstrate the front panel operations of Altair 8800.
 
 ## Usage
@@ -65,6 +67,17 @@ Small 8080 programs to try on the simulator, from a two instruction
 I/O echo to the 1975 game *Kill the Bit*, are in
 [examples/](examples/), each with a listing and instructions for
 loading it. They double as the golden set the tests run against.
+
+## Tests
+
+```
+npm test
+```
+
+Node.js 20 or newer, no dependencies to install. The suite covers the
+8080 CPU, the front panel, and every program in
+[examples/](examples/). It runs on each push and pull request against
+Node 20, 22 and 24.
 
 ## References
 
