@@ -111,6 +111,100 @@ panel.onFillZero = function() {
 };
 
 /**
+ * The memory sizes the machine can be built with. 256 bytes is the
+ * Altair as it shipped; the larger two are one and two 88-4MCS static
+ * memory boards. See docs/ms-basic-4k.md.
+ * @type {Array<number>}
+ */
+panel.MEM_SIZES = [256, 4096, 8192];
+
+/**
+ * When one of the installed-memory buttons is pressed. Installing
+ * memory switches the machine off, the way opening the case would.
+ * @param {number} memSize The new memory size, in bytes.
+ */
+panel.onSetMemSize = function(memSize) {
+    if (memSize == panel.sim.mem.length)
+        return;
+    panel.sim.setMemSize(memSize);
+    // setMemSize powered the machine down; show that on the panel.
+    panel.isPoweredOn = false;
+    panel.switchUp('off-on');
+    panel.updateMemoryControls();
+};
+
+/**
+ * Keeps the memory controls in step with the machine: which size is
+ * installed, and whether there is more memory than one window shows.
+ */
+panel.updateMemoryControls = function() {
+    var memSize = panel.sim.mem.length;
+    for (let i = 0; i < panel.MEM_SIZES.length; i++) {
+        let elem = document.getElementById('mem-size-' + panel.MEM_SIZES[i]);
+        if (elem) {
+            elem.classList.toggle('selected', panel.MEM_SIZES[i] == memSize);
+        }
+    }
+    var controls = document.getElementById('mem-window-controls');
+    if (controls) {
+        // On the 256 byte machine the window is the whole machine, so
+        // there is nothing to navigate.
+        controls.style.display =
+            memSize > Sim8800.DUMP_WINDOW_SIZE ? 'flex' : 'none';
+    }
+    var follow = document.getElementById('mem-follow-pc');
+    if (follow) {
+        follow.classList.toggle('selected', panel.sim.followPc);
+    }
+    panel.updateMemWindowLabel();
+};
+
+/**
+ * Shows which window of memory the dump is printing.
+ */
+panel.updateMemWindowLabel = function() {
+    var label = document.getElementById('mem-window-label');
+    if (!label)
+        return;
+    var window = panel.sim.getDumpWindow();
+    label.textContent = Sim8800.toHex(window.start, 4) + ' - ' +
+        Sim8800.toHex(window.end - 1, 4);
+};
+
+/**
+ * Steps the memory dump's window one page back or forward.
+ * @param {number} direction -1 for back, 1 for forward.
+ */
+panel.onMemPage = function(direction) {
+    var window = panel.sim.getDumpWindow();
+    panel.sim.setFollowPc(false);
+    panel.sim.setDumpWindow(
+        window.start + direction * Sim8800.DUMP_WINDOW_SIZE);
+    panel.updateMemoryControls();
+};
+
+/**
+ * When FOLLOW PC is pressed.
+ */
+panel.onToggleFollowPc = function() {
+    panel.sim.setFollowPc(!panel.sim.followPc);
+    panel.updateMemoryControls();
+};
+
+/**
+ * When a cell of the memory map is clicked, moves the window there.
+ * @param {Event} event The click event.
+ */
+panel.onMemMapClick = function(event) {
+    var cell = event.target;
+    if (!cell || !cell.classList || !cell.classList.contains('mem-page'))
+        return;
+    panel.sim.setFollowPc(false);
+    panel.sim.setDumpWindow(parseInt(cell.dataset.address, 10));
+    panel.updateMemoryControls();
+};
+
+/**
  * When CPU sets the address LEDs.
  */
 panel.setAddressLedsCallback = function(bits) {
@@ -191,6 +285,9 @@ panel.dumpCpuCallback = function(dumpHtml) {
 panel.dumpMemCallback = function(dumpHtml) {
     var dumpMemElem = document.getElementById('mem-dump');
     dumpMemElem.innerHTML = dumpHtml;
+    // FOLLOW PC moves the window on its own, so the label has to be
+    // refreshed with the dump rather than only when a button is hit.
+    panel.updateMemWindowLabel();
 };
 
 /**
@@ -694,6 +791,26 @@ panel.init = function() {
     // Adds handler for 'ZERO ALL MEMORY' Button 
     // (it doesn't have a corresponding switch on the actual machine)
     document.getElementById('debug-fill-zero').addEventListener('click', panel.onFillZero)
+
+    // Installed memory, and the controls for the memory dump's window.
+    for (let i = 0; i < panel.MEM_SIZES.length; i++) {
+        let memSize = panel.MEM_SIZES[i];
+        let elem = document.getElementById('mem-size-' + memSize);
+        elem.addEventListener('click', function() {
+            panel.onSetMemSize(memSize);
+        }, false);
+    }
+    document.getElementById('mem-page-prev').addEventListener(
+        'click', function() { panel.onMemPage(-1); }, false);
+    document.getElementById('mem-page-next').addEventListener(
+        'click', function() { panel.onMemPage(1); }, false);
+    document.getElementById('mem-follow-pc').addEventListener(
+        'click', panel.onToggleFollowPc, false);
+    // The map is rebuilt with every dump, so the listener goes on the
+    // container that survives it.
+    document.getElementById('mem-dump').addEventListener(
+        'click', panel.onMemMapClick, false);
+    panel.updateMemoryControls();
 
 };
 

@@ -378,3 +378,128 @@ test('a dump flush on a powered off machine stays blank', () => {
     assert.strictEqual(state.memDump, '');
     assert.strictEqual(state.cpuDump, '');
 });
+
+/**
+ * Phase 2: the installed memory size, and the memory dump's window.
+ */
+
+/** The hex part of a memory dump, without the map strip above it. */
+function hexOf(memDump) {
+    return memDump.split('<pre>')[1] || '';
+}
+
+/** Powers a machine of the given size on, zeroed, LED blink flushed. */
+function sizedSim(memSize) {
+    const fixture = createSim(memSize);
+    fixture.sim.powerOn();
+    flushTimers();
+    fixture.sim.initMem(false);
+    return fixture;
+}
+
+test('setMemSize installs memory and switches the machine off', () => {
+    const {sim, state} = poweredOnSim();
+    assert.strictEqual(sim.mem.length, 256);
+
+    sim.setDumpWindow(0);
+    sim.setMemSize(4096);
+    assert.strictEqual(sim.mem.length, 4096);
+    // You cannot add a board to a running machine.
+    assert.strictEqual(sim.isPoweredOn, false);
+    assert.strictEqual(state.memDump, '');
+    assert.strictEqual(sim.dumpWindow, 0);
+    // The new memory comes up with garbage in it, like the real thing.
+    assert.ok(sim.mem.every((b) => Number.isInteger(b) && b >= 0 && b <= 255));
+});
+
+test('setMemSize to the size already installed does nothing', () => {
+    const {sim} = poweredOnSim();
+    sim.setMemSize(256);
+    assert.strictEqual(sim.isPoweredOn, true, 'no pointless power cycle');
+});
+
+test('the 256 byte machine still dumps whole, with no map', () => {
+    const {sim, state} = poweredOnSim();
+    sim.flushDump(true);
+    assert.ok(!state.memDump.includes('mem-map'),
+              'nothing to navigate, so no map strip');
+    assert.ok(hexOf(state.memDump).includes('0000'));
+    assert.ok(hexOf(state.memDump).includes('00F0'), 'the last line is shown');
+    assert.deepStrictEqual(sim.getDumpWindow(), {start: 0, end: 256});
+});
+
+test('a larger machine dumps one window, with a map of the rest', () => {
+    const {sim, state} = sizedSim(8192);
+    sim.flushDump(true);
+
+    // One cell per 256 byte page: 8192 / 256 = 32.
+    assert.strictEqual((state.memDump.match(/class="mem-page/g) || []).length,
+                       32);
+    // One window of hex, not the whole machine.
+    assert.ok(hexOf(state.memDump).includes('0000'));
+    assert.ok(hexOf(state.memDump).includes('00F0'));
+    assert.ok(!hexOf(state.memDump).includes('0100'),
+              'the window stops after 256 bytes');
+
+    sim.setDumpWindow(0x0f40);
+    sim.flushDump(true);
+    assert.deepStrictEqual(sim.getDumpWindow(), {start: 0x0f00, end: 0x1000},
+                           'the window aligns down to a page');
+    assert.ok(hexOf(state.memDump).includes('0F00'));
+    assert.ok(!hexOf(state.memDump).includes('0000'),
+              'and only that window');
+});
+
+test('the dump window is clamped to the installed memory', () => {
+    const {sim} = sizedSim(4096);
+    sim.setDumpWindow(0x99999);
+    assert.deepStrictEqual(sim.getDumpWindow(), {start: 0x0f00, end: 0x1000});
+    sim.setDumpWindow(-100);
+    assert.deepStrictEqual(sim.getDumpWindow(), {start: 0, end: 256});
+});
+
+test('FOLLOW PC moves the window to wherever the CPU is', () => {
+    const {sim} = sizedSim(8192);
+    // JMP 0500h, then sit in a loop there.
+    sim.loadDataAsHexString(0, 'c3 00 05');
+    sim.loadDataAsHexString(0x0500, 'c3 00 05');
+    sim.setDumpWindow(0x1000);
+    assert.strictEqual(sim.getDumpWindow().start, 0x1000);
+
+    sim.setFollowPc(true);
+    sim.step(40);
+    assert.strictEqual(sim.getDumpWindow().start, 0x0500,
+                       'the window followed the PC');
+
+    // Turning it off leaves the window wherever it was pointed.
+    sim.setFollowPc(false);
+    sim.setDumpWindow(0x0200);
+    sim.step(40);
+    assert.strictEqual(sim.getDumpWindow().start, 0x0200);
+});
+
+test('the dump marks the bytes at PC and SP, and their pages', () => {
+    const {sim, state} = sizedSim(4096);
+    // LXI SP,0080h - puts the stack pointer somewhere findable.
+    sim.loadDataAsHexString(0, '31 80 00 00');
+    sim.step(20);
+    sim.flushDump(true);
+
+    assert.ok(/<span class="at-pc">[0-9A-F]{2}<\/span>/.test(state.memDump),
+              'the byte at PC is marked');
+    assert.ok(/<span class="at-sp">[0-9A-F]{2}<\/span>/.test(state.memDump),
+              'the byte at SP is marked');
+    // Both live in page 0 here, so that cell carries both marks.
+    assert.ok(/class="mem-page mem-page-\d mem-page-shown mem-page-pc mem-page-sp"/
+              .test(state.memDump));
+});
+
+test('map cells carry the address they jump to', () => {
+    const {sim, state} = sizedSim(4096);
+    sim.flushDump(true);
+    const addresses = [...state.memDump.matchAll(/data-address="(\d+)"/g)]
+          .map((m) => Number(m[1]));
+    assert.strictEqual(addresses.length, 16);
+    assert.strictEqual(addresses[0], 0);
+    assert.strictEqual(addresses[15], 0x0f00);
+});

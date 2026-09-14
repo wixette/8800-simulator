@@ -4,8 +4,8 @@ This records the investigation behind extending the simulator beyond
 its 256-byte memory so that it can run Microsoft's *Altair BASIC 3.2
 (4K Edition)*, and every design decision taken along the way.
 
-**Phase 1 is implemented** ([Part 6](#part-6--implementation-plan));
-the rest is not. The document exists so that the implementation does
+**Phases 1 and 2 are implemented**
+([Part 6](#part-6--implementation-plan)); the rest is not. The document exists so that the implementation does
 not have to rediscover any of it, and so that the reasoning stays
 visible if we later change our minds.
 
@@ -365,11 +365,24 @@ in 16 lines** — the same visual object the student already knows —
 plus:
 
 - a **memory map strip** above it: one cell per 256-byte page, shaded
-  by how much of the page is non-zero, with markers for PC, SP and HL.
-  Click a cell to move the window.
+  in four levels by how much of the page is non-zero, outlined on the
+  page being shown, and marked where PC and SP are. Click a cell to
+  move the window.
 - a **follow-PC toggle**.
-- highlighting of the bytes at PC and SP inside the window.
+- highlighting of the bytes at PC and SP inside the window. Applied at
+  every size, including 256 B, where watching PC walk through the
+  dump is worth having on its own.
 - the window defaults to the first 256 bytes.
+
+*As built,* the shading tells the intended story only on a machine
+that was zeroed first: ZERO ALL MEMORY, then load BASIC on a 4 KB
+machine, and the strip reads `█▓█████████████ ` — fifteen of sixteen
+pages full, one left over. That is D3's lesson in one line of pixels.
+A machine straight from power-on is full of random bytes and reads as
+solid, and after BASIC has run its memory probe every page has been
+written, so it reads solid again. Both are truthful; neither is the
+picture worth teaching from, so the tutorial should say to zero memory
+first.
 
 *Why:* it preserves the "one screen shows the whole machine" property
 that is the best thing about the current debugger, and it adds the
@@ -644,7 +657,7 @@ columns, so it exercises the terminal's line wrap. Useful from day one.
 | Phase | Work | Notes |
 | --- | --- | --- |
 | 1 ✅ | Port device table ([D6](#d6--ports-become-a-device-table)); bounded memory ([D2](#d2--bounded-memory-no-wrapping)); coalesced dumps ([D5](#d5--dumps-are-coalesced-and-skipped-when-hidden)) | **Done.** 8 new tests, 58 passing. BASIC now boots through an unmodified `Sim8800` given only two `attachDevice()` calls |
-| 2 | RAM selector ([D3](#d3--ram-size-is-an-explicit-visible-act)); windowed dump and map strip ([D4](#d4--the-memory-dump-is-windowed-never-grown)) | The pedagogical piece |
+| 2 ✅ | RAM selector ([D3](#d3--ram-size-is-an-explicit-visible-act)); windowed dump and map strip ([D4](#d4--the-memory-dump-is-windowed-never-grown)) | **Done.** 8 more tests, 67 passing. Both live in the Debug tab; three new l10n keys across nine locales |
 | 3 | `js/sio.js` ([D7](#d7--an-88-sio-device-on-ports-00h01h)); Teletype tab ([Part 3](#part-3--the-teletype-tab)); LED repeater ([D9](#d9--an-led-repeater-strip-on-the-teletype-tab)); l10n ([D13](#d13--nine-locales-as-usual)); the four example programs | Biggest chunk |
 | 4 | ROM loader and `roms/` ([D1](#d1--ship-the-rom-in-roms-with-a-notice)); BASIC tutorial section; the paper-tape story ([D12](#d12--tell-the-paper-tape-story)) | |
 
@@ -699,8 +712,9 @@ Phase 1 is worth doing whatever we decide about BASIC.
    ([Part 3](#part-3--the-teletype-tab)).
 2. Whether to add the 88-2SIO at `10h`/`11h` in Phase 3 or later
    ([D7](#d7--an-88-sio-device-on-ports-00h01h)).
-3. Whether the RAM selector and the ROM loader live in the Debug tab
-   or somewhere of their own.
+3. Where the **ROM loader** lives. The RAM selector went in the Debug
+   tab (see Closed, below); the loader probably belongs beside it, but
+   that is Phase 4's call.
 4. **The clock rate, noted but deliberately out of scope.**
    `panel.js` constructs `Sim8800` with `1000000 /* 1MHz */`, but the
    Altair 8800's 8080 ran at 2 MHz, which is what s2js uses. BASIC
@@ -716,6 +730,10 @@ Phase 1 is worth doing whatever we decide about BASIC.
   16 KB rung was dropped. Measurements and reasoning in
   [1.6](#16-what-fits-at-each-size) and
   [D3](#d3--ram-size-is-an-explicit-visible-act).
+- **Where the RAM selector lives.** The Debug tab, above the memory
+  dump, under an *Installed Memory* heading. That is the tab memory is
+  already discussed on, and where the effect of the choice — the dump
+  and the map strip — is visible. The Sim tab stays the machine.
 
 ---
 

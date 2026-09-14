@@ -204,6 +204,42 @@ l10n.MESSAGES = {
         'ko': '8080 CPU 상태',
     },
 
+    'debug-memory-title': {
+        'en': 'Installed Memory',
+        'es': 'Memoria instalada',
+        'fr': 'Mémoire installée',
+        'de': 'Installierter Speicher',
+        'it': 'Memoria installata',
+        'zh': '已安装的内存',
+        'zh-TW': '已安裝的記憶體',
+        'ja': '搭載メモリ',
+        'ko': '설치된 메모리',
+    },
+
+    'debug-memory-comment': {
+        'en': 'Memory came on boards, and you cannot add one to a running machine: changing this switches the Altair off. 256 B is the base machine, 4 KB adds an 88-4MCS board, 8 KB two of them.',
+        'es': 'La memoria venía en placas, y no se puede añadir una a una máquina encendida: cambiar esto apaga el Altair. 256 B es la máquina básica, 4 KB añade una placa 88-4MCS, 8 KB dos de ellas.',
+        'fr': 'La mémoire se présentait sous forme de cartes, et on ne peut pas en ajouter à une machine en marche : modifier ce réglage éteint l\'Altair. 256 o correspond à la machine de base, 4 Kio ajoutent une carte 88-4MCS, 8 Kio deux.',
+        'de': 'Speicher kam auf Steckkarten, und eine davon lässt sich nicht im laufenden Betrieb einbauen: Diese Änderung schaltet den Altair aus. 256 B ist die Grundmaschine, 4 KB fügen eine 88-4MCS-Karte hinzu, 8 KB zwei davon.',
+        'it': 'La memoria arrivava su schede, e non se ne può aggiungere una a macchina accesa: cambiare questa impostazione spegne l\'Altair. 256 B è la macchina base, 4 KB aggiungono una scheda 88-4MCS, 8 KB due.',
+        'zh': '内存以扩展板的形式提供，而且不能给运行中的机器加装：修改这里会关闭 Altair。256 B 是基础机型，4 KB 相当于加装一块 88-4MCS 板，8 KB 则是两块。',
+        'zh-TW': '記憶體以擴充卡的形式提供，而且無法為運行中的機器加裝：修改這裡會關閉 Altair。256 B 是基礎機型，4 KB 相當於加裝一塊 88-4MCS 卡，8 KB 則是兩塊。',
+        'ja': 'メモリはボードで供給され、動作中のマシンには追加できません。ここを変更すると Altair の電源が切れます。256 B は基本構成、4 KB は 88-4MCS ボード 1 枚、8 KB は 2 枚に相当します。',
+        'ko': '메모리는 보드 형태로 제공되었고, 켜져 있는 기계에는 추가할 수 없습니다. 이 설정을 바꾸면 Altair의 전원이 꺼집니다. 256 B는 기본 기계, 4 KB는 88-4MCS 보드 한 장, 8 KB는 두 장입니다.',
+    },
+
+    'mem-follow-pc': {
+        'en': 'FOLLOW PC',
+        'es': 'SEGUIR PC',
+        'fr': 'SUIVRE PC',
+        'de': 'PC FOLGEN',
+        'it': 'SEGUI PC',
+        'zh': '跟随 PC',
+        'zh-TW': '跟隨 PC',
+        'ja': 'PC を追う',
+        'ko': 'PC 따라가기',
+    },
+
     'debug-mem-dump-title': {
         'en': 'Memory Dump',
         'es': 'Volcado de memoria',
