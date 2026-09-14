@@ -1057,7 +1057,6 @@ panel.init = function() {
     button.addEventListener('click', panel.showTabDebug, false);
     button = document.getElementById('nav-ref');
     button.addEventListener('click', panel.showTabRes, false);
-    panel.showTabSim();
 
     // Initializes event listener for debug controls.
     button = document.getElementById('debug-load-data');
@@ -1152,6 +1151,9 @@ panel.init = function() {
     // The machine comes up switched off, and the empty dump and dark
     // panel should say why rather than look broken.
     panel.setStatus('status-off');
+    // Last, because showing a tab refreshes what is on it, and that
+    // needs the simulator and the teletype to exist first.
+    panel.showTab(panel.readSavedTab());
 };
 
 /**
@@ -1535,11 +1537,51 @@ panel.highlightNavTab = function(elem, highlight) {
 panel.TABS = ['sim', 'tty', 'debug', 'ref'];
 
 /**
+ * Where the chosen tab is remembered between visits.
+ *
+ * Only the tab is kept, in the same spirit as the chosen language:
+ * these are preferences about the view, not state belonging to the
+ * machine. Reloading the page reruns the simulator - the power comes
+ * back off, memory comes back up full of noise and the paper comes
+ * back blank - and pretending otherwise would take saving the whole
+ * machine, which is a different and much larger promise.
+ * @type {string}
+ */
+panel.tabStorageKey = 'sim8800tab';
+
+/**
+ * Remembers the tab on screen.
+ * @param {string} name One of panel.TABS.
+ */
+panel.saveTab = function(name) {
+    try {
+        localStorage.setItem(panel.tabStorageKey, name);
+    } catch (e) {
+        // Site data is blocked, so the choice is not remembered. The
+        // simulator itself works either way.
+    }
+};
+
+/**
+ * @return {string} The tab to open on, defaulting to the front panel.
+ */
+panel.readSavedTab = function() {
+    var name = null;
+    try {
+        name = localStorage.getItem(panel.tabStorageKey);
+    } catch (e) {
+        name = null;
+    }
+    return panel.TABS.indexOf(name) < 0 ? 'sim' : name;
+};
+
+/**
  * Shows one tab and hides the others.
  * @param {string} name One of panel.TABS.
  */
 panel.showTab = function(name) {
     panel.currentTab = name;
+    panel.saveTab(name);
     panel.isDebugTabVisible = name == 'debug';
     panel.isTtyTabVisible = name == 'tty';
     for (let i = 0; i < panel.TABS.length; i++) {
