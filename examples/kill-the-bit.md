@@ -10,7 +10,7 @@ listing is at <https://altairclone.com/downloads/killbits.pdf>.
 The game exposed a real bug in this simulator, since fixed: it has no
 output instruction at all, and depends on a hardware side effect of the
 machine that the simulator did not model. That story is in
-[../docs/kill_the_bit.md](../docs/kill_the_bit.md).
+[../docs/kill-the-bit.md](../docs/kill-the-bit.md).
 
 ## How to run it
 
