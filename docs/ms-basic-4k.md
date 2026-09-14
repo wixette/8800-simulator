@@ -4,8 +4,9 @@ This records the investigation behind extending the simulator beyond
 its 256-byte memory so that it can run Microsoft's *Altair BASIC 3.2
 (4K Edition)*, and every design decision taken along the way.
 
-**Phases 1 and 2 are implemented**
-([Part 6](#part-6--implementation-plan)); the rest is not. The document exists so that the implementation does
+**Phases 1 to 3 are implemented**
+([Part 6](#part-6--implementation-plan)); only Phase 4, the ROM loader
+itself, is left. The document exists so that the implementation does
 not have to rediscover any of it, and so that the reasoning stays
 visible if we later change our minds.
 
@@ -658,7 +659,7 @@ columns, so it exercises the terminal's line wrap. Useful from day one.
 | --- | --- | --- |
 | 1 ✅ | Port device table ([D6](#d6--ports-become-a-device-table)); bounded memory ([D2](#d2--bounded-memory-no-wrapping)); coalesced dumps ([D5](#d5--dumps-are-coalesced-and-skipped-when-hidden)) | **Done.** 8 new tests, 58 passing. BASIC now boots through an unmodified `Sim8800` given only two `attachDevice()` calls |
 | 2 ✅ | RAM selector ([D3](#d3--ram-size-is-an-explicit-visible-act)); windowed dump and map strip ([D4](#d4--the-memory-dump-is-windowed-never-grown)) | **Done.** 8 more tests, 67 passing. Both live in the Debug tab; three new l10n keys across nine locales |
-| 3 | `js/sio.js` ([D7](#d7--an-88-sio-device-on-ports-00h01h)); Teletype tab ([Part 3](#part-3--the-teletype-tab)); LED repeater ([D9](#d9--an-led-repeater-strip-on-the-teletype-tab)); l10n ([D13](#d13--nine-locales-as-usual)); the four example programs | Biggest chunk |
+| 3 ✅ | `js/sio.js` ([D7](#d7--an-88-sio-device-on-ports-00h01h)); Teletype tab ([Part 3](#part-3--the-teletype-tab)); LED repeater ([D9](#d9--an-led-repeater-strip-on-the-teletype-tab)); l10n ([D13](#d13--nine-locales-as-usual)); the four example programs | **Done.** 16 more tests, 97 passing. Also `js/teletype.js` for the paper, and a `DB` directive in the listing format so an example can carry data |
 | 4 | ROM loader and `roms/` ([D1](#d1--ship-the-rom-in-roms-with-a-notice)); BASIC tutorial section; the paper-tape story ([D12](#d12--tell-the-paper-tape-story)) | |
 
 **Phase 3 can move ahead of Phase 2.** The teletype earns its place at
@@ -701,21 +702,30 @@ Phase 1 is worth doing whatever we decide about BASIC.
   scripted rx queue and assert that `4823 BYTES FREE` and `OK` appear.
   This was done by hand during the investigation and works. It needs
   the ROM present, so it should skip cleanly when `roms/` is absent.
-- Phase 3 changes the tab strip, so `README.md` and the images under
-  `screenshots/` need updating with it.
+- Phase 3 changed the tab strip, so `README.md` and the images under
+  `screenshots/` need updating; the text is done, the screenshots are
+  not.
+- **A pre-existing quirk the LED repeater made visible.** `reset()`
+  lights every LED and schedules a `setTimeout` 400 ms later to clear
+  them again. If a program is started and writes the data LEDs inside
+  that window, the timeout wipes what it wrote. Found while driving
+  `tty-leds` from a script: type within 400 ms of RESET and the lamps
+  go dark until the next keystroke. By hand it cannot happen — RESET,
+  RUN and then reaching the Teletype tab takes far longer than 400 ms
+  — so it was left alone rather than widening Phase 3. The fix, when
+  someone wants it, is for `start()` to cancel or supersede the
+  pending flash.
 
 ---
 
 ## Part 7 — Open questions
 
-1. **Paper tint or not** — `#e8e2d0` versus plain `#ccc`
-   ([Part 3](#part-3--the-teletype-tab)).
-2. Whether to add the 88-2SIO at `10h`/`11h` in Phase 3 or later
+1. Whether to add the 88-2SIO at `10h`/`11h` in Phase 3 or later
    ([D7](#d7--an-88-sio-device-on-ports-00h01h)).
-3. Where the **ROM loader** lives. The RAM selector went in the Debug
+2. Where the **ROM loader** lives. The RAM selector went in the Debug
    tab (see Closed, below); the loader probably belongs beside it, but
    that is Phase 4's call.
-4. **The clock rate, noted but deliberately out of scope.**
+3. **The clock rate, noted but deliberately out of scope.**
    `panel.js` constructs `Sim8800` with `1000000 /* 1MHz */`, but the
    Altair 8800's 8080 ran at 2 MHz, which is what s2js uses. BASIC
    would boot in 0.46 s rather than ~0.9 s. This is not a blocker —
@@ -734,6 +744,9 @@ Phase 1 is worth doing whatever we decide about BASIC.
   dump, under an *Installed Memory* heading. That is the tab memory is
   already discussed on, and where the effect of the choice — the dump
   and the map strip — is visible. The Sim tab stays the machine.
+- **Paper tint.** Tinted, `#e8e2d0`. Next to the app's other panels it
+  reads immediately as a physical device rather than a screen, which is
+  the point of the tab, and it costs one hex value.
 
 ---
 

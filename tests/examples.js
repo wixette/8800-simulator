@@ -6,6 +6,9 @@
  * name and description, then one line per instruction holding the
  * address, the bytes, an optional label and the source. The bytes in
  * that listing are the program; nothing else stores a copy of them.
+ *
+ * A line whose source is a DB directive is data rather than code, and
+ * is not checked against the disassembler.
  */
 'use strict';
 
@@ -49,10 +52,14 @@ function parseListing(text, id) {
         if (label) {
             labels[label.toUpperCase()] = parseInt(addr, 16);
         }
+        const code = source.replace(/\s*;.*$/, '').trim();
         lines.push({
             address: parseInt(addr, 16),
             bytes: bytes.trim().split(/\s+/).map((b) => parseInt(b, 16)),
-            source: source.replace(/\s*;.*$/, '').trim(),
+            source: code,
+            // A DB line is data - a message, a table - so there is
+            // nothing for the disassembler to check it against.
+            isData: /^DB\b/i.test(code),
         });
     }
     if (!meta.name) {

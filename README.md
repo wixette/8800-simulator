@@ -16,6 +16,10 @@ There is a Debugger tab where you can check the internal status of the simulated
 
 ![8800 Debugger](./screenshots/sim-debug.png)
 
+There is a Teletype tab holding a simulated ASR-33: the paper, its keyboard, and a repeat of the address and data LEDs so a program that prints and lights lamps at once can be watched on one screen. The machine talks to it through an 88-SIO serial board on ports 00H and 01H, so a program has to be running and reading that board before anything appears — nothing echoes by itself. Load [tty-echo](./examples/tty-echo.asm) and RUN it, then type.
+
+[tty-leds](./examples/tty-leds.asm) is the one to start with: eighteen bytes, and pressing A lights `01000001` on the data LEDs while printing the letter on the paper.
+
 The Debugger tab is also where you choose how much memory is installed: 256 bytes as the Altair 8800 shipped, or 4 KB / 8 KB as if you had plugged in one or two 88-4MCS static memory boards. Memory boards are not something you add to a running machine, so changing the size switches the simulator off.
 
 Above 256 bytes the memory dump shows one 256-byte window at a time rather than the whole machine, with a map strip above it — one cell per page, shaded by how much of that page is in use, and marked where the program counter and the stack pointer are. Click a cell to jump the window there, or use FOLLOW PC to let it track the running program.

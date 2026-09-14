@@ -42,6 +42,7 @@
 
       <nav>
         <div id="nav-sim" class="nav-item l10n">Sim</div>
+        <div id="nav-tty" class="nav-item l10n">Teletype</div>
         <div id="nav-debug" class="nav-item l10n">Debug</div>
         <div id="nav-ref" class="nav-item l10n">Ref</div>
       </nav>
@@ -95,6 +96,46 @@
           </div>
         </div>
 
+      </div>
+
+      <div id="tab-tty">
+        <div class="subheader-bar">
+          <div id="tty-title" class="l10n">Teletype (ASR-33)</div>
+        </div>
+        <div id="tty-paper"><pre id="tty-text"></pre></div>
+        <input id="tty-input" class="tty-hidden-input" type="text"
+               autocapitalize="characters" autocomplete="off"
+               autocorrect="off" spellcheck="false" aria-label="Teletype">
+
+        <div id="tty-leds">
+          <div class="tty-led-group">
+            <div class="tty-led-label">A15-A0</div>
+            <div id="tty-address-leds" class="tty-led-row"></div>
+          </div>
+          <div class="tty-led-group">
+            <div class="tty-led-label">D7-D0</div>
+            <div id="tty-data-leds" class="tty-led-row"></div>
+          </div>
+          <div class="tty-led-group">
+            <div class="tty-led-label">WAIT</div>
+            <div id="tty-wait-led" class="tty-led"></div>
+          </div>
+        </div>
+
+        <div class="subheader-bar mt-8">
+          <div id="tty-helper-title" class="l10n">Teletype Helper</div>
+        </div>
+        <div class="h-box justify-start align-items-center">
+          <div id="tty-break" class="button m-8 l10n">CTRL-C (BREAK)</div>
+          <div id="tty-rubout" class="button m-8 l10n">RUBOUT (_)</div>
+          <div id="tty-kill" class="button m-8 l10n">KILL LINE (@)</div>
+          <div id="tty-clear" class="button m-8 l10n">CLEAR PAPER</div>
+        </div>
+        <div id="tty-hint" class="comments l10n">
+          Type here. Nothing echoes by itself - the machine has to be
+          running a program that reads the serial board, so load
+          tty-echo from the examples and RUN it first.
+        </div>
       </div>
 
       <div id="tab-debug">
@@ -236,6 +277,8 @@
     <script src="js/l10n.js"></script>
     <script src="js/8080.js"></script>
     <script src="js/sim8800.js"></script>
+    <script src="js/sio.js"></script>
+    <script src="js/teletype.js"></script>
     <script src="js/panel.js"></script>
     <script>
      (function() {

@@ -12,6 +12,10 @@ carrying its address, its bytes and its source.
 | [io-echo.asm](io-echo.asm) | 7 B | Echoes the sense switches to the data LEDs |
 | [bouncing-light.asm](bouncing-light.asm) | 59 B | A dark bit bounces across the data LEDs, speed set by the switches |
 | [kill-the-bit.asm](kill-the-bit.asm) | 24 B | The 1975 game by Dean McDaniel ([how to play](kill-the-bit.md)) |
+| [tty-echo.asm](tty-echo.asm) | 16 B | Echoes what you type on the teletype |
+| [tty-leds.asm](tty-leds.asm) | 18 B | Echoes it, and shows its ASCII code on the data LEDs |
+| [tty-hello.asm](tty-hello.asm) | 39 B | Prints `HELLO, WORLD!` on the teletype and halts |
+| [tty-ascii.asm](tty-ascii.asm) | 20 B | Prints every printable ASCII character, then halts |
 
 ## Loading a program
 
@@ -25,6 +29,10 @@ pattern-shift   3e 8c d3 ff 0f c3 02 00
 io-echo         db ff d3 ff c3 00 00
 kill-the-bit    21 00 00 16 80 01 0e 00 1a 1a 1a 1a 09 d2 08 00 db ff aa 0f 57 c3 08 00
 bouncing-light  0e ff 16 01 7a fe 80 ca 0f 00 fe 01 c2 12 00 79 2f 4f 79 fe 00 c2 1e 00 7a 17 57 c3 21 00 7a 1f 57 7a 2f d3 ff db ff 3c 06 02 1e ff 1d c2 2c 00 05 c2 2a 00 3d c2 28 00 c3 04 00
+tty-echo        db 00 e6 01 c2 00 00 db 01 e6 7f d3 01 c3 00 00
+tty-leds        db 00 e6 01 c2 00 00 db 01 e6 7f d3 ff d3 01 c3 00 00
+tty-hello       21 17 00 7e b7 ca 16 00 db 00 e6 80 c2 08 00 7e d3 01 23 c3 03 00 76 48 45 4c 4c 4f 2c 20 57 4f 52 4c 44 21 0d 0a 00
+tty-ascii       0e 20 db 00 e6 80 c2 02 00 79 d3 01 0c 79 fe 7f c2 02 00 76
 ```
 
 The authentic way is the front panel, in octal, the way the original
