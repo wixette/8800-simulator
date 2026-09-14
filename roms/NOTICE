@@ -1,0 +1,46 @@
+ROM images distributed with this simulator
+==========================================
+
+The files in this directory are NOT covered by the Apache License 2.0
+that applies to the rest of this repository. They are historical
+software, included so that the simulator can run the programs it was
+built to run. Their copyright belongs to their original owners.
+
+
+4kbas32.bin
+-----------
+
+Altair BASIC version 3.2, 4K edition. Written in 1975 by Bill Gates,
+Paul Allen and Monte Davidoff for MITS, and published by MITS for the
+Altair 8800.
+
+  Size   4096 bytes
+  MD5    8e6f8daa63a8b8b64b26fe36a33bfb95
+  SHA1   6e0d2347a30af5a8b9546a14ddd123e5b46646a4
+  Load   absolute at 0000H, no boot loader needed
+
+Only 0000H-0EFAH (3835 bytes) is program; the rest of the file is zero
+padding up to 4 KB, which becomes BASIC's own workspace.
+
+The copyright in this program is Microsoft's. It has never been
+formally released, and no licence to redistribute it has been granted.
+It is included here on the same footing as the many other Altair
+simulators and preservation archives that carry it: as a historical
+artifact, for study and for running on a simulator of the machine it
+was written for. If you are the rights holder and would rather it were
+not here, please open an issue on the repository and it will be
+removed.
+
+The identical file - byte for byte - can be obtained from:
+
+  https://s2js.com/altair/4kbas32.bin
+  https://github.com/companje/Altair8800  (data/4kbas32.bin)
+
+A near-complete annotated disassembly of this exact version is at
+http://altairbasic.org, which is the best place to start if you want to
+know how it works.
+
+If you would rather not have this file in your copy of the repository,
+delete it. The simulator's LOAD 4K BASIC button will simply report that
+it is missing, and the file picker next to it will still load a copy
+you supply yourself.
