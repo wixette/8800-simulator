@@ -340,3 +340,64 @@ footer {
     display: none;
     margin: 10px 0;
 }
+
+/* The memory map strip above the memory dump: one cell per 256-byte
+   page of memory, so that a machine too large to print on one screen
+   still fits on one screen. See docs/ms-basic-4k.md. */
+.mem-map {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin: 0 0 10px 0;
+}
+
+.mem-page {
+    background-color: #ddd;
+    border-bottom: 3px solid transparent;
+    border-top: 3px solid transparent;
+    cursor: pointer;
+    flex-grow: 1;
+    height: 18px;
+    min-width: 10px;
+}
+
+/* Shaded by how much of the page is not zero, so that the shape of
+   what is loaded - a program, a BASIC interpreter - is visible at a
+   glance. */
+.mem-page-1 { background-color: #bbb; }
+.mem-page-2 { background-color: #999; }
+.mem-page-3 { background-color: #777; }
+.mem-page-4 { background-color: #555; }
+
+/* The page the dump is printing. */
+.mem-page-shown {
+    outline: 2px solid #f90;
+    outline-offset: -2px;
+}
+
+/* Where the program counter and the stack pointer are. */
+.mem-page-pc { border-bottom-color: #c33; }
+.mem-page-sp { border-top-color: #36c; }
+
+/* The same two, on the byte itself inside the dump. */
+.at-pc {
+    background-color: #c33;
+    color: #eee;
+}
+
+.at-sp {
+    background-color: #36c;
+    color: #eee;
+}
+
+/* A button holding a current choice: the installed memory size, or
+   FOLLOW PC while it is on. Matches the selected nav tab. */
+.button.selected {
+    background-color: #f90;
+    font-weight: bold;
+}
+
+#mem-window-label {
+    padding: 0 10px;
+}

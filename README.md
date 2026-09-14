@@ -16,6 +16,10 @@ There is a Debugger tab where you can check the internal status of the simulated
 
 ![8800 Debugger](./screenshots/sim-debug.png)
 
+The Debugger tab is also where you choose how much memory is installed: 256 bytes as the Altair 8800 shipped, or 4 KB / 8 KB as if you had plugged in one or two 88-4MCS static memory boards. Memory boards are not something you add to a running machine, so changing the size switches the simulator off.
+
+Above 256 bytes the memory dump shows one 256-byte window at a time rather than the whole machine, with a map strip above it — one cell per page, shaded by how much of that page is in use, and marked where the program counter and the stack pointer are. Click a cell to jump the window there, or use FOLLOW PC to let it track the running program.
+
 The simulator works fine with modern mobile browsers, except that it is a bit challenging to touch a single switch on the panel on a mobile screen. Although, the helper switch buttons below the panel can be used as an alternative solution.
 
 ![8800 Mobile](./screenshots/sim-mobile.png)

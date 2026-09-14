@@ -78,6 +78,18 @@ class Sim8800 {
          */
         this.dumpFilter = null;
         this.dumpPending = false;
+        /**
+         * First address shown by the memory dump. Only meaningful on a
+         * machine with more memory than one window holds; below that
+         * the window is the whole machine. See dumpMem().
+         * @type {number}
+         */
+        this.dumpWindow = 0;
+        /**
+         * Whether the memory dump follows the program counter.
+         * @type {boolean}
+         */
+        this.followPc = false;
         this.initMem();
         this.attachDevice(Sim8800.FRONT_PANEL_PORT,
                           this.createFrontPanelDevice());
@@ -160,25 +172,133 @@ class Sim8800 {
     }
 
     /**
+     * Installs a different amount of memory.
+     *
+     * A memory board is not something you add to a running machine, so
+     * this powers the simulator off. The caller turns it back on, the
+     * same way you would have after opening the case.
+     * @param {number} memSize The new memory size, in bytes.
+     */
+    setMemSize(memSize) {
+        if (memSize == this.mem.length)
+            return;
+        this.powerOff();
+        this.mem = new Array(memSize);
+        this.initMem();
+        this.dumpWindow = 0;
+        this.lastAddress = 0;
+    }
+
+    /**
+     * Moves the memory dump's window.
+     * @param {number} address Any address inside the wanted window; the
+     *     window is aligned down to a multiple of its size.
+     */
+    setDumpWindow(address) {
+        var size = Sim8800.DUMP_WINDOW_SIZE;
+        var top = Math.max(this.mem.length - size, 0);
+        address = Math.min(Math.max(address, 0), top);
+        this.dumpWindow = address - (address % size);
+        this.requestDump();
+    }
+
+    /**
+     * Turns "follow the program counter" on or off for the memory dump.
+     * @param {boolean} followPc Whether to follow.
+     */
+    setFollowPc(followPc) {
+        this.followPc = followPc;
+        this.requestDump();
+    }
+
+    /**
+     * The window of memory the dump is currently showing.
+     * @return {{start: number, end: number}} Half open byte range.
+     */
+    getDumpWindow() {
+        var size = Sim8800.DUMP_WINDOW_SIZE;
+        if (this.mem.length <= size)
+            return {start: 0, end: this.mem.length};
+        var start = this.dumpWindow;
+        if (this.followPc) {
+            let pc = CPU8080.status().pc;
+            if (pc < this.mem.length) {
+                start = pc - (pc % size);
+            }
+        }
+        start = Math.min(start, this.mem.length - size);
+        return {start: start, end: start + size};
+    }
+
+    /**
+     * Builds the memory map strip: one cell per window-sized page of
+     * memory, shaded by how much of the page is not zero, marked where
+     * the program counter and the stack pointer are, and outlined on
+     * the page the dump is showing. It is how a machine too big to
+     * print on one screen still fits on one screen.
+     * @param {{start: number, end: number}} window The shown window.
+     * @param {Object} cpu The CPU status.
+     * @return {string} The HTML.
+     */
+    buildMemMap(window, cpu) {
+        var size = Sim8800.DUMP_WINDOW_SIZE;
+        var sb = ['<div class="mem-map">'];
+        for (let page = 0; page * size < this.mem.length; page++) {
+            let base = page * size;
+            let used = 0;
+            for (let i = base; i < Math.min(this.mem.length, base + size); i++) {
+                if (this.mem[i]) used++;
+            }
+            let level = used == 0 ? 0 : Math.min(4, Math.ceil(used / size * 4));
+            let classes = ['mem-page', 'mem-page-' + level];
+            if (base == window.start) classes.push('mem-page-shown');
+            if (cpu.pc >= base && cpu.pc < base + size) classes.push('mem-page-pc');
+            if (cpu.sp >= base && cpu.sp < base + size) classes.push('mem-page-sp');
+            sb.push('<span class="' + classes.join(' ') +
+                    '" data-address="' + base + '" title="' +
+                    Sim8800.toHex(base, 4) + '"></span>');
+        }
+        sb.push('</div>\n');
+        return sb.join('');
+    }
+
+    /**
      * Dumps the memory to HTML, for debugging or monitoring.
+     *
+     * Only one window of memory is printed, never the whole machine.
+     * On the 256 byte machine the window is the whole machine, so this
+     * prints exactly what it always did; above that the window moves,
+     * and the map strip above it shows where in the address space you
+     * are looking. Printing all of a large memory on every repaint is
+     * what made the debugger unusable past a few hundred bytes.
      */
     dumpMem() {
-        if (this.dumpMemCallback) {
-            var sb = ['<pre>\n'];
-            for (let i = 0; i < this.mem.length; i += 16) {
-                sb.push(Sim8800.toHex(i, 4));
-                sb.push('  ');
-                for (let j = i;
-                     j < Math.min(this.mem.length, i + 16);
-                     j++) {
-                    sb.push(Sim8800.toHex(this.mem[j], 2));
-                    sb.push((j + 1) % 8 == 0 ? '  ' : ' ');
-                }
-                sb.push('\n');
-            }
-            sb.push('</pre>\n');
-            this.dumpMemCallback(sb.join(''));
+        if (!this.dumpMemCallback)
+            return;
+        var cpu = CPU8080.status();
+        var window = this.getDumpWindow();
+        var sb = [];
+        if (this.mem.length > Sim8800.DUMP_WINDOW_SIZE) {
+            sb.push(this.buildMemMap(window, cpu));
         }
+        sb.push('<pre>\n');
+        for (let i = window.start; i < window.end; i += 16) {
+            sb.push(Sim8800.toHex(i, 4));
+            sb.push('  ');
+            for (let j = i; j < Math.min(window.end, i + 16); j++) {
+                let byte = Sim8800.toHex(this.mem[j], 2);
+                if (j == cpu.pc) {
+                    byte = '<span class="at-pc">' + byte + '</span>';
+                } else if (j == cpu.sp) {
+                    byte = '<span class="at-sp">' + byte + '</span>';
+                }
+                sb.push(byte);
+                sb.push((j + 1) % 8 == 0 ? '  ' : ' ');
+            }
+            sb.push('\n');
+        }
+        sb.push('</pre>\n');
+        this.dumpMemCallback(sb.join(''));
     }
 
     /**
@@ -643,6 +763,14 @@ class Sim8800 {
  * @type {number}
  */
 Sim8800.FRONT_PANEL_PORT = 0xff;
+
+/**
+ * How much memory the debugger's memory dump shows at once, and the
+ * size of one cell of the memory map. Sixteen lines of sixteen bytes:
+ * the whole of the 256 byte machine, and one page of anything larger.
+ * @type {number}
+ */
+Sim8800.DUMP_WINDOW_SIZE = 256;
 
 // Exports the class for unit tests when running in Node.js. This has
 // no effect when the script is loaded in a browser.

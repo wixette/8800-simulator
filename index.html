@@ -115,8 +115,29 @@
         <div id="cpu-dump" class="mt-8"></div>
 
         <div class="subheader-bar mt-8">
+          <div id="debug-memory-title" class="l10n">Installed Memory</div>
+        </div>
+        <div class="h-box justify-start mt-8 align-items-center">
+          <div id="mem-size-256" class="button m-8 mem-size">256 B</div>
+          <div id="mem-size-4096" class="button m-8 mem-size">4 KB</div>
+          <div id="mem-size-8192" class="button m-8 mem-size">8 KB</div>
+        </div>
+        <div id="debug-memory-comment" class="comments l10n">
+          Memory came on boards, and you cannot add one to a running
+          machine: changing this switches the Altair off. 256 B is the
+          base machine, 4 KB adds an 88-4MCS board, 8 KB two of them.
+        </div>
+
+        <div class="subheader-bar mt-8">
           <div id="debug-mem-dump-title" class="l10n">Memory Dump</div>
           <div id="debug-fill-zero" class="button m-8">ZERO ALL MEMORY</div>
+        </div>
+        <div id="mem-window-controls"
+             class="h-box justify-start mt-8 align-items-center">
+          <div id="mem-page-prev" class="button m-8">&#9664;</div>
+          <div id="mem-page-next" class="button m-8">&#9654;</div>
+          <div id="mem-follow-pc" class="button m-8 l10n">FOLLOW PC</div>
+          <div id="mem-window-label" class="comments"></div>
         </div>
         <div id="mem-dump" class="mt-8"></div>
       </div>
