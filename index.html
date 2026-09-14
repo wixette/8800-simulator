@@ -30,7 +30,14 @@
         <div id="header-title" class="l10n">
           Sim-8800: Altair 8800 Simulator
         </div>
-        <select id="switch-locale" aria-label="Language"></select>
+        <div id="locale-menu">
+          <button id="switch-locale" type="button" aria-haspopup="listbox"
+                  aria-expanded="false" aria-label="Language">
+            <span id="locale-current">English</span>
+            <span id="locale-arrow" aria-hidden="true">&#9662;</span>
+          </button>
+          <ul id="locale-list" role="listbox" aria-label="Language" hidden></ul>
+        </div>
       </div>
 
       <nav>

@@ -655,22 +655,94 @@ l10n.setLocale = function(locale) {
 };
 
 /**
- * Fills the language menu with the locales, each under its own name.
+ * Fills the language menu with the locales, each under its own name,
+ * and wires it up.
+ *
+ * This is a button and a list rather than a select element because a
+ * native menu is drawn by the operating system, which on macOS puts the
+ * list over the button with the current choice under the pointer. That
+ * cannot be restyled from the page, and it reads as a misplaced popup
+ * here, so the menu is built out of ordinary elements that sit where
+ * they are told.
  */
 l10n.initMenu = function() {
-    const menu = document.getElementById('switch-locale');
-    if (!menu) {
+    const button = document.getElementById('switch-locale');
+    const list = document.getElementById('locale-list');
+    if (!button || !list) {
         return;
     }
+
     for (const locale of l10n.LOCALES) {
-        const option = document.createElement('option');
-        option.value = locale;
-        option.textContent = l10n.LOCALE_NAMES[locale] || locale;
-        menu.appendChild(option);
+        const item = document.createElement('li');
+        item.setAttribute('role', 'option');
+        item.setAttribute('tabindex', '-1');
+        item.dataset.locale = locale;
+        item.textContent = l10n.LOCALE_NAMES[locale] || locale;
+        item.addEventListener('click', function() {
+            l10n.setLocale(locale);
+            l10n.closeMenu();
+        }, false);
+        list.appendChild(item);
     }
-    menu.addEventListener('change', function() {
-        l10n.setLocale(menu.value);
+
+    button.addEventListener('click', function(event) {
+        event.stopPropagation();
+        if (list.hidden) {
+            l10n.openMenu();
+        } else {
+            l10n.closeMenu();
+        }
     }, false);
+
+    // Anywhere else on the page dismisses it.
+    document.addEventListener('click', function(event) {
+        if (!list.hidden && !document.getElementById('locale-menu')
+                .contains(event.target)) {
+            l10n.closeMenu();
+        }
+    }, false);
+
+    // The keys a native menu would have handled by itself.
+    document.addEventListener('keydown', function(event) {
+        if (list.hidden) {
+            return;
+        }
+        const items = Array.from(list.children);
+        const at = items.indexOf(document.activeElement);
+        if (event.key === 'Escape' || event.key === 'Tab') {
+            l10n.closeMenu();
+        } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault();
+            const step = event.key === 'ArrowDown' ? 1 : -1;
+            const next = (at < 0 ? 0 : at + step + items.length) % items.length;
+            items[next].focus();
+        } else if (event.key === 'Enter' || event.key === ' ') {
+            if (at >= 0) {
+                event.preventDefault();
+                l10n.setLocale(items[at].dataset.locale);
+                l10n.closeMenu();
+            }
+        }
+    }, false);
+};
+
+/** Opens the language menu, with the current locale focused. */
+l10n.openMenu = function() {
+    const button = document.getElementById('switch-locale');
+    const list = document.getElementById('locale-list');
+    list.hidden = false;
+    button.setAttribute('aria-expanded', 'true');
+    const current = list.querySelector('[aria-selected="true"]');
+    (current || list.firstElementChild).focus();
+};
+
+/** Closes the language menu and puts focus back on the button. */
+l10n.closeMenu = function() {
+    const button = document.getElementById('switch-locale');
+    const list = document.getElementById('locale-list');
+    list.hidden = true;
+    button.setAttribute('aria-expanded', 'false');
+    button.focus();
 };
 
 /**
@@ -696,10 +768,20 @@ l10n.restoreLocale = function() {
 l10n.updateMessages = function() {
     const locale = l10n.LOCALES[l10n.current];
     document.documentElement.lang = locale;
-    const menu = document.getElementById('switch-locale');
-    if (menu) {
-        menu.value = locale;
+
+    // Keep the language menu showing what is actually selected.
+    const current = document.getElementById('locale-current');
+    if (current) {
+        current.textContent = l10n.LOCALE_NAMES[locale] || locale;
     }
+    const list = document.getElementById('locale-list');
+    if (list) {
+        for (const item of list.children) {
+            item.setAttribute(
+                'aria-selected', item.dataset.locale === locale ? 'true' : 'false');
+        }
+    }
+
     elems = document.getElementsByClassName('l10n');
     for (let i = 0; i < elems.length; i++) {
         if (l10n.MESSAGES.hasOwnProperty(elems[i].id)) {

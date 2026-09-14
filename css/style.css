@@ -126,26 +126,70 @@ main {
     font-weight: bold;
 }
 
+#locale-menu {
+    margin: 20px;
+    /* The list below is positioned against this. */
+    position: relative;
+}
+
 #switch-locale {
+    align-items: center;
     background-color: #369;
     border: none;
     border-radius: 10px;
     color: #6cf;
     cursor: pointer;
+    display: flex;
     font-family: inherit;
     font-size: 12px;
-    margin: 20px;
-    max-width: 40vw;
-    padding: 5px 10px;
-    /* Keep the menu on one line however long the language name is. */
-    text-overflow: ellipsis;
+    /* Roomier on the right so the arrow is not against the edge. */
+    gap: 8px;
+    padding: 6px 12px 6px 14px;
+    user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
 }
 
-#switch-locale option {
-    /* The list itself is drawn by the browser, which does not inherit
-       the blue; give it readable colours of its own. */
+#locale-arrow {
+    font-size: 10px;
+    line-height: 1;
+}
+
+#locale-list {
     background-color: #eee;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
     color: #222;
+    list-style: none;
+    margin: 0;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 4px 0;
+    /* Always directly under the button, never over it, and anchored to
+       its right edge so a long name cannot push the list off screen. */
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    z-index: 10;
+}
+
+#locale-list li {
+    cursor: pointer;
+    font-size: 13px;
+    padding: 7px 18px;
+    white-space: nowrap;
+}
+
+#locale-list li:hover,
+#locale-list li:focus {
+    background-color: #ddd;
+    outline: none;
+}
+
+#locale-list li[aria-selected='true'] {
+    background-color: #369;
+    color: #6cf;
 }
 
 .subheader-bar {
