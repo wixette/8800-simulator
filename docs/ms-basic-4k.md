@@ -4,9 +4,10 @@ This records the investigation behind extending the simulator beyond
 its 256-byte memory so that it can run Microsoft's *Altair BASIC 3.2
 (4K Edition)*, and every design decision taken along the way.
 
-Nothing here has been implemented yet. The document exists so that the
-implementation does not have to rediscover any of it, and so that the
-reasoning stays visible if we later change our minds.
+**Phase 1 is implemented** ([Part 6](#part-6--implementation-plan));
+the rest is not. The document exists so that the implementation does
+not have to rediscover any of it, and so that the reasoning stays
+visible if we later change our minds.
 
 Everything in [Part 1](#part-1--what-was-verified) was verified by
 running the real ROM against this repository's own CPU core, not read
@@ -642,7 +643,7 @@ columns, so it exercises the terminal's line wrap. Useful from day one.
 
 | Phase | Work | Notes |
 | --- | --- | --- |
-| 1 | Port device table ([D6](#d6--ports-become-a-device-table)); bounded memory ([D2](#d2--bounded-memory-no-wrapping)); coalesced dumps ([D5](#d5--dumps-are-coalesced-and-skipped-when-hidden)) | No BASIC yet. All three stand on their own merit, and **all 50 existing tests already pass** with the memory change |
+| 1 ✅ | Port device table ([D6](#d6--ports-become-a-device-table)); bounded memory ([D2](#d2--bounded-memory-no-wrapping)); coalesced dumps ([D5](#d5--dumps-are-coalesced-and-skipped-when-hidden)) | **Done.** 8 new tests, 58 passing. BASIC now boots through an unmodified `Sim8800` given only two `attachDevice()` calls |
 | 2 | RAM selector ([D3](#d3--ram-size-is-an-explicit-visible-act)); windowed dump and map strip ([D4](#d4--the-memory-dump-is-windowed-never-grown)) | The pedagogical piece |
 | 3 | `js/sio.js` ([D7](#d7--an-88-sio-device-on-ports-00h01h)); Teletype tab ([Part 3](#part-3--the-teletype-tab)); LED repeater ([D9](#d9--an-led-repeater-strip-on-the-teletype-tab)); l10n ([D13](#d13--nine-locales-as-usual)); the four example programs | Biggest chunk |
 | 4 | ROM loader and `roms/` ([D1](#d1--ship-the-rom-in-roms-with-a-notice)); BASIC tutorial section; the paper-tape story ([D12](#d12--tell-the-paper-tape-story)) | |
@@ -666,17 +667,14 @@ Phase 1 is worth doing whatever we decide about BASIC.
   memory with random bytes. So the sequence is power on → load →
   RESET → RUN. (Random contents do not disturb BASIC's probe, which
   writes before it reads.)
-- **EXAMINE and DEPOSIT disagree about out-of-range addresses today,
-  and the bounded-memory change runs straight through this.** Verified
-  on a 256-byte machine with the switches set to `0140h`: `examine()`
-  reaches `this.mem[320]` directly through `showAddressAndData()` and
-  gets `undefined`, so the data LEDs read `00`; `deposit()` goes
-  through `getWriteByteCallback()` and its modulo, so it writes to
-  `mem[64]` instead. Route both through the same bounded read/write
-  path as part of [D2](#d2--bounded-memory-no-wrapping) — after which
-  EXAMINE above the top should show `FFh`, like the bus.
-- Related and pre-existing: `examineNext()` does not wrap at 16 bits —
-  from `FFFFh` it steps to `10000h`. Worth fixing in the same pass.
+- ✅ *Fixed in Phase 1.* EXAMINE and DEPOSIT used to disagree about
+  out-of-range addresses: on a 256-byte machine with the switches at
+  `0140h`, `examine()` reached `this.mem[320]` directly and got
+  `undefined` (data LEDs `00`), while `deposit()` went through the
+  modulo and wrote to `mem[64]`. Both now go through `readByte()` /
+  `writeByte()`, so EXAMINE above the top shows `FFh`, like the bus.
+- ✅ *Fixed in Phase 1.* `examineNext()` did not wrap at 16 bits — from
+  `FFFFh` it stepped to `10000h`.
 - `Sim8800.step()` calls `CPU8080.status()` and `CPU8080.T()` once per
   instruction to watch for `LDAX`. That looks expensive but was
   measured at ~540 million cycles/second, indistinguishable from the
