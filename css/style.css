@@ -128,16 +128,24 @@ main {
 
 #switch-locale {
     background-color: #369;
+    border: none;
     border-radius: 10px;
     color: #6cf;
     cursor: pointer;
+    font-family: inherit;
     font-size: 12px;
     margin: 20px;
+    max-width: 40vw;
     padding: 5px 10px;
-    user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
+    /* Keep the menu on one line however long the language name is. */
+    text-overflow: ellipsis;
+}
+
+#switch-locale option {
+    /* The list itself is drawn by the browser, which does not inherit
+       the blue; give it readable colours of its own. */
+    background-color: #eee;
+    color: #222;
 }
 
 .subheader-bar {
