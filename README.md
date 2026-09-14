@@ -59,6 +59,13 @@ With a running Altair 8800 simulator, how to input and run the following program
  1. The LEDs D7-D0 show the result 00 000 011 (3 in decimal).
  1. Turn off Altair 8800.
 
+## Example programs
+
+Small 8080 programs to try on the simulator, from a two instruction
+I/O echo to the 1975 game *Kill the Bit*, are in
+[examples/](examples/), each with a listing and instructions for
+loading it. They double as the golden set the tests run against.
+
 ## References
 
 - [Wikipedia: Altair 8800](https://en.wikipedia.org/wiki/Altair_8800)

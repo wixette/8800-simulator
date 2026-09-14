@@ -1,6 +1,7 @@
 /**
  * Unit tests for the front panel simulator (js/sim8800.js), covering
- * the existing panel features and the Kill the Bit fix (issue #1).
+ * the front panel controls, the CPU wiring and single stepping. The
+ * example programs themselves are covered by examples.test.js.
  *
  * Run with: node --test tests/
  */
@@ -8,17 +9,16 @@
 
 const test = require('node:test');
 const assert = require('node:assert');
-const {Sim8800, createSim, flushTimers, bitsToNumber, highAddressLeds} =
+const {Sim8800, createSim, flushTimers, bitsToNumber} =
       require('./fixture.js');
+const {loadExample} = require('./examples.js');
 
-/** The demo programs from asm/tiny_programs.md. */
-const ADDER = '3a 80 00 47 3a 81 00 80 32 82 00 c3 00 00';
-const PATTERN_SHIFT = '3e 8c d3 ff 0f c3 02 00';
-const IO_ECHO = 'db ff d3 ff c3 00 00';
-
-/** Kill the Bit by Dean McDaniel, 1975. See doc/kill_the_bit.md. */
-const KILL_THE_BIT =
-      '21 00 00 16 80 01 0e 00 1a 1a 1a 1a 09 d2 08 00 db ff aa 0f 57 c3 08 00';
+/**
+ * Programs used here to drive the simulator. What each one does is
+ * checked in examples.test.js; these tests only need something to run.
+ */
+const ADDER = loadExample('adder').hex;
+const PATTERN_SHIFT = loadExample('pattern-shift').hex;
 
 /**
  * Creates a powered-on simulator with the reset LED blink flushed and
@@ -162,84 +162,12 @@ test('step shows PC on the address LEDs for ordinary programs', () => {
     assert.strictEqual(bitsToNumber(state.addressLeds), 2);
 });
 
-test('adder demo: 1 + 2 = 3', () => {
-    const {sim} = poweredOnSim();
-    sim.loadDataAsHexString(0, ADDER);
-    sim.loadData(0x80, [1, 2]);
-    sim.step(200);
-    assert.strictEqual(sim.mem[0x82], 3);
-});
-
-test('pattern shift demo: OUT FFh drives the data LEDs', () => {
-    const {sim, state} = poweredOnSim();
-    sim.loadDataAsHexString(0, PATTERN_SHIFT);
-    sim.step(17);  // MVI A,8Ch (7) + OUT FFh (10).
-    assert.strictEqual(bitsToNumber(state.dataLeds), 0x8c);
-});
-
-test('I/O echo demo: IN FFh reads the high 8 address switches', () => {
-    const {sim, state} = poweredOnSim();
-    sim.loadDataAsHexString(0, IO_ECHO);
-    state.inputWord = 0xab12;  // Sense switches are A15-A8.
-    sim.step(20);              // IN FFh (10) + OUT FFh (10).
-    assert.strictEqual(bitsToNumber(state.dataLeds), 0xab);
-});
-
 test('IN from ports other than FFh reads 0', () => {
     const {sim, state} = poweredOnSim();
     sim.loadDataAsHexString(0, 'db 12 d3 ff');  // IN 12h; OUT FFh.
     state.inputWord = 0xffff;
     sim.step(20);
     assert.strictEqual(bitsToNumber(state.dataLeds), 0);
-});
-
-test('kill the bit: LDAX D lights the high address LEDs (issue #1)', () => {
-    const {sim, state} = poweredOnSim();
-    sim.loadDataAsHexString(0, KILL_THE_BIT);
-    // A short run reaches the LDAX D display loop; the initial bit
-    // pattern in D is 80h.
-    sim.step(200);
-    assert.strictEqual(highAddressLeds(state), 0x80);
-});
-
-test('kill the bit: the lit bit rotates over time', () => {
-    const {sim, state} = poweredOnSim();
-    sim.loadDataAsHexString(0, KILL_THE_BIT);
-    // One full delay loop takes roughly 230K cycles, after which the
-    // bit moves from A15 to A14.
-    let rotated = false;
-    for (let i = 0; i < 20 && !rotated; i++) {
-        sim.step(50000);
-        if (highAddressLeds(state) == 0x40) {
-            rotated = true;
-        }
-    }
-    assert.ok(rotated, 'the lit bit should rotate from A15 to A14');
-});
-
-test('kill the bit: raising the matching sense switch kills the bit', () => {
-    const {sim, state} = poweredOnSim();
-    sim.loadDataAsHexString(0, KILL_THE_BIT);
-    sim.step(200);
-    const litBit = highAddressLeds(state);
-    assert.notStrictEqual(litBit, 0);
-
-    // Raise the sense switch right over the lit bit and run until the
-    // program reads it (IN FFh; XRA D zeroes the display register).
-    state.inputWord = litBit << 8;
-    let killed = false;
-    for (let i = 0; i < 300 && !killed; i++) {
-        sim.step(2000);
-        if (global.CPU8080.status().d == 0) {
-            killed = true;
-        }
-    }
-    assert.ok(killed, 'XRA D should zero the display register');
-
-    // Lower the switch; with no bits left the high LEDs stay dark.
-    state.inputWord = 0;
-    sim.step(300000);
-    assert.strictEqual(highAddressLeds(state), 0);
 });
 
 test('single step on an LDAX D instruction shows DE on the LEDs', () => {
