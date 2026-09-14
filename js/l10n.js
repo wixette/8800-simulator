@@ -312,11 +312,9 @@ l10n.restoreLocale = function() {
     var val = l10n.readSavedLocale();
     var index = l10n.LOCALES.indexOf(val);
     if (index < 0 && val) {
-        // Older versions saved the index into LOCALES rather than the
-        // locale itself, so an existing choice still has to be read.
-        var legacy = parseInt(val);
-        if (!isNaN(legacy)) {
-            index = legacy % l10n.LOCALES.length;
+        var savedIndex = parseInt(val);
+        if (!isNaN(savedIndex)) {
+            index = savedIndex % l10n.LOCALES.length;
         }
     }
     l10n.current = index < 0 ? 0 : index;
