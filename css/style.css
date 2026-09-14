@@ -406,3 +406,104 @@ footer {
 #mem-window-label {
     padding: 0 10px;
 }
+
+/* The Teletype tab. A printer, not a screen: paper coloured stock,
+   72 columns wide, scrolled to wherever the carriage is. */
+#tab-tty {
+    display: none;
+    margin: 10px 0;
+}
+
+#tty-paper {
+    background-color: #e8e2d0;
+    border-radius: 10px;
+    color: #222;
+    cursor: text;
+    font-size: 14px;
+    height: 576px;          /* 24 lines at the dump's line height */
+    line-height: 24px;
+    overflow-x: auto;
+    overflow-y: auto;
+    padding: 5px 10px;
+}
+
+#tty-text {
+    white-space: pre;
+}
+
+/* The carriage. It only blinks while the machine is on, so a dark
+   panel is visibly a dark panel. */
+.tty-cursor {
+    background-color: #222;
+    color: #e8e2d0;
+}
+
+.powered-on .tty-cursor {
+    animation: tty-blink 1s step-end infinite;
+}
+
+@keyframes tty-blink {
+    50% {
+        background-color: transparent;
+        color: #222;
+    }
+}
+
+/* Takes the soft keyboard on a phone without showing a text box. */
+.tty-hidden-input {
+    border: 0;
+    height: 1px;
+    opacity: 0;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+}
+
+/* A repeat of the lamps that matter, so that a program which prints
+   and lights LEDs at once can be watched on one screen. */
+#tty-leds {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin: 10px 0 0 0;
+}
+
+.tty-led-group {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    margin: 0 20px 0 0;
+}
+
+.tty-led-label {
+    color: #999;
+    font-size: 11px;
+    margin: 0 8px 0 0;
+}
+
+.tty-led-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.tty-led {
+    background-image: url(../images/led-off.svg);
+    background-repeat: no-repeat;
+    background-size: contain;
+    height: 14px;
+    margin: 0 2px;
+    width: 14px;
+}
+
+.tty-led.on {
+    background-image: url(../images/led-on.svg);
+}
+
+/* Marks the Teletype tab while its machine is printing and you are
+   looking at something else. */
+.nav-item.has-activity::after {
+    color: #f90;
+    content: ' \25CF';
+    font-size: 11px;
+    vertical-align: super;
+}

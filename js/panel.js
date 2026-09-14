@@ -30,6 +30,18 @@ panel = {};
 panel.isDebugTabVisible = false;
 
 /**
+ * Whether the teletype is the tab currently on screen.
+ * @type {boolean}
+ */
+panel.isTtyTabVisible = false;
+
+/**
+ * The name of the tab on screen: 'sim', 'tty', 'debug' or 'ref'.
+ * @type {string}
+ */
+panel.currentTab = 'sim';
+
+/**
  * When STOP switch is pressed.
  */
 panel.onStop = function() {
@@ -90,6 +102,8 @@ panel.onReset = function() {
  */
 panel.onPowerOn = function() {
     panel.sim.powerOn();
+    // Only a live machine has a blinking carriage.
+    document.body.classList.add('powered-on');
     window.setTimeout(function() {
         panel.playBeepbeep();
     }, 500);
@@ -100,6 +114,12 @@ panel.onPowerOn = function() {
  */
 panel.onPowerOff = function() {
     panel.sim.powerOff();
+    document.body.classList.remove('powered-on');
+    if (panel.sio) {
+        // Keys typed but never read do not survive the power going off.
+        panel.sio.reset();
+    }
+    panel.renderTeletype();
 };
 
 /**
@@ -130,6 +150,11 @@ panel.onSetMemSize = function(memSize) {
     // setMemSize powered the machine down; show that on the panel.
     panel.isPoweredOn = false;
     panel.switchUp('off-on');
+    document.body.classList.remove('powered-on');
+    if (panel.sio) {
+        panel.sio.reset();
+    }
+    panel.renderTeletype();
     panel.updateMemoryControls();
 };
 
@@ -216,6 +241,7 @@ panel.setAddressLedsCallback = function(bits) {
             panel.ledOff(ledId);
         }
     }
+    panel.setRepeaterLeds('tty-a', bits);
 };
 
 /**
@@ -230,6 +256,7 @@ panel.setDataLedsCallback = function(bits) {
             panel.ledOff(ledId);
         }
     }
+    panel.setRepeaterLeds('tty-d', bits);
 };
 
 /**
@@ -241,6 +268,10 @@ panel.setWaitLedCallback = function(isRunning) {
         panel.ledOn(ledId);
     } else {
         panel.ledOff(ledId);
+    }
+    var repeater = document.getElementById('tty-wait-led');
+    if (repeater) {
+        repeater.classList.toggle('on', !isRunning);
     }
 };
 
@@ -296,6 +327,152 @@ panel.dumpMemCallback = function(dumpHtml) {
 panel.debugLoadData = function() {
     var data = document.getElementById("debug-data-input").value;
     panel.sim.loadDataAsHexString(0, data);
+};
+
+/**
+ * Sends one byte to the machine, as if it had been typed at the
+ * teletype keyboard.
+ * @param {number} byte The byte.
+ */
+panel.ttySend = function(byte) {
+    if (byte === null || !panel.sio)
+        return;
+    panel.sio.receive(byte);
+};
+
+/**
+ * When the teletype prints a character. The paper is a model, not the
+ * DOM, so this is cheap enough to do on every character; drawing it is
+ * coalesced onto the browser's repaint the way the dumps are.
+ * @param {number} byte The byte the CPU sent.
+ */
+panel.onTtyPrint = function(byte) {
+    panel.tty.write(byte);
+    if (!panel.isTtyTabVisible) {
+        // Something is being printed on a tab nobody is looking at.
+        panel.setNavActivity(true);
+    }
+    panel.requestTtyRender();
+};
+
+/**
+ * Marks, or unmarks, the teletype nav tab as having something new.
+ * @param {boolean} active Whether to mark it.
+ */
+panel.setNavActivity = function(active) {
+    var elem = document.getElementById('nav-tty');
+    if (elem) {
+        elem.classList.toggle('has-activity', active);
+    }
+};
+
+/**
+ * Asks for the paper to be redrawn, at most once per repaint.
+ */
+panel.requestTtyRender = function() {
+    if (panel.ttyRenderPending)
+        return;
+    panel.ttyRenderPending = true;
+    window.requestAnimationFrame(function() {
+        panel.ttyRenderPending = false;
+        panel.renderTeletype();
+    });
+};
+
+/**
+ * Escapes text for putting inside the paper's markup.
+ * @param {string} text The text.
+ * @return {string} The escaped text.
+ */
+panel.escapeHtml = function(text) {
+    return text.replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+};
+
+/**
+ * Draws the paper, with the carriage shown where it actually is -
+ * which after a carriage return is back at the left margin, over
+ * whatever is already printed there.
+ */
+panel.renderTeletype = function() {
+    var textElem = document.getElementById('tty-text');
+    if (!textElem || !panel.tty)
+        return;
+    var lines = panel.tty.lines;
+    var out = [];
+    for (let i = 0; i < lines.length; i++) {
+        if (i < lines.length - 1) {
+            out.push(panel.escapeHtml(lines[i]));
+            continue;
+        }
+        let line = lines[i];
+        if (line.length < panel.tty.column) {
+            line += ' '.repeat(panel.tty.column - line.length);
+        }
+        let under = line.charAt(panel.tty.column) || ' ';
+        out.push(panel.escapeHtml(line.substring(0, panel.tty.column)) +
+                 '<span class="tty-cursor">' + panel.escapeHtml(under) +
+                 '</span>' +
+                 panel.escapeHtml(line.substring(panel.tty.column + 1)));
+    }
+    textElem.innerHTML = out.join('\n');
+    var paper = document.getElementById('tty-paper');
+    if (paper) {
+        paper.scrollTop = paper.scrollHeight;
+    }
+};
+
+/**
+ * When CLEAR PAPER is pressed. The paper is torn off; what the machine
+ * is doing is not disturbed.
+ */
+panel.onTtyClear = function() {
+    panel.tty.clear();
+    panel.renderTeletype();
+};
+
+/**
+ * Handles a key pressed while the teletype tab is on screen.
+ * @param {Event} event The keydown event.
+ */
+panel.onTtyKeyDown = function(event) {
+    if (!panel.isTtyTabVisible || event.metaKey || event.altKey)
+        return;
+    var byte = Teletype.keyToByte(event.key, event.ctrlKey);
+    if (byte === null)
+        return;
+    event.preventDefault();
+    panel.ttySend(byte);
+};
+
+/**
+ * Handles text from a soft keyboard, which often reports its keys as
+ * 'Unidentified' and so is not caught by onTtyKeyDown.
+ * @param {Event} event The input event.
+ */
+panel.onTtyInput = function(event) {
+    var text = event.target.value;
+    event.target.value = '';
+    for (let i = 0; i < text.length; i++) {
+        panel.ttySend(Teletype.keyToByte(text.charAt(i)));
+    }
+};
+
+/**
+ * Updates the teletype tab's repeat of the address, data and WAIT
+ * lamps. The panel's own LEDs are SVG sprites inside the front panel
+ * artwork; these are plain elements carrying the same two images.
+ * @param {string} prefix The element id prefix, 'tty-a' or 'tty-d'.
+ * @param {Array<number>} bits The bits, lowest first.
+ */
+panel.setRepeaterLeds = function(prefix, bits) {
+    for (let i = 0; i < bits.length; i++) {
+        let elem = document.getElementById(prefix + i);
+        if (elem) {
+            elem.classList.toggle('on', !!bits[i]);
+        }
+    }
 };
 
 /**
@@ -732,6 +909,8 @@ panel.init = function() {
     // Initializes event listener for nav buttons.
     var button = document.getElementById('nav-sim');
     button.addEventListener('click', panel.showTabSim, false);
+    button = document.getElementById('nav-tty');
+    button.addEventListener('click', panel.showTabTty, false);
     button = document.getElementById('nav-debug');
     button.addEventListener('click', panel.showTabDebug, false);
     button = document.getElementById('nav-ref');
@@ -788,6 +967,14 @@ panel.init = function() {
         return panel.isDebugTabVisible;
     };
 
+    // The teletype. The paper and the serial board are plain objects
+    // that keep working whether or not the tab is on screen; only the
+    // drawing waits for the tab.
+    panel.tty = new Teletype();
+    panel.sio = new Sio(panel.onTtyPrint);
+    panel.sio.attachTo(panel.sim);
+    panel.initTeletypeUi();
+
     // Adds handler for 'ZERO ALL MEMORY' Button 
     // (it doesn't have a corresponding switch on the actual machine)
     document.getElementById('debug-fill-zero').addEventListener('click', panel.onFillZero)
@@ -812,6 +999,46 @@ panel.init = function() {
         'click', panel.onMemMapClick, false);
     panel.updateMemoryControls();
 
+};
+
+/**
+ * Builds the teletype tab's lamps and hooks up its controls.
+ */
+panel.initTeletypeUi = function() {
+    // The repeater: A15-A0 and D7-D0, highest bit on the left, so that
+    // it reads the same way round as the front panel does.
+    var row = document.getElementById('tty-address-leds');
+    for (let i = 15; i >= 0; i--) {
+        let led = document.createElement('div');
+        led.id = 'tty-a' + i;
+        led.className = 'tty-led';
+        row.appendChild(led);
+    }
+    row = document.getElementById('tty-data-leds');
+    for (let i = 7; i >= 0; i--) {
+        let led = document.createElement('div');
+        led.id = 'tty-d' + i;
+        led.className = 'tty-led';
+        row.appendChild(led);
+    }
+
+    document.getElementById('tty-break').addEventListener(
+        'click', function() { panel.ttySend(Teletype.BREAK); }, false);
+    document.getElementById('tty-rubout').addEventListener(
+        'click', function() { panel.ttySend(Teletype.RUBOUT); }, false);
+    document.getElementById('tty-kill').addEventListener(
+        'click', function() { panel.ttySend(Teletype.KILL_LINE); }, false);
+    document.getElementById('tty-clear').addEventListener(
+        'click', panel.onTtyClear, false);
+
+    // Tapping the paper raises the soft keyboard on a phone.
+    var input = document.getElementById('tty-input');
+    document.getElementById('tty-paper').addEventListener(
+        'click', function() { input.focus(); }, false);
+    input.addEventListener('input', panel.onTtyInput, false);
+    document.addEventListener('keydown', panel.onTtyKeyDown, false);
+
+    panel.renderTeletype();
 };
 
 /**
@@ -1146,45 +1373,60 @@ panel.highlightNavTab = function(elem, highlight) {
 };
 
 /**
- * Shows the simulator tab, and hides the other two.
+ * The tabs, in the order they appear. The front panel and the teletype
+ * are the two things a 1975 owner actually touched, so they sit
+ * together; the debugger is the one view that was never part of the
+ * machine. See docs/ms-basic-4k.md.
+ * @type {Array<string>}
  */
-panel.showTabSim = function() {
-    panel.isDebugTabVisible = false;
-    document.getElementById('tab-sim').style.display = 'block';
-    document.getElementById('tab-debug').style.display = 'none';
-    document.getElementById('tab-ref').style.display = 'none';
-    panel.highlightNavTab(document.getElementById('nav-sim'), true);
-    panel.highlightNavTab(document.getElementById('nav-debug'), false);
-    panel.highlightNavTab(document.getElementById('nav-ref'), false);
-};
+panel.TABS = ['sim', 'tty', 'debug', 'ref'];
 
 /**
- * Shows the debug tab, and hides the other two.
+ * Shows one tab and hides the others.
+ * @param {string} name One of panel.TABS.
  */
-panel.showTabDebug = function() {
-    panel.isDebugTabVisible = true;
-    document.getElementById('tab-sim').style.display = 'none';
-    document.getElementById('tab-debug').style.display = 'block';
-    document.getElementById('tab-ref').style.display = 'none';
-    // Nothing has been rendered while the tab was hidden, so catch up
-    // before it is shown.
-    if (panel.sim) {
+panel.showTab = function(name) {
+    panel.currentTab = name;
+    panel.isDebugTabVisible = name == 'debug';
+    panel.isTtyTabVisible = name == 'tty';
+    for (let i = 0; i < panel.TABS.length; i++) {
+        let tab = panel.TABS[i];
+        let shown = tab == name;
+        document.getElementById('tab-' + tab).style.display =
+            shown ? 'block' : 'none';
+        panel.highlightNavTab(document.getElementById('nav-' + tab), shown);
+    }
+    // Neither view is kept up to date while it is hidden, so catch up
+    // as it comes back.
+    if (panel.isDebugTabVisible && panel.sim) {
         panel.sim.flushDump(true);
     }
-    panel.highlightNavTab(document.getElementById('nav-sim'), false);
-    panel.highlightNavTab(document.getElementById('nav-debug'), true);
-    panel.highlightNavTab(document.getElementById('nav-ref'), false);
+    if (panel.isTtyTabVisible) {
+        panel.setNavActivity(false);
+        panel.renderTeletype();
+        var input = document.getElementById('tty-input');
+        if (input) {
+            input.focus();
+        }
+    }
 };
 
-/**
- * Shows the resource tab, and hides the other two.
- */
+/** Shows the front panel. */
+panel.showTabSim = function() {
+    panel.showTab('sim');
+};
+
+/** Shows the teletype. */
+panel.showTabTty = function() {
+    panel.showTab('tty');
+};
+
+/** Shows the debugger. */
+panel.showTabDebug = function() {
+    panel.showTab('debug');
+};
+
+/** Shows the reference tab. */
 panel.showTabRes = function() {
-    panel.isDebugTabVisible = false;
-    document.getElementById('tab-sim').style.display = 'none';
-    document.getElementById('tab-debug').style.display = 'none';
-    document.getElementById('tab-ref').style.display = 'block';
-    panel.highlightNavTab(document.getElementById('nav-sim'), false);
-    panel.highlightNavTab(document.getElementById('nav-debug'), false);
-    panel.highlightNavTab(document.getElementById('nav-ref'), true);
+    panel.showTab('ref');
 };

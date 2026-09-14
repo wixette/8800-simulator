@@ -17,6 +17,8 @@ const {createSim, flushTimers, bitsToNumber, highAddressLeds} =
 const {EXAMPLES_DIR, loadExamples, loadExample, normalizeSource} =
       require('./examples.js');
 const cpu = require('../js/8080.js');
+const Sio = require('../js/sio.js');
+const Teletype = require('../js/teletype.js');
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -57,6 +59,9 @@ test('examples/README.md lists every program and its bytes', () => {
 for (const example of EXAMPLES) {
     test(example.id + ': the bytes match the source next to them', () => {
         for (const line of example.lines) {
+            if (line.isData) {
+                continue;  // A DB directive; there is nothing to decode.
+            }
             const [text, length] = cpu.disasm(
                 line.bytes[0], line.bytes[1] || 0, line.bytes[2] || 0);
             assert.strictEqual(
@@ -97,6 +102,63 @@ for (const example of EXAMPLES) {
         }
     });
 }
+
+/**
+ * Creates a powered-on simulator holding the example, with an 88-SIO
+ * and a sheet of teletype paper plugged in.
+ */
+function ttySimFor(id) {
+    const fixture = simFor(loadExample(id));
+    const tty = new Teletype();
+    const sio = new Sio((byte) => tty.write(byte));
+    sio.attachTo(fixture.sim);
+    return {sim: fixture.sim, state: fixture.state, sio: sio, tty: tty};
+}
+
+test('tty-echo: prints back what is typed', () => {
+    const {sim, sio, tty} = ttySimFor('tty-echo');
+    sio.receiveText('PRINT 1');
+    sim.step(2000);
+    assert.strictEqual(tty.getText(), 'PRINT 1');
+
+    // It keeps waiting, so later keys are echoed too.
+    sio.receiveText('0');
+    sim.step(500);
+    assert.strictEqual(tty.getText(), 'PRINT 10');
+});
+
+test('tty-leds: echoes, and shows the ASCII code on the data LEDs', () => {
+    const {sim, state, sio, tty} = ttySimFor('tty-leds');
+    sio.receiveText('A');
+    sim.step(500);
+    assert.strictEqual(tty.getText(), 'A');
+    // 'A' is 41h: 01000001 on the data LEDs.
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0x41);
+
+    sio.receiveText('B');
+    sim.step(500);
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0x42);
+});
+
+test('tty-hello: prints its message once and halts', () => {
+    const {sim, tty} = ttySimFor('tty-hello');
+    sim.step(4000);
+    assert.strictEqual(tty.getText(), 'HELLO, WORLD!\n');
+    // HLT, so running longer prints nothing more.
+    sim.step(4000);
+    assert.strictEqual(tty.getText(), 'HELLO, WORLD!\n');
+});
+
+test('tty-ascii: prints the printable set, wrapping at the margin', () => {
+    const {sim, tty} = ttySimFor('tty-ascii');
+    sim.step(20000);   // ~69 cycles per character, 95 of them
+    // 20h to 7Eh is 95 characters on a 72 column carriage.
+    assert.strictEqual(tty.getText().replace(/\n/g, '').length, 95);
+    assert.ok(tty.getText().startsWith(' !"#$%&'));
+    assert.ok(tty.getText().endsWith('}~'));
+    assert.strictEqual(tty.lines.length, 2, 'the carriage wrapped once');
+    assert.strictEqual(tty.lines[0].length, 72);
+});
 
 test('adder: adds the two bytes it is given', () => {
     const {sim} = simFor(loadExample('adder'));
