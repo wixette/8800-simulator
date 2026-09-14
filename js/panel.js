@@ -108,7 +108,7 @@ panel.onFillZero = function() {
  */
 panel.setAddressLedsCallback = function(bits) {
     for (let i = 0; i < bits.length; i++) {
-        var ledId = 'A' + i;
+        var ledId = 'a' + i;
         if (bits[i]) {
             panel.ledOn(ledId);
         } else {
@@ -122,7 +122,7 @@ panel.setAddressLedsCallback = function(bits) {
  */
 panel.setDataLedsCallback = function(bits) {
     for (let i = 0; i < bits.length; i++) {
-        var ledId = 'D' + i;
+        var ledId = 'd' + i;
         if (bits[i]) {
             panel.ledOn(ledId);
         } else {
@@ -135,7 +135,7 @@ panel.setDataLedsCallback = function(bits) {
  * When CPU sets the WAIT LED.
  */
 panel.setWaitLedCallback = function(isRunning) {
-    var ledId = 'WAIT';
+    var ledId = 'wait';
     if (!isRunning) {
         panel.ledOn(ledId);
     } else {
@@ -147,7 +147,7 @@ panel.setWaitLedCallback = function(isRunning) {
  * When CPU sets the status LEDs.
  */
 panel.setStatusLedsCallback = function(isPoweredOn) {
-    var ledIds = ['MEMR', 'MI', 'WO'];
+    var ledIds = ['memr', 'mi', 'wo'];
     for (let i = 0; i < ledIds.length; i++) {
         if (isPoweredOn) {
             panel.ledOn(ledIds[i]);
@@ -199,182 +199,182 @@ panel.debugLoadData = function() {
  */
 panel.LED_INFO = [
     {
-        id: 'INTE',
+        id: 'inte',
         x: 194,
         y: 120
     },
     {
-        id: 'PROT',
+        id: 'prot',
         x: 245,
         y: 120
     },
     {
-        id: 'MEMR',
+        id: 'memr',
         x: 296,
         y: 120
     },
     {
-        id: 'INP',
+        id: 'inp',
         x: 347,
         y: 120
     },
     {
-        id: 'MI',
+        id: 'mi',
         x: 398,
         y: 120
     },
     {
-        id: 'OUT',
+        id: 'out',
         x: 449,
         y: 120
     },
     {
-        id: 'HLTA',
+        id: 'hlta',
         x: 500,
         y: 120
     },
     {
-        id: 'STACK',
+        id: 'stack',
         x: 551,
         y: 120
     },
     {
-        id: 'WO',
+        id: 'wo',
         x: 602,
         y: 120
     },
     {
-        id: 'INT',
+        id: 'int',
         x: 653,
         y: 120
     },
     {
-        id: 'D7',
+        id: 'd7',
         x: 830,
         y: 120
     },
     {
-        id: 'D6',
+        id: 'd6',
         x: 880,
         y: 120
     },
     {
-        id: 'D5',
+        id: 'd5',
         x: 959,
         y: 120
     },
     {
-        id: 'D4',
+        id: 'd4',
         x: 1009,
         y: 120
     },
     {
-        id: 'D3',
+        id: 'd3',
         x: 1059,
         y: 120
     },
     {
-        id: 'D2',
+        id: 'd2',
         x: 1138,
         y: 120
     },
     {
-        id: 'D1',
+        id: 'd1',
         x: 1188,
         y: 120
     },
     {
-        id: 'D0',
+        id: 'd0',
         x: 1238,
         y: 120
     },
     {
-        id: 'WAIT',
+        id: 'wait',
         x: 194,
         y: 230
     },
     {
-        id: 'HLDA',
+        id: 'hlda',
         x: 245,
         y: 230
     },
     {
-        id: 'A15',
+        id: 'a15',
         x: 346,
         y: 230
     },
     {
-        id: 'A14',
+        id: 'a14',
         x: 423,
         y: 230
     },
     {
-        id: 'A13',
+        id: 'a13',
         x: 473,
         y: 230
     },
     {
-        id: 'A12',
+        id: 'a12',
         x: 523,
         y: 230
     },
     {
-        id: 'A11',
+        id: 'a11',
         x: 602,
         y: 230
     },
     {
-        id: 'A10',
+        id: 'a10',
         x: 652,
         y: 230
     },
     {
-        id: 'A9',
+        id: 'a9',
         x: 702,
         y: 230
     },
     {
-        id: 'A8',
+        id: 'a8',
         x: 780,
         y: 230
     },
     {
-        id: 'A7',
+        id: 'a7',
         x: 830,
         y: 230
     },
     {
-        id: 'A6',
+        id: 'a6',
         x: 880,
         y: 230
     },
     {
-        id: 'A5',
+        id: 'a5',
         x: 959,
         y: 230
     },
     {
-        id: 'A4',
+        id: 'a4',
         x: 1009,
         y: 230
     },
     {
-        id: 'A3',
+        id: 'a3',
         x: 1059,
         y: 230
     },
     {
-        id: 'A2',
+        id: 'a2',
         x: 1138,
         y: 230
     },
     {
-        id: 'A1',
+        id: 'a1',
         x: 1188,
         y: 230
     },
     {
-        id: 'A0',
+        id: 'a0',
         x: 1238,
         y: 230
     },
@@ -388,87 +388,87 @@ panel.LED_INFO = [
  */
 panel.TOGGLE_SWITCH_INFO = [
     {
-        id: 'OFF-ON',
+        id: 'off-on',
         x: 105,
         y: 439
     },
     {
-        id: 'S15',
+        id: 's15',
         x: 346,
         y: 334
     },
     {
-        id: 'S14',
+        id: 's14',
         x: 423,
         y: 334
     },
     {
-        id: 'S13',
+        id: 's13',
         x: 473,
         y: 334
     },
     {
-        id: 'S12',
+        id: 's12',
         x: 523,
         y: 334
     },
     {
-        id: 'S11',
+        id: 's11',
         x: 602,
         y: 334
     },
     {
-        id: 'S10',
+        id: 's10',
         x: 652,
         y: 334
     },
     {
-        id: 'S9',
+        id: 's9',
         x: 702,
         y: 334
     },
     {
-        id: 'S8',
+        id: 's8',
         x: 780,
         y: 334
     },
     {
-        id: 'S7',
+        id: 's7',
         x: 830,
         y: 334
     },
     {
-        id: 'S6',
+        id: 's6',
         x: 880,
         y: 334
     },
     {
-        id: 'S5',
+        id: 's5',
         x: 959,
         y: 334
     },
     {
-        id: 'S4',
+        id: 's4',
         x: 1009,
         y: 334
     },
     {
-        id: 'S3',
+        id: 's3',
         x: 1059,
         y: 334
     },
     {
-        id: 'S2',
+        id: 's2',
         x: 1138,
         y: 334
     },
     {
-        id: 'S1',
+        id: 's1',
         x: 1188,
         y: 334
     },
     {
-        id: 'S0',
+        id: 's0',
         x: 1238,
         y: 334
     },
@@ -484,11 +484,11 @@ panel.TOGGLE_SWITCH_INFO = [
  */
 panel.STATELESS_SWITCH_INFO = [
     {
-        id: 'STOP-RUN',
+        id: 'stop-run',
         x: 348,
         y: 439,
         upperCmd: {
-            id: 'SW-STOP',
+            id: 'sw-stop',
             x: 341.22,
             y: 427.03,
             width: 33.82,
@@ -496,7 +496,7 @@ panel.STATELESS_SWITCH_INFO = [
             callback: panel.onStop,
         },
         lowerCmd: {
-            id: 'SW-RUN',
+            id: 'sw-run',
             x: 344.63,
             y: 467.68,
             width: 27.08,
@@ -505,11 +505,11 @@ panel.STATELESS_SWITCH_INFO = [
         },
     },
     {
-        id: 'SINGLE',
+        id: 'single',
         x: 446,
         y: 439,
         upperCmd: {
-            id: 'SW-SINGLE',
+            id: 'sw-single',
             x: 434.31,
             y: 416.02,
             width: 46.54,
@@ -519,11 +519,11 @@ panel.STATELESS_SWITCH_INFO = [
         lowerCmd: null,
     },
     {
-        id: 'EXAMINE',
+        id: 'examine',
         x: 550,
         y: 439,
         upperCmd: {
-            id: 'SW-EXAMINE',
+            id: 'sw-examine',
             x: 530.88,
             y: 426.76,
             width: 56.96,
@@ -531,7 +531,7 @@ panel.STATELESS_SWITCH_INFO = [
             callback: panel.onExamine,
         },
         lowerCmd: {
-            id: 'SW-EXAMINE-NEXT',
+            id: 'sw-examine-next',
             x: 531.44,
             y: 469.77,
             width: 56.96,
@@ -540,11 +540,11 @@ panel.STATELESS_SWITCH_INFO = [
         },
     },
     {
-        id: 'DEPOSIT',
+        id: 'deposit',
         x: 650,
         y: 439,
         upperCmd: {
-            id: 'SW-DEPOSIT',
+            id: 'sw-deposit',
             x: 633,
             y: 426.76,
             width: 54.87,
@@ -552,7 +552,7 @@ panel.STATELESS_SWITCH_INFO = [
             callback: panel.onDeposit,
         },
         lowerCmd: {
-            id: 'SW-DEPOSIT-NEXT',
+            id: 'sw-deposit-next',
             x: 633,
             y: 469.77,
             width: 54.87,
@@ -561,11 +561,11 @@ panel.STATELESS_SWITCH_INFO = [
         },
     },
     {
-        id: 'RESET',
+        id: 'reset',
         x: 753,
         y: 439,
         upperCmd: {
-            id: 'SW-RESET',
+            id: 'sw-reset',
             x: 741.71,
             y: 426.76,
             width: 41.68,
@@ -575,21 +575,21 @@ panel.STATELESS_SWITCH_INFO = [
         lowerCmd: null,
     },
     {
-        id: 'PROTECT',
+        id: 'protect',
         x: 853,
         y: 439,
         upperCmd: null,
         lowerCmd: null,
     },
     {
-        id: 'AUX1',
+        id: 'aux1',
         x: 957,
         y: 439,
         upperCmd: null,
         lowerCmd: null,
     },
     {
-        id: 'AUX2',
+        id: 'aux2',
         x: 1060,
         y: 439,
         upperCmd: null,
@@ -661,7 +661,7 @@ panel.init = function() {
     // Initializes internal states.
     panel.isPoweredOn = false;
     panel.addressSwitchStates.fill(0);
-    panel.switchUp('OFF-ON');
+    panel.switchUp('off-on');
 
     // Initializes the simulator.
     panel.sim = new Sim8800(
@@ -762,7 +762,7 @@ panel.createCmdLabel = function(cmd, callback) {
     panelElem.appendChild(elem);
 
     // Also installs the helper switch board handler.
-    var softElem = document.getElementById('S' + cmd.id);
+    var softElem = document.getElementById('s-' + cmd.id);
     softElem.addEventListener('click', callback, false);
 };
 
@@ -825,7 +825,7 @@ panel.createSwitch = function(id, type, x, y, upperCmd, lowerCmd) {
                                   },
                                   false);
         // Also installs helper switch handlers.
-        let softSwitchId = 'S-' + id;
+        let softSwitchId = 's-' + id;
         let elem = document.getElementById(softSwitchId);
         elem.addEventListener(
             'click',
@@ -944,7 +944,7 @@ panel.switchDownThenBack = function(id) {
  */
 panel.onToggle = function(id) {
     panel.playToggle();
-    if (id[0] == 'S') {
+    if (id[0] == 's') {
         var bitIndex = parseInt(id.substr(1));
         var state = panel.addressSwitchStates[bitIndex];
         if (state == 0) {
@@ -953,7 +953,7 @@ panel.onToggle = function(id) {
             panel.switchDown(id);
         }
         panel.addressSwitchStates[bitIndex] = state ? 0 : 1;
-    } else if (id == 'OFF-ON') {
+    } else if (id == 'off-on') {
         if (panel.isPoweredOn) {
             panel.onPowerOff();
             panel.switchUp(id);
