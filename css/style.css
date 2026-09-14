@@ -296,6 +296,12 @@ footer {
     padding: 5px 10px;
 }
 
+/* A program listing inside a tutorial step needs a little air around
+   it; the global reset takes every margin off pre. */
+.tutorial li pre {
+    margin: 6px 0 8px 0;
+}
+
 .tutorial {
     background-color: #ccc;
     border-radius: 10px;
