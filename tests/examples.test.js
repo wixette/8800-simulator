@@ -6,7 +6,7 @@
  * is run on the simulator and checked for what it is supposed to do.
  * Adding a listing to examples/ adds it to the checks below.
  *
- * Run with: node --test tests/
+ * Run with: npm test
  */
 'use strict';
 

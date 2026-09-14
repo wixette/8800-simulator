@@ -2,7 +2,7 @@
  * Unit tests for the 8080 CPU core (js/8080.js), focusing on the
  * instructions that the front panel demos and Kill the Bit rely on.
  *
- * Run with: node --test tests/
+ * Run with: npm test
  */
 'use strict';
 
