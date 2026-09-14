@@ -4,9 +4,9 @@ This records the investigation behind extending the simulator beyond
 its 256-byte memory so that it can run Microsoft's *Altair BASIC 3.2
 (4K Edition)*, and every design decision taken along the way.
 
-**Phases 1 to 3 are implemented**
-([Part 6](#part-6--implementation-plan)); only Phase 4, the ROM loader
-itself, is left. The document exists so that the implementation does
+**All four phases are implemented**
+([Part 6](#part-6--implementation-plan)). 4K BASIC boots, takes a
+program and runs it, in the browser and in the test suite. The document exists so that the implementation does
 not have to rediscover any of it, and so that the reasoning stays
 visible if we later change our minds.
 
@@ -507,6 +507,21 @@ DOM, and nothing in `js/sio.js` touches `document`.
 purely presentational. Moving later from design F to design E becomes a
 markup-and-CSS change with no core impact.
 
+### D14 — Loading stops short of running
+
+`panel.loadImage` powers the machine up if needed, zeroes memory, puts
+the image at `0000H` and presses RESET — and stops there. It does not
+RUN.
+
+*Why:* loading and starting were two separate acts on the real
+machine, and keeping them separate leaves the front panel with
+something to do. It also preserves the lesson in
+[D3](#d3--ram-size-is-an-explicit-visible-act): the loader sits in the
+Debug tab, so the moment BASIC is loaded the memory map above shows it
+filling fifteen of the sixteen pages, *before* BASIC's own memory probe
+runs and writes over every page. Auto-running would hide exactly the
+picture worth seeing.
+
 ### D12 — Tell the paper-tape story
 
 No boot loader is technically needed ([1.2](#12-the-rom)). Say so,
@@ -660,7 +675,7 @@ columns, so it exercises the terminal's line wrap. Useful from day one.
 | 1 ✅ | Port device table ([D6](#d6--ports-become-a-device-table)); bounded memory ([D2](#d2--bounded-memory-no-wrapping)); coalesced dumps ([D5](#d5--dumps-are-coalesced-and-skipped-when-hidden)) | **Done.** 8 new tests, 58 passing. BASIC now boots through an unmodified `Sim8800` given only two `attachDevice()` calls |
 | 2 ✅ | RAM selector ([D3](#d3--ram-size-is-an-explicit-visible-act)); windowed dump and map strip ([D4](#d4--the-memory-dump-is-windowed-never-grown)) | **Done.** 8 more tests, 67 passing. Both live in the Debug tab; three new l10n keys across nine locales |
 | 3 ✅ | `js/sio.js` ([D7](#d7--an-88-sio-device-on-ports-00h01h)); Teletype tab ([Part 3](#part-3--the-teletype-tab)); LED repeater ([D9](#d9--an-led-repeater-strip-on-the-teletype-tab)); l10n ([D13](#d13--nine-locales-as-usual)); the four example programs | **Done.** 16 more tests, 97 passing. Also `js/teletype.js` for the paper, and a `DB` directive in the listing format so an example can carry data |
-| 4 | ROM loader and `roms/` ([D1](#d1--ship-the-rom-in-roms-with-a-notice)); BASIC tutorial section; the paper-tape story ([D12](#d12--tell-the-paper-tape-story)) | |
+| 4 ✅ | ROM loader and `roms/` ([D1](#d1--ship-the-rom-in-roms-with-a-notice)); BASIC tutorial section; the paper-tape story ([D12](#d12--tell-the-paper-tape-story)) | **Done.** 6 more tests, 103 passing, including booting the real ROM end to end. 19 more l10n keys |
 
 **Phase 3 can move ahead of Phase 2.** The teletype earns its place at
 256 B on its own ([Part 5](#part-5--example-programs)); only Phase 1 is
@@ -674,8 +689,10 @@ Phase 1 is worth doing whatever we decide about BASIC.
   `text-mode.html`. Changes there must keep both working. Giving
   `text-mode.html` its own teletype is out of scope for now, but the
   memory and port changes reach it, so it needs checking.
-- `loadDataAsHexString` cannot load the ROM — a 4 KB image is a ~12 KB
-  hex string. Phase 4 needs a `fetch` → `Uint8Array` → `loadData` path.
+- ✅ *Done in Phase 4.* `loadDataAsHexString` cannot load the ROM — a
+  4 KB image is a ~12 KB hex string — so `panel.onLoadBasic` fetches it
+  and `panel.loadImage` puts it in memory. A file picker beside it does
+  the same for an image of your own.
 - **Order matters when loading the ROM.** `loadData()` returns early
   unless `isPoweredOn`, and `powerOn()` calls `initMem()`, which fills
   memory with random bytes. So the sequence is power on → load →
@@ -698,10 +715,12 @@ Phase 1 is worth doing whatever we decide about BASIC.
 - `js/sio.js` must have no DOM dependency
   ([D11](#d11--the-sio-is-a-device-not-a-view)), so it can be tested
   the same way.
-- A good end-to-end test: drive the real ROM through `Sim8800` with a
-  scripted rx queue and assert that `4823 BYTES FREE` and `OK` appear.
-  This was done by hand during the investigation and works. It needs
-  the ROM present, so it should skip cleanly when `roms/` is absent.
+- ✅ *Done in Phase 4.* `tests/basic.test.js` drives the real ROM
+  through `Sim8800` with a scripted rx queue: it boots at 4 KB and
+  8 KB, runs a `FOR` loop, checks the maths functions, breaks out with
+  Control-C, and checks that sense switches in the wrong position send
+  BASIC to a board that is not there. It skips itself if `roms/` is
+  absent.
 - Phase 3 changed the tab strip, so `README.md` and the images under
   `screenshots/` need updating; the text is done, the screenshots are
   not.
@@ -722,10 +741,7 @@ Phase 1 is worth doing whatever we decide about BASIC.
 
 1. Whether to add the 88-2SIO at `10h`/`11h` in Phase 3 or later
    ([D7](#d7--an-88-sio-device-on-ports-00h01h)).
-2. Where the **ROM loader** lives. The RAM selector went in the Debug
-   tab (see Closed, below); the loader probably belongs beside it, but
-   that is Phase 4's call.
-3. **The clock rate, noted but deliberately out of scope.**
+2. **The clock rate, noted but deliberately out of scope.**
    `panel.js` constructs `Sim8800` with `1000000 /* 1MHz */`, but the
    Altair 8800's 8080 ran at 2 MHz, which is what s2js uses. BASIC
    would boot in 0.46 s rather than ~0.9 s. This is not a blocker —
@@ -744,6 +760,12 @@ Phase 1 is worth doing whatever we decide about BASIC.
   dump, under an *Installed Memory* heading. That is the tab memory is
   already discussed on, and where the effect of the choice — the dump
   and the map strip — is visible. The Sim tab stays the machine.
+- **Where the ROM loader lives.** The Debug tab, directly under *Load
+  Data to Addr #0*, because it is the same act — get bytes into memory
+  at 0000H — just from a file rather than typed hex. Landing there has
+  a second benefit: the memory map is a few lines below, so clicking
+  LOAD 4K BASIC shows you BASIC filling fifteen of the sixteen pages
+  of a 4 KB machine before anything has run.
 - **Paper tint.** Tinted, `#e8e2d0`. Next to the app's other panels it
   reads immediately as a physical device rather than a screen, which is
   the point of the tab, and it costs one hex value.

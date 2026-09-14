@@ -22,6 +22,27 @@ There is a Teletype tab holding a simulated ASR-33: the paper, its keyboard, and
 
 The Debugger tab is also where you choose how much memory is installed: 256 bytes as the Altair 8800 shipped, or 4 KB / 8 KB as if you had plugged in one or two 88-4MCS static memory boards. Memory boards are not something you add to a running machine, so changing the size switches the simulator off.
 
+## Microsoft BASIC
+
+The simulator runs the Altair's first piece of software, and Microsoft's: [Altair BASIC 3.2](http://altairbasic.org), written in 1975 by Bill Gates, Paul Allen and Monte Davidoff. Choose 4 KB or 8 KB of memory in the Debugger tab, click LOAD 4K BASIC, then RUN from the front panel and type at the Teletype tab.
+
+```
+MEMORY SIZE?
+TERMINAL WIDTH?
+WANT SIN? Y
+
+727 BYTES FREE
+
+BASIC VERSION 3.2
+[4K VERSION]
+
+OK
+```
+
+On a 4 KB machine that leaves 727 bytes for your program, which is exactly what the name means — load it and look at the memory map before pressing RUN, and you can see BASIC filling fifteen of the machine's sixteen pages. The Tutorial tab walks through it, including what the LOAD button quietly skips: toggling in a 28 byte boot loader by hand and then waiting seven minutes for the paper tape.
+
+The ROM is in [roms/](./roms/), and [roms/NOTICE](./roms/NOTICE) explains what it is and why it is not under this repository's licence. It is optional; LOAD BINARY FILE will load an image of your own instead.
+
 Above 256 bytes the memory dump shows one 256-byte window at a time rather than the whole machine, with a map strip above it — one cell per page, shaded by how much of that page is in use, and marked where the program counter and the stack pointer are. Click a cell to jump the window there, or use FOLLOW PC to let it track the running program.
 
 The simulator works fine with modern mobile browsers, except that it is a bit challenging to touch a single switch on the panel on a mobile screen. Although, the helper switch buttons below the panel can be used as an alternative solution.
