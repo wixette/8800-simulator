@@ -366,13 +366,29 @@ in 16 lines** — the same visual object the student already knows —
 plus:
 
 - a **memory map strip** above it: one cell per 256-byte page, shaded
-  in four levels by how much of the page is non-zero, outlined on the
-  page being shown, and marked where PC and SP are. Click a cell to
-  move the window.
+  by how much of the page is non-zero, outlined on the page being
+  shown, and marked where PC and SP are. Click a cell to move the
+  window.
+
+  The shading has **five steps**, by the share of that page's bytes
+  that are not zero — `level = used == 0 ? 0 : ceil(used / 256 × 4)`:
+
+  | Step | Non-zero bytes | Meaning |
+  | --- | --- | --- |
+  | 0 | 0 | untouched |
+  | 1 | 1–64 | up to a quarter in use |
+  | 2 | 65–128 | up to a half |
+  | 3 | 129–192 | up to three quarters |
+  | 4 | 193–256 | nearly or completely full |
+
+  Each cell's tooltip gives its address range and that percentage, so
+  the scale does not have to be learnt: `0000-00FF  98%`.
 - a **follow-PC toggle**.
 - highlighting of the bytes at PC and SP inside the window. Applied at
   every size, including 256 B, where watching PC walk through the
-  dump is worth having on its own.
+  dump is worth having on its own. **Green** for PC and blue for SP:
+  red was tried first and reads as an error, which a program counter
+  is not.
 - the window defaults to the first 256 bytes.
 
 *As built,* the shading tells the intended story only on a machine
@@ -521,6 +537,38 @@ Debug tab, so the moment BASIC is loaded the memory map above shows it
 filling fifteen of the sixteen pages, *before* BASIC's own memory probe
 runs and writes over every page. Auto-running would hide exactly the
 picture worth seeing.
+
+### D15 — One status line, at the foot of the machine
+
+Everything the simulator wants to say — the power went off, a board
+was installed, a tape was loaded, something will not work — says it in
+a single bar under the tabs, with a warning and an error colour.
+
+*Why:* much of what this machine does is only unsurprising if you
+already know how these machines worked. Installing memory switches the
+power off, so the memory dump goes blank; a tape is loaded but not
+started; RESET moves the program counter but nothing visibly happens.
+To a newcomer each of those reads as the app breaking. A traditional
+status line is the cheapest way to turn every one of them into a
+sentence, and it gives warnings and errors somewhere to go that is not
+an alert box.
+
+*Replaced:* the ad-hoc `rom-status` line under the loading buttons.
+One place to look beats several.
+
+### D16 — The paper is never cleared automatically
+
+Power off, power on, RESET, installing memory and loading a tape all
+leave the paper exactly as it was. Only CLEAR PAPER tears it off.
+
+*Why:* it is paper. Switching a teletype off does not erase what it
+has already printed, and the roll surviving a power cycle is how you
+compared this run with the last one. [D15](#d15--one-status-line-at-the-foot-of-the-machine)
+covers the confusion this might otherwise cause, by saying what just
+happened rather than wiping the evidence of it.
+
+*If this is ever reversed*, the place to do it is `panel.onPowerOff`,
+and it is one line.
 
 ### D12 — Tell the paper-tape story
 
