@@ -219,3 +219,162 @@ test('free-running step leaves the data LEDs to OUT FFh', () => {
     assert.ok(validOutputs.includes(shown),
               'data LEDs must show a rotation of 8Ch, got ' + shown);
 });
+
+/**
+ * Phase 1 of the 4K BASIC work: the memory model, the I/O device
+ * table and the coalescing of the debugger dumps. See
+ * ../docs/ms-basic-4k.md.
+ */
+
+test('memory above the installed size reads FFh and swallows writes', () => {
+    const {sim} = poweredOnSim();
+    const read = sim.getReadByteCallback();
+    const write = sim.getWriteByteCallback();
+
+    sim.mem[0] = 0x11;
+    sim.mem[1] = 0x22;
+    // 0100h is one past the top of a 256 byte machine. It must not be
+    // mirrored back onto 0000h.
+    assert.strictEqual(read(0x0100), 0xff);
+    write(0x0100, 0x99);
+    assert.strictEqual(sim.mem[0], 0x11);
+    assert.strictEqual(sim.mem.length, 256);
+    // Nor anywhere else above the top.
+    assert.strictEqual(read(0x8000), 0xff);
+    write(0x8001, 0x99);
+    assert.strictEqual(sim.mem[1], 0x22);
+    // Addresses inside the machine are untouched by any of this.
+    write(0x34, 0x56);
+    assert.strictEqual(read(0x34), 0x56);
+});
+
+test('the memory size probe terminates (issue behind 4K BASIC)', () => {
+    const {sim} = poweredOnSim();
+    // The shape of MITS BASIC's own probe, in twelve bytes: walk
+    // upwards writing 37h and reading it back, and stop where the
+    // read-back fails. With memory mirrored instead of bounded, this
+    // wraps onto itself, overwrites the program and never stops.
+    //
+    //   0000  21 f0 00   LXI H,00F0h
+    //   0003  23         INX H
+    //   0004  3e 37      MVI A,37h
+    //   0006  77         MOV M,A
+    //   0007  be         CMP M
+    //   0008  ca 03 00   JZ 0003h     ; still memory, keep walking
+    //   000b  76         HLT          ; found the top
+    sim.loadDataAsHexString(0, '21 f0 00 23 3e 37 77 be ca 03 00 76');
+    sim.step(5000);
+
+    const cpu = CPU8080.status();
+    assert.strictEqual((cpu.h << 8) | cpu.l, 0x0100,
+                       'the probe should stop one past the top');
+    assert.strictEqual(sim.mem[0xff], 0x37, 'the last byte is memory');
+    assert.strictEqual(sim.mem[0], 0x21, 'the program is not overwritten');
+});
+
+test('EXAMINE above the top shows FFh rather than a stray byte', () => {
+    const {sim, state} = poweredOnSim();
+    state.inputWord = 0x0140;   // above a 256 byte machine
+    sim.examine();
+    assert.strictEqual(bitsToNumber(state.addressLeds), 0x0140);
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0xff);
+    // DEPOSIT there must go nowhere - and in particular must not land
+    // at 0140h mod 256, which is what it used to do.
+    state.inputWord = 0x0155;
+    sim.deposit();
+    assert.notStrictEqual(sim.mem[0x40], 0x55);
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0xff);
+});
+
+test('EXAMINE NEXT wraps at the top of the 16 bit address space', () => {
+    const {sim, state} = poweredOnSim();
+    state.inputWord = 0xffff;
+    sim.examine();
+    sim.examineNext();
+    assert.strictEqual(sim.lastAddress, 0);
+    assert.strictEqual(bitsToNumber(state.addressLeds), 0);
+});
+
+test('devices can be attached to any port', () => {
+    const {sim, state} = poweredOnSim();
+    const written = [];
+    sim.attachDevice(0x12, {
+        readPort: (port) => 0xa5,
+        writePort: (port, value) => { written.push([port, value]); },
+    });
+    // IN 12h; OUT 12h; OUT FFh - the last one proves the front panel
+    // is still a device like any other.
+    sim.loadDataAsHexString(0, 'db 12 d3 12 d3 ff');
+    sim.step(40);
+    assert.deepStrictEqual(written, [[0x12, 0xa5]]);
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0xa5);
+});
+
+test('a device may implement only one direction', () => {
+    const {sim} = poweredOnSim();
+    sim.attachDevice(0x20, {readPort: () => 0x7e});   // no writePort
+    sim.attachDevice(0x21, {writePort: () => {}});    // no readPort
+    const read = sim.getReadPortCallback();
+    const write = sim.getWritePortCallback();
+    assert.strictEqual(read(0x20), 0x7e);
+    assert.doesNotThrow(() => write(0x20, 1));
+    assert.strictEqual(read(0x21), 0);
+    assert.doesNotThrow(() => write(0x21, 1));
+});
+
+test('dumps coalesce onto a scheduler instead of firing every batch', () => {
+    const {sim, state} = poweredOnSim();
+    const scheduled = [];
+    sim.dumpScheduler = (flush) => { scheduled.push(flush); };
+    sim.loadDataAsHexString(0, '00 00 00 00');   // NOPs
+    state.memDump = null;
+
+    // Many batches, and nothing is rendered yet.
+    for (let i = 0; i < 20; i++) {
+        sim.step(8);
+    }
+    assert.strictEqual(state.memDump, null);
+    assert.strictEqual(scheduled.length, 1, 'requests coalesce into one');
+
+    scheduled[0]();
+    assert.ok(state.memDump.includes('0000'));
+    assert.ok(state.cpuDump.includes('PC ='));
+
+    // Once flushed, the next batch asks again.
+    sim.step(8);
+    assert.strictEqual(scheduled.length, 2);
+});
+
+test('dumpFilter skips the dumps while nobody is looking', () => {
+    const {sim, state} = poweredOnSim();
+    let visible = false;
+    sim.dumpFilter = () => visible;
+    state.memDump = null;
+
+    sim.step(4);
+    assert.strictEqual(state.memDump, null, 'nothing built while hidden');
+
+    // Becoming visible again catches up, even though the filter is
+    // still the only thing that changed.
+    sim.flushDump(true);
+    assert.ok(state.memDump.includes('0000'));
+
+    state.memDump = null;
+    visible = true;
+    sim.step(4);
+    assert.ok(state.memDump.includes('0000'), 'built again once visible');
+});
+
+test('a dump flush on a powered off machine stays blank', () => {
+    const {sim, state} = poweredOnSim();
+    sim.step(4);
+    assert.ok(state.memDump.includes('0000'));
+
+    sim.powerOff();
+    assert.strictEqual(state.memDump, '');
+    // Opening the debugger, or a repaint scheduled just before the
+    // power went off, must not put the contents back.
+    sim.flushDump(true);
+    assert.strictEqual(state.memDump, '');
+    assert.strictEqual(state.cpuDump, '');
+});

@@ -23,6 +23,13 @@
 panel = {};
 
 /**
+ * Whether the debugger is the tab currently on screen. The dumps are
+ * expensive, so they are not built while it is not.
+ * @type {boolean}
+ */
+panel.isDebugTabVisible = false;
+
+/**
  * When STOP switch is pressed.
  */
 panel.onStop = function() {
@@ -672,6 +679,18 @@ panel.init = function() {
         panel.getInputAddressCallback,
         panel.dumpCpuCallback, panel.dumpMemCallback);
 
+    // A running CPU asks to redraw the debugger far more often than
+    // the screen can show it - hundreds of times a second, each one
+    // rebuilding the dumps as HTML. Coalesce the requests onto the
+    // browser's own repaint, and drop them altogether while the
+    // debugger is not the visible tab.
+    panel.sim.dumpScheduler = function(flush) {
+        window.requestAnimationFrame(flush);
+    };
+    panel.sim.dumpFilter = function() {
+        return panel.isDebugTabVisible;
+    };
+
     // Adds handler for 'ZERO ALL MEMORY' Button 
     // (it doesn't have a corresponding switch on the actual machine)
     document.getElementById('debug-fill-zero').addEventListener('click', panel.onFillZero)
@@ -1013,6 +1032,7 @@ panel.highlightNavTab = function(elem, highlight) {
  * Shows the simulator tab, and hides the other two.
  */
 panel.showTabSim = function() {
+    panel.isDebugTabVisible = false;
     document.getElementById('tab-sim').style.display = 'block';
     document.getElementById('tab-debug').style.display = 'none';
     document.getElementById('tab-ref').style.display = 'none';
@@ -1025,9 +1045,15 @@ panel.showTabSim = function() {
  * Shows the debug tab, and hides the other two.
  */
 panel.showTabDebug = function() {
+    panel.isDebugTabVisible = true;
     document.getElementById('tab-sim').style.display = 'none';
     document.getElementById('tab-debug').style.display = 'block';
     document.getElementById('tab-ref').style.display = 'none';
+    // Nothing has been rendered while the tab was hidden, so catch up
+    // before it is shown.
+    if (panel.sim) {
+        panel.sim.flushDump(true);
+    }
     panel.highlightNavTab(document.getElementById('nav-sim'), false);
     panel.highlightNavTab(document.getElementById('nav-debug'), true);
     panel.highlightNavTab(document.getElementById('nav-ref'), false);
@@ -1037,6 +1063,7 @@ panel.showTabDebug = function() {
  * Shows the resource tab, and hides the other two.
  */
 panel.showTabRes = function() {
+    panel.isDebugTabVisible = false;
     document.getElementById('tab-sim').style.display = 'none';
     document.getElementById('tab-debug').style.display = 'none';
     document.getElementById('tab-ref').style.display = 'block';

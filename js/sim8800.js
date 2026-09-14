@@ -57,7 +57,30 @@ class Sim8800 {
         this.isRunning = false;
         this.lastAddress = 0;
         this.lastTickTime = 0;
+        /**
+         * I/O devices, keyed by port number. Every port the machine
+         * answers is a device here, the front panel included. See
+         * attachDevice().
+         * @type {Object}
+         */
+        this.devices = {};
+        /**
+         * Coalesces the debugger dumps. A UI that repaints on its own
+         * schedule sets dumpScheduler; without one the dumps happen
+         * inline, as they always did. See requestDump().
+         * @type {?function(function())}
+         */
+        this.dumpScheduler = null;
+        /**
+         * Optional predicate. When it returns false the dumps are not
+         * built at all - nobody is looking at them. See flushDump().
+         * @type {?function(): boolean}
+         */
+        this.dumpFilter = null;
+        this.dumpPending = false;
         this.initMem();
+        this.attachDevice(Sim8800.FRONT_PANEL_PORT,
+                          this.createFrontPanelDevice());
         CPU8080.init(this.getWriteByteCallback(),
                      this.getReadByteCallback(),
                      null,  /* not used. */
@@ -115,7 +138,7 @@ class Sim8800 {
         for (let i = 0; i < data.length && address < this.mem.length; i++) {
             this.mem[address++] = data[i];
         }
-        this.dumpMem();
+        this.requestDump();
     }
 
     /**
@@ -133,7 +156,7 @@ class Sim8800 {
                 this.mem[address++] = byte;
             }
         }
-        this.dumpMem();
+        this.requestDump();
     }
 
     /**
@@ -203,14 +226,45 @@ class Sim8800 {
     }
 
     /**
+     * Reads a byte of memory.
+     *
+     * Addresses above the installed memory are not mirrored back into
+     * it. A real Altair only answers at the addresses its memory
+     * boards decode; reading anywhere else picks up an undriven bus,
+     * which reads as FFh. Programs that size memory by writing a byte
+     * and reading it back - MITS BASIC among them - depend on that:
+     * with the address wrapped around instead, the probe writes over
+     * the program that started it and never finds the top.
+     * @param {number} address The address to read.
+     * @return {number} The byte at that address, or FFh if there is no
+     *     memory there.
+     */
+    readByte(address) {
+        address &= 0xffff;
+        return address < this.mem.length ? this.mem[address] : 0xff;
+    }
+
+    /**
+     * Writes a byte of memory. Writes above the installed memory go
+     * nowhere, as they would on the real machine. See readByte().
+     * @param {number} address The address to write.
+     * @param {number} value The byte to write.
+     */
+    writeByte(address, value) {
+        address &= 0xffff;
+        if (address < this.mem.length) {
+            this.mem[address] = value;
+        }
+    }
+
+    /**
      * Returns the byteTo (write memory) callback.
      * @return {function(number, number)}
      */
     getWriteByteCallback() {
         var self = this;
         return function(address, value) {
-            address = address % self.mem.length;
-            self.mem[address] = value;
+            self.writeByte(address, value);
         };
     }
 
@@ -221,9 +275,46 @@ class Sim8800 {
     getReadByteCallback() {
         var self = this;
         return function(address) {
-            address = address % self.mem.length;
-            var value = self.mem[address];
-            return value;
+            return self.readByte(address);
+        };
+    }
+
+    /**
+     * Attaches an I/O device to a port.
+     *
+     * On the real machine a port number is answered by whichever board
+     * decodes it, so this is the same shape: a device is any object
+     * with a readPort and/or a writePort method, and the simulator
+     * does not care what is behind them. The front panel is attached
+     * this way like anything else; a serial board would be too.
+     * @param {number} port The port number, 00h-FFh.
+     * @param {Object} device The device. Its optional readPort(port)
+     *     returns the byte the CPU reads, and its optional
+     *     writePort(port, value) receives the byte the CPU writes.
+     */
+    attachDevice(port, device) {
+        this.devices[port & 0xff] = device;
+    }
+
+    /**
+     * Builds the device that is the front panel itself: reading port
+     * FFh returns the upper eight address switches, writing it lights
+     * the data LEDs.
+     * @return {Object} The device.
+     */
+    createFrontPanelDevice() {
+        var self = this;
+        return {
+            readPort: function() {
+                if (!self.getInputAddressCallback)
+                    return 0;
+                return (self.getInputAddressCallback() >> 8) & 0xff;
+            },
+            writePort: function(port, value) {
+                if (self.setDataLedsCallback) {
+                    self.setDataLedsCallback(Sim8800.parseBits(value, 8));
+                }
+            },
         };
     }
 
@@ -234,28 +325,70 @@ class Sim8800 {
     getWritePortCallback() {
         var self = this;
         return function(address, value) {
-            if (address == 0xff && self.setDataLedsCallback) {
-                var bits = Sim8800.parseBits(value, 8);
-                self.setDataLedsCallback(bits);
+            var device = self.devices[address & 0xff];
+            if (device && device.writePort) {
+                device.writePort(address & 0xff, value & 0xff);
             }
         };
     }
 
     /**
-     * Returns the byteAt (read memory) callback.
+     * Returns the porti (read port) callback. A port with nothing
+     * attached reads 0.
      * @return {function(number): number}
      */
     getReadPortCallback() {
         var self = this;
         return function(address) {
-            var value = 0;
-            // We only care about the port 0xff.
-            if (address == 0xff && self.getInputAddressCallback) {
-                var word = self.getInputAddressCallback();
-                return word >> 8;
+            var device = self.devices[address & 0xff];
+            if (device && device.readPort) {
+                return device.readPort(address & 0xff) & 0xff;
             }
-            return value;
+            return 0;
         };
+    }
+
+    /**
+     * Asks for the debugger dumps to be refreshed.
+     *
+     * The dumps are the most expensive thing the simulator does - the
+     * memory dump alone rebuilds the whole of memory as HTML - and a
+     * running CPU would otherwise ask for them hundreds of times a
+     * second. So a UI can set dumpScheduler to coalesce the requests
+     * onto its own repaint, and dumpFilter to skip them entirely while
+     * nothing is on screen. With neither set, the dumps happen inline.
+     */
+    requestDump() {
+        if (!this.dumpScheduler) {
+            this.flushDump();
+            return;
+        }
+        if (this.dumpPending)
+            return;
+        this.dumpPending = true;
+        var self = this;
+        this.dumpScheduler(function() {
+            self.flushDump();
+        });
+    }
+
+    /**
+     * Refreshes the debugger dumps now.
+     * @param {boolean=} force Dumps even if dumpFilter says nobody is
+     *     looking. Used when the debugger becomes visible again.
+     */
+    flushDump(force = false) {
+        this.dumpPending = false;
+        // A machine that is off shows nothing. powerOff() blanks the
+        // dumps deliberately, and a scheduled flush arriving after it
+        // - or the debugger tab being opened later - must not put the
+        // old contents back.
+        if (!this.isPoweredOn)
+            return;
+        if (!force && this.dumpFilter && !this.dumpFilter())
+            return;
+        this.dumpCpu();
+        this.dumpMem();
     }
 
     /**
@@ -337,8 +470,7 @@ class Sim8800 {
         if (this.setDataLedsCallback) {
             this.setDataLedsCallback(new Array(8).fill(1));
         }
-        this.dumpCpu();
-        this.dumpMem();
+        this.requestDump();
         var self = this;
         window.setTimeout(function() {
             if (self.setAddressLedsCallback) {
@@ -411,8 +543,7 @@ class Sim8800 {
                 }
             }
         }
-        this.dumpCpu();
-        this.dumpMem();
+        this.requestDump();
         var address = ldaxAddress != null ? ldaxAddress : CPU8080.status().pc;
         if (this.setAddressLedsCallback) {
             let bits = Sim8800.parseBits(address, 16);
@@ -442,7 +573,9 @@ class Sim8800 {
     }
 
     /**
-     * Shows the address and the byte at the address via LEDs.
+     * Shows the address and the byte at the address via LEDs. The byte
+     * is read the same way the CPU reads it, so an address with no
+     * memory behind it shows FFh rather than a stray value.
      */
     showAddressAndData() {
         if (this.setAddressLedsCallback) {
@@ -450,7 +583,7 @@ class Sim8800 {
             this.setAddressLedsCallback(bits);
         }
         if (this.setDataLedsCallback) {
-            let bits = Sim8800.parseBits(this.mem[this.lastAddress], 8);
+            let bits = Sim8800.parseBits(this.readByte(this.lastAddress), 8);
             this.setDataLedsCallback(bits);
         }
     }
@@ -463,7 +596,7 @@ class Sim8800 {
             return;
         if (this.getInputAddressCallback) {
             var address = this.getInputAddressCallback();
-            this.lastAddress = address;
+            this.lastAddress = address & 0xffff;
             this.showAddressAndData();
         }
     }
@@ -474,7 +607,7 @@ class Sim8800 {
     examineNext() {
         if (!this.isPoweredOn)
             return;
-        this.lastAddress++;
+        this.lastAddress = (this.lastAddress + 1) & 0xffff;
         this.showAddressAndData();
     }
 
@@ -487,9 +620,9 @@ class Sim8800 {
         if (this.getInputAddressCallback) {
             // Only 8 bits of input is considered.
             var value = this.getInputAddressCallback() & 0xff;
-            this.getWriteByteCallback()(this.lastAddress, value);
+            this.writeByte(this.lastAddress, value);
             this.showAddressAndData();
-            this.dumpMem();
+            this.requestDump();
         }
     }
 
@@ -499,10 +632,17 @@ class Sim8800 {
     depositNext() {
         if (!this.isPoweredOn)
             return;
-        this.lastAddress++;
+        this.lastAddress = (this.lastAddress + 1) & 0xffff;
         this.deposit();
     }
 };
+
+/**
+ * The port the front panel answers: reading it gives the upper eight
+ * address switches, writing it drives the data LEDs.
+ * @type {number}
+ */
+Sim8800.FRONT_PANEL_PORT = 0xff;
 
 // Exports the class for unit tests when running in Node.js. This has
 // no effect when the script is loaded in a browser.
