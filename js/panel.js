@@ -125,6 +125,7 @@ panel.onPowerOff = function() {
     }
     panel.renderTeletype();
     panel.setStatus('status-off');
+    panel.updateHelperSwitches();
 };
 
 /**
@@ -219,6 +220,7 @@ panel.loadImage = function(bytes) {
         panel.onPowerOn();
         panel.switchDown('off-on');
         panel.isPoweredOn = true;
+        panel.updateHelperSwitches();
     }
     panel.sim.initMem(false);
     panel.sim.loadData(0, bytes);
@@ -289,6 +291,7 @@ panel.onSetMemSize = function(memSize) {
     // setMemSize powered the machine down; show that on the panel.
     panel.isPoweredOn = false;
     panel.switchUp('off-on');
+    panel.updateHelperSwitches();
     document.body.classList.remove('powered-on');
     if (panel.sio) {
         panel.sio.reset();
@@ -442,6 +445,30 @@ panel.setStatusLedsCallback = function(isPoweredOn) {
         } else {
             panel.ledOff(ledIds[i]);
         }
+    }
+};
+
+/**
+ * Repaints the helper buttons that stand for a switch, so that the
+ * board below the panel reads the same way the panel does.
+ *
+ * The panel's own switches are 20 px sprites that show their position
+ * by being drawn up or down. The helper buttons had no such tell: an
+ * address switch that was up looked exactly like one that was down,
+ * and the only way to know the machine was on was to look at the
+ * panel. Now the raised ones carry the same orange the rest of the app
+ * uses for an active choice, and the power button lights.
+ */
+panel.updateHelperSwitches = function() {
+    for (let i = 0; i < 16; i++) {
+        let elem = document.getElementById('s-s' + i);
+        if (elem) {
+            elem.classList.toggle('switch-on', !!panel.addressSwitchStates[i]);
+        }
+    }
+    var power = document.getElementById('s-off-on');
+    if (power) {
+        power.classList.toggle('on', !!panel.isPoweredOn);
     }
 };
 
@@ -1494,6 +1521,7 @@ panel.onToggle = function(id) {
             panel.switchDown(id);
         }
         panel.addressSwitchStates[bitIndex] = state ? 0 : 1;
+        panel.updateHelperSwitches();
     } else if (id == 'off-on') {
         if (panel.isPoweredOn) {
             panel.onPowerOff();
@@ -1504,6 +1532,7 @@ panel.onToggle = function(id) {
             panel.switchDown(id);
             panel.isPoweredOn = true;
         }
+        panel.updateHelperSwitches();
     }
 };
 

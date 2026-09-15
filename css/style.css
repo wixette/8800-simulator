@@ -403,9 +403,35 @@ footer {
 }
 
 /* A button holding a current choice: the installed memory size, or
-   FOLLOW PC while it is on. Matches the selected nav tab. */
-.button.selected {
+   FOLLOW PC while it is on. Matches the selected nav tab. A helper
+   button standing for a raised address switch reads the same way -
+   orange means active, wherever it appears. */
+.button.selected,
+.button.switch-on {
     background-color: #f90;
+    font-weight: bold;
+}
+
+/* The power switch. It is the one control that has to be found before
+   anything else in the simulator does anything, and its counterpart on
+   the panel is a 20 px sprite among thirty others. So this one is
+   deliberately the loudest thing on the helper board: bigger, ringed
+   so it can be picked out while the machine is dark, and lit green
+   once the machine is live. It keeps its own colours rather than
+   borrowing the orange the address switches use, because it is not
+   the same kind of thing. */
+.button.power-button {
+    background-color: #444;
+    box-shadow: 0 0 0 2px #8a8a8a;
+    color: #ddd;
+    letter-spacing: 1px;
+    padding: 2px 18px;
+}
+
+.button.power-button.on {
+    background-color: #3ddc63;
+    box-shadow: 0 0 12px rgba(61, 220, 99, 0.6);
+    color: #123;
     font-weight: bold;
 }
 
