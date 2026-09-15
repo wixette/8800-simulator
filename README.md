@@ -23,7 +23,7 @@ Microsoft's original 4K BASIC on a simulated Teletype.
   game on the teletype, each a checked listing you load with one click.
 - **Nine languages**, no build step and no dependencies.
 
-![8800 Panel](./screenshots/sim-panel.png)
+![The Simulator tab: the Altair 8800 front panel, switched on, with the Switch Board Helper below it](./screenshots/panel.png)
 
 ## Usage
 
@@ -59,6 +59,8 @@ to it through an 88-SIO serial board on ports 00H and 01H (and an
 88-2SIO on 10H and 11H), so a program has to be running and reading
 that board before anything appears — nothing echoes by itself.
 
+![The Teletype tab running 4K BASIC: MEMORY SIZE?, 727 BYTES FREE, then PRINT 3.14 * 9 answered with 28.26](./screenshots/teletype.png)
+
 **Debugger** shows the internal state of the simulated 8080 CPU and
 the contents of memory, and is where programs are loaded:
 
@@ -79,12 +81,10 @@ the contents of memory, and is where programs are loaded:
   stack pointer are. Click a cell to jump there, or use **Follow PC** to
   track the running program.
 
-![8800 Debugger](./screenshots/sim-debug.png)
+![The Debugger tab: the loaders, the CPU registers, installed memory and the memory dump](./screenshots/debugger.png)
 
 **Tutorial** walks through toggling in a first program by hand and
 starting BASIC, with references for going further.
-
-![8800 Mobile](./screenshots/sim-mobile.png)
 
 ## Teletype programs
 
