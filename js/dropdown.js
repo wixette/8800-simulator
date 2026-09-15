@@ -57,10 +57,11 @@ class Dropdown {
             }
         }, false);
 
-        // Anywhere else on the page dismisses it.
+        // Anywhere else on the page dismisses it, leaving the focus on
+        // whatever was clicked.
         document.addEventListener('click', function(event) {
             if (!self.list.hidden && !self.root.contains(event.target)) {
-                self.close();
+                self.close(false);
             }
         }, false);
 
@@ -143,11 +144,17 @@ class Dropdown {
         }
     }
 
-    /** Closes the list and puts the keyboard back on the button. */
-    close() {
+    /**
+     * Closes the list.
+     * @param {boolean=} refocus Whether to put the keyboard back on the
+     *     button.
+     */
+    close(refocus = true) {
         this.list.hidden = true;
         this.button.setAttribute('aria-expanded', 'false');
-        this.button.focus();
+        if (refocus) {
+            this.button.focus();
+        }
     }
 
     /**
