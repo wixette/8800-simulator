@@ -159,6 +159,74 @@ panel.MIN_BASIC_MEM = 4096;
 panel.MAX_IMAGE_BYTES = 65536;
 
 /**
+ * The example programs offered in the Debugger tab, in the order a
+ * newcomer is best off meeting them: the teletype demonstrations, then
+ * something to play, then the ones that speak through the front panel.
+ *
+ * Only the names are here. Everything shown about a program - its
+ * title, its size, its bytes - is read out of examples/<id>.asm when
+ * the list is built, so this cannot drift out of step with the
+ * listings, and a test keeps it in step with the directory.
+ * @type {Array<string>}
+ */
+panel.EXAMPLES = [
+    'tty-echo',
+    'tty-leds',
+    'tty-hello',
+    'tty-ascii',
+    'guess-letter',
+    'adder',
+    'pattern-shift',
+    'io-echo',
+    'bouncing-light',
+    'kill-the-bit',
+];
+
+/**
+ * Builds a button per example, once, the first time the debugger is
+ * looked at. A reader who never opens that tab never fetches them.
+ */
+panel.buildExampleButtons = function() {
+    if (panel.exampleButtonsBuilt) {
+        return;
+    }
+    panel.exampleButtonsBuilt = true;
+    var row = document.getElementById('example-buttons');
+    if (!row) {
+        return;
+    }
+    for (let i = 0; i < panel.EXAMPLES.length; i++) {
+        let id = panel.EXAMPLES[i];
+        let button = document.createElement('div');
+        button.className = 'button m-8';
+        button.id = 'example-' + id;
+        button.textContent = id;
+        row.appendChild(button);
+        window.fetch('examples/' + id + '.asm').then(function(response) {
+            if (!response.ok) {
+                throw new Error('HTTP ' + response.status);
+            }
+            return response.text();
+        }).then(function(text) {
+            let program = Listing.parse(text);
+            if (!program.bytes.length) {
+                throw new Error('no bytes');
+            }
+            button.textContent = program.name + '  ' + program.bytes.length + 'B';
+            button.addEventListener('click', function() {
+                var loaded = panel.loadImage(program.bytes);
+                panel.setStatus('example-loaded',
+                                {name: program.name, bytes: loaded});
+            }, false);
+        }).catch(function() {
+            // A listing that cannot be read should not leave a button
+            // that does nothing when pressed.
+            button.remove();
+        });
+    }
+};
+
+/**
  * Says something on the status line at the foot of the machine.
  *
  * A lot of what the simulator does is only obvious if you already know
@@ -1688,8 +1756,11 @@ panel.showTab = function(name) {
     }
     // Neither view is kept up to date while it is hidden, so catch up
     // as it comes back.
-    if (panel.isDebugTabVisible && panel.sim) {
-        panel.sim.flushDump(true);
+    if (panel.isDebugTabVisible) {
+        panel.buildExampleButtons();
+        if (panel.sim) {
+            panel.sim.flushDump(true);
+        }
     }
     if (panel.isTtyTabVisible) {
         panel.setNavActivity(false);
