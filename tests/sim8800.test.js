@@ -602,3 +602,53 @@ test('map cells carry the address they jump to', () => {
     assert.strictEqual(addresses[0], 0);
     assert.strictEqual(addresses[15], 0x0f00);
 });
+
+test('a machine that is off prints no dump, however it is asked', () => {
+    const {sim, state} = createSim(4096);
+    sim.powerOn();
+    flushTimers();
+    sim.flushDump(true);
+    assert.ok(state.memDump, 'a live machine dumps');
+    assert.ok(state.cpuDump, 'a live machine dumps its CPU');
+
+    sim.powerOff();
+    assert.strictEqual(state.memDump, '', 'powering off blanks the dump');
+    assert.strictEqual(state.cpuDump, '', 'powering off blanks the CPU dump');
+
+    // ZERO ALL MEMORY used to call dumpMem() straight, going around
+    // flushDump() and its power check, and painted a dump of zeros over
+    // that blank. The guard belongs in the dumps themselves.
+    sim.initMem(false);
+    sim.dumpMem();
+    sim.dumpCpu();
+    assert.strictEqual(state.memDump, '', 'a dead machine has no memory to show');
+    assert.strictEqual(state.cpuDump, '', 'a dead machine has no CPU to show');
+
+    sim.flushDump(true);
+    assert.strictEqual(state.memDump, '', 'and a forced flush does not revive it');
+});
+
+test('moving the dump window while off leaves the screen blank', () => {
+    const {sim, state} = createSim(4096);
+    sim.powerOn();
+    flushTimers();
+    sim.powerOff();
+
+    // The map strip is part of the dump, so a window that moved while
+    // the dump was blank would put the cursor somewhere the reader
+    // cannot see: the window moves, nothing is drawn.
+    sim.setDumpWindow(0x0800);
+    assert.strictEqual(state.memDump, '');
+    sim.setFollowPc(true);
+    assert.strictEqual(state.memDump, '');
+
+    // Switching back on draws it, at the window that was chosen.
+    sim.powerOn();
+    flushTimers();
+    sim.setFollowPc(false);
+    sim.setDumpWindow(0x0800);
+    sim.flushDump(true);
+    assert.ok(state.memDump.includes('mem-page-shown'),
+              'the map marks the window that is showing');
+    assert.strictEqual(sim.getDumpWindow().start, 0x0800);
+});

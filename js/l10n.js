@@ -552,6 +552,18 @@ l10n.MESSAGES = {
         'ko': '16진수 바이트, 예: c3 00 00',
     },
 
+    'zero-mem-off': {
+        'en': 'The machine is off, so there is no memory to zero. Switch it on first.',
+        'es': 'La máquina está apagada, así que no hay memoria que poner a cero. Enciéndela primero.',
+        'fr': 'La machine est éteinte, il n\'y a donc pas de mémoire à remettre à zéro. Allumez-la d\'abord.',
+        'de': 'Die Maschine ist aus, es gibt also keinen Speicher zum Nullsetzen. Schalten Sie sie zuerst ein.',
+        'it': 'La macchina è spenta, quindi non c\'è memoria da azzerare. Accendila prima.',
+        'zh': '机器已关闭，没有内存可以清零。请先开机。',
+        'zh-TW': '機器已關閉，沒有記憶體可以清零。請先開機。',
+        'ja': '電源が入っていないので、ゼロにするメモリがありません。先に電源を入れてください。',
+        'ko': '기계가 꺼져 있어 0으로 만들 메모리가 없습니다. 먼저 전원을 켜세요.',
+    },
+
     'load-data-empty': {
         'en': 'Nothing to load. Type some bytes in hex, such as c3 00 00.',
         'es': 'No hay nada que cargar. Escribe algunos bytes en hex, por ejemplo c3 00 00.',

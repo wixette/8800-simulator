@@ -291,6 +291,16 @@ class Sim8800 {
     dumpMem() {
         if (!this.dumpMemCallback)
             return;
+        // A machine that is off has no memory to print. The guard is
+        // here and not only in flushDump() because anything that calls
+        // this directly bypasses flushDump entirely - ZERO ALL MEMORY
+        // did, and painted a dump of zeros over the blank a powered
+        // down machine is supposed to show. Worse, everything that
+        // moved the window afterwards went through flushDump and was
+        // refused, so the map strip sat there taking clicks and never
+        // moving its cursor.
+        if (!this.isPoweredOn)
+            return;
         var cpu = CPU8080.status();
         var window = this.getDumpWindow();
         var sb = [];
@@ -336,6 +346,8 @@ class Sim8800 {
      * Dumps the internal CPU status to HTML, for debugging or mornitoring.
      */
     dumpCpu() {
+        if (!this.isPoweredOn)
+            return;
         if (this.dumpCpuCallback) {
             var cpu = CPU8080.status();
             var sb = ['<pre>\n'];
@@ -518,7 +530,8 @@ class Sim8800 {
         // A machine that is off shows nothing. powerOff() blanks the
         // dumps deliberately, and a scheduled flush arriving after it
         // - or the debugger tab being opened later - must not put the
-        // old contents back.
+        // old contents back. dumpCpu() and dumpMem() refuse as well;
+        // stopping here just saves asking them.
         if (!this.isPoweredOn)
             return;
         if (!force && this.dumpFilter && !this.dumpFilter())
