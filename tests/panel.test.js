@@ -89,16 +89,83 @@ test('a run of hex digits that is not whole bytes is reported', () => {
     assert.strictEqual(parsed.params.text, '8cd3f');
 });
 
-test('every message the parser can ask for exists in every locale', () => {
-    const messages = loadScript('l10n').MESSAGES;
-    const ids = ['load-data-bad', 'load-data-odd', 'load-data-empty',
-                 'load-data-off', 'load-data-too-long', 'load-data-loaded'];
-    const locales = Object.keys(messages[ids[0]]);
-    assert.ok(locales.length >= 9, 'expected every locale');
-    for (const id of ids) {
-        assert.ok(messages[id], id + ' has no message at all');
-        for (const locale of locales) {
-            assert.ok(messages[id][locale], id + ' is missing ' + locale);
-        }
+/** Every message id, with the locales it is translated into. */
+function messages() {
+    return loadScript('l10n').MESSAGES;
+}
+
+/** The locales the app claims to support. */
+function locales() {
+    return Object.values(loadScript('l10n').LOCALES);
+}
+
+/** The source of one of the page's scripts, or of index.html. */
+function sourceOf(file) {
+    return fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
+}
+
+test('every message is translated into every locale', () => {
+    const all = messages();
+    const expected = locales();
+    assert.ok(expected.length >= 9, 'expected nine locales');
+    for (const id of Object.keys(all)) {
+        const got = Object.keys(all[id]);
+        assert.deepStrictEqual([...got].sort(), [...expected].sort(),
+                               id + ' is not translated everywhere');
+    }
+});
+
+test('every label the page marks for translation has a message', () => {
+    const html = sourceOf('index.html');
+    // <div id="x" class="... l10n ...">, in either attribute order.
+    const tags = html.match(/<[^>]*\bclass="[^"]*\bl10n\b[^"]*"[^>]*>/g) || [];
+    assert.ok(tags.length > 20, 'expected the page to be full of these');
+    const all = messages();
+    for (const tag of tags) {
+        const id = tag.match(/\bid="([^"]+)"/);
+        assert.ok(id, 'an l10n element with no id: ' + tag);
+        assert.ok(all[id[1]], id[1] + ' is marked l10n but has no message');
+    }
+});
+
+test('every message the panel asks for by name exists', () => {
+    // Catches a message renamed or retired out from under its caller,
+    // which shows up in the app as a control that says nothing at all.
+    const panelSource = sourceOf('js/panel.js');
+    const asked = new Set();
+    for (const m of panelSource.matchAll(/setStatus\(\s*'([^']+)'/g)) {
+        asked.add(m[1]);
+    }
+    for (const m of panelSource.matchAll(/getMessage\(\s*'([^']+)'/g)) {
+        asked.add(m[1]);
+    }
+    // The reasons a control gives for being unavailable.
+    for (const m of panelSource.matchAll(/\{id:\s*'([^']+)',\s*params:/g)) {
+        asked.add(m[1]);
+    }
+    assert.ok(asked.size > 15, 'expected to find plenty of these');
+    const all = messages();
+    for (const id of asked) {
+        assert.ok(all[id], 'panel.js asks for "' + id + '", which does not exist');
+    }
+});
+
+test('every Debugger control that can be unavailable can say why', () => {
+    // The greying out and the explanation come from one function, so
+    // a control cannot be greyed with nothing to say for itself.
+    const source = sourceOf('js/panel.js');
+    const body = source.slice(
+        source.indexOf('panel.debugControlReasons = function'),
+        source.indexOf('panel.reportIfUnavailable = function'));
+    const controls = [...body.matchAll(/reasons\['([^']+)'\]/g)].map((m) => m[1]);
+    assert.ok(controls.length >= 7, 'expected every control listed');
+    const html = sourceOf('index.html');
+    for (const id of new Set(controls)) {
+        assert.ok(html.includes('id="' + id + '"'),
+                  id + ' is given a reason but is not on the page');
+    }
+    const all = messages();
+    for (const m of body.matchAll(/\{id:\s*'([^']+)'/g)) {
+        assert.ok(all[m[1]], m[1] + ' is a reason with no message');
     }
 });

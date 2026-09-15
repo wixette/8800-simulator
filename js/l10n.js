@@ -373,15 +373,15 @@ l10n.MESSAGES = {
     },
 
     'example-prompt': {
-        'en': 'Example programs...',
-        'es': 'Programas de ejemplo...',
-        'fr': 'Programmes d’exemple...',
+        'en': 'Example Programs...',
+        'es': 'Programas de Ejemplo...',
+        'fr': 'Programmes d’Exemple...',
         'de': 'Beispielprogramme...',
-        'it': 'Programmi di esempio...',
-        'zh': '示例程序…',
-        'zh-TW': '範例程式…',
-        'ja': 'サンプルプログラム…',
-        'ko': '예제 프로그램…',
+        'it': 'Programmi di Esempio...',
+        'zh': '示例程序...',
+        'zh-TW': '範例程式...',
+        'ja': 'サンプルプログラム...',
+        'ko': '예제 프로그램...',
     },
 
     'example-loaded': {
@@ -397,12 +397,12 @@ l10n.MESSAGES = {
     },
 
     'load-basic': {
-        'en': 'LOAD 4K BASIC',
-        'es': 'CARGAR BASIC 4K',
-        'fr': 'CHARGER BASIC 4K',
-        'de': '4K BASIC LADEN',
-        'it': 'CARICA BASIC 4K',
-        'zh': '加载 4K BASIC',
+        'en': 'Load 4K BASIC',
+        'es': 'Cargar 4K BASIC',
+        'fr': 'Charger 4K BASIC',
+        'de': '4K BASIC laden',
+        'it': 'Carica 4K BASIC',
+        'zh': '载入 4K BASIC',
         'zh-TW': '載入 4K BASIC',
         'ja': '4K BASIC を読み込む',
         'ko': '4K BASIC 불러오기',
@@ -576,18 +576,6 @@ l10n.MESSAGES = {
         'ko': '불러올 내용이 없습니다. 16진수 바이트를 입력하세요. 예: c3 00 00.',
     },
 
-    'load-data-off': {
-        'en': 'The machine is off, so the bytes would go nowhere. Switch it on first.',
-        'es': 'La máquina está apagada, así que los bytes no irían a ninguna parte. Enciéndela primero.',
-        'fr': 'La machine est éteinte, les octets n’iraient nulle part. Allumez-la d’abord.',
-        'de': 'Die Maschine ist aus, die Bytes würden nirgendwo landen. Schalten Sie sie zuerst ein.',
-        'it': 'La macchina è spenta, quindi i byte non andrebbero da nessuna parte. Accendila prima.',
-        'zh': '机器已关闭，字节无处可去。请先开机。',
-        'zh-TW': '機器已關閉，位元組無處可去。請先開機。',
-        'ja': '電源が切れているので、バイト列はどこにも入りません。先に電源を入れてください。',
-        'ko': '기계가 꺼져 있어 바이트가 들어갈 곳이 없습니다. 먼저 전원을 켜세요.',
-    },
-
     'load-data-bad': {
         'en': '"{text}" is not a byte. A byte is one or two hex digits, such as c3 or 0f.',
         'es': '"{text}" no es un byte. Un byte son uno o dos dígitos hex, por ejemplo c3 o 0f.',
@@ -636,6 +624,66 @@ l10n.MESSAGES = {
         'ko': '0000H에 {bytes}바이트를 불러왔습니다.',
     },
 
+    'debug-fill-zero': {
+        'en': 'Zero All Memory',
+        'es': 'Poner Memoria a Cero',
+        'fr': 'Mettre la Mémoire à Zéro',
+        'de': 'Speicher Nullsetzen',
+        'it': 'Azzera la Memoria',
+        'zh': '内存清零',
+        'zh-TW': '記憶體清零',
+        'ja': 'メモリをゼロに',
+        'ko': '메모리 0으로',
+    },
+
+    'mem-page-prev-title': {
+        'en': 'Previous page of memory',
+        'es': 'Página anterior de memoria',
+        'fr': 'Page de mémoire précédente',
+        'de': 'Vorherige Speicherseite',
+        'it': 'Pagina di memoria precedente',
+        'zh': '上一页内存',
+        'zh-TW': '上一頁記憶體',
+        'ja': 'メモリの前のページ',
+        'ko': '이전 메모리 페이지',
+    },
+
+    'mem-page-next-title': {
+        'en': 'Next page of memory',
+        'es': 'Página siguiente de memoria',
+        'fr': 'Page de mémoire suivante',
+        'de': 'Nächste Speicherseite',
+        'it': 'Pagina di memoria successiva',
+        'zh': '下一页内存',
+        'zh-TW': '下一頁記憶體',
+        'ja': 'メモリの次のページ',
+        'ko': '다음 메모리 페이지',
+    },
+
+    'mem-nav-off': {
+        'en': 'The machine is off, so there is no memory dump to move around in. Switch it on first.',
+        'es': 'La máquina está apagada, así que no hay volcado de memoria por el que moverse. Enciéndela primero.',
+        'fr': 'La machine est éteinte, il n\'y a donc aucun vidage mémoire à parcourir. Allumez-la d\'abord.',
+        'de': 'Die Maschine ist aus, es gibt also keinen Speicherauszug zum Blättern. Schalten Sie sie zuerst ein.',
+        'it': 'La macchina è spenta, quindi non c\'è alcun dump di memoria da scorrere. Accendila prima.',
+        'zh': '机器已关闭，没有内存转储可以浏览。请先开机。',
+        'zh-TW': '機器已關閉，沒有記憶體傾印可以瀏覽。請先開機。',
+        'ja': '電源が入っていないので、たどるメモリダンプがありません。先に電源を入れてください。',
+        'ko': '기계가 꺼져 있어 살펴볼 메모리 덤프가 없습니다. 먼저 전원을 켜세요.',
+    },
+
+    'mem-nav-fits': {
+        'en': 'All {size} is on screen at once. Install 4 KB or 8 KB and the dump gets a window to move.',
+        'es': 'Los {size} caben en pantalla de una vez. Instala 4 KB u 8 KB y el volcado tendrá una ventana que mover.',
+        'fr': 'Les {size} tiennent à l’écran d’un seul coup. Installez 4 Ko ou 8 Ko et le vidage aura une fenêtre à déplacer.',
+        'de': 'Die {size} passen auf einmal auf den Bildschirm. Bauen Sie 4 KB oder 8 KB ein, dann bekommt der Auszug ein Fenster zum Verschieben.',
+        'it': 'Tutti i {size} stanno sullo schermo in una volta. Installa 4 KB o 8 KB e il dump avrà una finestra da spostare.',
+        'zh': '{size} 一屏就能显示完。装上 4 KB 或 8 KB，转储才会有可移动的窗口。',
+        'zh-TW': '{size} 一個畫面就能顯示完。裝上 4 KB 或 8 KB，傾印才會有可移動的視窗。',
+        'ja': '{size} は一画面に収まります。4 KB か 8 KB を増設すると、ダンプに動かせる窓ができます。',
+        'ko': '{size}는 한 화면에 모두 들어갑니다. 4 KB나 8 KB를 설치하면 덤프에 옮길 창이 생깁니다.',
+    },
+
     'debug-cpu-dump-title': {
         'en': '8080 CPU Status Dump',
         'es': 'Estado de la CPU 8080',
@@ -661,11 +709,11 @@ l10n.MESSAGES = {
     },
 
     'mem-follow-pc': {
-        'en': 'FOLLOW PC',
-        'es': 'SEGUIR PC',
-        'fr': 'SUIVRE PC',
-        'de': 'PC FOLGEN',
-        'it': 'SEGUI PC',
+        'en': 'Follow PC',
+        'es': 'Seguir el PC',
+        'fr': 'Suivre le PC',
+        'de': 'PC folgen',
+        'it': 'Segui il PC',
         'zh': '跟随 PC',
         'zh-TW': '跟隨 PC',
         'ja': 'PC を追う',

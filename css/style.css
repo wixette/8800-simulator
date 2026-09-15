@@ -447,13 +447,22 @@ footer {
     font-weight: bold;
 }
 
-/* A control with nothing to act on: the memory dump buttons while the
-   machine is off, when the dump below them is blank. Still reachable,
-   because pressing one is how you find out why - it answers in the
-   status bar. */
-.button.disabled {
+/* A control that cannot be used just now: the dump buttons while the
+   machine is off or while all of memory is already on screen, LOAD 4K
+   BASIC on a machine too small to hold it.
+
+   It keeps the pointer cursor, which looks like a mistake and is not.
+   Elsewhere a greyed button ignores you; here it takes the press and
+   answers in the status bar with the reason it is grey. A simulator is
+   for finding out what the machine can do, and a control that goes
+   dead without a word teaches nothing. Coming after .selected means a
+   button that is both - FOLLOW PC, switched on, on a dead machine -
+   reads as unavailable rather than as active. */
+.button.disabled,
+.button.disabled.selected {
     background-color: #bbb;
     color: #777;
+    font-weight: normal;
 }
 
 
