@@ -410,13 +410,21 @@ footer {
 /* The page the dump is printing. The outline sits in the gap between
    cells rather than inside them, so that it does not paint over the
    PC and SP marks below - which is the usual case, since the page you
-   are looking at is normally the one the program is running in. */
+   are looking at is normally the one the program is running in.
+
+   There is deliberately no :hover here. One was tried, a white outline
+   on the cell under the pointer, and it had to go for two reasons.
+   It could not work while a program ran: the strip is rebuilt from
+   innerHTML on every repaint, so the element under the pointer is
+   destroyed sixty times a second and the browser has nothing to keep
+   a hover state on - the same reason the click had to become a
+   pointerdown, see panel.onMemMapPress. And it used the same property
+   as the rule above, so hovering the page you were looking at replaced
+   the orange cursor with white and hid the one thing the strip is for.
+   The cursor: pointer on .mem-page is the affordance, and it survives
+   the rebuild because it is hit tested afresh on every frame. */
 .mem-page-shown {
     outline: 2px solid #f90;
-}
-
-.mem-page:hover {
-    outline: 2px solid #eee;
 }
 
 /* Where the program counter and the stack pointer are. These sit on
