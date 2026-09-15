@@ -373,15 +373,27 @@ l10n.MESSAGES = {
     },
 
     'debug-rom-title': {
-        'en': 'Load a Program From a File',
-        'es': 'Cargar un programa desde un archivo',
-        'fr': 'Charger un programme depuis un fichier',
-        'de': 'Ein Programm aus einer Datei laden',
-        'it': 'Carica un programma da un file',
-        'zh': '从文件加载程序',
-        'zh-TW': '從檔案載入程式',
-        'ja': 'ファイルからプログラムを読み込む',
-        'ko': '파일에서 프로그램 불러오기',
+        'en': 'Load a Program',
+        'es': 'Cargar un programa',
+        'fr': 'Charger un programme',
+        'de': 'Ein Programm laden',
+        'it': 'Carica un programma',
+        'zh': '加载程序',
+        'zh-TW': '載入程式',
+        'ja': 'プログラムを読み込む',
+        'ko': '프로그램 불러오기',
+    },
+
+    'example-loaded': {
+        'en': 'Loaded {name}, {bytes} bytes, at 0000H and pressed RESET. Go to the Simulator tab and click RUN.',
+        'es': 'Cargado {name}, {bytes} bytes, en 0000H y pulsado RESET. Ve a la pestaña Simulador y pulsa RUN.',
+        'fr': '{name} chargé, {bytes} octets, en 0000H et RESET appuyé. Allez dans l\'onglet Simulateur et cliquez sur RUN.',
+        'de': '{name} geladen, {bytes} Bytes, bei 0000H, und RESET gedrückt. Gehen Sie zum Simulator-Tab und klicken Sie RUN.',
+        'it': 'Caricato {name}, {bytes} byte, a 0000H e premuto RESET. Vai alla scheda Simulatore e premi RUN.',
+        'zh': '已在 0000H 载入 {name}（{bytes} 字节）并按下 RESET。请到“模拟器”标签页点击 RUN。',
+        'zh-TW': '已在 0000H 載入 {name}（{bytes} 位元組）並按下 RESET。請到「模擬器」標籤頁點擊 RUN。',
+        'ja': '{name}（{bytes} バイト）を 0000H に読み込み、RESET を押しました。シミュレータタブで RUN を押してください。',
+        'ko': '{name}({bytes}바이트)을 0000H에 불러오고 RESET을 눌렀습니다. 시뮬레이터 탭에서 RUN을 누르세요.',
     },
 
     'load-basic': {
