@@ -795,10 +795,6 @@ Phase 1 is worth doing whatever we decide about BASIC.
 
 ### Notes for whoever implements this
 
-- `js/sim8800.js` is shared by **both** `index.html` and
-  `text-mode.html`. Changes there must keep both working. Giving
-  `text-mode.html` its own teletype is out of scope for now, but the
-  memory and port changes reach it, so it needs checking.
 - ✅ *Done in Phase 4.* `loadDataAsHexString` cannot load the ROM — a
   4 KB image is a ~12 KB hex string — so `panel.onLoadBasic` fetches it
   and `panel.loadImage` puts it in memory. A file picker beside it does

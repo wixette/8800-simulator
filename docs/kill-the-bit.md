@@ -58,9 +58,9 @@ Altair's 8080 was clocked at, so the bit advances about every 0.115 s —
 twice as fast, and the speed the game was actually played at.)
 
 All other panel features (EXAMINE / DEPOSIT / RESET / single step,
-port I/O, the debugger dumps, both `index.html` and `text-mode.html`)
-are unchanged, and are now covered by unit tests in `tests/`
-(`npm test`, requires Node.js 18+; no dependencies).
+port I/O, the debugger dumps) are unchanged, and are now covered by
+unit tests in `tests/` (`npm test`, requires Node.js 18+; no
+dependencies).
 
 ## Running it
 
