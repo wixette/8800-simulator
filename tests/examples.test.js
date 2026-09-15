@@ -89,6 +89,32 @@ for (const example of EXAMPLES) {
         }
     });
 
+    test(example.id + ': does not depend on what RESET left behind', () => {
+        // A real 8080's RESET line clears the program counter and
+        // nothing else, so a program started after another one has run
+        // begins with that program's registers still in place. None of
+        // these examples should care; kill-the-bit is the one that
+        // reads a register it never sets - E, through LDAX D - and
+        // even there only the low address LEDs are affected, which its
+        // display does not use.
+        for (const poison of [0x00, 0xff, 0xa5]) {
+            const {sim} = simFor(example);
+            for (const r of ['A', 'B', 'C', 'D', 'E', 'H', 'L']) {
+                cpu.set(r, poison);
+            }
+            cpu.set('SP', 0xbeef);
+            const limit = example.org + example.bytes.length;
+            for (let i = 0; i < 10; i++) {
+                sim.step(2000);
+                const pc = cpu.status().pc;
+                assert.ok(pc >= example.org && pc <= limit,
+                          example.id + ' with registers ' +
+                              poison.toString(16) + ': PC ran to ' +
+                              pc.toString(16) + ', outside the program');
+            }
+        }
+    });
+
     test(example.id + ': runs without leaving its own code', () => {
         const {sim} = simFor(example);
         const limit = example.org + example.bytes.length;
@@ -263,6 +289,19 @@ test('kill the bit: the bit shows on the upper address LEDs (issue #1)', () => {
     // of its LDAX D loop, which holds register D on A15-A8.
     sim.step(200);
     assert.strictEqual(highAddressLeds(state), 0x80);
+});
+
+test('kill the bit: the display works whatever E was left holding', () => {
+    // The game sets D but never E, and reads memory at DE. Only the
+    // upper address LEDs carry its display, so E is free to be
+    // anything - which it now is, since RESET no longer clears it.
+    for (const e of [0x00, 0x3c, 0xff]) {
+        const {sim, state} = simFor(loadExample('kill-the-bit'));
+        cpu.set('E', e);
+        sim.step(200);
+        assert.strictEqual(highAddressLeds(state), 0x80,
+                           'with E = ' + e.toString(16));
+    }
 });
 
 test('kill the bit: the lit bit rotates over time', () => {
