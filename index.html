@@ -28,7 +28,7 @@
     <main>
       <div class="header-bar">
         <div id="header-title" class="l10n">
-          Sim-8800: Altair 8800 Simulator
+          Altair 8800 Simulator
         </div>
         <div id="locale-menu" class="dropdown">
           <button id="switch-locale" type="button" aria-haspopup="listbox"
@@ -41,10 +41,10 @@
       </div>
 
       <nav>
-        <div id="nav-sim" class="nav-item l10n">Sim</div>
+        <div id="nav-sim" class="nav-item l10n">Simulator</div>
         <div id="nav-tty" class="nav-item l10n">Teletype</div>
-        <div id="nav-debug" class="nav-item l10n">Debug</div>
-        <div id="nav-ref" class="nav-item l10n">Ref</div>
+        <div id="nav-debug" class="nav-item l10n">Debugger</div>
+        <div id="nav-ref" class="nav-item l10n">Tutorial</div>
       </nav>
 
       <div id="tab-sim">
@@ -133,8 +133,9 @@
         </div>
         <div id="tty-hint" class="comments l10n">
           Type here. Nothing echoes by itself - the machine has to be
-          running a program that reads the serial board, so load
-          tty-echo from the examples and RUN it first.
+          running a program that reads the serial board, so pick
+          tty-echo from Example Programs in the Debugger tab and RUN it
+          first.
         </div>
       </div>
 
@@ -173,9 +174,9 @@
           <div id="debug-memory-title" class="l10n">Installed Memory</div>
         </div>
         <div class="h-box justify-start mt-8 align-items-center">
-          <div id="mem-size-256" class="button m-8 mem-size l10n">256 B</div>
-          <div id="mem-size-4096" class="button m-8 mem-size l10n">4 KB</div>
-          <div id="mem-size-8192" class="button m-8 mem-size l10n">8 KB</div>
+          <div id="mem-size-256" class="button m-8 mem-size l10n">256 B · as it shipped</div>
+          <div id="mem-size-4096" class="button m-8 mem-size l10n">4 KB · one 88-4MCS</div>
+          <div id="mem-size-8192" class="button m-8 mem-size l10n">8 KB · two 88-4MCS</div>
         </div>
 
         <div class="subheader-bar mt-8">
@@ -256,7 +257,7 @@
           <p>
             <ol>
               <li><span id="basic-1" class="l10n">Go to the Debugger tab and choose 4 KB (or 8 KB, for room to write longer programs) under Installed Memory. Installing memory switches the machine off, which is what opening the case would have done.</span></li>
-              <li><span id="basic-2" class="l10n">Click LOAD 4K BASIC. The machine powers up, the tape is read for you, and RESET is pressed.</span></li>
+              <li><span id="basic-2" class="l10n">Click Load 4K BASIC. The machine powers up, the tape is read for you, and RESET is pressed.</span></li>
               <li><span id="basic-3" class="l10n">Before going any further, look at the memory map above the dump. Fifteen of the sixteen pages of a 4 KB machine are full: that is BASIC, and the one page left over is all the room you have for a program. This is what "4K BASIC" means.</span></li>
               <li><span id="basic-4" class="l10n">The address switches A15-A8 tell BASIC which terminal board to use: all down is the 88-SIO at ports 00H and 01H, switch A11 up is the 88-2SIO at 10H and 11H. The teletype here is wired to both slots, so either setting works - a real Altair would have had only one of the two boards fitted, and the wrong setting left it silent.</span></li>
               <li><span id="basic-5" class="l10n">Go to the Simulator tab and click RUN.</span></li>
@@ -272,7 +273,7 @@ RUN</pre>
           </p>
           <p>
             <ul>
-              <li><span id="basic-note" class="l10n">What the LOAD button skips: on a real Altair you first toggled a 28 byte boot loader in through the front panel, one byte at a time, then started the paper tape reader and waited about seven minutes while BASIC clattered in. Get one switch wrong and you did it again.</span></li>
+              <li><span id="basic-note" class="l10n">What Load 4K BASIC skips: on a real Altair you first toggled a 28 byte boot loader in through the front panel, one byte at a time, then started the paper tape reader and waited about seven minutes while BASIC clattered in. Get one switch wrong and you did it again.</span></li>
             </ul>
           </p>
         </div>
