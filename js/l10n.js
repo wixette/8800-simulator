@@ -253,15 +253,15 @@ l10n.MESSAGES = {
     },
 
     'debug-load-data-title': {
-        'en': 'Load Data to Addr #0',
-        'es': 'Cargar datos desde la dirección 0',
-        'fr': "Charger les données à l'adresse 0",
-        'de': 'Daten ab Adresse 0 laden',
-        'it': "Carica i dati dall'indirizzo 0",
-        'zh': '从地址0开始加载数据',
-        'zh-TW': '從位址 0 開始載入資料',
-        'ja': 'アドレス 0 からデータを読み込む',
-        'ko': '주소 0부터 데이터 적재',
+        'en': 'Load Your Own',
+        'es': 'Cargar lo tuyo',
+        'fr': 'Charger le vôtre',
+        'de': 'Eigenes laden',
+        'it': 'Carica il tuo',
+        'zh': '加载你自己的程序',
+        'zh-TW': '載入你自己的程式',
+        'ja': '自分のプログラムを読み込む',
+        'ko': '직접 만든 프로그램 불러오기',
     },
 
     'debug-load-data': {
@@ -277,15 +277,15 @@ l10n.MESSAGES = {
     },
 
     'debug-data-sample': {
-        'en': "Bytes in HEX string, such as 'c3 00 00'",
-        'es': "Bytes en hexadecimal, por ejemplo 'c3 00 00'",
-        'fr': "Octets en hexadécimal, par exemple 'c3 00 00'",
-        'de': "Bytes als Hex-Zeichenkette, z. B. 'c3 00 00'",
-        'it': "Byte in esadecimale, ad esempio 'c3 00 00'",
-        'zh': '十六进制字节序列，如 c3 00 00',
-        'zh-TW': '十六進位位元組序列，例如 c3 00 00',
-        'ja': '16 進数のバイト列（例: c3 00 00）',
-        'ko': "16진수 바이트 문자열, 예: 'c3 00 00'",
+        'en': 'Bytes as a HEX string, such as \'c3 00 00\', or a binary image from disk. Either goes in at 0000H.',
+        'es': 'Bytes como cadena HEX, por ejemplo \'c3 00 00\', o una imagen binaria del disco. Ambas entran en 0000H.',
+        'fr': 'Des octets en chaîne HEX, par exemple \'c3 00 00\', ou une image binaire sur disque. L’un comme l’autre se chargent en 0000H.',
+        'de': 'Bytes als HEX-Zeichenkette, etwa \'c3 00 00\', oder ein Binärabbild von der Festplatte. Beides landet bei 0000H.',
+        'it': 'Byte come stringa HEX, ad esempio \'c3 00 00\', oppure un\'immagine binaria da disco. Entrambe entrano a 0000H.',
+        'zh': '以 HEX 字符串给出的字节，例如 \'c3 00 00\'，或磁盘上的二进制映像。两者都载入到 0000H。',
+        'zh-TW': '以 HEX 字串給出的位元組，例如 \'c3 00 00\'，或磁碟上的二進位映像。兩者都載入到 0000H。',
+        'ja': '\'c3 00 00\' のような HEX 文字列のバイト列、またはディスク上のバイナリイメージ。どちらも 0000H に読み込まれます。',
+        'ko': '\'c3 00 00\' 같은 HEX 문자열 바이트, 또는 디스크의 바이너리 이미지. 둘 다 0000H에 들어갑니다.',
     },
 
     'status-off': {
@@ -384,6 +384,18 @@ l10n.MESSAGES = {
         'ko': '프로그램 불러오기',
     },
 
+    'example-prompt': {
+        'en': 'Example programs...',
+        'es': 'Programas de ejemplo...',
+        'fr': 'Programmes d’exemple...',
+        'de': 'Beispielprogramme...',
+        'it': 'Programmi di esempio...',
+        'zh': '示例程序…',
+        'zh-TW': '範例程式…',
+        'ja': 'サンプルプログラム…',
+        'ko': '예제 프로그램…',
+    },
+
     'example-loaded': {
         'en': 'Loaded {name}, {bytes} bytes, at 0000H and pressed RESET. Go to the Simulator tab and click RUN.',
         'es': 'Cargado {name}, {bytes} bytes, en 0000H y pulsado RESET. Ve a la pestaña Simulador y pulsa RUN.',
@@ -409,27 +421,15 @@ l10n.MESSAGES = {
     },
 
     'load-binary': {
-        'en': 'LOAD BINARY FILE',
-        'es': 'CARGAR ARCHIVO BINARIO',
-        'fr': 'CHARGER UN FICHIER BINAIRE',
-        'de': 'BINÄRDATEI LADEN',
-        'it': 'CARICA FILE BINARIO',
+        'en': 'Load Binary File',
+        'es': 'Cargar archivo binario',
+        'fr': 'Charger un fichier binaire',
+        'de': 'Binärdatei laden',
+        'it': 'Carica file binario',
         'zh': '加载二进制文件',
         'zh-TW': '載入二進位檔',
         'ja': 'バイナリファイルを読み込む',
         'ko': '바이너리 파일 불러오기',
-    },
-
-    'rom-hint': {
-        'en': '4K BASIC is 4 KB of paper tape, so install at least 4 KB of memory first. In 1975 you would have toggled in a 28 byte boot loader by hand and then listened to the tape read for seven minutes.',
-        'es': 'BASIC 4K son 4 KB de cinta de papel, así que instala al menos 4 KB de memoria primero. En 1975 habrías introducido a mano un cargador de 28 bytes y luego escuchado la cinta durante siete minutos.',
-        'fr': 'BASIC 4K tient sur 4 Kio de bande perforée, installez donc au moins 4 Kio de mémoire d\'abord. En 1975, il aurait fallu saisir à la main un chargeur de 28 octets puis écouter la bande pendant sept minutes.',
-        'de': '4K BASIC sind 4 KB Lochstreifen, installieren Sie also zuerst mindestens 4 KB Speicher. 1975 hätten Sie einen 28 Byte langen Urlader von Hand eingegeben und dann dem Band sieben Minuten lang zugehört.',
-        'it': 'BASIC 4K sta in 4 KB di nastro perforato, quindi installa prima almeno 4 KB di memoria. Nel 1975 avresti inserito a mano un boot loader di 28 byte e poi ascoltato il nastro per sette minuti.',
-        'zh': '4K BASIC 是 4 KB 的纸带，所以请先安装至少 4 KB 内存。在 1975 年，你得先用开关手工输入 28 字节的引导程序，然后听着纸带读上七分钟。',
-        'zh-TW': '4K BASIC 是 4 KB 的紙帶，所以請先安裝至少 4 KB 記憶體。在 1975 年，你得先用開關手工輸入 28 位元組的載入程式，然後聽著紙帶讀上七分鐘。',
-        'ja': '4K BASIC は 4 KB の紙テープなので、まず 4 KB 以上のメモリを搭載してください。1975 年なら 28 バイトのブートローダーをスイッチで手入力し、それからテープが読み終わるまで七分間待つことになります。',
-        'ko': '4K BASIC은 4 KB짜리 종이 테이프이므로 먼저 4 KB 이상의 메모리를 설치하세요. 1975년이라면 28바이트짜리 부트로더를 스위치로 직접 입력한 뒤, 테이프가 읽히는 7분을 기다렸을 것입니다.',
     },
 
     'rom-needs-memory': {

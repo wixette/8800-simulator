@@ -32,7 +32,7 @@ GUESS MY LETTER A-Z. ANY KEY STARTS.
 ? V GOT IT IN 5 TRIES.
 ```
 
-The Debugger tab has a button for every program in [examples/](./examples/) under *Load a Program*. Click one and it is loaded at 0000H with RESET pressed, ready to RUN — the button reads the listing file itself, so there is no assembled copy of a program anywhere to fall out of step with its source.
+The Debugger tab lists every program in [examples/](./examples/) under *Load a Program*. Pick one and it is loaded at 0000H with RESET pressed, ready to RUN — the menu reads the listing files themselves, so there is no assembled copy of a program anywhere to fall out of step with its source. *Load Your Own* below it takes a hex string or a binary file from disk.
 
 The Debugger tab is also where you choose how much memory is installed: 256 bytes as the Altair 8800 shipped, or 4 KB / 8 KB as if you had plugged in one or two 88-4MCS static memory boards. Memory boards are not something you add to a running machine, so changing the size switches the simulator off.
 

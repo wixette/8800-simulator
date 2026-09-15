@@ -20,15 +20,15 @@ carrying its address, its bytes and its source.
 
 ## Loading a program
 
-The quick way is the *Debugger* tab, under *Load a Program*: there is a
-button for every program here. Click one and it is loaded at 0000H and
-RESET is pressed for you; then go to the *Simulator* tab and click RUN.
-The button reads the same listing file you are looking at, so what runs
-is what is printed below.
+The quick way is the *Debugger* tab, under *Load a Program*: pick one
+from the *Example programs* menu. It is loaded at 0000H and RESET is
+pressed for you; then go to the *Simulator* tab and click RUN. The menu
+reads the same listing files you are looking at, so what runs is what
+is printed below.
 
-Pasting works too, if you would rather see the bytes go in. Switch the
-machine ON and paste a program's bytes into *LOAD DATA*, which loads
-them from 0000H, then RESET and RUN from the *Simulator* tab.
+Pasting works too, if you would rather see the bytes go in. Under *Load
+Your Own*, switch the machine ON and paste a program's bytes into *Load
+Data*, then RESET and RUN from the *Simulator* tab.
 
 ```
 adder           3a 80 00 47 3a 81 00 80 32 82 00 c3 00 00

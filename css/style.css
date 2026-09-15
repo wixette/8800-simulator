@@ -626,3 +626,19 @@ footer {
         padding: 8px;
     }
 }
+
+/* The example menu. A native select, dressed to match the buttons
+   beside it: it carries its own disclosure arrow, which is the whole
+   reason for preferring it to a custom menu here. */
+#example-select {
+    background-color: #eee;
+    border: 0;
+    border-radius: 10px;
+    color: #222;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 2em;
+    max-width: 100%;
+    padding: 2px 8px;
+}
