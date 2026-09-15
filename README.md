@@ -1,8 +1,29 @@
-# Altair 8800 simulator.
+# Altair 8800 Simulator
 
 [![Tests](https://github.com/wixette/8800-simulator/actions/workflows/test.yml/badge.svg)](https://github.com/wixette/8800-simulator/actions/workflows/test.yml)
 
-A JavaScript simulator to demonstrate the front panel operations of Altair 8800.
+The 1975 computer that started the personal computer revolution, in
+your browser. Toggle 8080 machine code in through a working front
+panel, watch it run on the LEDs, then install a memory board and boot
+Microsoft's original 4K BASIC on a simulated Teletype.
+
+**[Try it online](https://wixette.github.io/8800-simulator/)**
+
+- **A working front panel.** The Altair 8800's address and data lamps
+  and its switches - EXAMINE, DEPOSIT, SINGLE STEP, RUN, RESET and the
+  sense switches - on an Intel 8080 clocked at the machine's own 2 MHz.
+- **Microsoft Altair BASIC 3.2.** The 4K edition Bill Gates, Paul Allen
+  and Monte Davidoff wrote in 1975, running unmodified.
+- **The hardware it needs.** A Teletype ASR-33 on MITS 88-SIO and
+  88-2SIO serial boards, and 256 B, 4 KB or 8 KB of memory, installed
+  the way you installed a board.
+- **A debugger the Altair never had.** Live CPU registers, a paged
+  memory dump, and a map of what fills each page of memory.
+- **Ten example programs**, from a seven byte switch echo to a guessing
+  game on the teletype, each a checked listing you load with one click.
+- **Nine languages**, no build step and no dependencies.
+
+![8800 Panel](./screenshots/sim-panel.png)
 
 ## Usage
 
@@ -14,29 +35,58 @@ python3 -m http.server 8000
 ```
 
 then open <http://localhost:8000/>. To deploy, copy the whole directory
-to your web server's root — there is nothing to build and no
-dependencies.
+to your web server's root — there is nothing to build.
 
 Opening `index.html` straight off the disk mostly works: the front
 panel, the teletype and the debugger are all in the page itself. Two
-things are not, and will not load that way — the example programs and
-the 4K BASIC tape, which the page reads from `examples/` and `roms/`
-when you ask for them. A browser treats every `file://` page as a
-different site from the files beside it and blocks the read, so those
-two controls grey out and say so. Serving the directory is what fixes
-it.
+things are not — the example programs and the 4K BASIC tape, which the
+page reads from `examples/` and `roms/` when you ask for them. A
+browser treats every `file://` page as a different site from the files
+beside it and blocks the read, so those two controls grey out and say
+so. Serving the directory is what fixes it.
 
-The simulator UI is translated into nine languages. In a desktop
-browser, you may use mouse to toggle or click the switches on the panel
-directly.
+The simulator has four tabs.
 
-![8800 Panel](./screenshots/sim-panel.png)
+**Simulator** is the front panel. In a desktop browser you can click
+the switches on the panel directly. On a phone a single switch is hard
+to touch, so the *Switch Board Helper* buttons below the panel do the
+same job, and show which switches are up.
 
-There is a Debugger tab where you can check the internal status of the simulated 8080 CPU, or the contents of the simulator's memory.
+**Teletype** holds a simulated ASR-33: the paper, its keyboard, and a
+repeat of the address and data LEDs so a program that prints and
+lights lamps at once can be watched on one screen. The machine talks
+to it through an 88-SIO serial board on ports 00H and 01H (and an
+88-2SIO on 10H and 11H), so a program has to be running and reading
+that board before anything appears — nothing echoes by itself.
+
+**Debugger** shows the internal state of the simulated 8080 CPU and
+the contents of memory, and is where programs are loaded:
+
+- *Load a Program* has **Load 4K BASIC** and the **Example Programs**
+  menu, which lists every program in [examples/](./examples/). Pick one
+  and it is loaded at 0000H with RESET pressed, ready to RUN. The menu
+  reads the listing files themselves, so there is no assembled copy of
+  a program anywhere to fall out of step with its source.
+- *Load Your Own* takes a hex string (**Load Data**) or a binary file
+  from disk (**Load Binary File**).
+- *Installed Memory* chooses 256 bytes, as the Altair 8800 shipped, or
+  4 KB / 8 KB as if you had plugged in one or two 88-4MCS memory boards.
+  Memory boards are not something you add to a running machine, so
+  changing the size switches the simulator off.
+- *Memory Dump* shows one 256-byte page at a time. Above 256 bytes a
+  map strip sits over it — one cell per page, shaded by how much of
+  that page is in use, and marked where the program counter and the
+  stack pointer are. Click a cell to jump there, or use **Follow PC** to
+  track the running program.
 
 ![8800 Debugger](./screenshots/sim-debug.png)
 
-There is a Teletype tab holding a simulated ASR-33: the paper, its keyboard, and a repeat of the address and data LEDs so a program that prints and lights lamps at once can be watched on one screen. The machine talks to it through an 88-SIO serial board on ports 00H and 01H, so a program has to be running and reading that board before anything appears — nothing echoes by itself. Load [tty-echo](./examples/tty-echo.asm) and RUN it, then type.
+**Tutorial** walks through toggling in a first program by hand and
+starting BASIC, with references for going further.
+
+![8800 Mobile](./screenshots/sim-mobile.png)
+
+## Teletype programs
 
 [tty-leds](./examples/tty-leds.asm) is the one to start with: eighteen bytes, and pressing A lights `01000001` on the data LEDs while printing the letter on the paper.
 
@@ -52,13 +102,9 @@ GUESS MY LETTER A-Z. ANY KEY STARTS.
 ? V GOT IT IN 5 TRIES.
 ```
 
-The Debugger tab lists every program in [examples/](./examples/) under *Load a Program*. Pick one and it is loaded at 0000H with RESET pressed, ready to RUN — the menu reads the listing files themselves, so there is no assembled copy of a program anywhere to fall out of step with its source. *Load Your Own* below it takes a hex string or a binary file from disk.
-
-The Debugger tab is also where you choose how much memory is installed: 256 bytes as the Altair 8800 shipped, or 4 KB / 8 KB as if you had plugged in one or two 88-4MCS static memory boards. Memory boards are not something you add to a running machine, so changing the size switches the simulator off.
-
 ## Microsoft BASIC
 
-The simulator runs the Altair's first piece of software, and Microsoft's: [Altair BASIC 3.2](http://altairbasic.org), written in 1975 by Bill Gates, Paul Allen and Monte Davidoff. Choose 4 KB or 8 KB of memory in the Debugger tab, click LOAD 4K BASIC, then RUN from the front panel and type at the Teletype tab.
+The simulator runs the Altair's first piece of software, and Microsoft's: [Altair BASIC 3.2](http://altairbasic.org), written in 1975 by Bill Gates, Paul Allen and Monte Davidoff. Choose 4 KB or 8 KB under *Installed Memory* in the Debugger tab, click **Load 4K BASIC**, then RUN from the front panel and type at the Teletype tab.
 
 ```
 MEMORY SIZE?
@@ -73,19 +119,13 @@ BASIC VERSION 3.2
 OK
 ```
 
-On a 4 KB machine that leaves 727 bytes for your program, which is exactly what the name means — load it and look at the memory map before pressing RUN, and you can see BASIC filling fifteen of the machine's sixteen pages. The Tutorial tab walks through it, including what the LOAD button quietly skips: toggling in a 28 byte boot loader by hand and then waiting seven minutes for the paper tape.
+On a 4 KB machine that leaves 727 bytes for your program, which is exactly what the name means — load it and look at the memory map before pressing RUN, and you can see BASIC filling fifteen of the machine's sixteen pages. The Tutorial tab walks through it, including what Load 4K BASIC quietly skips: toggling in a 28 byte boot loader by hand and then waiting seven minutes for the paper tape.
 
-The ROM is in [roms/](./roms/), and [roms/NOTICE](./roms/NOTICE) explains what it is and why it is not under this repository's licence. It is optional; LOAD BINARY FILE will load an image of your own instead.
-
-Above 256 bytes the memory dump shows one 256-byte window at a time rather than the whole machine, with a map strip above it — one cell per page, shaded by how much of that page is in use, and marked where the program counter and the stack pointer are. Click a cell to jump the window there, or use FOLLOW PC to let it track the running program.
-
-The simulator works fine with modern mobile browsers, except that it is a bit challenging to touch a single switch on the panel on a mobile screen. Although, the helper switch buttons below the panel can be used as an alternative solution.
-
-![8800 Mobile](./screenshots/sim-mobile.png)
+The ROM is in [roms/](./roms/), and [roms/NOTICE](./roms/NOTICE) explains what it is and why it is not under this repository's licence. It is optional; **Load Binary File** will load an image of your own instead.
 
 ## A Quick Tutorial
 
-With a running Altair 8800 simulator, how to input and run the following program to calculate 1 + 2 = 3:
+How to input and run the following program to calculate 1 + 2 = 3, by hand, on the front panel. The same steps are in the simulator's Tutorial tab.
 
 ```
         LDA 0080H  ; 00 111 010
@@ -126,10 +166,12 @@ With a running Altair 8800 simulator, how to input and run the following program
 
 ## Example programs
 
-Small 8080 programs to try on the simulator, from a two instruction
-I/O echo to the 1975 game *Kill the Bit*, are in
-[examples/](examples/), each with a listing and instructions for
-loading it. They double as the golden set the tests run against.
+Ten small 8080 programs to try on the simulator — five on the front
+panel, from a pattern walking across the LEDs to the 1975 game *Kill
+the Bit*, and five on the teletype, from `HELLO, WORLD!` to a guessing
+game — are in [examples/](examples/), each with a listing and
+instructions for loading it. They double as the golden set the tests
+run against.
 
 ## Tests
 
@@ -138,8 +180,10 @@ npm test
 ```
 
 Node.js 24, no dependencies to install. The suite covers the 8080 CPU,
-the front panel, and every program in [examples/](examples/), and runs
-on each push and pull request.
+the front panel, the serial boards and the teletype, the page's own
+logic and translations, every program in [examples/](examples/), and
+4K BASIC booting and running end to end. It runs on each push and pull
+request.
 
 ## References
 
@@ -151,12 +195,15 @@ on each push and pull request.
 - [Altair 8800 Operator's Manual v2.0 - an HTML edition by Kevin Cole](https://ubuntourist.codeberg.page/Altair-8800/)
 - [Intel 8080 Assembly Language Programming Manual - Intel's original manual as a scanned PDF](http://www.classiccmp.org/dunfield/r/8080asm.pdf)
 - [Demystifying Computers - an open source book by Chris Jones and Jeff Elkner](https://www.openbookproject.net/books/demystcomp/index.html)
+- [Wikipedia: Altair BASIC - what it is, and how Microsoft started with it](https://en.wikipedia.org/wiki/Altair_BASIC)
+- [MITS Altair BASIC Reference Manual (1975) - the language itself, the startup questions and the error codes](https://altairclone.com/downloads/manuals/BASIC%20Manual%2075.pdf)
+- [Altair BASIC 3.2 (4K) - an annotated disassembly of the exact program this simulator runs](http://altairbasic.org)
 - [MITS Altair Simulator - another JavaScript simulator, running Microsoft BASIC on a simulated teletype](https://s2js.com/altair/)
 
 ## Acknowledgements
 
-I use https://github.com/maly/8080js to execute Intel 8080 instruments.
+The Intel 8080 CPU core is [maly/8080js](https://github.com/maly/8080js).
 
-The Quick Tutoral in the simulator UI refers to an example program got from the original [Altair 8800 Operator's Manual](https://altairclone.com/downloads/manuals/Altair%208800%20Operator's%20Manual.pdf).
+The Quick Tutorial in the simulator UI uses an example program from the original [Altair 8800 Operator's Manual](https://altairclone.com/downloads/manuals/Altair%208800%20Operator's%20Manual.pdf).
 
 The interaction design took [another Altair 8800 simulator](https://s2js.com/altair/) as a reference.
