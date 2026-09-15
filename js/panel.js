@@ -637,6 +637,11 @@ panel.onTtyKeyDown = function(event) {
 panel.onTtyInput = function(event) {
     var text = event.target.value;
     event.target.value = '';
+    if (!panel.isTtyTabVisible) {
+        // Focus left in here after switching away must not go on
+        // feeding the machine from another tab.
+        return;
+    }
     for (let i = 0; i < text.length; i++) {
         panel.ttySend(Teletype.keyToByte(text.charAt(i)));
     }
@@ -1239,7 +1244,12 @@ panel.initTeletypeUi = function() {
     // Tapping the paper raises the soft keyboard on a phone.
     var input = document.getElementById('tty-input');
     document.getElementById('tty-paper').addEventListener(
-        'click', function() { input.focus(); }, false);
+        'click', function() {
+            // preventScroll for the same reason the tab switch does
+            // not focus at all: the input sits below the paper, and
+            // scrolling it into view would jump the page.
+            input.focus({preventScroll: true});
+        }, false);
     input.addEventListener('input', panel.onTtyInput, false);
     document.addEventListener('keydown', panel.onTtyKeyDown, false);
 
@@ -1651,10 +1661,23 @@ panel.showTab = function(name) {
     if (panel.isTtyTabVisible) {
         panel.setNavActivity(false);
         panel.renderTeletype();
-        var input = document.getElementById('tty-input');
-        if (input) {
-            input.focus();
-        }
+    }
+    // The hidden input is not focused when the tab is shown. Focusing
+    // it scrolls it into view, and it sits below a paper some 600px
+    // tall, so on a narrow screen arriving at the teletype threw the
+    // page straight past the thing you came to look at. On a phone it
+    // also raised the keyboard over that paper. Nothing is lost:
+    // keystrokes are handled on document, so no focus is needed in
+    // order to type, and tapping the paper focuses it when the soft
+    // keyboard is actually wanted.
+    //
+    // What does have to be minded is focus left behind elsewhere - in
+    // the debugger's load field, or in this input after leaving the
+    // teletype - which would otherwise swallow the keys or, worse,
+    // keep feeding them to the machine from another tab.
+    var focused = document.activeElement;
+    if (focused && focused !== document.body && focused.blur) {
+        focused.blur();
     }
 };
 
