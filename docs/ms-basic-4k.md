@@ -937,6 +937,51 @@ screen. It is also the natural sibling of the existing
 `tty-ascii` prints 95 characters, which is wider than the ASR-33's 72
 columns, so it exercises the terminal's line wrap. Useful from day one.
 
+### The order they are offered in
+
+The menu was, for a while, in the order the programs happened to be
+written: the four teletype demonstrations, the game, then the older
+panel ones in no order at all. That is not an order, and a reader
+cannot tell it is not.
+
+The rule is now two deep, and `panel.EXAMPLES` is its only statement.
+
+**First, by which face of the machine the program speaks through** —
+front panel, then teletype. This is the part that matters before
+anything else, because a teletype program watched on the front panel
+looks like a machine that has died: you press RUN and nothing at all
+happens on the lamps. Each listing declares its own face in a
+`;;; device:` header, so the page reads it from the same file it reads
+the bytes from, and a test refuses a listing that does not say.
+
+The menu draws a rule at the seam. A rule and not a heading: a heading
+is one more thing the arrow keys have to step over, and ten entries
+need a seam rather than titles.
+
+**Then, within each group, by how much you have to know.**
+
+| | Front panel | Teletype |
+| --- | --- | --- |
+| 1 | `pattern-shift` — runs by itself, moves the lights | `tty-hello` — prints one message, halts |
+| 2 | `io-echo` — the same, with your hand on the switches | `tty-ascii` — prints many, in a loop |
+| 3 | `adder` — arithmetic, read back out of memory | `tty-echo` — reads one key back |
+| 4 | `bouncing-light` — a loop with a direction to remember | `tty-leds` — reads a key and takes it apart |
+| 5 | `kill-the-bit` — a game from 1975 | `guess-letter` — a game to play |
+
+`pattern-shift` leads rather than the shorter `io-echo` deliberately:
+it needs nothing of the reader but RUN, where `io-echo` does nothing
+visible until you know the sense switches exist.
+
+Size is not the rule, though it nearly agrees with it. `kill-the-bit`
+is 24 bytes and the hardest thing here to follow; `guess-letter` is
+218 and the easiest to enjoy.
+
+*What the reader is told after loading:* the status line names the tab
+to watch, which differs by device — the panel ones end at "click RUN",
+the teletype ones go on to "then watch the Teletype tab". Without
+that, the grouping would only exist in the menu and the first run of
+`tty-hello` would look like a failure.
+
 ---
 
 ## Part 6 — Implementation plan

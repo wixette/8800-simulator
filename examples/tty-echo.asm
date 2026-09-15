@@ -1,6 +1,7 @@
 ;;; name: Teletype echo
 ;;; desc: Reads a character from the teletype and prints it straight
 ;;;   back, the smallest program that uses the serial board.
+;;; device: teletype
 ;;;
 ;;; Load at 0000H, RESET, then RUN, and type on the Teletype tab. Every
 ;;; key you press appears on the paper because this program put it

@@ -188,6 +188,16 @@ main {
     white-space: nowrap;
 }
 
+/* The seam between two kinds of entry - in the example menu, between
+   the programs that speak through the front panel and the ones that
+   speak through the teletype. A rule rather than a heading, because a
+   heading is one more thing for the arrow keys to have to step over. */
+.dropdown li.dropdown-group-start {
+    border-top: 1px solid #bbb;
+    margin-top: 4px;
+    padding-top: 8px;
+}
+
 .dropdown li:hover,
 .dropdown li:focus {
     background-color: #ddd;

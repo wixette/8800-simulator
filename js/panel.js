@@ -164,27 +164,47 @@ panel.MIN_BASIC_MEM = 4096;
 panel.MAX_IMAGE_BYTES = 65536;
 
 /**
- * The example programs offered in the Debugger tab, in the order a
- * newcomer is best off meeting them: the teletype demonstrations, then
- * something to play, then the ones that speak through the front panel.
+ * The example programs offered in the Debugger tab.
+ *
+ * The order is deliberate, and the rule is two deep. First by which
+ * face of the machine the program speaks through - the front panel,
+ * then the teletype - because that is what a reader has to know before
+ * pressing RUN: a teletype program watched on the panel looks like a
+ * machine that has died. Within each group, by how much you need to
+ * know to follow it.
+ *
+ * On the panel: something that runs by itself and moves the lights,
+ * then the same with your hand on the switches, then arithmetic you
+ * read out of memory, then a loop with a direction to remember, then
+ * a game from 1975.
+ *
+ * On the teletype: print one message, print many, read one key back,
+ * read a key and take it apart, then a game to play.
+ *
+ * Size is not the rule, though it nearly agrees: Kill the Bit is 24
+ * bytes and the hardest thing here to follow, and Guess my letter is
+ * 218 and the easiest to enjoy.
  *
  * Only the names are here. Everything shown about a program - its
- * title, its size, its bytes - is read out of examples/<id>.asm when
- * the list is built, so this cannot drift out of step with the
- * listings, and a test keeps it in step with the directory.
+ * title, its size, where to watch it, its bytes - is read out of
+ * examples/<id>.asm when the list is built, so this cannot drift out
+ * of step with the listings, and a test keeps it in step with the
+ * directory and with the order described above.
  * @type {Array<string>}
  */
 panel.EXAMPLES = [
-    'tty-echo',
-    'tty-leds',
-    'tty-hello',
-    'tty-ascii',
-    'guess-letter',
-    'adder',
+    // Front panel.
     'pattern-shift',
     'io-echo',
+    'adder',
     'bouncing-light',
     'kill-the-bit',
+    // Teletype.
+    'tty-hello',
+    'tty-ascii',
+    'tty-echo',
+    'tty-leds',
+    'guess-letter',
 ];
 
 /**
@@ -209,7 +229,10 @@ panel.buildExampleMenu = function() {
             return;
         }
         var loaded = panel.loadImage(program.bytes);
-        panel.setStatus('example-loaded',
+        // RUN is on the front panel wherever the program's output
+        // goes, but where to look afterwards is not the same place.
+        panel.setStatus(program.device == 'teletype' ?
+                            'example-loaded-tty' : 'example-loaded',
                         {name: program.name, bytes: loaded});
     });
     panel.refreshExampleMenu();
@@ -233,16 +256,23 @@ panel.buildExampleMenu = function() {
     });
     Promise.all(fetches).then(function(results) {
         var items = [];
+        var lastDevice = null;
         for (let i = 0; i < results.length; i++) {
             if (!results[i]) {
                 continue;
             }
             panel.examplePrograms[results[i].id] = results[i].program;
+            // A rule where the panel programs end and the teletype
+            // ones begin, so that the order reads as deliberate rather
+            // than as whatever came out of the directory.
+            let device = results[i].program.device;
             items.push({
                 value: results[i].id,
                 label: results[i].program.name + ' \u2014 ' +
                     results[i].program.bytes.length + ' bytes',
+                startsGroup: items.length > 0 && device != lastDevice,
             });
+            lastDevice = device;
         }
         panel.exampleMenu.setItems(items);
     });

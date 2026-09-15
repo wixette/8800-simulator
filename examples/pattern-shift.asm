@@ -1,6 +1,7 @@
 ;;; name: Pattern shift
 ;;; desc: Writes 8CH to the data LEDs and rotates it right forever, so
 ;;;   the pattern walks across the display.
+;;; device: panel
 ;;;
 ;;; Load at 0000H, RESET, then RUN. The data LEDs (D7-D0) show the bit
 ;;; pattern 10001100 sliding one place to the right on every pass,

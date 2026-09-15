@@ -1,6 +1,7 @@
 ;;; name: Bouncing light
 ;;; desc: Walks a single dark bit back and forth across the data LEDs,
 ;;;   at a speed set by the sense switches.
+;;; device: panel
 ;;;
 ;;; Load at 0000H, RESET, then RUN. One dark LED travels from D1 up to
 ;;; D7, turns around, travels back down to D1, and repeats. The display

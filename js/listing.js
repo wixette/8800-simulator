@@ -29,11 +29,13 @@
 class Listing {
     /**
      * @param {string} text The contents of a .asm listing.
-     * @return {{name: string, bytes: Array<number>}} Its title, and the
-     *     program itself.
+     * @return {{name: string, device: string, bytes: Array<number>}}
+     *     Its title, which of the machine's faces it speaks through,
+     *     and the program itself.
      */
     static parse(text) {
         var name = '';
+        var device = '';
         var bytes = [];
         var lines = text.split('\n');
         for (let i = 0; i < lines.length; i++) {
@@ -41,6 +43,15 @@ class Listing {
             let header = raw.match(/^;;;\s*name:\s*(.*)$/);
             if (header) {
                 name = header[1].trim();
+                continue;
+            }
+            // Which of the machine's two faces this program speaks
+            // through, so that the page can say where to watch. Running
+            // a teletype program while looking at the front panel makes
+            // a working machine look broken.
+            let where = raw.match(/^;;;\s*device:\s*(.*)$/);
+            if (where) {
+                device = where[1].trim();
                 continue;
             }
             let line = raw.replace(/^\s+/, '');
@@ -57,7 +68,7 @@ class Listing {
                 bytes.push(parseInt(parts[j], 16));
             }
         }
-        return {name: name, bytes: bytes};
+        return {name: name, device: device, bytes: bytes};
     }
 };
 

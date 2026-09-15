@@ -1,6 +1,7 @@
 ;;; name: I/O echo
 ;;; desc: Reads the sense switches and echoes them to the data LEDs,
 ;;;   the shortest program that shows panel input and output together.
+;;; device: panel
 ;;;
 ;;; Load at 0000H, RESET, then RUN. Flip any of the sense switches
 ;;; (A15-A8, the upper eight) and the matching data LED follows it

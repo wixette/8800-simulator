@@ -2,6 +2,7 @@
 ;;; desc: The classic Altair 8800 game by Dean McDaniel, 1975. A bit
 ;;;   rotates across the upper address LEDs and you kill it with the
 ;;;   sense switch underneath.
+;;; device: panel
 ;;;
 ;;; See kill-the-bit.md for how to load it, how to play, and why you
 ;;; have to flip the switch straight back down. The original listing is
