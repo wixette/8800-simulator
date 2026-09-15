@@ -437,14 +437,14 @@ plus:
 - the window defaults to the first 256 bytes.
 
 *As built,* the shading tells the intended story only on a machine
-that was zeroed first: ZERO ALL MEMORY, then load BASIC on a 4 KB
-machine, and the strip reads `█▓█████████████ ` — fifteen of sixteen
-pages full, one left over. That is D3's lesson in one line of pixels.
-A machine straight from power-on is full of random bytes and reads as
-solid, and after BASIC has run its memory probe every page has been
-written, so it reads solid again. Both are truthful; neither is the
-picture worth teaching from, so the tutorial should say to zero memory
-first.
+that was zeroed first, so `panel.loadImage` zeroes memory before it
+loads: load BASIC on a 4 KB machine and the strip reads
+`█▓█████████████ ` — fifteen of sixteen pages full, one left over.
+That is D3's lesson in one line of pixels. A machine straight from
+power-on is full of random bytes and reads as solid, and after BASIC
+has run its memory probe every page has been written, so it reads
+solid again. Both are truthful; neither is the picture worth teaching
+from.
 
 *Why:* it preserves the "one screen shows the whole machine" property
 that is the best thing about the current debugger, and it adds the
@@ -495,7 +495,7 @@ tutorial says as much rather than pretending otherwise.
 
 ### D8 — The Teletype is its own tab
 
-Tab order: **Panel | Teletype | Debugger | Ref.**
+Tab order: **Simulator | Teletype | Debugger | Tutorial.**
 
 *Why second, not last:*
 
@@ -877,20 +877,17 @@ Minimalist, and consistent with the visual language already in
  └────────────────────────────────────────────────┘
 ```
 
-- **The paper** reuses `#mem-dump`'s treatment — `border-radius: 10px`,
-  `font-size: 14px`, `line-height: 24px`, `padding: 5px 10px`,
-  `overflow-x: auto` — fixed at 72 columns × 24 lines with
-  `overflow-y: auto`, auto-scrolled to the bottom. At 14 px monospace
-  72 columns is ~605 px, so on a phone it scrolls sideways, exactly as
-  the memory dump already does.
-- **One deliberate deviation to consider:** tint the paper
-  (`#e8e2d0`) rather than `#ccc`. One hex value, and it reads instantly
-  as *a physical device rather than a screen* — consistent with the
-  app's stance, given the Panel tab is already photoreal SVG artwork.
-  Plain `#ccc` is a perfectly good alternative if we want zero
-  deviation. **Open** — see [Part 7](#part-7--open-questions).
-- **Cursor:** a `▌` blinking via CSS `@keyframes`, shown only while
-  powered on.
+- **The paper** follows `#mem-dump`'s treatment — `border-radius: 10px`,
+  `padding: 5px 10px`, `overflow-x: auto` — at 16 px on 26 px lines,
+  23 lines tall with `overflow-y: auto`, auto-scrolled to the bottom.
+  72 columns wide, so on a phone it scrolls sideways, exactly as the
+  memory dump does.
+- **The paper is tinted** (`#e8e2d0`) rather than `#ccc`. One hex value,
+  and it reads instantly as *a physical device rather than a screen* —
+  consistent with the app's stance, given the Simulator tab is already
+  photoreal SVG artwork. See [Part 7](#part-7--open-questions).
+- **Cursor:** an inverse block over the character at the carriage,
+  blinking via CSS `@keyframes` only while powered on.
 - **Teletype Helper row** mirrors the existing *Switch Board Helper*
   pattern exactly, because it solves the same problem: keys that are
   awkward or impossible on a phone.
@@ -921,12 +918,15 @@ point.
 
 ```
  ┌────────────────────────────────────────────────┐
- │  Memory Dump            [ZERO ALL MEMORY]      │
+ │  Installed Memory                              │
+ │ [256 B · as it shipped] [4 KB · one 88-4MCS] … │
  ├────────────────────────────────────────────────┤
+ │  Memory Dump                                   │
+ │ 0F00-0FFF [◀][▶] [Follow PC] [Zero All Memory] │
  │ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒░░░░░░░░░░░░░░░░  ← map strip  │
  │ ↑BASIC                    ↑PC  ↑SP             │
  ├────────────────────────────────────────────────┤
- │ 0F00  00 11 22 ...            [x] follow PC    │
+ │ 0F00  00 11 22 ...                             │
  │ ...   16 lines, 256 bytes, always              │
  └────────────────────────────────────────────────┘
 ```
@@ -935,9 +935,12 @@ point.
 
 ## Part 5 — Example programs
 
-All four verified against this repository's CPU core on a 256-byte
-machine with an 88-SIO stub. **The teletype is useful at the default
-RAM size** — it does not depend on the memory work at all.
+The full set of ten, with their bytes, is in
+[../examples/README.md](../examples/README.md). This part covers the
+four teletype programs written for this work, verified against this
+repository's CPU core on a 256-byte machine with an 88-SIO stub, and
+the order all ten are offered in. **The teletype is useful at the
+default RAM size** — it does not depend on the memory work at all.
 
 | Program | Size | What it does |
 | --- | --- | --- |
@@ -1058,18 +1061,10 @@ Phase 1 is worth doing whatever we decide about BASIC.
   `writeByte()`, so EXAMINE above the top shows `FFh`, like the bus.
 - ✅ *Fixed in Phase 1.* `examineNext()` did not wrap at 16 bits — from
   `FFFFh` it stepped to `10000h`.
-- **The memory dump is rebuilt wholesale on every repaint**, so while a
-  program runs every cell of the map strip is destroyed and recreated
-  about sixty times a second. That broke clicking on the map: a click
-  needs its press and release on the same element, a human press lasts
-  several rebuilds, so the browser fired the click on the container
-  instead. Now handled on `pointerdown`, which is read before any
-  rebuild can intervene. Two related annoyances share the same root and
-  are *not* fixed: a cell's tooltip is dismissed as soon as it is
-  rebuilt, so the address and percentage cannot be read while anything
-  is running, and the hover outline flickers. The real fix is to update
-  the cells in place instead of regenerating the HTML, which means
-  `dumpMem` mutating the DOM rather than returning a string.
+- ✅ *Fixed later.* The map strip used to be rebuilt wholesale with the
+  dump on every repaint, which broke its clicks, tooltips and hover.
+  It is now data from `getMemMap()`, edited in place — see
+  [D21](#d21--the-map-strip-is-edited-not-rebuilt).
 - `Sim8800.step()` calls `CPU8080.status()` and `CPU8080.T()` once per
   instruction to watch for `LDAX`. That looks expensive but was
   measured at ~540 million cycles/second, indistinguishable from the
@@ -1086,18 +1081,13 @@ Phase 1 is worth doing whatever we decide about BASIC.
   BASIC to a board that is not there. It skips itself if `roms/` is
   absent.
 - Phase 3 changed the tab strip, so `README.md` and the images under
-  `screenshots/` need updating; the text is done, the screenshots are
-  not.
-- **A pre-existing quirk the LED repeater made visible.** `reset()`
-  lights every LED and schedules a `setTimeout` 400 ms later to clear
-  them again. If a program is started and writes the data LEDs inside
-  that window, the timeout wipes what it wrote. Found while driving
-  `tty-leds` from a script: type within 400 ms of RESET and the lamps
-  go dark until the next keystroke. By hand it cannot happen — RESET,
-  RUN and then reaching the Teletype tab takes far longer than 400 ms
-  — so it was left alone rather than widening Phase 3. The fix, when
-  someone wants it, is for `start()` to cancel or supersede the
-  pending flash.
+  `screenshots/` need updating. The text and `sim-panel.png` are done;
+  `sim-debug.png` and `sim-mobile.png` still show the old tabs and the
+  old Debugger layout.
+- ✅ *Fixed later.* `reset()` lights every LED and clears them 400 ms
+  later; a program that wrote the data LEDs inside that window used to
+  have them wiped. Now `start()` and `step()` end the flash first
+  (`endResetFlash()`), and a superseded flash leaves the lamps alone.
 
 ---
 
@@ -1115,12 +1105,13 @@ Phase 1 is worth doing whatever we decide about BASIC.
   dump, under an *Installed Memory* heading. That is the tab memory is
   already discussed on, and where the effect of the choice — the dump
   and the map strip — is visible. The Sim tab stays the machine.
-- **Where the ROM loader lives.** The Debug tab, directly under *Load
-  Data to Addr #0*, because it is the same act — get bytes into memory
-  at 0000H — just from a file rather than typed hex. Landing there has
-  a second benefit: the memory map is a few lines below, so clicking
-  LOAD 4K BASIC shows you BASIC filling fifteen of the sixteen pages
-  of a 4 KB machine before anything has run.
+- **Where the ROM loader lives.** The Debugger tab, which has two
+  loading sections: *Load a Program* (Load 4K BASIC and the Example
+  Programs menu — what ships with the simulator) and *Load Your Own*
+  (a hex string with Load Data, or Load Binary File). Landing there
+  has a second benefit: the memory map is a few lines below, so
+  clicking Load 4K BASIC shows you BASIC filling fifteen of the sixteen
+  pages of a 4 KB machine before anything has run.
 - **The clock rate.** Now **2 MHz**, which is what the Altair's 8080
   was clocked at; it had been 1 MHz, so everything ran at half speed.
   Measured consequences: BASIC reaches `OK` in 0.46 s rather than
@@ -1137,8 +1128,6 @@ Phase 1 is worth doing whatever we decide about BASIC.
 - **Paper tint.** Tinted, `#e8e2d0`. Next to the app's other panels it
   reads immediately as a physical device rather than a screen, which is
   the point of the tab, and it costs one hex value.
-
----
 
 ---
 

@@ -7,7 +7,7 @@
 ;;; See kill-the-bit.md for how to load it, how to play, and why you
 ;;; have to flip the switch straight back down. The original listing is
 ;;; at https://altairclone.com/downloads/killbits.pdf and the simulator
-;;; bug this game exposed is written up in doc/kill_the_bit.md.
+;;; bug this game exposed is written up in docs/kill-the-bit.md.
 ;;;
 ;;; The game has no output instruction at all. Its display is a side
 ;;; effect of the real machine: every memory read puts its address on
