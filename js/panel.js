@@ -1126,8 +1126,16 @@ panel.init = function() {
     // that keep working whether or not the tab is on screen; only the
     // drawing waits for the tab.
     panel.tty = new Teletype();
+    // Two boards, one teletype. Software picks which one it talks to -
+    // MITS BASIC reads the sense switches at startup and chooses the
+    // 88-SIO with them down, the 88-2SIO with A11 up - and wiring the
+    // terminal to both slots means either choice works instead of the
+    // machine going silent. They share one key queue, since there is
+    // only one keyboard.
     panel.sio = new Sio(panel.onTtyPrint);
-    panel.sio.attachTo(panel.sim);
+    panel.sio.attachTo(panel.sim, Sio.BASE_PORT, true);
+    panel.sio2 = new Sio(panel.onTtyPrint, panel.sio.rx);
+    panel.sio2.attachTo(panel.sim, Sio.TWO_SIO_BASE_PORT, false);
     panel.initTeletypeUi();
 
     // Adds handler for 'ZERO ALL MEMORY' Button 
