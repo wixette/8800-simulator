@@ -447,6 +447,16 @@ footer {
     font-weight: bold;
 }
 
+/* A control with nothing to act on: the memory dump buttons while the
+   machine is off, when the dump below them is blank. Still reachable,
+   because pressing one is how you find out why - it answers in the
+   status bar. */
+.button.disabled {
+    background-color: #bbb;
+    color: #777;
+}
+
+
 /* The power switch. It is the one control that has to be found before
    anything else in the simulator does anything, and its counterpart on
    the panel is a 20 px sprite among thirty others, so this one is

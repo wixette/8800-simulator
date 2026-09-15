@@ -107,6 +107,7 @@ panel.onPowerOn = function() {
     panel.sim.powerOn();
     // Only a live machine has a blinking carriage.
     document.body.classList.add('powered-on');
+    panel.updateMemoryControls();
     panel.setStatus('status-on');
     window.setTimeout(function() {
         panel.playBeepbeep();
@@ -124,6 +125,7 @@ panel.onPowerOff = function() {
         panel.sio.reset();
     }
     panel.renderTeletype();
+    panel.updateMemoryControls();
     panel.setStatus('status-off');
     panel.updateHelperSwitches();
 };
@@ -132,8 +134,15 @@ panel.onPowerOff = function() {
  * When ZERO ALL MEMORY button is pressed.
  */
 panel.onFillZero = function() {
+    if (!panel.sim.isPoweredOn) {
+        // Memory is only there while the power is. Zeroing it off
+        // used to paint a dump full of zeros over the blank that says
+        // the machine is down.
+        panel.setStatus('zero-mem-off', {}, 'warn');
+        return;
+    }
     panel.sim.initMem(false);
-    panel.sim.dumpMem();
+    panel.sim.requestDump();
     panel.setStatus('status-zeroed');
 };
 
@@ -467,6 +476,17 @@ panel.updateMemoryControls = function() {
     if (follow) {
         follow.classList.toggle('selected', panel.sim.followPc);
     }
+    // While the machine is down the dump below is blank, so none of
+    // these have anything to act on. They say so rather than going
+    // quiet when pressed.
+    var ids = ['mem-page-prev', 'mem-page-next', 'mem-follow-pc',
+               'debug-fill-zero'];
+    for (let i = 0; i < ids.length; i++) {
+        let elem = document.getElementById(ids[i]);
+        if (elem) {
+            elem.classList.toggle('disabled', !panel.sim.isPoweredOn);
+        }
+    }
     panel.updateMemWindowLabel();
 };
 
@@ -477,6 +497,10 @@ panel.updateMemWindowLabel = function() {
     var label = document.getElementById('mem-window-label');
     if (!label)
         return;
+    if (!panel.sim.isPoweredOn) {
+        label.textContent = '';
+        return;
+    }
     var window = panel.sim.getDumpWindow();
     label.textContent = Sim8800.toHex(window.start, 4) + ' - ' +
         Sim8800.toHex(window.end - 1, 4);
@@ -487,6 +511,8 @@ panel.updateMemWindowLabel = function() {
  * @param {number} direction -1 for back, 1 for forward.
  */
 panel.onMemPage = function(direction) {
+    if (!panel.sim.isPoweredOn)
+        return;
     var window = panel.sim.getDumpWindow();
     panel.sim.setFollowPc(false);
     panel.sim.setDumpWindow(
@@ -498,6 +524,8 @@ panel.onMemPage = function(direction) {
  * When FOLLOW PC is pressed.
  */
 panel.onToggleFollowPc = function() {
+    if (!panel.sim.isPoweredOn)
+        return;
     panel.sim.setFollowPc(!panel.sim.followPc);
     panel.updateMemoryControls();
 };
@@ -521,6 +549,8 @@ panel.onMemMapPress = function(event) {
     if (event.button) {
         return;  // Not the primary button.
     }
+    if (!panel.sim.isPoweredOn)
+        return;
     var cell = event.target;
     if (!cell || !cell.classList || !cell.classList.contains('mem-page'))
         return;
