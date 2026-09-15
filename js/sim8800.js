@@ -129,7 +129,7 @@ class Sim8800 {
     static parseBits(data, numBits) {
         var bits = [];
         for (let i = 0; i < numBits; i++) {
-            bits.push(data & 1 != 0 ? 1 : 0);
+            bits.push(data & 1);
             data >>>= 1;
         }
         return bits;
@@ -341,44 +341,42 @@ class Sim8800 {
      * @return {Object} The decoded flags.
      */
     decodeFlags(flags) {
-        var ret = {};
-        ret.sign = flags & 0x80 != 0;
-        ret.zero = flags & 0x40 != 0;
-        ret.auxiliaryCarry = flags & 0x10 != 0;
-        ret.parity = flags & 0x04 != 0;
-        ret.carry = flags & 0x01 != 0;
-        return ret;
+        return {
+            sign: (flags & 0x80) != 0,
+            zero: (flags & 0x40) != 0,
+            auxiliaryCarry: (flags & 0x10) != 0,
+            parity: (flags & 0x04) != 0,
+            carry: (flags & 0x01) != 0,
+        };
     }
 
     /**
-     * Dumps the internal CPU status to HTML, for debugging or mornitoring.
+     * Dumps the internal CPU status to HTML, for debugging or monitoring.
      */
     dumpCpu() {
-        if (!this.isPoweredOn)
+        if (!this.dumpCpuCallback || !this.isPoweredOn)
             return;
-        if (this.dumpCpuCallback) {
-            var cpu = CPU8080.status();
-            var sb = ['<pre>\n'];
-            sb.push('PC = ' + Sim8800.toHex(cpu.pc, 4) + '  ');
-            sb.push('SP = ' + Sim8800.toHex(cpu.sp, 4) + '\n');
-            sb.push('A = ' + Sim8800.toHex(cpu.a, 2) + '  ');
-            sb.push('B = ' + Sim8800.toHex(cpu.b, 2) + '  ');
-            sb.push('C = ' + Sim8800.toHex(cpu.c, 2) + '  ');
-            sb.push('D = ' + Sim8800.toHex(cpu.d, 2) + '\n');
-            sb.push('E = ' + Sim8800.toHex(cpu.e, 2) + '  ');
-            sb.push('F = ' + Sim8800.toHex(cpu.f, 2) + '  ');
-            sb.push('H = ' + Sim8800.toHex(cpu.h, 2) + '  ');
-            sb.push('L = ' + Sim8800.toHex(cpu.l, 2) + '\n');
-            var flags = this.decodeFlags(cpu.f);
-            sb.push('FLAGS: ');
-            if (flags.sign) sb.push('SIGN ');
-            if (flags.zero) sb.push('ZERO ');
-            if (flags.auxiliaryCarry) sb.push('AC ');
-            if (flags.parity) sb.push('PARITY ');
-            if (flags.carry) sb.push('CARRY ');
-            sb.push('</pre>\n');
-            this.dumpCpuCallback(sb.join(''));
-        }
+        var cpu = CPU8080.status();
+        var sb = ['<pre>\n'];
+        sb.push('PC = ' + Sim8800.toHex(cpu.pc, 4) + '  ');
+        sb.push('SP = ' + Sim8800.toHex(cpu.sp, 4) + '\n');
+        sb.push('A = ' + Sim8800.toHex(cpu.a, 2) + '  ');
+        sb.push('B = ' + Sim8800.toHex(cpu.b, 2) + '  ');
+        sb.push('C = ' + Sim8800.toHex(cpu.c, 2) + '  ');
+        sb.push('D = ' + Sim8800.toHex(cpu.d, 2) + '\n');
+        sb.push('E = ' + Sim8800.toHex(cpu.e, 2) + '  ');
+        sb.push('F = ' + Sim8800.toHex(cpu.f, 2) + '  ');
+        sb.push('H = ' + Sim8800.toHex(cpu.h, 2) + '  ');
+        sb.push('L = ' + Sim8800.toHex(cpu.l, 2) + '\n');
+        var flags = this.decodeFlags(cpu.f);
+        sb.push('FLAGS: ');
+        if (flags.sign) sb.push('SIGN ');
+        if (flags.zero) sb.push('ZERO ');
+        if (flags.auxiliaryCarry) sb.push('AC ');
+        if (flags.parity) sb.push('PARITY ');
+        if (flags.carry) sb.push('CARRY ');
+        sb.push('</pre>\n');
+        this.dumpCpuCallback(sb.join(''));
     }
 
     /**
