@@ -806,6 +806,18 @@ Phase 1 is worth doing whatever we decide about BASIC.
   `writeByte()`, so EXAMINE above the top shows `FFh`, like the bus.
 - ✅ *Fixed in Phase 1.* `examineNext()` did not wrap at 16 bits — from
   `FFFFh` it stepped to `10000h`.
+- **The memory dump is rebuilt wholesale on every repaint**, so while a
+  program runs every cell of the map strip is destroyed and recreated
+  about sixty times a second. That broke clicking on the map: a click
+  needs its press and release on the same element, a human press lasts
+  several rebuilds, so the browser fired the click on the container
+  instead. Now handled on `pointerdown`, which is read before any
+  rebuild can intervene. Two related annoyances share the same root and
+  are *not* fixed: a cell's tooltip is dismissed as soon as it is
+  rebuilt, so the address and percentage cannot be read while anything
+  is running, and the hover outline flickers. The real fix is to update
+  the cells in place instead of regenerating the HTML, which means
+  `dumpMem` mutating the DOM rather than returning a string.
 - `Sim8800.step()` calls `CPU8080.status()` and `CPU8080.T()` once per
   instruction to watch for `LDAX`. That looks expensive but was
   measured at ~540 million cycles/second, indistinguishable from the
