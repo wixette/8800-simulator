@@ -169,3 +169,81 @@ test('every Debugger control that can be unavailable can say why', () => {
         assert.ok(all[m[1]], m[1] + ' is a reason with no message');
     }
 });
+
+/**
+ * The text of every button in one tab of index.html.
+ * @param {string} tabId The tab's element id.
+ * @return {Array<{id: string, text: string, translated: boolean}>}
+ */
+function buttonsIn(tabId) {
+    const html = sourceOf('index.html');
+    const start = html.indexOf('id="' + tabId + '"');
+    assert.ok(start > 0, tabId + ' is not in the page');
+    // Up to whichever tab is declared next.
+    const rest = ['tab-sim', 'tab-tty', 'tab-debug', 'tab-ref']
+          .map((id) => html.indexOf('id="' + id + '"'))
+          .filter((at) => at > start);
+    const end = rest.length ? Math.min(...rest) : html.length;
+    const chunk = html.slice(start, end);
+    const found = [];
+    const button =
+          /<div id="([^"]+)" class="([^"]*\bbutton\b[^"]*)"[^>]*>([^<]*)<\/div>/g;
+    for (const m of chunk.matchAll(button)) {
+        const text = m[3].trim();
+        if (!text || text.startsWith('&#')) {
+            continue;  // A glyph, with no case to have.
+        }
+        found.push({id: m[1], text: text,
+                    translated: m[2].split(/\s+/).includes('l10n')});
+    }
+    return found;
+}
+
+test('the Simulator tab wears the panel silkscreen: caps, untranslated', () => {
+    // These stand for switches that exist on the metal. A photograph of
+    // the real panel does not change language, so neither do they.
+    const buttons = buttonsIn('tab-sim');
+    assert.ok(buttons.length >= 25, 'expected the whole switch board');
+    for (const b of buttons) {
+        assert.strictEqual(b.text, b.text.toUpperCase(),
+                           b.id + ' is a panel legend and must be uppercase');
+        assert.strictEqual(b.translated, false,
+                           b.id + ' is a panel legend and must not translate');
+    }
+});
+
+test('the Teletype tab speaks in capitals, because the ASR-33 had no others', () => {
+    // 64 characters, capitals only. The paper above these buttons
+    // cannot hold a lowercase letter, so neither do they. Unlike the
+    // panel legends they are translated: "CLEAR PAPER" tells you what
+    // will happen rather than naming a part of the machine.
+    const buttons = buttonsIn('tab-tty');
+    assert.ok(buttons.length >= 4, 'expected the teletype helper row');
+    const all = messages();
+    for (const b of buttons) {
+        assert.strictEqual(b.text, b.text.toUpperCase(),
+                           b.id + ' sits under uppercase paper');
+        assert.strictEqual(b.translated, true, b.id + ' should translate');
+        assert.strictEqual(all[b.id]['en'], all[b.id]['en'].toUpperCase(),
+                           b.id + ': the English message must be uppercase too');
+    }
+});
+
+test('the Debugger tab reads as software, not as a machine', () => {
+    // Tooling the Altair never had, so it follows software convention:
+    // Title Case, like the headings it sits under. Shouting here would
+    // borrow the machine's voice for something that is not the machine.
+    const buttons = buttonsIn('tab-debug');
+    assert.ok(buttons.length >= 7, 'expected the loaders and dump controls');
+    const all = messages();
+    for (const b of buttons) {
+        assert.strictEqual(b.translated, true, b.id + ' should translate');
+        const english = all[b.id]['en'];
+        // "4 KB", "Load 4K BASIC" and "Follow PC" keep their initialisms,
+        // so the test is that the label is not uppercase throughout.
+        const letters = english.replace(/[^A-Za-z]/g, '');
+        assert.notStrictEqual(
+            letters, letters.toUpperCase(),
+            b.id + ' ("' + english + '") shouts like a panel legend');
+    }
+});
