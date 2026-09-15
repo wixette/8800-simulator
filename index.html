@@ -140,30 +140,26 @@
 
       <div id="tab-debug">
         <div class="subheader-bar">
-          <div id="debug-load-data-title" class="l10n">Load Data to Addr #0</div>
+          <div id="debug-rom-title" class="l10n">Load a Program</div>
         </div>
         <div class="h-box justify-start mt-8 mb-8 align-items-center">
-          <input id="debug-data-input" class="flex-grow-1 mr-8" type="text">
-          <div id="debug-load-data" class="button l10n">Load Data</div>
-        </div>
-        <div id="debug-data-sample" class="comments l10n">
-          In HEX string, such as 'c3 00 00'
+          <div id="load-basic" class="button m-8 l10n">LOAD 4K BASIC</div>
+          <select id="example-select" class="m-8" aria-label="Example programs">
+          </select>
         </div>
 
         <div class="subheader-bar mt-8">
-          <div id="debug-rom-title" class="l10n">Load a Program</div>
+          <div id="debug-load-data-title" class="l10n">Load Your Own</div>
         </div>
         <div class="h-box justify-start mt-8 align-items-center">
-          <div id="load-basic" class="button m-8 l10n">LOAD 4K BASIC</div>
-          <div id="load-binary" class="button m-8 l10n">LOAD BINARY FILE</div>
+          <input id="debug-data-input" class="flex-grow-1 mr-8" type="text">
+          <div id="debug-load-data" class="button l10n">Load Data</div>
+          <div id="load-binary" class="button m-8 l10n">Load Binary File</div>
           <input id="binary-file" type="file" hidden>
         </div>
-        <div id="example-buttons" class="h-box justify-start align-items-center">
-        </div>
-        <div id="rom-hint" class="comments l10n">
-          4K BASIC is 4 KB of paper tape, so install at least 4 KB of memory
-          first. In 1975 you would have toggled in a 28 byte boot loader by
-          hand and then listened to the tape read for seven minutes.
+        <div id="debug-data-sample" class="comments l10n">
+          Bytes as a HEX string, such as 'c3 00 00', or a binary image from
+          disk. Either goes in at 0000H.
         </div>
 
         <div class="subheader-bar mt-8">

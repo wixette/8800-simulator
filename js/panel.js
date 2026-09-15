@@ -183,47 +183,86 @@ panel.EXAMPLES = [
 ];
 
 /**
- * Builds a button per example, once, the first time the debugger is
- * looked at. A reader who never opens that tab never fetches them.
+ * Fills the example menu, once, the first time the debugger is looked
+ * at. A reader who never opens that tab never fetches anything.
+ *
+ * A menu rather than a button apiece: ten buttons crowded the tab and
+ * pushed the dumps - which are what a debugger is for - below the
+ * fold. The menu acts on choosing and then returns to its prompt, so
+ * it reads as a list of things to do rather than a setting, and the
+ * same program can be loaded twice running.
  */
-panel.buildExampleButtons = function() {
-    if (panel.exampleButtonsBuilt) {
+panel.buildExampleMenu = function() {
+    if (panel.exampleMenuBuilt) {
         return;
     }
-    panel.exampleButtonsBuilt = true;
-    var row = document.getElementById('example-buttons');
-    if (!row) {
+    panel.exampleMenuBuilt = true;
+    var menu = document.getElementById('example-select');
+    if (!menu) {
         return;
     }
-    for (let i = 0; i < panel.EXAMPLES.length; i++) {
-        let id = panel.EXAMPLES[i];
-        let button = document.createElement('div');
-        button.className = 'button m-8';
-        button.id = 'example-' + id;
-        button.textContent = id;
-        row.appendChild(button);
-        window.fetch('examples/' + id + '.asm').then(function(response) {
+    panel.examplePrograms = {};
+    // The markup leaves whitespace inside the select, so build the
+    // prompt rather than looking for something already there.
+    menu.textContent = '';
+    menu.appendChild(document.createElement('option'));
+    panel.refreshExampleMenu();
+    menu.addEventListener('change', function() {
+        var program = panel.examplePrograms[menu.value];
+        menu.selectedIndex = 0;
+        if (!program) {
+            return;
+        }
+        var loaded = panel.loadImage(program.bytes);
+        panel.setStatus('example-loaded',
+                        {name: program.name, bytes: loaded});
+    }, false);
+
+    // Fetched together but listed in the order panel.EXAMPLES gives,
+    // which is the order they are worth meeting in - not whichever
+    // request happens to finish first.
+    var fetches = panel.EXAMPLES.map(function(id) {
+        return window.fetch('examples/' + id + '.asm').then(function(response) {
             if (!response.ok) {
                 throw new Error('HTTP ' + response.status);
             }
             return response.text();
         }).then(function(text) {
-            let program = Listing.parse(text);
-            if (!program.bytes.length) {
-                throw new Error('no bytes');
-            }
-            button.textContent = program.name + '  ' + program.bytes.length + 'B';
-            button.addEventListener('click', function() {
-                var loaded = panel.loadImage(program.bytes);
-                panel.setStatus('example-loaded',
-                                {name: program.name, bytes: loaded});
-            }, false);
+            var program = Listing.parse(text);
+            return program.bytes.length ? {id: id, program: program} : null;
         }).catch(function() {
-            // A listing that cannot be read should not leave a button
-            // that does nothing when pressed.
-            button.remove();
+            // A listing that cannot be read is simply not offered.
+            return null;
         });
+    });
+    Promise.all(fetches).then(function(results) {
+        for (let i = 0; i < results.length; i++) {
+            if (!results[i]) {
+                continue;
+            }
+            let id = results[i].id;
+            let program = results[i].program;
+            panel.examplePrograms[id] = program;
+            let option = document.createElement('option');
+            option.value = id;
+            option.textContent = program.name + ' \u2014 ' +
+                program.bytes.length + ' bytes';
+            menu.appendChild(option);
+        }
+    });
+};
+
+/**
+ * Puts the menu's prompt back, in the current language.
+ */
+panel.refreshExampleMenu = function() {
+    var menu = document.getElementById('example-select');
+    if (!menu || !menu.options.length) {
+        return;
     }
+    menu.options[0].value = '';
+    menu.options[0].textContent = l10n.getMessage('example-prompt');
+    menu.selectedIndex = 0;
 };
 
 /**
@@ -1290,7 +1329,10 @@ panel.init = function() {
         'click', function() { filePicker.click(); }, false);
     filePicker.addEventListener('change', panel.onBinaryFileChosen, false);
     // Keeps the loading message readable after a change of language.
-    l10n.onUpdate = panel.refreshStatus;
+    l10n.onUpdate = function() {
+        panel.refreshStatus();
+        panel.refreshExampleMenu();
+    };
 
     document.getElementById('mem-page-prev').addEventListener(
         'click', function() { panel.onMemPage(-1); }, false);
@@ -1757,7 +1799,7 @@ panel.showTab = function(name) {
     // Neither view is kept up to date while it is hidden, so catch up
     // as it comes back.
     if (panel.isDebugTabVisible) {
-        panel.buildExampleButtons();
+        panel.buildExampleMenu();
         if (panel.sim) {
             panel.sim.flushDump(true);
         }
