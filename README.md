@@ -20,6 +20,18 @@ There is a Teletype tab holding a simulated ASR-33: the paper, its keyboard, and
 
 [tty-leds](./examples/tty-leds.asm) is the one to start with: eighteen bytes, and pressing A lights `01000001` on the data LEDs while printing the letter on the paper.
 
+For something to actually play, [guess-letter](./examples/guess-letter.asm) is a game in 218 bytes — it thinks of a letter and tells you whether yours is higher or lower, and counts your guesses. Twenty-six letters fall to five tries if you halve the alphabet each time.
+
+```
+GUESS MY LETTER A-Z. ANY KEY STARTS.
+
+? M HIGHER
+? T HIGHER
+? W LOWER
+? U HIGHER
+? V GOT IT IN 5 TRIES.
+```
+
 The Debugger tab is also where you choose how much memory is installed: 256 bytes as the Altair 8800 shipped, or 4 KB / 8 KB as if you had plugged in one or two 88-4MCS static memory boards. Memory boards are not something you add to a running machine, so changing the size switches the simulator off.
 
 ## Microsoft BASIC
