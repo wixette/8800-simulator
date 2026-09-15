@@ -290,21 +290,96 @@ footer {
     padding: 5px 10px;
 }
 
-/* A program listing inside a tutorial step needs a little air around
-   it; the global reset takes every margin off pre. */
-.tutorial li pre {
-    margin: 6px 0 8px 0;
-}
-
+/* The Tutorial tab: an introduction, a program listing, numbered
+   steps, and a closing note. */
 .tutorial {
     background-color: #ccc;
     border-radius: 10px;
     color: #222;
     font-size: 14px;
-    line-height: 1.5em;
-    min-height: 20px;
-    overflow-x: hidden;
-    padding: 5px 10px;
+    line-height: 1.6;
+    padding: 16px 20px;
+}
+
+.tutorial-lead {
+    font-weight: bold;
+    margin: 0 0 12px 0;
+}
+
+.tutorial-code {
+    background-color: #e6e6e6;
+    border-left: 3px solid #999;
+    border-radius: 6px;
+    line-height: 1.5;
+    margin: 0 0 16px 0;
+    overflow-x: auto;
+    padding: 10px 16px;
+}
+
+.steps {
+    counter-reset: step;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.steps > li {
+    counter-increment: step;
+    margin: 0 0 8px 0;
+    min-height: 24px;
+    padding: 1px 0 0 38px;
+    position: relative;
+}
+
+.steps > li:last-child {
+    margin-bottom: 0;
+}
+
+/* The step number, as a badge in the gutter. */
+.steps > li::before {
+    background-color: #666;
+    border-radius: 12px;
+    color: #eee;
+    content: counter(step);
+    font-size: 12px;
+    font-weight: bold;
+    height: 24px;
+    left: 0;
+    line-height: 24px;
+    position: absolute;
+    text-align: center;
+    top: 0;
+    width: 24px;
+}
+
+.steps .tutorial-code {
+    margin: 8px 0 4px 0;
+}
+
+.tutorial-note {
+    background-color: #e6e6e6;
+    border-left: 3px solid #f90;
+    border-radius: 6px;
+    margin: 16px 0 0 0;
+    padding: 10px 16px;
+}
+
+/* Source code and references, on the dark ground. */
+.link-list {
+    font-size: 14px;
+    line-height: 1.5;
+    list-style: none;
+    margin: 0 0 10px 0;
+    padding: 0 10px;
+}
+
+.link-list li {
+    border-bottom: 1px solid #333;
+    padding: 8px 0;
+}
+
+.link-list li:last-child {
+    border-bottom: 0;
 }
 
 .button {
