@@ -36,7 +36,8 @@ function createSim(memSize = 256, clockRate = 1000000) {
         statusLedsArg: null,  // Last raw argument of setStatusLedsCallback.
         inputWord: 0,         // The value the address switches report.
         cpuDump: null,
-        memDump: null,
+        memDump: null,       // The <pre> of hex.
+        memMap: undefined,   // The map strip, as data. Null when none.
     };
     const sim = new Sim8800(
         memSize, clockRate,
@@ -46,7 +47,7 @@ function createSim(memSize = 256, clockRate = 1000000) {
         (isPoweredOn) => { state.statusLedsArg = isPoweredOn; },
         () => state.inputWord,
         (html) => { state.cpuDump = html; },
-        (html) => { state.memDump = html; });
+        (html, pages) => { state.memDump = html; state.memMap = pages; });
     return {sim: sim, state: state};
 }
 

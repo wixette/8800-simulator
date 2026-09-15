@@ -473,6 +473,31 @@ function hexOf(memDump) {
     return memDump.split('<pre>')[1] || '';
 }
 
+test('the map arrives as data, with no markup in it', () => {
+    // The strip used to be built here as a string and dropped into the
+    // page whole, which is what stopped its tooltips ever appearing.
+    // The view owns the elements now; this side owns the numbers.
+    const {sim, state} = sizedSim(4096);
+    sim.flushDump(true);
+    assert.ok(Array.isArray(state.memMap));
+    assert.ok(!state.memDump.includes('mem-page'),
+              'no map markup in the dump');
+    assert.ok(!state.memDump.includes('<div'),
+              'the dump is the hex and nothing else');
+    assert.deepStrictEqual(Object.keys(state.memMap[0]).sort(),
+                           ['end', 'label', 'level', 'pc', 'shown', 'sp',
+                            'start']);
+});
+
+test('powering off clears the map as well as the dump', () => {
+    const {sim, state} = sizedSim(4096);
+    sim.flushDump(true);
+    assert.strictEqual(state.memMap.length, 16);
+    sim.powerOff();
+    assert.strictEqual(state.memDump, '');
+    assert.strictEqual(state.memMap, null, 'no strip on a dead machine');
+});
+
 /** Powers a machine of the given size on, zeroed, LED blink flushed. */
 function sizedSim(memSize) {
     const fixture = createSim(memSize);
@@ -506,8 +531,8 @@ test('setMemSize to the size already installed does nothing', () => {
 test('the 256 byte machine still dumps whole, with no map', () => {
     const {sim, state} = poweredOnSim();
     sim.flushDump(true);
-    assert.ok(!state.memDump.includes('mem-map'),
-              'nothing to navigate, so no map strip');
+    assert.strictEqual(state.memMap, null,
+                       'nothing to navigate, so no map strip');
     assert.ok(hexOf(state.memDump).includes('0000'));
     assert.ok(hexOf(state.memDump).includes('00F0'), 'the last line is shown');
     assert.deepStrictEqual(sim.getDumpWindow(), {start: 0, end: 256});
@@ -518,8 +543,7 @@ test('a larger machine dumps one window, with a map of the rest', () => {
     sim.flushDump(true);
 
     // One cell per 256 byte page: 8192 / 256 = 32.
-    assert.strictEqual((state.memDump.match(/class="mem-page/g) || []).length,
-                       32);
+    assert.strictEqual(state.memMap.length, 32);
     // One window of hex, not the whole machine.
     assert.ok(hexOf(state.memDump).includes('0000'));
     assert.ok(hexOf(state.memDump).includes('00F0'));
@@ -575,8 +599,10 @@ test('the dump marks the bytes at PC and SP, and their pages', () => {
     assert.ok(/<span class="at-sp">[0-9A-F]{2}<\/span>/.test(state.memDump),
               'the byte at SP is marked');
     // Both live in page 0 here, so that cell carries both marks.
-    assert.ok(/class="mem-page mem-page-\d mem-page-shown mem-page-pc mem-page-sp"/
-              .test(state.memDump));
+    assert.strictEqual(state.memMap[0].shown, true);
+    assert.strictEqual(state.memMap[0].pc, true);
+    assert.strictEqual(state.memMap[0].sp, true);
+    assert.strictEqual(state.memMap[1].pc, false);
 });
 
 test('map cells explain their own shading in a tooltip', () => {
@@ -586,18 +612,16 @@ test('map cells explain their own shading in a tooltip', () => {
         sim.mem[i] = 0xff;
     }
     sim.flushDump(true);
-    const titles = [...state.memDump.matchAll(/title="([^"]+)"/g)]
-          .map((m) => m[1]);
-    assert.strictEqual(titles[0], '0000-00FF  50%');
-    assert.strictEqual(titles[1], '0100-01FF  0%');
-    assert.strictEqual(titles[15], '0F00-0FFF  0%');
+    const labels = state.memMap.map((page) => page.label);
+    assert.strictEqual(labels[0], '0000-00FF  50%');
+    assert.strictEqual(labels[1], '0100-01FF  0%');
+    assert.strictEqual(labels[15], '0F00-0FFF  0%');
 });
 
 test('map cells carry the address they jump to', () => {
     const {sim, state} = sizedSim(4096);
     sim.flushDump(true);
-    const addresses = [...state.memDump.matchAll(/data-address="(\d+)"/g)]
-          .map((m) => Number(m[1]));
+    const addresses = state.memMap.map((page) => page.start);
     assert.strictEqual(addresses.length, 16);
     assert.strictEqual(addresses[0], 0);
     assert.strictEqual(addresses[15], 0x0f00);
@@ -648,7 +672,7 @@ test('moving the dump window while off leaves the screen blank', () => {
     sim.setFollowPc(false);
     sim.setDumpWindow(0x0800);
     sim.flushDump(true);
-    assert.ok(state.memDump.includes('mem-page-shown'),
-              'the map marks the window that is showing');
+    assert.strictEqual(state.memMap[8].shown, true,
+                       'the map marks the window that is showing');
     assert.strictEqual(sim.getDumpWindow().start, 0x0800);
 });

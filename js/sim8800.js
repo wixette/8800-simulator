@@ -36,8 +36,10 @@ class Sim8800 {
      *     callback to get the input word from address/data switches.
      * @param {function(string)?} dumpCpuCallback The callback to receive
      *     CPU status dump, in HTML string.
-     * @param {function(string)?} dumpMemCallback The callback to receive
-     *     memory contents dump, in HTML string.
+     * @param {function(string, ?Array<Object>)?} dumpMemCallback The
+     *     callback to receive the memory dump as an HTML string, and
+     *     the memory map as data - see getMemMap() - or null on a
+     *     machine small enough not to need a map.
      */
     constructor(memSize, clockRate,
                 setAddressLedsCallback, setDataLedsCallback,
@@ -238,44 +240,50 @@ class Sim8800 {
     }
 
     /**
-     * Builds the memory map strip: one cell per window-sized page of
-     * memory, shaded by how much of the page is not zero, marked where
-     * the program counter and the stack pointer are, and outlined on
-     * the page the dump is showing. It is how a machine too big to
-     * print on one screen still fits on one screen.
+     * Describes the memory map strip: one entry per page of memory.
      *
-     * The shading has five steps, by the share of the page's bytes
-     * that are not zero: empty, then up to a quarter, a half, three
-     * quarters, and the rest. Each cell's tooltip gives its address
-     * and that percentage, so the scale does not have to be learnt.
+     * This is data rather than HTML, and that is the point. The strip
+     * used to be built as a string and dropped into the page with
+     * innerHTML on every repaint, which threw away and recreated every
+     * cell sixty times a second. Nothing the browser attaches to an
+     * element could survive that - the cell's tooltip was dismissed
+     * before it could appear, a :hover outline never showed while a
+     * program ran, and a click had to be caught as a pointerdown
+     * because press and release landed on different elements. The view
+     * now keeps the cells and edits them, so all of that works.
+     *
+     * Each page carries how full it is, on a scale of 0 to 4, so that
+     * the shape of what is loaded is visible at a glance, and a label
+     * naming the range and that fullness as a percentage.
+     *
      * @param {{start: number, end: number}} window The shown window.
      * @param {Object} cpu The CPU status.
-     * @return {string} The HTML.
+     * @return {Array<{start: number, end: number, level: number,
+     *     shown: boolean, pc: boolean, sp: boolean, label: string}>}
      */
-    buildMemMap(window, cpu) {
+    getMemMap(window, cpu) {
         var size = Sim8800.DUMP_WINDOW_SIZE;
-        var sb = ['<div class="mem-map">'];
+        var pages = [];
         for (let page = 0; page * size < this.mem.length; page++) {
             let base = page * size;
             let used = 0;
             for (let i = base; i < Math.min(this.mem.length, base + size); i++) {
                 if (this.mem[i]) used++;
             }
-            let level = used == 0 ? 0 : Math.min(4, Math.ceil(used / size * 4));
-            let classes = ['mem-page', 'mem-page-' + level];
-            if (base == window.start) classes.push('mem-page-shown');
-            if (cpu.pc >= base && cpu.pc < base + size) classes.push('mem-page-pc');
-            if (cpu.sp >= base && cpu.sp < base + size) classes.push('mem-page-sp');
             let pageSize = Math.min(this.mem.length - base, size);
-            let title = Sim8800.toHex(base, 4) + '-' +
-                Sim8800.toHex(base + pageSize - 1, 4) + '  ' +
-                Math.round(used / pageSize * 100) + '%';
-            sb.push('<span class="' + classes.join(' ') +
-                    '" data-address="' + base + '" title="' + title +
-                    '"></span>');
+            pages.push({
+                start: base,
+                end: base + pageSize,
+                level: used == 0 ? 0 : Math.min(4, Math.ceil(used / size * 4)),
+                shown: base == window.start,
+                pc: cpu.pc >= base && cpu.pc < base + size,
+                sp: cpu.sp >= base && cpu.sp < base + size,
+                label: Sim8800.toHex(base, 4) + '-' +
+                    Sim8800.toHex(base + pageSize - 1, 4) + '  ' +
+                    Math.round(used / pageSize * 100) + '%',
+            });
         }
-        sb.push('</div>\n');
-        return sb.join('');
+        return pages;
     }
 
     /**
@@ -303,10 +311,10 @@ class Sim8800 {
             return;
         var cpu = CPU8080.status();
         var window = this.getDumpWindow();
+        // No strip on a machine whose memory is all on screen already.
+        var map = this.mem.length > Sim8800.DUMP_WINDOW_SIZE ?
+            this.getMemMap(window, cpu) : null;
         var sb = [];
-        if (this.mem.length > Sim8800.DUMP_WINDOW_SIZE) {
-            sb.push(this.buildMemMap(window, cpu));
-        }
         sb.push('<pre>\n');
         for (let i = window.start; i < window.end; i += 16) {
             sb.push(Sim8800.toHex(i, 4));
@@ -324,7 +332,7 @@ class Sim8800 {
             sb.push('\n');
         }
         sb.push('</pre>\n');
-        this.dumpMemCallback(sb.join(''));
+        this.dumpMemCallback(sb.join(''), map);
     }
 
     /**
@@ -602,7 +610,7 @@ class Sim8800 {
             this.dumpCpuCallback('');
         }
         if (this.dumpMemCallback) {
-            this.dumpMemCallback('');
+            this.dumpMemCallback('', null);
         }
         this.isPoweredOn = false;
     }

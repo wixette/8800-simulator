@@ -378,6 +378,15 @@ footer {
     margin: 10px 0;
 }
 
+/* The hidden attribute has to win. The browser's own rule for it is
+   only display: none at user agent level, which any author rule with
+   a display in it beats - and .mem-map below sets display: flex, so
+   hiding the strip by setting .hidden would otherwise do nothing at
+   all. */
+[hidden] {
+    display: none !important;
+}
+
 /* The memory map strip above the memory dump: one cell per 256-byte
    page of memory, so that a machine too large to print on one screen
    still fits on one screen. See docs/ms-basic-4k.md. */
@@ -386,7 +395,11 @@ footer {
     flex-direction: row;
     flex-wrap: wrap;
     gap: 2px;
-    margin: 5px 0 10px 0;
+    /* It sits between the dump controls and the dump itself, as its
+       own element rather than inside the dump - the dump is rewritten
+       on every repaint and these cells have to outlive that. See
+       panel.renderMemMap. */
+    margin: 5px 0 0 0;
 }
 
 .mem-page {

@@ -709,6 +709,45 @@ cases at once next to `Load Data` and `Example programs...`.
 | Teletype | UPPERCASE | yes (4 of 4) | the ASR-33 had no lowercase |
 | Debugger | Title Case | yes | software the machine never had |
 
+### D21 — The map strip is edited, not rebuilt
+
+The memory dump is written into the page with `innerHTML` on every
+repaint, sixty times a second while a program runs. That is fine for
+the hex, which is text and nothing else. It was not fine for the map
+strip, which was built into the same string: every cell was destroyed
+and recreated on every frame.
+
+A browser hangs a good deal off an element that only lives as long as
+the element does. All of it broke, and each break was found separately
+before the cause was:
+
+- a click needed its press and its release on the same cell, so the
+  map appeared dead whenever anything was running — worked around at
+  the time by reading `pointerdown` instead;
+- a `:hover` outline never appeared while a program ran, and was
+  removed rather than fixed;
+- the tooltip naming each page's address range and how full it is
+  needs about a second of stillness, and never had a hundredth of one.
+
+So `Sim8800.getMemMap()` now returns the strip as **data** — one entry
+per page, with its range, fill level, and whether the window, PC or SP
+is in it — and `panel.renderMemMap()` keeps the cells and edits them.
+Only what changed is written, each assignment guarded by a comparison,
+because writing the same title again is itself enough to dismiss a
+tooltip that is already up. Measured in the browser: **zero** DOM
+mutations across thirty repaints of an idle machine, and three when
+the program counter crosses into another page.
+
+*Why it was worth doing rather than living with:* three separate
+symptoms, one cause. Two had already been papered over in ways that
+cost something — a `pointerdown` where a click belonged, and a
+navigational affordance deleted outright.
+
+*The one case that remains:* a page whose fill percentage is actually
+changing rewrites its own label, which will dismiss a tooltip held
+over that cell. Left alone deliberately — the alternative is showing a
+number that is no longer true.
+
 ### D18 — Nothing in the Debugger is hidden; it greys out instead
 
 The memory paging controls used to disappear entirely on the 256 byte

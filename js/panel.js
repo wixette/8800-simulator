@@ -617,16 +617,13 @@ panel.onToggleFollowPc = function() {
 /**
  * When a cell of the memory map is pressed, moves the window there.
  *
- * On pointerdown rather than click, and that matters. The dump is
- * rebuilt wholesale on every repaint, so while a program is running
- * the cell under the pointer is destroyed and recreated about sixty
- * times a second. A click needs its press and its release to land on
- * the same element; a human press lasts long enough to span several
- * rebuilds, so the browser finds no surviving cell and fires the click
- * on the container instead - and the map appeared dead whenever
- * anything was running, while the buttons beside it, which are never
- * rebuilt, kept working. Pointerdown is read before any rebuild can
- * intervene. It also covers touch.
+ * Still pointerdown rather than click, though it no longer has to be.
+ * It had to be once: the strip was rebuilt from innerHTML on every
+ * repaint, so a press and its release landed on different elements and
+ * no click was ever fired while a program ran. The cells survive now
+ * (see panel.renderMemMap), so a click would work - but a strip you
+ * may want to move along quickly is better answering the press, and
+ * this covers touch with the same code.
  * @param {Event} event The pointerdown event.
  */
 panel.onMemMapPress = function(event) {
@@ -749,12 +746,72 @@ panel.dumpCpuCallback = function(dumpHtml) {
 /**
  * When CPU dumps the MEM contents for debug.
  */
-panel.dumpMemCallback = function(dumpHtml) {
+panel.dumpMemCallback = function(dumpHtml, pages) {
     var dumpMemElem = document.getElementById('mem-dump');
     dumpMemElem.innerHTML = dumpHtml;
+    panel.renderMemMap(pages);
     // FOLLOW PC moves the window on its own, so the label has to be
     // refreshed with the dump rather than only when a button is hit.
     panel.updateMemWindowLabel();
+};
+
+/**
+ * Draws the memory map strip, editing the cells rather than replacing
+ * them.
+ *
+ * The strip is redrawn on every repaint - sixty times a second while a
+ * program runs - and the cells have to be the same elements each time.
+ * A browser hangs a good deal off an element that only lives as long
+ * as the element does: the dwell that brings up a tooltip, the hover
+ * state, the press that pairs with a release to make a click. Rebuilt
+ * from innerHTML, every cell was destroyed before any of that could
+ * finish, and a tooltip that needs a second of stillness never had a
+ * hundredth of one.
+ *
+ * So the cells are built once and only what changed is written. Each
+ * assignment is guarded by a comparison, because assigning the same
+ * title again is enough to dismiss a tooltip that is already up.
+ *
+ * @param {?Array<Object>} pages From Sim8800.getMemMap(), or null when
+ *     the machine has no more memory than one window shows.
+ */
+panel.renderMemMap = function(pages) {
+    var strip = document.getElementById('mem-map');
+    if (!strip) {
+        return;
+    }
+    if (!pages || !pages.length) {
+        strip.hidden = true;
+        strip.textContent = '';
+        return;
+    }
+    strip.hidden = false;
+    // Only when the machine itself changed size.
+    if (strip.children.length != pages.length) {
+        strip.textContent = '';
+        for (let i = 0; i < pages.length; i++) {
+            let cell = document.createElement('span');
+            strip.appendChild(cell);
+        }
+    }
+    for (let i = 0; i < pages.length; i++) {
+        let page = pages[i];
+        let cell = strip.children[i];
+        let classes = 'mem-page mem-page-' + page.level;
+        if (page.shown) classes += ' mem-page-shown';
+        if (page.pc) classes += ' mem-page-pc';
+        if (page.sp) classes += ' mem-page-sp';
+        if (cell.className !== classes) {
+            cell.className = classes;
+        }
+        if (cell.title !== page.label) {
+            cell.title = page.label;
+        }
+        let address = String(page.start);
+        if (cell.dataset.address !== address) {
+            cell.dataset.address = address;
+        }
+    }
 };
 
 /**
@@ -1509,10 +1566,10 @@ panel.init = function() {
         'click', function() { panel.onMemPage(1); }, false);
     document.getElementById('mem-follow-pc').addEventListener(
         'click', panel.onToggleFollowPc, false);
-    // The map is rebuilt with every dump, so the listener goes on the
-    // container that survives it - and listens for the press rather
-    // than the click. See panel.onMemMapPress.
-    document.getElementById('mem-dump').addEventListener(
+    // One listener on the strip rather than one per cell, so that
+    // cells can come and go when the memory size changes. See
+    // panel.onMemMapPress for why it is the press and not the click.
+    document.getElementById('mem-map').addEventListener(
         'pointerdown', panel.onMemMapPress, false);
     panel.updateMemoryControls();
     // The machine comes up switched off, and the empty dump and dark
