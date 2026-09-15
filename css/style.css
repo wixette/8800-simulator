@@ -488,9 +488,17 @@ footer {
    for finding out what the machine can do, and a control that goes
    dead without a word teaches nothing. Coming after .selected means a
    button that is both - FOLLOW PC, switched on, on a dead machine -
-   reads as unavailable rather than as active. */
+   reads as unavailable rather than as active.
+
+   Both shapes of control are named. The controls on this page are
+   mostly .button divs, but the example menu is a real <button> inside
+   a .dropdown, and it needs the same treatment for the same reason -
+   it cannot offer anything on a page opened straight off the disk.
+   Naming only .button left it carrying the class and looking entirely
+   available. */
 .button.disabled,
-.button.disabled.selected {
+.button.disabled.selected,
+.dropdown > button.disabled {
     background-color: #bbb;
     color: #777;
     font-weight: normal;

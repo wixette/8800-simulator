@@ -128,6 +128,12 @@ class Dropdown {
 
     /** Opens the list, with the keyboard on the current choice. */
     open() {
+        if (!this.list.children.length) {
+            // A menu of nothing opens as a box of nothing, which tells
+            // the reader less than not opening does. Whoever had
+            // nothing to put in it says why.
+            return;
+        }
         this.list.hidden = false;
         this.button.setAttribute('aria-expanded', 'true');
         var current = this.list.querySelector('[aria-selected="true"]');
