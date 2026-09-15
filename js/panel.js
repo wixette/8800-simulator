@@ -134,11 +134,7 @@ panel.onPowerOff = function() {
  * When ZERO ALL MEMORY button is pressed.
  */
 panel.onFillZero = function() {
-    if (!panel.sim.isPoweredOn) {
-        // Memory is only there while the power is. Zeroing it off
-        // used to paint a dump full of zeros over the blank that says
-        // the machine is down.
-        panel.setStatus('zero-mem-off', {}, 'warn');
+    if (panel.reportIfUnavailable('debug-fill-zero')) {
         return;
     }
     panel.sim.initMem(false);
@@ -262,6 +258,18 @@ panel.refreshPlaceholders = function() {
     if (input) {
         input.placeholder = l10n.getMessage('debug-data-placeholder');
     }
+    // The two paging buttons are arrowheads with no words in them, so
+    // their name lives in a tooltip and on the element, where a screen
+    // reader can reach it.
+    var arrows = ['mem-page-prev', 'mem-page-next'];
+    for (let i = 0; i < arrows.length; i++) {
+        let elem = document.getElementById(arrows[i]);
+        if (elem) {
+            let text = l10n.getMessage(arrows[i] + '-title');
+            elem.title = text;
+            elem.setAttribute('aria-label', text);
+        }
+    }
 };
 
 /**
@@ -329,6 +337,25 @@ panel.formatMemSize = function(bytes) {
 };
 
 /**
+ * Switches the machine on if it is not on already.
+ *
+ * Every way of getting a program in does this, so that none of them is
+ * a dead end: you press the thing that loads, and it loads. The machine
+ * coming up is visible on the panel - the OFF/ON button turns green -
+ * and memory fills with the random bytes a real one powers up with,
+ * which is worth seeing rather than being protected from.
+ */
+panel.ensurePoweredOn = function() {
+    if (panel.isPoweredOn) {
+        return;
+    }
+    panel.onPowerOn();
+    panel.switchDown('off-on');
+    panel.isPoweredOn = true;
+    panel.updateHelperSwitches();
+};
+
+/**
  * Puts an image into memory at 0000H and presses RESET, powering the
  * machine up first if it is off.
  *
@@ -342,12 +369,7 @@ panel.formatMemSize = function(bytes) {
  * @return {number} How many bytes actually fit in the machine.
  */
 panel.loadImage = function(bytes) {
-    if (!panel.isPoweredOn) {
-        panel.onPowerOn();
-        panel.switchDown('off-on');
-        panel.isPoweredOn = true;
-        panel.updateHelperSwitches();
-    }
+    panel.ensurePoweredOn();
     panel.sim.initMem(false);
     panel.sim.loadData(0, bytes);
     panel.sim.reset();
@@ -360,8 +382,7 @@ panel.loadImage = function(bytes) {
  * When LOAD 4K BASIC is pressed.
  */
 panel.onLoadBasic = function() {
-    if (panel.sim.mem.length < panel.MIN_BASIC_MEM) {
-        panel.setStatus('rom-needs-memory', {}, 'warn');
+    if (panel.reportIfUnavailable('load-basic')) {
         return;
     }
     window.fetch(panel.ROM_URL).then(function(response) {
@@ -453,6 +474,84 @@ panel.onSetMemSize = function(memSize) {
 };
 
 /**
+ * Why each Debugger control cannot be used at the moment.
+ *
+ * This is the only place that decides. The greying out and the message
+ * a greyed control gives when pressed both read from here, so the two
+ * cannot drift apart - which is exactly what went wrong before: ZERO
+ * ALL MEMORY explained itself and FOLLOW PC went quiet, and the window
+ * label counted up pages the dump was not showing.
+ *
+ * @return {Object<string, ?{id: string, params: Object}>} A reason for
+ *     each control, or null where the control is available.
+ */
+panel.debugControlReasons = function() {
+    var on = panel.sim.isPoweredOn;
+    var memSize = panel.sim.mem.length;
+    var reasons = {};
+    // The loaders are never unavailable: each one switches the machine
+    // on for you, so there is nothing to be unavailable about. Except
+    // BASIC, which needs a memory board this machine may not have.
+    reasons['load-basic'] = memSize < panel.MIN_BASIC_MEM ?
+        {id: 'rom-needs-memory', params: {}} : null;
+    reasons['debug-load-data'] = null;
+    reasons['load-binary'] = null;
+    // The dump controls act on the memory dump. With the machine off
+    // it is blank, and on the base machine it is one page that cannot
+    // be moved.
+    var navReason = null;
+    if (!on) {
+        navReason = {id: 'mem-nav-off', params: {}};
+    } else if (memSize <= Sim8800.DUMP_WINDOW_SIZE) {
+        navReason = {id: 'mem-nav-fits',
+                     params: {size: panel.formatMemSize(memSize)}};
+    }
+    reasons['mem-page-prev'] = navReason;
+    reasons['mem-page-next'] = navReason;
+    reasons['mem-follow-pc'] = navReason;
+    reasons['debug-fill-zero'] = on ? null : {id: 'zero-mem-off', params: {}};
+    return reasons;
+};
+
+/**
+ * Says why a control cannot be used, if it cannot be.
+ *
+ * A greyed control here still takes the press and answers. That is not
+ * what most software does - a disabled button usually ignores you -
+ * but a simulator is for learning what the machine can do, and a
+ * control that goes dead without saying why teaches nothing.
+ *
+ * @param {string} id The control.
+ * @return {boolean} True if it is unavailable, and the reason has been
+ *     shown.
+ */
+panel.reportIfUnavailable = function(id) {
+    var reason = panel.debugControlReasons()[id];
+    if (!reason) {
+        return false;
+    }
+    panel.setStatus(reason.id, reason.params, 'warn');
+    return true;
+};
+
+/**
+ * Greys out whatever cannot be used just now.
+ *
+ * Nothing is hidden. A control that disappears when it does not apply
+ * takes its explanation with it and moves everything beside it; one
+ * that greys out stays where it was and can still be asked why.
+ */
+panel.updateDebugControls = function() {
+    var reasons = panel.debugControlReasons();
+    for (let id in reasons) {
+        let elem = document.getElementById(id);
+        if (elem) {
+            elem.classList.toggle('disabled', !!reasons[id]);
+        }
+    }
+};
+
+/**
  * Keeps the memory controls in step with the machine: which size is
  * installed, and whether there is more memory than one window shows.
  */
@@ -464,29 +563,11 @@ panel.updateMemoryControls = function() {
             elem.classList.toggle('selected', panel.MEM_SIZES[i] == memSize);
         }
     }
-    var nav = document.getElementById('mem-window-nav');
-    if (nav) {
-        // On the 256 byte machine the window is the whole machine, so
-        // there is nothing to navigate. ZERO ALL MEMORY sits outside
-        // this group, because it applies at every size.
-        nav.style.display =
-            memSize > Sim8800.DUMP_WINDOW_SIZE ? 'flex' : 'none';
-    }
     var follow = document.getElementById('mem-follow-pc');
     if (follow) {
         follow.classList.toggle('selected', panel.sim.followPc);
     }
-    // While the machine is down the dump below is blank, so none of
-    // these have anything to act on. They say so rather than going
-    // quiet when pressed.
-    var ids = ['mem-page-prev', 'mem-page-next', 'mem-follow-pc',
-               'debug-fill-zero'];
-    for (let i = 0; i < ids.length; i++) {
-        let elem = document.getElementById(ids[i]);
-        if (elem) {
-            elem.classList.toggle('disabled', !panel.sim.isPoweredOn);
-        }
-    }
+    panel.updateDebugControls();
     panel.updateMemWindowLabel();
 };
 
@@ -511,8 +592,10 @@ panel.updateMemWindowLabel = function() {
  * @param {number} direction -1 for back, 1 for forward.
  */
 panel.onMemPage = function(direction) {
-    if (!panel.sim.isPoweredOn)
+    if (panel.reportIfUnavailable(
+            direction < 0 ? 'mem-page-prev' : 'mem-page-next')) {
         return;
+    }
     var window = panel.sim.getDumpWindow();
     panel.sim.setFollowPc(false);
     panel.sim.setDumpWindow(
@@ -524,8 +607,9 @@ panel.onMemPage = function(direction) {
  * When FOLLOW PC is pressed.
  */
 panel.onToggleFollowPc = function() {
-    if (!panel.sim.isPoweredOn)
+    if (panel.reportIfUnavailable('mem-follow-pc')) {
         return;
+    }
     panel.sim.setFollowPc(!panel.sim.followPc);
     panel.updateMemoryControls();
 };
@@ -549,8 +633,6 @@ panel.onMemMapPress = function(event) {
     if (event.button) {
         return;  // Not the primary button.
     }
-    if (!panel.sim.isPoweredOn)
-        return;
     var cell = event.target;
     if (!cell || !cell.classList || !cell.classList.contains('mem-page'))
         return;
@@ -718,11 +800,6 @@ panel.debugLoadData = function() {
         panel.setStatus('load-data-empty', {}, 'warn');
         return;
     }
-    if (!panel.sim.isPoweredOn) {
-        // The bytes would go nowhere.
-        panel.setStatus('load-data-off', {}, 'warn');
-        return;
-    }
     var parsed = panel.parseBytes(text);
     if (parsed.error) {
         panel.setStatus(parsed.error, parsed.params, 'error');
@@ -734,7 +811,11 @@ panel.debugLoadData = function() {
                          size: panel.sim.mem.length}, 'error');
         return;
     }
+    // On, but not wiped: this is a deposit into the machine as it
+    // stands, not a fresh tape. loadImage() is the one that clears.
+    panel.ensurePoweredOn();
     panel.sim.loadData(0, parsed.bytes);
+    panel.updateMemoryControls();
     panel.setStatus('load-data-loaded', {bytes: parsed.bytes.length});
 };
 

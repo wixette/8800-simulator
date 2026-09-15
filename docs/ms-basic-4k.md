@@ -647,6 +647,96 @@ The Teletype tab needs roughly eight new keys in `js/l10n.js` —
 `tty-kill`, `tty-clear`, `tty-hint` — plus whatever the RAM selector
 and the memory-window controls need, across all nine locales.
 
+### D17 — Two vocabularies: the machine, and the instrument
+
+The app has controls of two different kinds, and they should not try to
+look alike.
+
+**The machine.** Everything on the Simulator tab stands for a switch
+that exists on a real Altair 8800. `OFF/ON`, `STOP`, `RUN`,
+`SINGLE STEP`, `EXAMINE`, `DEPOSIT`, `RESET`, `A15`–`A00`. These keep
+the silkscreen's **UPPERCASE**, and they are **not translated**: they
+are the legend printed on the metal, and a photograph of the real
+panel does not change language. They are never hidden and never
+disabled, because a physical switch is always there to be thrown —
+throwing one on a dead machine simply does nothing, which is also true
+here.
+
+**The instrument.** The Debugger tab is the simulator's own tooling.
+None of it existed in 1975: there was no "load a file", no example
+menu, no memory dump you could page through. So it follows ordinary
+software convention instead — **Title Case**, matching the section
+headings already there (*Load a Program*, *Installed Memory*,
+*Memory Dump*), and **translated into all nine locales**.
+
+*Why the split at all:* the two sets answer different questions. A
+panel legend answers "what is this switch called on the machine"; an
+instrument label answers "what will this do for me". Making the second
+set shout in uppercase, as `LOAD 4K BASIC`, `FOLLOW PC` and
+`ZERO ALL MEMORY` used to, borrowed the machine's voice for something
+the machine never had, and left the tab reading in three different
+cases at once next to `Load Data` and `Example programs...`.
+
+### D18 — Nothing in the Debugger is hidden; it greys out instead
+
+The memory paging controls used to disappear entirely on the 256 byte
+machine, on the grounds that a single page cannot be paged. Now they
+stay and grey out.
+
+*Why:* a control that vanishes takes its own explanation with it. The
+reader never learns that the debugger can page through memory, or that
+installing a board is what unlocks it — the feature is simply absent,
+and the row beside it jumps whenever the memory size changes. A greyed
+control stays in place, keeps the layout still, and can be asked why.
+
+### D19 — A greyed control still answers
+
+This is the deliberate departure from industry convention, and the
+reason for it is that this is a teaching app.
+
+Everywhere else, a disabled button ignores the press. Here it takes it
+and replies in the status bar ([D15](#d15--one-status-line-at-the-foot-of-the-machine))
+with the reason it is grey:
+
+| Control | Grey when | Says |
+| --- | --- | --- |
+| Load 4K BASIC | less than 4 KB installed | *4K BASIC needs at least 4 KB installed. Choose 4 KB or 8 KB under Installed Memory.* |
+| ◀ ▶ Follow PC | machine off | *The machine is off, so there is no memory dump to move around in.* |
+| ◀ ▶ Follow PC | all memory fits one page | *All 256 B is on screen at once. Install 4 KB or 8 KB and the dump gets a window to move.* |
+| Zero All Memory | machine off | *The machine is off, so there is no memory to zero.* |
+
+*Why:* a dead end with no explanation teaches nothing. Every one of
+these reasons is a fact about the machine worth knowing — how much
+memory BASIC needs, that memory is volatile, that the dump window only
+exists once there is more memory than fits on screen.
+
+*How it is kept honest:* `panel.debugControlReasons()` is the only
+place that decides, and both the greying (`panel.updateDebugControls`)
+and the message (`panel.reportIfUnavailable`) read from it. They
+cannot disagree. They did once: `ZERO ALL MEMORY` explained itself
+while `FOLLOW PC` went silent, and the window label counted up pages
+the dump was not showing. `tests/panel.test.js` checks that every
+control named there is on the page and that every reason has a
+message in every locale.
+
+### D20 — Anything that loads a program switches the machine on
+
+All four ways in — Load 4K BASIC, the example menu, Load Binary File,
+Load Data — power the machine up first if it is off. Three of them
+already did; Load Data used to refuse with *the machine is off, so the
+bytes would go nowhere*.
+
+*Why:* pressing the thing that loads should load. A refusal here is a
+dead end that costs a trip to the other tab and teaches only that the
+button was in the wrong mood. The machine coming up is not hidden —
+the OFF/ON button turns green and memory fills with the random bytes a
+real one powers up with, which is worth seeing.
+
+*The one distinction kept:* the three that load an *image* clear
+memory first and press RESET, because a tape is a fresh start.
+Load Data is a **deposit** — the DEPOSIT switch's equivalent — so it
+leaves the rest of memory alone and puts its bytes in as they are.
+
 ---
 
 ## Part 3 — The Teletype tab
