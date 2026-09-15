@@ -647,10 +647,12 @@ The Teletype tab needs roughly eight new keys in `js/l10n.js` —
 `tty-kill`, `tty-clear`, `tty-hint` — plus whatever the RAM selector
 and the memory-window controls need, across all nine locales.
 
-### D17 — Two vocabularies: the machine, and the instrument
+### D17 — Three surfaces, three voices
 
-The app has controls of two different kinds, and they should not try to
-look alike.
+The app has controls of three different kinds, and they should not try
+to look alike. The unit is the **surface**, not the individual control:
+a tab speaks in one voice throughout, so a control that is not strictly
+part of that machine still takes the voice of the tab it sits on.
 
 **The machine.** Everything on the Simulator tab stands for a switch
 that exists on a real Altair 8800. `OFF/ON`, `STOP`, `RUN`,
@@ -662,6 +664,28 @@ disabled, because a physical switch is always there to be thrown —
 throwing one on a dead machine simply does nothing, which is also true
 here.
 
+**The teletype.** The Teletype tab is uppercase too, but for a
+different reason, and this one matters: the ASR-33 had **no
+lowercase**. Sixty-four characters, capitals only. The paper is
+uppercase because the machine could not print anything else, the input
+box force-uppercases what is typed into it, and the tab exists partly
+to show that. So `CTRL-C (BREAK)`, `RUBOUT (_)`, `KILL LINE (@)` and
+`CLEAR PAPER` are uppercase, and lowercase buttons sitting under an
+uppercase paper roll would quietly contradict the lesson.
+
+These *are* translated, unlike the panel legends, and the difference is
+real rather than an oversight: `RESET` is an object being
+photographed, while `CLEAR PAPER` is an instruction about what will
+happen when you press it. Instructions translate. They stay uppercase
+because that is the device's case, not because they are legends.
+
+Two of the four are not strictly teletype controls at all — an ASR-33
+has no CLEAR PAPER button, you tear the paper off, and `KILL LINE`
+describes what `@` does rather than naming a keycap. They keep the
+uppercase anyway, by the surface rule above. `Clear Paper` standing in
+a row with `RUBOUT (_)` would be a worse inconsistency than the one it
+fixed.
+
 **The instrument.** The Debugger tab is the simulator's own tooling.
 None of it existed in 1975: there was no "load a file", no example
 menu, no memory dump you could page through. So it follows ordinary
@@ -669,13 +693,21 @@ software convention instead — **Title Case**, matching the section
 headings already there (*Load a Program*, *Installed Memory*,
 *Memory Dump*), and **translated into all nine locales**.
 
-*Why the split at all:* the two sets answer different questions. A
-panel legend answers "what is this switch called on the machine"; an
-instrument label answers "what will this do for me". Making the second
+*Why the split at all:* the sets answer different questions. A panel
+legend answers "what is this switch called on the machine"; an
+instrument label answers "what will this do for me". Making the last
 set shout in uppercase, as `LOAD 4K BASIC`, `FOLLOW PC` and
 `ZERO ALL MEMORY` used to, borrowed the machine's voice for something
 the machine never had, and left the tab reading in three different
 cases at once next to `Load Data` and `Example programs...`.
+
+*As it stands, audited:*
+
+| Tab | Case | Translated | Why |
+| --- | --- | --- | --- |
+| Simulator | UPPERCASE | no (25 of 25) | silkscreen on the panel |
+| Teletype | UPPERCASE | yes (4 of 4) | the ASR-33 had no lowercase |
+| Debugger | Title Case | yes | software the machine never had |
 
 ### D18 — Nothing in the Debugger is hidden; it greys out instead
 
