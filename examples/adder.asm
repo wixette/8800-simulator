@@ -1,6 +1,7 @@
 ;;; name: Simple adder
 ;;; desc: Adds the two bytes held at 0080H and 0081H and stores the sum
 ;;;   at 0082H, then starts over.
+;;; device: panel
 ;;;
 ;;; Load the program at 0000H, then deposit the two numbers to add at
 ;;; 0080H and 0081H. RESET and RUN, stop after a moment, then EXAMINE

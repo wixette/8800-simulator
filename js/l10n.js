@@ -396,6 +396,18 @@ l10n.MESSAGES = {
         'ko': '{name}({bytes}바이트)을 0000H에 불러오고 RESET을 눌렀습니다. 시뮬레이터 탭에서 RUN을 누르세요.',
     },
 
+    'example-loaded-tty': {
+        'en': 'Loaded {name}, {bytes} bytes, at 0000H and pressed RESET. Go to the Simulator tab, click RUN, then watch the Teletype tab.',
+        'es': 'Cargado {name}, {bytes} bytes, en 0000H y pulsado RESET. Ve a la pestaña Simulador, haz clic en RUN y luego mira la pestaña Teletipo.',
+        'fr': 'Chargé {name}, {bytes} octets, en 0000H et RESET pressé. Allez à l’onglet Simulateur, cliquez sur RUN, puis regardez l’onglet Téléscripteur.',
+        'de': '{name} geladen, {bytes} Bytes, bei 0000H, und RESET gedrückt. Gehen Sie zum Reiter Simulator, klicken Sie RUN und sehen Sie dann im Reiter Fernschreiber nach.',
+        'it': 'Caricato {name}, {bytes} byte, a 0000H e premuto RESET. Vai alla scheda Simulatore, fai clic su RUN, poi guarda la scheda Telescrivente.',
+        'zh': '已在 0000H 载入 {name}（{bytes} 字节）并按下 RESET。请到"模拟器"标签页点击 RUN，然后看"电传打字机"标签页。',
+        'zh-TW': '已在 0000H 載入 {name}（{bytes} 位元組）並按下 RESET。請到「模擬器」標籤頁點擊 RUN，然後看「電傳打字機」標籤頁。',
+        'ja': '{name}（{bytes} バイト）を 0000H に読み込み、RESET を押しました。シミュレータータブで RUN をクリックし、テレタイプタブをご覧ください。',
+        'ko': '{name}({bytes}바이트)을 0000H에 불러오고 RESET을 눌렀습니다. 시뮬레이터 탭에서 RUN을 클릭한 다음 텔레타이프 탭을 보세요.',
+    },
+
     'load-basic': {
         'en': 'Load 4K BASIC',
         'es': 'Cargar 4K BASIC',

@@ -71,7 +71,12 @@ class Dropdown {
 
     /**
      * Fills the list.
-     * @param {Array<{value: string, label: string}>} items The choices.
+     * @param {Array<{value: string, label: string,
+     *     startsGroup: (boolean|undefined)}>} items The choices. An
+     *     item marked startsGroup gets a rule above it. It is still an
+     *     ordinary item, so nothing about moving around the list
+     *     changes - a heading would have to be skipped by the arrow
+     *     keys, and a list of ten needs a seam rather than headings.
      */
     setItems(items) {
         if (!this.list) {
@@ -85,6 +90,9 @@ class Dropdown {
             item.setAttribute('tabindex', '-1');
             item.dataset.value = items[i].value;
             item.textContent = items[i].label;
+            if (items[i].startsGroup) {
+                item.className = 'dropdown-group-start';
+            }
             item.addEventListener('click', function() {
                 self.close();
                 self.onSelect(items[i].value);

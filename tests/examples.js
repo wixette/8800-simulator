@@ -32,7 +32,7 @@ function parseListing(text, id) {
     const lines = [];
     const labels = {};
     for (const raw of text.split('\n')) {
-        const header = raw.match(/^;;;\s*(name|desc):\s*(.*)$/);
+        const header = raw.match(/^;;;\s*(name|desc|device):\s*(.*)$/);
         if (header) {
             meta[header[1]] = header[2].trim();
             continue;
@@ -73,6 +73,7 @@ function parseListing(text, id) {
         id: id,
         name: meta.name,
         desc: meta.desc || '',
+        device: meta.device || '',
         org: lines.length ? lines[0].address : 0,
         lines: lines,
         labels: labels,

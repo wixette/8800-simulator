@@ -1,6 +1,7 @@
 ;;; name: ASCII table
 ;;; desc: Prints every printable ASCII character, 20H to 7EH, then
 ;;;   halts.
+;;; device: teletype
 ;;;
 ;;; Load at 0000H, RESET, then RUN, and watch the Teletype tab. The
 ;;; output is 95 characters wide and the carriage is only 72, so it

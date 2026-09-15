@@ -1,6 +1,7 @@
 ;;; name: Teletype hello
 ;;; desc: Prints HELLO, WORLD! on the teletype and halts. A message in
 ;;;   memory, walked a byte at a time.
+;;; device: teletype
 ;;;
 ;;; Load at 0000H, RESET, then RUN, and look at the Teletype tab.
 ;;;

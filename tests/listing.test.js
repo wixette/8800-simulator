@@ -37,6 +37,8 @@ test('the page reader agrees with the test reader on every example', () => {
                                example.id + ': bytes differ');
         assert.strictEqual(parsed.name, example.name,
                            example.id + ': name differs');
+        assert.strictEqual(parsed.device, example.device,
+                           example.id + ': device differs');
     }
 });
 
@@ -63,6 +65,7 @@ test('the reader ignores comments and takes only listing lines', () => {
     const parsed = Listing.parse([
         ';;; name: Something',
         ';;; desc: ignored',
+        ';;; device: panel',
         '',
         '0000  3e 01      MVI A,001H       ; a trailing comment',
         '        ; a comment lined up with the source column',
@@ -70,10 +73,46 @@ test('the reader ignores comments and takes only listing lines', () => {
         '0004  76         HLT',
     ].join('\n'));
     assert.strictEqual(parsed.name, 'Something');
+    assert.strictEqual(parsed.device, 'panel');
     assert.deepStrictEqual(parsed.bytes, [0x3e, 0x01, 0xd3, 0xff, 0x76]);
 });
 
 test('the reader returns nothing useful for a file that is not a listing', () => {
     const parsed = Listing.parse('<!doctype html>\n<p>not a program</p>\n');
     assert.strictEqual(parsed.bytes.length, 0);
+});
+
+test('every example says which face of the machine it speaks through', () => {
+    for (const example of loadExamples()) {
+        assert.ok(['panel', 'teletype'].includes(example.device),
+                  example.id + ' needs a ";;; device: panel" or' +
+                      ' ";;; device: teletype" header, so the page can' +
+                      ' say where to watch it');
+    }
+});
+
+test('the menu lists the panel programs first, then the teletype ones', () => {
+    // A teletype program watched on the front panel looks like a
+    // machine that has died, so which device a program speaks through
+    // is the first thing the order sorts by. See panel.EXAMPLES.
+    const byId = {};
+    for (const example of loadExamples()) {
+        byId[example.id] = example;
+    }
+    const devices = offeredExamples().map((id) => byId[id].device);
+    const firstTeletype = devices.indexOf('teletype');
+    assert.notStrictEqual(firstTeletype, -1, 'expected both groups');
+    assert.ok(!devices.slice(firstTeletype).includes('panel'),
+              'a panel program is listed after a teletype one: ' +
+                  devices.join(', '));
+});
+
+test('the message after loading points at the right tab', () => {
+    // The panel ones end at "click RUN"; the teletype ones have to go
+    // on and say where the output will appear.
+    const panelSource = fs.readFileSync(
+        path.join(__dirname, '..', 'js', 'panel.js'), 'utf8');
+    assert.match(panelSource,
+                 /program\.device == 'teletype' \?\s*\n\s*'example-loaded-tty' : 'example-loaded'/,
+                 'the example loader should pick its message by device');
 });

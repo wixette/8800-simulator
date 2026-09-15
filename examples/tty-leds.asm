@@ -1,6 +1,7 @@
 ;;; name: Teletype echo with LEDs
 ;;; desc: Echoes what you type and shows the character's ASCII code in
 ;;;   binary on the data LEDs at the same time.
+;;; device: teletype
 ;;;
 ;;; Load at 0000H, RESET, then RUN, and type on the Teletype tab. Press
 ;;; A and the LED repeater on that tab reads 01000001 - the letter A is

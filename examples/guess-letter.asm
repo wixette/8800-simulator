@@ -1,6 +1,7 @@
 ;;; name: Guess my letter
 ;;; desc: The machine picks a letter and tells you whether yours is
 ;;;   higher or lower, counting how many tries it takes you.
+;;; device: teletype
 ;;;
 ;;; Load at 0000H, RESET, then RUN, and play on the Teletype tab. It
 ;;; asks for a key to start, then prompts with "?" until you find the
