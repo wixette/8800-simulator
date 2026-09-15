@@ -13,16 +13,19 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  *
- * @fileoverview MITS 88-SIO serial interface board.
+ * @fileoverview MITS 88-SIO and 88-2SIO serial interface boards.
  */
 
 
 /**
- * The 88-SIO board, the thing a terminal plugged into.
+ * A MITS serial interface board, the thing a terminal plugged into.
  *
  * It answers two ports: a status port, and a data port one above it.
- * The status bits are active low - a zero means ready - which is the
- * detail that catches everyone out. MITS 4K BASIC drives it like this:
+ * The same class covers both boards the Altair's software expects,
+ * because they differ only in where they sit and which way up they
+ * report: the 88-SIO at 00h/01h is active low - a zero means ready -
+ * and the 88-2SIO at 10h/11h is the usual way round. MITS 4K BASIC
+ * drives the 88-SIO like this:
  *
  *     IN 00H / ANI 01H / JNZ back    ; wait for a character to arrive
  *     IN 01H                         ; read it
@@ -39,15 +42,24 @@ class Sio {
      * @param {function(number)?} onTx Called with each byte the CPU
      *     sends, as the CPU wrote it. The eighth bit is left alone;
      *     masking it off is the printer's business, not the board's.
+     * @param {Array<number>=} rx An input queue to share with another
+     *     board, so that one terminal can be wired to two slots at
+     *     once. Without it the board gets a queue of its own.
      */
-    constructor(onTx) {
+    constructor(onTx, rx) {
         /**
          * Characters typed but not yet read by the CPU.
          * @type {Array<number>}
          */
-        this.rx = [];
+        this.rx = rx || [];
         this.onTx = onTx || null;
         this.basePort = Sio.BASE_PORT;
+        /**
+         * Whether a clear status bit means ready. True for the 88-SIO,
+         * false for the 88-2SIO, whose 6850 reports the other way up.
+         * @type {boolean}
+         */
+        this.activeLow = true;
     }
 
     /**
@@ -55,10 +67,13 @@ class Sio {
      * @param {Sim8800} sim The simulator.
      * @param {number=} basePort The status port; the data port is the
      *     next one up. The 88-SIO sits at 00h, the 88-2SIO at 10h.
+     * @param {boolean=} activeLow Whether a clear status bit means
+     *     ready. The 88-SIO says yes, the 88-2SIO says no.
      * @return {Sio} This board, for chaining.
      */
-    attachTo(sim, basePort = Sio.BASE_PORT) {
+    attachTo(sim, basePort = Sio.BASE_PORT, activeLow = true) {
         this.basePort = basePort;
+        this.activeLow = activeLow;
         sim.attachDevice(basePort, this);
         sim.attachDevice(basePort + 1, this);
         return this;
@@ -90,18 +105,24 @@ class Sio {
     }
 
     /**
-     * Reads the status port. Active low: a clear bit means ready.
-     * Only the two bits software actually tests are modelled.
+     * Reads the status port.
+     *
+     * The two boards report the opposite way up. On the 88-SIO a clear
+     * bit means ready, so "no input" is set when nothing is waiting
+     * and the transmit-busy bit stays clear because nothing here is
+     * ever slower than the CPU. On the 88-2SIO, whose 6850 ACIA is the
+     * usual way round, a set bit means ready. Only the bits software
+     * actually tests are modelled.
      * @return {number} The status byte.
      */
     readStatus() {
-        var status = 0;
-        if (this.rx.length == 0) {
-            status |= Sio.STATUS_NO_INPUT;
+        if (this.activeLow) {
+            // Nothing here is ever slower than the CPU, so
+            // STATUS_OUTPUT_BUSY stays clear.
+            return this.rx.length ? 0 : Sio.STATUS_NO_INPUT;
         }
-        // Nothing here is ever slower than the CPU, so the transmitter
-        // is always ready and STATUS_OUTPUT_BUSY stays clear.
-        return status;
+        return (this.rx.length ? Sio.STATUS_2SIO_INPUT_READY : 0) |
+            Sio.STATUS_2SIO_OUTPUT_READY;
     }
 
     /**
@@ -162,6 +183,25 @@ Sio.STATUS_NO_INPUT = 0x01;
  * @type {number}
  */
 Sio.STATUS_OUTPUT_BUSY = 0x80;
+
+/**
+ * The 88-2SIO's status port. Selected by raising sense switch A11,
+ * which MITS BASIC reads at startup. See docs/ms-basic-4k.md.
+ * @type {number}
+ */
+Sio.TWO_SIO_BASE_PORT = 0x10;
+
+/**
+ * 88-2SIO status bit that is SET when a character is waiting.
+ * @type {number}
+ */
+Sio.STATUS_2SIO_INPUT_READY = 0x01;
+
+/**
+ * 88-2SIO status bit that is SET when the transmitter is ready.
+ * @type {number}
+ */
+Sio.STATUS_2SIO_OUTPUT_READY = 0x02;
 
 // Exports the class for unit tests when running in Node.js. This has
 // no effect when the script is loaded in a browser.

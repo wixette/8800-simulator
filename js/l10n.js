@@ -841,15 +841,15 @@ l10n.MESSAGES = {
     },
 
     'basic-4': {
-        'en': 'Check that the address switches A15-A8 are all down. BASIC reads them at startup to decide which terminal board to talk to, and down means the 88-SIO the Teletype tab is wired to.',
-        'es': 'Comprueba que los interruptores A15-A8 estén todos abajo. BASIC los lee al arrancar para decidir con qué placa de terminal hablar, y abajo significa la 88-SIO a la que está conectada la pestaña Teletipo.',
-        'fr': 'Vérifiez que les interrupteurs A15-A8 sont tous en bas. BASIC les lit au démarrage pour choisir la carte de terminal, et en bas désigne la 88-SIO à laquelle l\'onglet Téléscripteur est reliée.',
-        'de': 'Prüfen Sie, dass die Schalter A15-A8 alle unten stehen. BASIC liest sie beim Start, um die Terminalkarte zu wählen; unten bedeutet die 88-SIO, an der der Fernschreiber-Tab hängt.',
-        'it': 'Controlla che gli interruttori A15-A8 siano tutti abbassati. BASIC li legge all’avvio per scegliere la scheda del terminale, e abbassati significa la 88-SIO a cui è collegata la scheda Telescrivente.',
-        'zh': '确认地址开关 A15-A8 全部向下。BASIC 启动时会读取它们来决定和哪块终端板通信，向下就是“电传打字机”标签页所接的 88-SIO。',
-        'zh-TW': '確認位址開關 A15-A8 全部向下。BASIC 啟動時會讀取它們來決定和哪塊終端板通訊，向下就是「電傳打字機」標籤頁所接的 88-SIO。',
-        'ja': 'アドレススイッチ A15-A8 がすべて下がっていることを確認します。BASIC は起動時にこれを読んで、どの端末ボードと話すかを決めます。下はテレタイプタブがつながっている 88-SIO です。',
-        'ko': '주소 스위치 A15-A8이 모두 내려가 있는지 확인하세요. BASIC은 시작할 때 이 스위치를 읽어 어떤 터미널 보드와 통신할지 정하며, 내려간 상태가 텔레타이프 탭이 연결된 88-SIO입니다.',
+        'en': 'The address switches A15-A8 tell BASIC which terminal board to use: all down is the 88-SIO at ports 00H and 01H, switch A11 up is the 88-2SIO at 10H and 11H. The teletype here is wired to both slots, so either setting works - a real Altair would have had only one of the two boards fitted, and the wrong setting left it silent.',
+        'es': 'Los interruptores A15-A8 le dicen a BASIC qué placa de terminal usar: todos abajo es la 88-SIO en los puertos 00H y 01H, el interruptor A11 arriba es la 88-2SIO en 10H y 11H. Aquí el teletipo está conectado a ambas ranuras, así que cualquiera de las dos funciona; un Altair real solo llevaba una de las dos placas, y el ajuste equivocado lo dejaba mudo.',
+        'fr': 'Les interrupteurs A15-A8 indiquent à BASIC quelle carte de terminal utiliser : tous en bas désigne la 88-SIO aux ports 00H et 01H, l\'interrupteur A11 en haut la 88-2SIO en 10H et 11H. Ici le téléscripteur est relié aux deux emplacements, donc les deux réglages fonctionnent ; un vrai Altair n\'avait qu\'une des deux cartes, et le mauvais réglage le laissait muet.',
+        'de': 'Die Adressschalter A15-A8 sagen BASIC, welche Terminalkarte es benutzen soll: alle unten heißt die 88-SIO auf den Ports 00H und 01H, Schalter A11 oben die 88-2SIO auf 10H und 11H. Der Fernschreiber hängt hier an beiden Steckplätzen, also funktioniert jede Einstellung - ein echter Altair hatte nur eine der beiden Karten, und die falsche Einstellung ließ ihn stumm.',
+        'it': 'Gli interruttori A15-A8 dicono a BASIC quale scheda terminale usare: tutti abbassati è la 88-SIO sulle porte 00H e 01H, l’interruttore A11 alzato è la 88-2SIO su 10H e 11H. Qui la telescrivente è collegata a entrambi gli slot, quindi funzionano entrambe le impostazioni; un Altair vero montava una sola delle due schede, e l’impostazione sbagliata lo lasciava muto.',
+        'zh': '地址开关 A15-A8 告诉 BASIC 该用哪块终端板：全部向下是端口 00H 和 01H 上的 88-SIO，A11 向上则是 10H 和 11H 上的 88-2SIO。这里的电传打字机同时接在两个插槽上，所以两种设置都能用——真正的 Altair 只会装其中一块，设错了机器就哑了。',
+        'zh-TW': '位址開關 A15-A8 告訴 BASIC 該用哪塊終端卡：全部向下是連接埠 00H 和 01H 上的 88-SIO，A11 向上則是 10H 和 11H 上的 88-2SIO。這裡的電傳打字機同時接在兩個插槽上，所以兩種設定都能用——真正的 Altair 只會裝其中一塊，設錯了機器就啞了。',
+        'ja': 'アドレススイッチ A15-A8 は、BASIC がどの端末ボードを使うかを決めます。すべて下ならポート 00H と 01H の 88-SIO、A11 を上げれば 10H と 11H の 88-2SIO です。ここではテレタイプが両方のスロットにつながっているのでどちらの設定でも動きますが、本物の Altair はどちらか一方しか挿さっておらず、設定を間違えると黙り込みました。',
+        'ko': '주소 스위치 A15-A8은 BASIC이 어느 터미널 보드를 쓸지 정합니다. 모두 내리면 포트 00H와 01H의 88-SIO, A11을 올리면 10H와 11H의 88-2SIO입니다. 여기서는 텔레타이프가 두 슬롯 모두에 연결되어 있어 어느 쪽으로 설정해도 동작하지만, 실제 Altair에는 둘 중 하나만 꽂혀 있어 설정을 잘못하면 아무 반응이 없었습니다.',
     },
 
     'basic-5': {

@@ -56,14 +56,59 @@ test('the board answers two ports, status then data', () => {
     assert.deepStrictEqual(sent, [0x21], 'control writes print nothing');
 });
 
-test('the board can be strapped to the 2SIO ports instead', () => {
+test('the 2SIO reports the opposite way up', () => {
+    const sio = new Sio();
+    sio.activeLow = false;
+    // Nothing typed: the "input ready" bit is CLEAR, and the
+    // transmitter is always ready.
+    assert.strictEqual(sio.readStatus() & Sio.STATUS_2SIO_INPUT_READY, 0);
+    assert.strictEqual(sio.readStatus() & Sio.STATUS_2SIO_OUTPUT_READY,
+                       Sio.STATUS_2SIO_OUTPUT_READY);
+    sio.receive(0x41);
+    assert.strictEqual(sio.readStatus() & Sio.STATUS_2SIO_INPUT_READY,
+                       Sio.STATUS_2SIO_INPUT_READY);
+    assert.strictEqual(sio.readData(), 0x41);
+});
+
+test('a 2SIO can be strapped at 10h/11h', () => {
     const {sim} = simWithSio();
     const sio = new Sio();
-    sio.attachTo(sim, 0x10);
+    sio.attachTo(sim, Sio.TWO_SIO_BASE_PORT, false);
     sio.receive(0x5a);
     const read = sim.getReadPortCallback();
-    assert.strictEqual(read(0x10) & Sio.STATUS_NO_INPUT, 0);
+    assert.strictEqual(read(0x10) & Sio.STATUS_2SIO_INPUT_READY,
+                       Sio.STATUS_2SIO_INPUT_READY);
     assert.strictEqual(read(0x11), 0x5a);
+});
+
+test('two boards can share one keyboard and one printer', () => {
+    const fixture = createSim(256);
+    fixture.sim.powerOn();
+    flushTimers();
+    fixture.sim.initMem(false);
+    const printed = [];
+    const sio = new Sio((b) => printed.push(b));
+    sio.attachTo(fixture.sim, Sio.BASE_PORT, true);
+    const sio2 = new Sio((b) => printed.push(b), sio.rx);
+    sio2.attachTo(fixture.sim, Sio.TWO_SIO_BASE_PORT, false);
+
+    // One key press is readable from whichever board software picks,
+    // and once read it is gone from both.
+    sio.receiveText('Q');
+    const read = fixture.sim.getReadPortCallback();
+    assert.strictEqual(read(0x00) & Sio.STATUS_NO_INPUT, 0,
+                       'the 88-SIO sees it');
+    assert.strictEqual(read(0x10) & Sio.STATUS_2SIO_INPUT_READY,
+                       Sio.STATUS_2SIO_INPUT_READY, 'so does the 2SIO');
+    assert.strictEqual(read(0x11), 0x51, 'the 2SIO takes it');
+    assert.strictEqual(read(0x00) & Sio.STATUS_NO_INPUT, Sio.STATUS_NO_INPUT,
+                       'and the 88-SIO no longer has it');
+
+    // Either board prints to the same paper.
+    const write = fixture.sim.getWritePortCallback();
+    write(0x01, 0x41);
+    write(0x11, 0x42);
+    assert.deepStrictEqual(printed, [0x41, 0x42]);
 });
 
 test('a program echoes what is typed, through the real CPU', () => {

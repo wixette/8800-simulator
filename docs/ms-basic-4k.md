@@ -479,9 +479,19 @@ existing `tests/fixture.js` already works.
 `writeData()`. Active-low status per
 [1.3](#13-how-basic-talks-to-the-machine). No DOM.
 
-The 88-2SIO at `10h`/`11h` (active-high) is nearly free once the
-device table exists, and makes the other sense-switch settings work.
-Worth adding, low priority.
+**Both boards are fitted.** The same class serves the 88-2SIO at
+`10h`/`11h`, whose 6850 reports the opposite way up — a *set* bit means
+ready — selected by `attachTo(sim, Sio.TWO_SIO_BASE_PORT, false)`. The
+teletype is wired to both slots and the two boards share one key queue,
+since there is one keyboard, so whichever board software picks it
+answers.
+
+That is a deliberate departure from the hardware: a real Altair had one
+of the two boards fitted, and choosing the other in the sense switches
+left the machine silent. Here, raising switch A11 moves BASIC from
+`00h`/`01h` to `10h`/`11h` and it keeps working — which turns a
+mysterious dead machine into something a student can watch happen. The
+tutorial says as much rather than pretending otherwise.
 
 ### D8 — The Teletype is its own tab
 
@@ -851,9 +861,7 @@ Phase 1 is worth doing whatever we decide about BASIC.
 
 ## Part 7 — Open questions
 
-1. Whether to add the 88-2SIO at `10h`/`11h` in Phase 3 or later
-   ([D7](#d7--an-88-sio-device-on-ports-00h01h)).
-2. **The clock rate, noted but deliberately out of scope.**
+1. **The clock rate, noted but deliberately out of scope.**
    `panel.js` constructs `Sim8800` with `1000000 /* 1MHz */`, but the
    Altair 8800's 8080 ran at 2 MHz, which is what s2js uses. BASIC
    would boot in 0.46 s rather than ~0.9 s. This is not a blocker —
@@ -878,6 +886,10 @@ Phase 1 is worth doing whatever we decide about BASIC.
   a second benefit: the memory map is a few lines below, so clicking
   LOAD 4K BASIC shows you BASIC filling fifteen of the sixteen pages
   of a 4 KB machine before anything has run.
+- **Whether to build the 88-2SIO.** Built. Both boards are fitted and
+  share one teletype, so either sense-switch setting works instead of
+  one of them leaving the machine silent. See
+  [D7](#d7--an-88-sio-device-on-ports-00h01h).
 - **Paper tint.** Tinted, `#e8e2d0`. Next to the app's other panels it
   reads immediately as a physical device rather than a screen, which is
   the point of the tab, and it costs one hex value.

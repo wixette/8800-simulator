@@ -111,11 +111,11 @@ test('4K BASIC does arithmetic and the maths functions', {skip: SKIP}, () => {
     assert.match(text, /1\.41421/);
 });
 
-test('the sense switches choose the board (issue if left up)',
+test('with only an 88-SIO, raising A11 leaves the machine silent',
      {skip: SKIP}, () => {
-         // 08h is switch A11 up, which sends BASIC to the 88-2SIO at
-         // 10h/11h instead - so the 88-SIO sees nothing and the boot
-         // never reaches its first prompt.
+         // 0800h is sense switch A11 up, which sends BASIC to the
+         // 88-2SIO at 10h/11h. A machine with only the 88-SIO fitted
+         // has nothing there, so the boot never reaches a prompt.
          const {sim, state} = createSim(8192, 2000000);
          const tty = new Teletype();
          new Sio((byte) => tty.write(byte)).attachTo(sim);
@@ -128,6 +128,43 @@ test('the sense switches choose the board (issue if left up)',
          sim.step(2000000);
          assert.strictEqual(tty.getText(), '',
                             'nothing should reach the 88-SIO');
+     });
+
+test('with both boards fitted, either sense switch setting works',
+     {skip: SKIP}, () => {
+         // What the simulator actually offers: the teletype is wired
+         // to both slots, so whichever board BASIC picks, it answers.
+         for (const [switches, board] of [[0x0000, '88-SIO'],
+                                          [0x0800, '88-2SIO']]) {
+             const {sim, state} = createSim(8192, 2000000);
+             const tty = new Teletype();
+             const sio = new Sio((byte) => tty.write(byte));
+             sio.attachTo(sim, Sio.BASE_PORT, true);
+             new Sio((byte) => tty.write(byte), sio.rx)
+                 .attachTo(sim, Sio.TWO_SIO_BASE_PORT, false);
+             sim.powerOn();
+             flushTimers();
+             state.inputWord = switches;
+             sim.loadData(0, Array.from(fs.readFileSync(ROM_PATH)));
+             sim.reset();
+             flushTimers();
+
+             let next = 0, idle = 0, printed = -1;
+             const script = ['', '', 'Y', 'PRINT 6*7'];
+             for (let tick = 0; tick < 200000; tick++) {
+                 sim.step(4000);
+                 const now = tty.getText().length;
+                 if (now !== printed) { printed = now; idle = 0; continue; }
+                 if (++idle < 25 || sio.rx.length) continue;
+                 if (next === script.length) break;
+                 sio.receiveText(script[next++] + '\r');
+                 idle = 0;
+             }
+             assert.match(tty.getText(), /4823 BYTES FREE/,
+                          'BASIC should boot on the ' + board);
+             assert.match(tty.getText().split('PRINT 6\*7')[1] || '', /42/,
+                          'and answer on the ' + board);
+         }
      });
 
 test('RESET and RUN warm starts BASIC, keeping the program',
