@@ -646,11 +646,66 @@ panel.dumpMemCallback = function(dumpHtml) {
 };
 
 /**
- * Deposites data into MEM directly in debug panel.
+ * Turns the text of the hex box into bytes.
+ *
+ * @param {string} text What the reader typed or pasted.
+ * @return {{bytes: (Array<number>|undefined), error: (string|undefined),
+ *     params: (Object|undefined)}} The bytes, or the l10n id of what is
+ *     wrong with the text and the values that message needs.
+ */
+panel.parseBytes = function(text) {
+    // Splits on any run of whitespace or commas, so a block pasted out
+    // of the documentation arrives intact whatever it is separated by.
+    var tokens = text.trim().split(/[\s,]+/);
+    var bytes = [];
+    for (let i = 0; i < tokens.length; i++) {
+        let token = tokens[i];
+        if (!/^[0-9a-fA-F]+$/.test(token)) {
+            return {error: 'load-data-bad', params: {text: token}};
+        }
+        if (token.length > 2 && token.length % 2) {
+            return {error: 'load-data-odd', params: {text: token}};
+        }
+        // A longer run of hex digits is simply several bytes running
+        // together. That covers a listing copied out of the
+        // documentation: a one line input box drops the newlines out of
+        // a paste, so "3e 8c\nd3 ff" arrives as "3e 8cd3 ff", and
+        // rejecting it would be blaming the reader for the box.
+        for (let j = 0; j < token.length; j += 2) {
+            bytes.push(parseInt(token.substr(j, 2), 16));
+        }
+    }
+    return {bytes: bytes};
+};
+
+/**
+ * Reads the hex box and puts those bytes at 0000H, saying in the status
+ * bar what happened. Every way this can fail used to fail in silence.
  */
 panel.debugLoadData = function() {
-    var data = document.getElementById("debug-data-input").value;
-    panel.sim.loadDataAsHexString(0, data);
+    var text = document.getElementById('debug-data-input').value.trim();
+    if (!text) {
+        panel.setStatus('load-data-empty', {}, 'warn');
+        return;
+    }
+    if (!panel.sim.isPoweredOn) {
+        // The bytes would go nowhere.
+        panel.setStatus('load-data-off', {}, 'warn');
+        return;
+    }
+    var parsed = panel.parseBytes(text);
+    if (parsed.error) {
+        panel.setStatus(parsed.error, parsed.params, 'error');
+        return;
+    }
+    if (parsed.bytes.length > panel.sim.mem.length) {
+        panel.setStatus('load-data-too-long',
+                        {bytes: parsed.bytes.length,
+                         size: panel.sim.mem.length}, 'error');
+        return;
+    }
+    panel.sim.loadData(0, parsed.bytes);
+    panel.setStatus('load-data-loaded', {bytes: parsed.bytes.length});
 };
 
 /**
