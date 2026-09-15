@@ -1194,83 +1194,21 @@ l10n.setLocale = function(locale) {
  * they are told.
  */
 l10n.initMenu = function() {
-    const button = document.getElementById('switch-locale');
-    const list = document.getElementById('locale-list');
-    if (!button || !list) {
-        return;
-    }
-
-    for (const locale of l10n.LOCALES) {
-        const item = document.createElement('li');
-        item.setAttribute('role', 'option');
-        item.setAttribute('tabindex', '-1');
-        item.dataset.locale = locale;
-        item.textContent = l10n.LOCALE_NAMES[locale] || locale;
-        item.addEventListener('click', function() {
-            l10n.setLocale(locale);
-            l10n.closeMenu();
-        }, false);
-        list.appendChild(item);
-    }
-
-    button.addEventListener('click', function(event) {
-        event.stopPropagation();
-        if (list.hidden) {
-            l10n.openMenu();
-        } else {
-            l10n.closeMenu();
-        }
-    }, false);
-
-    // Anywhere else on the page dismisses it.
-    document.addEventListener('click', function(event) {
-        if (!list.hidden && !document.getElementById('locale-menu')
-                .contains(event.target)) {
-            l10n.closeMenu();
-        }
-    }, false);
-
-    // The keys a native menu would have handled by itself.
-    document.addEventListener('keydown', function(event) {
-        if (list.hidden) {
-            return;
-        }
-        const items = Array.from(list.children);
-        const at = items.indexOf(document.activeElement);
-        if (event.key === 'Escape' || event.key === 'Tab') {
-            l10n.closeMenu();
-        } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-            event.preventDefault();
-            const step = event.key === 'ArrowDown' ? 1 : -1;
-            const next = (at < 0 ? 0 : at + step + items.length) % items.length;
-            items[next].focus();
-        } else if (event.key === 'Enter' || event.key === ' ') {
-            if (at >= 0) {
-                event.preventDefault();
-                l10n.setLocale(items[at].dataset.locale);
-                l10n.closeMenu();
-            }
-        }
-    }, false);
+    l10n.menu = new Dropdown('locale-menu', function(locale) {
+        l10n.setLocale(locale);
+    });
+    l10n.menu.setItems(l10n.LOCALES.map(function(locale) {
+        return {value: locale, label: l10n.LOCALE_NAMES[locale] || locale};
+    }));
 };
 
-/** Opens the language menu, with the current locale focused. */
-l10n.openMenu = function() {
-    const button = document.getElementById('switch-locale');
-    const list = document.getElementById('locale-list');
-    list.hidden = false;
-    button.setAttribute('aria-expanded', 'true');
-    const current = list.querySelector('[aria-selected="true"]');
-    (current || list.firstElementChild).focus();
-};
-
-/** Closes the language menu and puts focus back on the button. */
+/**
+ * Closes the language menu, if it is open.
+ */
 l10n.closeMenu = function() {
-    const button = document.getElementById('switch-locale');
-    const list = document.getElementById('locale-list');
-    list.hidden = true;
-    button.setAttribute('aria-expanded', 'false');
-    button.focus();
+    if (l10n.menu) {
+        l10n.menu.close();
+    }
 };
 
 /**
@@ -1319,16 +1257,9 @@ l10n.updateMessages = function() {
     document.documentElement.lang = locale;
 
     // Keep the language menu showing what is actually selected.
-    const current = document.getElementById('locale-current');
-    if (current) {
-        current.textContent = l10n.LOCALE_NAMES[locale] || locale;
-    }
-    const list = document.getElementById('locale-list');
-    if (list) {
-        for (const item of list.children) {
-            item.setAttribute(
-                'aria-selected', item.dataset.locale === locale ? 'true' : 'false');
-        }
+    if (l10n.menu) {
+        l10n.menu.setLabel(l10n.LOCALE_NAMES[locale] || locale);
+        l10n.menu.setSelected(locale);
     }
 
     elems = document.getElementsByClassName('l10n');
