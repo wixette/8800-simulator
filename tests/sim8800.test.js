@@ -155,6 +155,38 @@ test('reset stops the CPU and resets PC to 0', () => {
     assert.ok(state.cpuDump.includes('PC = 0000'));
 });
 
+test('reset clears the program counter and leaves the registers', () => {
+    const {sim} = poweredOnSim();
+    // MVI A,12h / MVI B,34h / LXI SP,0080h
+    sim.loadDataAsHexString(0, '3e 12 06 34 31 80 00');
+    sim.step(40);
+    assert.strictEqual(CPU8080.status().a, 0x12);
+    assert.strictEqual(CPU8080.status().sp, 0x0080);
+
+    sim.reset();
+    const cpu = CPU8080.status();
+    // The 8080's RESET line clears the program counter, and nothing
+    // else. Software depends on it: MITS BASIC's warm start assumes
+    // the stack pointer survived.
+    assert.strictEqual(cpu.pc, 0);
+    assert.strictEqual(cpu.a, 0x12, 'A should survive RESET');
+    assert.strictEqual(cpu.b, 0x34, 'B should survive RESET');
+    assert.strictEqual(cpu.sp, 0x0080, 'SP should survive RESET');
+});
+
+test('powering on clears the CPU, unlike RESET', () => {
+    const {sim} = poweredOnSim();
+    sim.loadDataAsHexString(0, '3e 12 06 34 31 80 00');
+    sim.step(40);
+    sim.powerOff();
+    sim.powerOn();
+    flushTimers();
+    const cpu = CPU8080.status();
+    assert.strictEqual(cpu.a, 0);
+    assert.strictEqual(cpu.b, 0);
+    assert.strictEqual(cpu.sp, 0);
+});
+
 test('step shows PC on the address LEDs for ordinary programs', () => {
     const {sim, state} = poweredOnSim();
     sim.loadDataAsHexString(0, '00 00');  // Two NOPs, 8 cycles.

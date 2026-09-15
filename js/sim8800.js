@@ -550,6 +550,9 @@ class Sim8800 {
     powerOn() {
         this.isPoweredOn = true;
         this.initMem();
+        // A cold machine: clear the whole CPU, which reset() below
+        // deliberately does not do.
+        CPU8080.reset();
         this.reset();
         if (this.setStatusLedsCallback) {
             this.setStatusLedsCallback(true);
@@ -590,7 +593,29 @@ class Sim8800 {
     reset() {
         if (!this.isPoweredOn)
             return;
+        // The 8080's RESET line clears the program counter and the
+        // interrupt enable. It does NOT clear the registers, and that
+        // is not a detail: MITS BASIC patches the jump at 0000H to
+        // point at its warm start once it has finished initialising,
+        // so RESET and RUN brings back OK with your program intact
+        // rather than asking MEMORY SIZE? again - and that warm start
+        // assumes the stack pointer is still where it left it. Clear
+        // SP here and the first PUSH lands in unpopulated memory and
+        // BASIC never reaches its prompt.
+        //
+        // The CPU core's reset() clears everything, so put the
+        // registers back afterwards. powerOn() does the full clear.
+        var cpu = CPU8080.status();
         CPU8080.reset();
+        CPU8080.set('A', cpu.a);
+        CPU8080.set('B', cpu.b);
+        CPU8080.set('C', cpu.c);
+        CPU8080.set('D', cpu.d);
+        CPU8080.set('E', cpu.e);
+        CPU8080.set('F', cpu.f);
+        CPU8080.set('H', cpu.h);
+        CPU8080.set('L', cpu.l);
+        CPU8080.set('SP', cpu.sp);
         this.stop();
         this.lastAddress = 0;
         if (this.setAddressLedsCallback) {

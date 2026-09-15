@@ -130,6 +130,53 @@ test('the sense switches choose the board (issue if left up)',
                             'nothing should reach the 88-SIO');
      });
 
+test('RESET and RUN warm starts BASIC, keeping the program',
+     {skip: SKIP}, () => {
+         const {sim, state} = createSim(4096, 2000000);
+         const tty = new Teletype();
+         const sio = new Sio((byte) => tty.write(byte));
+         sio.attachTo(sim);
+         sim.powerOn();
+         flushTimers();
+         state.inputWord = 0;
+         sim.loadData(0, Array.from(fs.readFileSync(ROM_PATH)));
+         sim.reset();
+         flushTimers();
+
+         const drive = (script) => {
+             let next = 0, idle = 0, printed = -1;
+             for (let tick = 0; tick < 200000; tick++) {
+                 sim.step(4000);
+                 const now = tty.getText().length;
+                 if (now !== printed) { printed = now; idle = 0; continue; }
+                 if (++idle < 25 || sio.rx.length) continue;
+                 if (next === script.length) break;
+                 sio.receiveText(script[next++] + '\r');
+                 idle = 0;
+             }
+         };
+
+         drive(['', '', 'Y', '10 PRINT "KEPT"']);
+         assert.match(tty.getText(), /727 BYTES FREE/);
+
+         // Once BASIC has initialised it rewrites the jump at 0000H to
+         // point at its warm start instead of its cold start, so the
+         // front panel's RESET and RUN comes back to OK rather than
+         // asking MEMORY SIZE? again - and the program is still there.
+         assert.notStrictEqual(sim.mem[2] | (sim.mem[3] << 8), 0x0d21,
+                               'BASIC should have patched its restart vector');
+         tty.clear();
+         sim.reset();
+         flushTimers();
+         drive(['LIST']);
+
+         const out = tty.getText();
+         assert.match(out, /OK/, 'the warm start should reach its prompt');
+         assert.ok(!/MEMORY SIZE/.test(out),
+                   'a warm start must not ask the questions again');
+         assert.match(out, /10 PRINT "KEPT"/, 'the program should survive');
+     });
+
 test('Control-C breaks out of a running program', {skip: SKIP}, () => {
     const {sim, state} = createSim(8192, 2000000);
     const tty = new Teletype();
