@@ -861,14 +861,7 @@ Phase 1 is worth doing whatever we decide about BASIC.
 
 ## Part 7 — Open questions
 
-1. **The clock rate, noted but deliberately out of scope.**
-   `panel.js` constructs `Sim8800` with `1000000 /* 1MHz */`, but the
-   Altair 8800's 8080 ran at 2 MHz, which is what s2js uses. BASIC
-   would boot in 0.46 s rather than ~0.9 s. This is not a blocker —
-   but changing it would also change the speed of every existing
-   example, including the Kill the Bit timing that
-   [kill-the-bit.md](kill-the-bit.md) describes as authentic. Decide it
-   on its own, not as a side effect of this work.
+*None.*
 
 ### Closed
 
@@ -886,6 +879,15 @@ Phase 1 is worth doing whatever we decide about BASIC.
   a second benefit: the memory map is a few lines below, so clicking
   LOAD 4K BASIC shows you BASIC filling fifteen of the sixteen pages
   of a 4 KB machine before anything has run.
+- **The clock rate.** Now **2 MHz**, which is what the Altair's 8080
+  was clocked at; it had been 1 MHz, so everything ran at half speed.
+  Measured consequences: BASIC reaches `OK` in 0.46 s rather than
+  0.93 s, and Kill the Bit advances its bit every 0.115 s rather than
+  0.231 s. The documentation that called 0.23 s "authentic" was simply
+  wrong and has been corrected — `docs/kill-the-bit.md`,
+  `examples/kill-the-bit.md` and the header of
+  `examples/pattern-shift.asm`. No test depended on absolute timing,
+  and the examples that describe their speed do so relatively.
 - **Whether to build the 88-2SIO.** Built. Both boards are fitted and
   share one teletype, so either sense-switch setting works instead of
   one of them leaving the machine silent. See

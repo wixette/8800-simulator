@@ -48,10 +48,14 @@ program, the LEDs show PC exactly as before.
 
 In addition, the clock ticker now computes each batch from the wall
 time elapsed since the previous tick instead of a fixed 1 ms quantum.
-Browsers clamp nested `setTimeout` to ~4 ms, which made the "1 MHz"
-CPU effectively run at ~250 kHz, so the bit crawled four times slower
-than on real hardware. With the fix the game plays at its authentic
-speed (the bit advances roughly every 0.23 s).
+Browsers clamp nested `setTimeout` to ~4 ms, which made the simulated
+CPU effectively run at a quarter of its nominal rate, so the bit
+crawled four times slower than it should.
+
+(The simulator ran at 1 MHz when this was written, and the bit advanced
+about every 0.23 s. It now runs at 2 MHz, which is the rate the real
+Altair's 8080 was clocked at, so the bit advances about every 0.115 s —
+twice as fast, and the speed the game was actually played at.)
 
 All other panel features (EXAMINE / DEPOSIT / RESET / single step,
 port I/O, the debugger dumps, both `index.html` and `text-mode.html`)
