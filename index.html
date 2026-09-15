@@ -200,114 +200,91 @@
           <div id="tutorial-title" class="l10n">Quick Tutorial</div>
         </div>
         <div class="tutorial">
-          <p>
-            <ul>
-              <li><span id="tutorial-desc" class="l10n">How to input and run the following program to calculate 1 + 2 = 3:</span></li>
-            </ul>
-          </p>
-          <pre>
-        LDA 0080H  ; 00 111 010
-                   ; 10 000 000
-                   ; 00 000 000
-        MOV B,A    ; 01 000 111
-        LDA 0081H  ; 00 111 010
-                   ; 10 000 001
-                   ; 00 000 000
-        ADD B      ; 10 000 000
-        STA 0082H  ; 00 110 010
-                   ; 10 000 010
-                   ; 00 000 000
-        JMP 0000H  ; 11 000 011
-                   ; 00 000 000
-                   ; 00 000 000</pre>
-          <p>
-            <ol>
-              <li><span id="tutorial-1" class="l10n">Turn on Altair 8800 by clicking OFF/ON switch.</span></li>
-              <li><span id="tutorial-2" class="l10n">Set switches A7-A0 to 00 111 010 (up for 1, down for 0).</span></li>
-              <li><span id="tutorial-3" class="l10n">Click "DEPOSIT".</span></li>
-              <li><span id="tutorial-4" class="l10n">Set switches A7-A0 to 10 000 000.</span></li>
-              <li><span id="tutorial-5" class="l10n">Click "DEPOSIT NEXT".</span></li>
-              <li><span id="tutorial-6" class="l10n">Repeat step 4-5 to input the following bytes one by one: 00 000 000, 01 000 111, 00 111 010, 10 000 001, 00 000 000, 10 000 000, 00 110 010, 10 000 010, 00 000 000, 11 000 011, 00 000 000, 00 000 000.</span></li>
-              <li><span id="tutorial-7" class="l10n">Set switches A7-A0 to 10 000 000.</span></li>
-              <li><span id="tutorial-8" class="l10n">Click "EXAMINE".</span></li>
-              <li><span id="tutorial-9" class="l10n">Set switches A7-A0 to 00 000 001 (the first number to be added, or 1 in decimal).</span></li>
-              <li><span id="tutorial-10" class="l10n">Click "DEPOSIT".</span></li>
-              <li><span id="tutorial-11" class="l10n">Set switches A7-A0 to 00 000 010 (the second number to be added, or 2 in decimal).</span></li>
-              <li><span id="tutorial-12" class="l10n">Click "DEPOSIT NEXT".</span></li>
-              <li><span id="tutorial-13" class="l10n">Click "RESET".</span></li>
-              <li><span id="tutorial-14" class="l10n">Click "RUN" and wait for a few seconds.</span></li>
-              <li><span id="tutorial-15" class="l10n">Click "STOP".</span></li>
-              <li><span id="tutorial-16" class="l10n">Set switches A7-A0 to 10 000 010 (the address that holds the sum).</span></li>
-              <li><span id="tutorial-17" class="l10n">Click "EXAMINE".</span></li>
-              <li><span id="tutorial-18" class="l10n">The LEDs D7-D0 show the result 00 000 011 (3 in decimal).</span></li>
-              <li><span id="tutorial-19" class="l10n">Turn off Altair 8800.</span></li>
-            </ol>
-          </p>
+          <p id="tutorial-desc" class="tutorial-lead l10n">How to input and run the following program to calculate 1 + 2 = 3:</p>
+          <pre class="tutorial-code">LDA 0080H  ; 00 111 010
+           ; 10 000 000
+           ; 00 000 000
+MOV B,A    ; 01 000 111
+LDA 0081H  ; 00 111 010
+           ; 10 000 001
+           ; 00 000 000
+ADD B      ; 10 000 000
+STA 0082H  ; 00 110 010
+           ; 10 000 010
+           ; 00 000 000
+JMP 0000H  ; 11 000 011
+           ; 00 000 000
+           ; 00 000 000</pre>
+          <ol class="steps">
+            <li><span id="tutorial-1" class="l10n">Turn on Altair 8800 by clicking OFF/ON switch.</span></li>
+            <li><span id="tutorial-2" class="l10n">Set switches A7-A0 to 00 111 010 (up for 1, down for 0).</span></li>
+            <li><span id="tutorial-3" class="l10n">Click "DEPOSIT".</span></li>
+            <li><span id="tutorial-4" class="l10n">Set switches A7-A0 to 10 000 000.</span></li>
+            <li><span id="tutorial-5" class="l10n">Click "DEPOSIT NEXT".</span></li>
+            <li><span id="tutorial-6" class="l10n">Repeat step 4-5 to input the following bytes one by one: 00 000 000, 01 000 111, 00 111 010, 10 000 001, 00 000 000, 10 000 000, 00 110 010, 10 000 010, 00 000 000, 11 000 011, 00 000 000, 00 000 000.</span></li>
+            <li><span id="tutorial-7" class="l10n">Set switches A7-A0 to 10 000 000.</span></li>
+            <li><span id="tutorial-8" class="l10n">Click "EXAMINE".</span></li>
+            <li><span id="tutorial-9" class="l10n">Set switches A7-A0 to 00 000 001 (the first number to be added, or 1 in decimal).</span></li>
+            <li><span id="tutorial-10" class="l10n">Click "DEPOSIT".</span></li>
+            <li><span id="tutorial-11" class="l10n">Set switches A7-A0 to 00 000 010 (the second number to be added, or 2 in decimal).</span></li>
+            <li><span id="tutorial-12" class="l10n">Click "DEPOSIT NEXT".</span></li>
+            <li><span id="tutorial-13" class="l10n">Click "RESET".</span></li>
+            <li><span id="tutorial-14" class="l10n">Click "RUN" and wait for a few seconds.</span></li>
+            <li><span id="tutorial-15" class="l10n">Click "STOP".</span></li>
+            <li><span id="tutorial-16" class="l10n">Set switches A7-A0 to 10 000 010 (the address that holds the sum).</span></li>
+            <li><span id="tutorial-17" class="l10n">Click "EXAMINE".</span></li>
+            <li><span id="tutorial-18" class="l10n">The LEDs D7-D0 show the result 00 000 011 (3 in decimal).</span></li>
+            <li><span id="tutorial-19" class="l10n">Turn off Altair 8800.</span></li>
+          </ol>
         </div>
 
         <div class="subheader-bar">
           <div id="basic-title" class="l10n">Running Microsoft BASIC</div>
         </div>
         <div class="tutorial">
-          <p>
-            <ul>
-              <li><span id="basic-desc" class="l10n">The Altair's first piece of software, and Microsoft's: Altair BASIC 3.2, written in 1975 by Bill Gates, Paul Allen and Monte Davidoff. How to start it:</span></li>
-            </ul>
-          </p>
-          <p>
-            <ol>
-              <li><span id="basic-1" class="l10n">Go to the Debugger tab and choose 4 KB (or 8 KB, for room to write longer programs) under Installed Memory. Installing memory switches the machine off, which is what opening the case would have done.</span></li>
-              <li><span id="basic-2" class="l10n">Click Load 4K BASIC. The machine powers up, the tape is read for you, and RESET is pressed.</span></li>
-              <li><span id="basic-3" class="l10n">Before going any further, look at the memory map above the dump. Fifteen of the sixteen pages of a 4 KB machine are full: that is BASIC, and the one page left over is all the room you have for a program. This is what "4K BASIC" means.</span></li>
-              <li><span id="basic-4" class="l10n">The address switches A15-A8 tell BASIC which terminal board to use: all down is the 88-SIO at ports 00H and 01H, switch A11 up is the 88-2SIO at 10H and 11H. The teletype here is wired to both slots, so either setting works - a real Altair would have had only one of the two boards fitted, and the wrong setting left it silent.</span></li>
-              <li><span id="basic-5" class="l10n">Go to the Simulator tab and click RUN.</span></li>
-              <li><span id="basic-6" class="l10n">Go to the Teletype tab. BASIC asks MEMORY SIZE? - press Enter to take everything it found. Press Enter again for TERMINAL WIDTH?, then Y for WANT SIN? to keep the maths functions.</span></li>
-              <li><span id="basic-7" class="l10n">It prints how many bytes are free, then OK. Try PRINT 22/7 for an answer straight away. To enter a program, type these lines one at a time, pressing Enter after each:</span>
-                <pre>10 FOR I=1 TO 10
+          <p id="basic-desc" class="tutorial-lead l10n">The Altair's first piece of software, and Microsoft's: Altair BASIC 3.2, written in 1975 by Bill Gates, Paul Allen and Monte Davidoff. How to start it:</p>
+          <ol class="steps">
+            <li><span id="basic-1" class="l10n">Go to the Debugger tab and choose 4 KB (or 8 KB, for room to write longer programs) under Installed Memory. Installing memory switches the machine off, which is what opening the case would have done.</span></li>
+            <li><span id="basic-2" class="l10n">Click Load 4K BASIC. The machine powers up, the tape is read for you, and RESET is pressed.</span></li>
+            <li><span id="basic-3" class="l10n">Before going any further, look at the memory map above the dump. Fifteen of the sixteen pages of a 4 KB machine are full: that is BASIC, and the one page left over is all the room you have for a program. This is what "4K BASIC" means.</span></li>
+            <li><span id="basic-4" class="l10n">The address switches A15-A8 tell BASIC which terminal board to use: all down is the 88-SIO at ports 00H and 01H, switch A11 up is the 88-2SIO at 10H and 11H. The teletype here is wired to both slots, so either setting works - a real Altair would have had only one of the two boards fitted, and the wrong setting left it silent.</span></li>
+            <li><span id="basic-5" class="l10n">Go to the Simulator tab and click RUN.</span></li>
+            <li><span id="basic-6" class="l10n">Go to the Teletype tab. BASIC asks MEMORY SIZE? - press Enter to take everything it found. Press Enter again for TERMINAL WIDTH?, then Y for WANT SIN? to keep the maths functions.</span></li>
+            <li><span id="basic-7" class="l10n">It prints how many bytes are free, then OK. Try PRINT 22/7 for an answer straight away. To enter a program, type these lines one at a time, pressing Enter after each:</span>
+              <pre class="tutorial-code">10 FOR I=1 TO 10
 20 PRINT I,I*I
 30 NEXT I
 RUN</pre>
-              </li>
-              <li><span id="basic-8" class="l10n">The keyboard is upper case only. Underscore rubs out the last character, at-sign throws away the line, and Ctrl-C stops a running program.</span></li>
-            </ol>
-          </p>
-          <p>
-            <ul>
-              <li><span id="basic-note" class="l10n">What Load 4K BASIC skips: on a real Altair you first toggled a 28 byte boot loader in through the front panel, one byte at a time, then started the paper tape reader and waited about seven minutes while BASIC clattered in. Get one switch wrong and you did it again.</span></li>
-            </ul>
-          </p>
+            </li>
+            <li><span id="basic-8" class="l10n">The keyboard is upper case only. Underscore rubs out the last character, at-sign throws away the line, and Ctrl-C stops a running program.</span></li>
+          </ol>
+          <p id="basic-note" class="tutorial-note l10n">What Load 4K BASIC skips: on a real Altair you first toggled a 28 byte boot loader in through the front panel, one byte at a time, then started the paper tape reader and waited about seven minutes while BASIC clattered in. Get one switch wrong and you did it again.</p>
         </div>
 
         <div class="subheader-bar">
           <div id="source-code" class="l10n">Source code</div>
         </div>
-        <div>
-          <p>
-            <ul><li><a href="https://github.com/wixette/8800-simulator" target="_blank" rel="noopener">github.com/wixette/8800-simulator</a></li></ul>
-          </p>
-        </div>
+        <ul class="link-list">
+          <li><a href="https://github.com/wixette/8800-simulator" target="_blank" rel="noopener">github.com/wixette/8800-simulator</a></li>
+        </ul>
 
         <div class="subheader-bar">
           <div id="reference-title" class="l10n">References</div>
         </div>
-        <div>
-          <p>
-            <ul>
-              <li><a href="https://en.wikipedia.org/wiki/Altair_8800" target="_blank" rel="noopener"><span id="ref-wikipedia-altair" class="l10n">Wikipedia: Altair 8800</span></a></li>
-              <li><a href="https://en.wikipedia.org/wiki/Intel_8080" target="_blank" rel="noopener"><span id="ref-wikipedia-8080" class="l10n">Wikipedia: Intel 8080 CPU</span></a></li>
-              <li><a href="http://www.classiccmp.org/dunfield/r/8080.txt" target="_blank" rel="noopener"><span id="ref-instruction-set" class="l10n">Intel 8080 instruction set - an opcode encoding quick reference (text)</span></a></li>
-              <li><a href="https://altairclone.com/altair_manuals.html" target="_blank" rel="noopener"><span id="ref-original-manuals" class="l10n">Original Altair 8800 manuals - scanned PDFs archived at altairclone.com</span></a></li>
-              <li><a href="https://altairclone.com/downloads/manuals/Altair%208800%20Operator's%20Manual.pdf" target="_blank" rel="noopener"><span id="ref-operators-manual" class="l10n">Altair 8800 Operator's Manual - the original manual as a scanned PDF</span></a></li>
-              <li><a href="https://ubuntourist.codeberg.page/Altair-8800/" target="_blank" rel="noopener"><span id="ref-operators-manual-html" class="l10n">Altair 8800 Operator's Manual v2.0 - an HTML edition by Kevin Cole</span></a></li>
-              <li><a href="http://www.classiccmp.org/dunfield/r/8080asm.pdf" target="_blank" rel="noopener"><span id="ref-asm-manual" class="l10n">Intel 8080 Assembly Language Programming Manual - Intel's original manual as a scanned PDF</span></a></li>
-              <li><a href="https://www.openbookproject.net/books/demystcomp/index.html" target="_blank" rel="noopener"><span id="ref-demystifying-computers" class="l10n">Demystifying Computers - an open source book by Chris Jones and Jeff Elkner</span></a></li>
-              <li><a href="https://en.wikipedia.org/wiki/Altair_BASIC" target="_blank" rel="noopener"><span id="ref-altair-basic" class="l10n">Wikipedia: Altair BASIC - what it is, and how Microsoft started with it</span></a></li>
-              <li><a href="https://altairclone.com/downloads/manuals/BASIC%20Manual%2075.pdf" target="_blank" rel="noopener"><span id="ref-basic-manual" class="l10n">MITS Altair BASIC Reference Manual (1975) - the language itself: a tutorial, every statement and function, the startup questions in Appendix B, and the error codes in Appendix C</span></a></li>
-              <li><a href="http://altairbasic.org" target="_blank" rel="noopener"><span id="ref-basic-disassembly" class="l10n">Altair BASIC 3.2 (4K) - an annotated disassembly of the exact program this simulator runs</span></a></li>
-              <li><a href="https://s2js.com/altair/" target="_blank" rel="noopener"><span id="ref-altair-simulator" class="l10n">MITS Altair Simulator - another JavaScript simulator, running Microsoft BASIC on a simulated teletype</span></a></li>
-            </ul>
-          </p>
-        </div>
+        <ul class="link-list">
+          <li><a href="https://en.wikipedia.org/wiki/Altair_8800" target="_blank" rel="noopener"><span id="ref-wikipedia-altair" class="l10n">Wikipedia: Altair 8800</span></a></li>
+          <li><a href="https://en.wikipedia.org/wiki/Intel_8080" target="_blank" rel="noopener"><span id="ref-wikipedia-8080" class="l10n">Wikipedia: Intel 8080 CPU</span></a></li>
+          <li><a href="http://www.classiccmp.org/dunfield/r/8080.txt" target="_blank" rel="noopener"><span id="ref-instruction-set" class="l10n">Intel 8080 instruction set - an opcode encoding quick reference (text)</span></a></li>
+          <li><a href="https://altairclone.com/altair_manuals.html" target="_blank" rel="noopener"><span id="ref-original-manuals" class="l10n">Original Altair 8800 manuals - scanned PDFs archived at altairclone.com</span></a></li>
+          <li><a href="https://altairclone.com/downloads/manuals/Altair%208800%20Operator's%20Manual.pdf" target="_blank" rel="noopener"><span id="ref-operators-manual" class="l10n">Altair 8800 Operator's Manual - the original manual as a scanned PDF</span></a></li>
+          <li><a href="https://ubuntourist.codeberg.page/Altair-8800/" target="_blank" rel="noopener"><span id="ref-operators-manual-html" class="l10n">Altair 8800 Operator's Manual v2.0 - an HTML edition by Kevin Cole</span></a></li>
+          <li><a href="http://www.classiccmp.org/dunfield/r/8080asm.pdf" target="_blank" rel="noopener"><span id="ref-asm-manual" class="l10n">Intel 8080 Assembly Language Programming Manual - Intel's original manual as a scanned PDF</span></a></li>
+          <li><a href="https://www.openbookproject.net/books/demystcomp/index.html" target="_blank" rel="noopener"><span id="ref-demystifying-computers" class="l10n">Demystifying Computers - an open source book by Chris Jones and Jeff Elkner</span></a></li>
+          <li><a href="https://en.wikipedia.org/wiki/Altair_BASIC" target="_blank" rel="noopener"><span id="ref-altair-basic" class="l10n">Wikipedia: Altair BASIC - what it is, and how Microsoft started with it</span></a></li>
+          <li><a href="https://altairclone.com/downloads/manuals/BASIC%20Manual%2075.pdf" target="_blank" rel="noopener"><span id="ref-basic-manual" class="l10n">MITS Altair BASIC Reference Manual (1975) - the language itself: a tutorial, every statement and function, the startup questions in Appendix B, and the error codes in Appendix C</span></a></li>
+          <li><a href="http://altairbasic.org" target="_blank" rel="noopener"><span id="ref-basic-disassembly" class="l10n">Altair BASIC 3.2 (4K) - an annotated disassembly of the exact program this simulator runs</span></a></li>
+          <li><a href="https://s2js.com/altair/" target="_blank" rel="noopener"><span id="ref-altair-simulator" class="l10n">MITS Altair Simulator - another JavaScript simulator, running Microsoft BASIC on a simulated teletype</span></a></li>
+        </ul>
 
       </div>
       <div id="status-bar">
