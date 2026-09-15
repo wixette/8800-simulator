@@ -1080,10 +1080,11 @@ Phase 1 is worth doing whatever we decide about BASIC.
   Control-C, and checks that sense switches in the wrong position send
   BASIC to a board that is not there. It skips itself if `roms/` is
   absent.
-- Phase 3 changed the tab strip, so `README.md` and the images under
-  `screenshots/` need updating. The text and `sim-panel.png` are done;
-  `sim-debug.png` and `sim-mobile.png` still show the old tabs and the
-  old Debugger layout.
+- ✅ *Done.* Phase 3 changed the tab strip, so `README.md` and the
+  images under `screenshots/` were updated: one screenshot per machine
+  tab, with the Teletype one showing 4K BASIC running. The phone
+  screenshot was dropped; the layout is responsive and it showed
+  nothing the others do not.
 - ✅ *Fixed later.* `reset()` lights every LED and clears them 400 ms
   later; a program that wrote the data LEDs inside that window used to
   have them wiped. Now `start()` and `step()` end the flash first
