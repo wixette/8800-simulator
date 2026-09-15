@@ -41,6 +41,6 @@ http://altairbasic.org, which is the best place to start if you want to
 know how it works.
 
 If you would rather not have this file in your copy of the repository,
-delete it. The simulator's LOAD 4K BASIC button will simply report that
-it is missing, and the file picker next to it will still load a copy
-you supply yourself.
+delete it. The simulator's Load 4K BASIC button will simply report that
+it is missing, and Load Binary File will still load a copy you supply
+yourself.

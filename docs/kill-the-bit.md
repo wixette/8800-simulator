@@ -59,8 +59,7 @@ twice as fast, and the speed the game was actually played at.)
 
 All other panel features (EXAMINE / DEPOSIT / RESET / single step,
 port I/O, the debugger dumps) are unchanged, and are now covered by
-unit tests in `tests/` (`npm test`, requires Node.js 18+; no
-dependencies).
+unit tests in `tests/` (`npm test`; no dependencies).
 
 ## Running it
 

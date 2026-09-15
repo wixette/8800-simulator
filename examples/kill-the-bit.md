@@ -16,13 +16,18 @@ machine that the simulator did not model. That story is in
 
 ### Quick way (Debugger tab)
 
-1. Open `index.html` and switch the machine ON.
-2. Open the *Debugger* tab and load this with *LOAD DATA*:
-   ```
-   21 00 00 16 80 01 0e 00 1a 1a 1a 1a 09 d2 08 00 db ff aa 0f 57 c3 08 00
-   ```
-3. Make sure all 16 address switches are down, go back to the
-   *Simulator* tab, click RESET, then RUN.
+1. Open the *Debugger* tab and pick *Kill the Bit* from the *Example
+   Programs* menu under *Load a Program*. The machine is switched on,
+   the program is loaded at 0000H and RESET is pressed for you.
+2. Make sure all 16 address switches are down, go back to the
+   *Simulator* tab and click RUN.
+
+Or paste the bytes into the box under *Load Your Own*, click *Load
+Data*, then RESET and RUN:
+
+```
+21 00 00 16 80 01 0e 00 1a 1a 1a 1a 09 d2 08 00 db ff aa 0f 57 c3 08 00
+```
 
 ### Authentic way (front panel switches)
 
