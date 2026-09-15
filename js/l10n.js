@@ -552,6 +552,78 @@ l10n.MESSAGES = {
         'ko': '16진수 바이트, 예: c3 00 00',
     },
 
+    'load-data-empty': {
+        'en': 'Nothing to load. Type some bytes in hex, such as c3 00 00.',
+        'es': 'No hay nada que cargar. Escribe algunos bytes en hex, por ejemplo c3 00 00.',
+        'fr': 'Rien à charger. Tapez des octets en hexadécimal, par exemple c3 00 00.',
+        'de': 'Nichts zu laden. Geben Sie Bytes in Hex ein, etwa c3 00 00.',
+        'it': 'Non c’è nulla da caricare. Scrivi dei byte in esadecimale, ad esempio c3 00 00.',
+        'zh': '没有可加载的内容。请输入十六进制字节，例如 c3 00 00。',
+        'zh-TW': '沒有可載入的內容。請輸入十六進位位元組，例如 c3 00 00。',
+        'ja': '読み込むものがありません。16 進数でバイト列を入力してください。例えば c3 00 00。',
+        'ko': '불러올 내용이 없습니다. 16진수 바이트를 입력하세요. 예: c3 00 00.',
+    },
+
+    'load-data-off': {
+        'en': 'The machine is off, so the bytes would go nowhere. Switch it on first.',
+        'es': 'La máquina está apagada, así que los bytes no irían a ninguna parte. Enciéndela primero.',
+        'fr': 'La machine est éteinte, les octets n’iraient nulle part. Allumez-la d’abord.',
+        'de': 'Die Maschine ist aus, die Bytes würden nirgendwo landen. Schalten Sie sie zuerst ein.',
+        'it': 'La macchina è spenta, quindi i byte non andrebbero da nessuna parte. Accendila prima.',
+        'zh': '机器已关闭，字节无处可去。请先开机。',
+        'zh-TW': '機器已關閉，位元組無處可去。請先開機。',
+        'ja': '電源が切れているので、バイト列はどこにも入りません。先に電源を入れてください。',
+        'ko': '기계가 꺼져 있어 바이트가 들어갈 곳이 없습니다. 먼저 전원을 켜세요.',
+    },
+
+    'load-data-bad': {
+        'en': '"{text}" is not a byte. A byte is one or two hex digits, such as c3 or 0f.',
+        'es': '"{text}" no es un byte. Un byte son uno o dos dígitos hex, por ejemplo c3 o 0f.',
+        'fr': '« {text} » n’est pas un octet. Un octet s’écrit avec un ou deux chiffres hexadécimaux, par exemple c3 ou 0f.',
+        'de': '"{text}" ist kein Byte. Ein Byte sind eine oder zwei Hex-Ziffern, etwa c3 oder 0f.',
+        'it': '"{text}" non è un byte. Un byte è una o due cifre esadecimali, ad esempio c3 o 0f.',
+        'zh': '“{text}” 不是一个字节。字节是一到两位十六进制数字，例如 c3 或 0f。',
+        'zh-TW': '「{text}」不是一個位元組。位元組是一到兩位十六進位數字，例如 c3 或 0f。',
+        'ja': '「{text}」はバイトではありません。バイトは 16 進数 1 桁か 2 桁です。例えば c3 や 0f。',
+        'ko': '"{text}"은(는) 바이트가 아닙니다. 바이트는 16진수 한두 자리입니다. 예: c3 또는 0f.',
+    },
+
+    'load-data-too-long': {
+        'en': 'That is {bytes} bytes and the machine has {size}. Install more memory, or load fewer.',
+        'es': 'Son {bytes} bytes y la máquina tiene {size}. Instala más memoria o carga menos.',
+        'fr': 'Cela fait {bytes} octets et la machine en a {size}. Installez plus de mémoire, ou chargez-en moins.',
+        'de': 'Das sind {bytes} Bytes, die Maschine hat {size}. Bauen Sie mehr Speicher ein oder laden Sie weniger.',
+        'it': 'Sono {bytes} byte e la macchina ne ha {size}. Installa più memoria, o caricane meno.',
+        'zh': '这是 {bytes} 字节，而机器只有 {size}。请加装内存，或少载入一些。',
+        'zh-TW': '這是 {bytes} 位元組，而機器只有 {size}。請加裝記憶體，或少載入一些。',
+        'ja': '{bytes} バイトありますが、マシンは {size} しかありません。メモリを増やすか、量を減らしてください。',
+        'ko': '{bytes}바이트인데 기계에는 {size}뿐입니다. 메모리를 늘리거나 더 적게 불러오세요.',
+    },
+
+    'load-data-odd': {
+        'en': '"{text}" has an odd number of hex digits, so it is not a whole number of bytes.',
+        'es': '"{text}" tiene un número impar de dígitos hex, así que no son bytes completos.',
+        'fr': '« {text} » a un nombre impair de chiffres hexadécimaux, ce ne sont donc pas des octets entiers.',
+        'de': '"{text}" hat eine ungerade Anzahl Hex-Ziffern und ergibt damit keine ganzen Bytes.',
+        'it': '"{text}" ha un numero dispari di cifre esadecimali, quindi non sono byte interi.',
+        'zh': '“{text}” 的十六进制位数是奇数，凑不成整数个字节。',
+        'zh-TW': '「{text}」的十六進位位數是奇數，湊不成整數個位元組。',
+        'ja': '「{text}」は 16 進数の桁数が奇数なので、バイトの区切りになりません。',
+        'ko': '"{text}"은(는) 16진수 자릿수가 홀수여서 온전한 바이트가 되지 않습니다.',
+    },
+
+    'load-data-loaded': {
+        'en': 'Loaded {bytes} bytes at 0000H.',
+        'es': 'Cargados {bytes} bytes en 0000H.',
+        'fr': '{bytes} octets chargés en 0000H.',
+        'de': '{bytes} Bytes bei 0000H geladen.',
+        'it': 'Caricati {bytes} byte a 0000H.',
+        'zh': '已在 0000H 载入 {bytes} 字节。',
+        'zh-TW': '已在 0000H 載入 {bytes} 位元組。',
+        'ja': '0000H に {bytes} バイトを読み込みました。',
+        'ko': '0000H에 {bytes}바이트를 불러왔습니다.',
+    },
+
     'debug-cpu-dump-title': {
         'en': '8080 CPU Status Dump',
         'es': 'Estado de la CPU 8080',
