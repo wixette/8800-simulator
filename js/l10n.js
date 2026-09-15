@@ -1376,14 +1376,7 @@ l10n.setLocale = function(locale) {
 
 /**
  * Fills the language menu with the locales, each under its own name,
- * and wires it up.
- *
- * This is a button and a list rather than a select element because a
- * native menu is drawn by the operating system, which on macOS puts the
- * list over the button with the current choice under the pointer. That
- * cannot be restyled from the page, and it reads as a misplaced popup
- * here, so the menu is built out of ordinary elements that sit where
- * they are told.
+ * and wires it up. See js/dropdown.js for why it is not a <select>.
  */
 l10n.initMenu = function() {
     l10n.menu = new Dropdown('locale-menu', function(locale) {
@@ -1392,15 +1385,6 @@ l10n.initMenu = function() {
     l10n.menu.setItems(l10n.LOCALES.map(function(locale) {
         return {value: locale, label: l10n.LOCALE_NAMES[locale] || locale};
     }));
-};
-
-/**
- * Closes the language menu, if it is open.
- */
-l10n.closeMenu = function() {
-    if (l10n.menu) {
-        l10n.menu.close();
-    }
 };
 
 /**
@@ -1454,7 +1438,7 @@ l10n.updateMessages = function() {
         l10n.menu.setSelected(locale);
     }
 
-    elems = document.getElementsByClassName('l10n');
+    const elems = document.getElementsByClassName('l10n');
     for (let i = 0; i < elems.length; i++) {
         if (l10n.MESSAGES.hasOwnProperty(elems[i].id)) {
             elems[i].innerHTML = l10n.getMessage(elems[i].id);

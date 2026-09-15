@@ -36,12 +36,6 @@ panel.isDebugTabVisible = false;
 panel.isTtyTabVisible = false;
 
 /**
- * The name of the tab on screen: 'sim', 'tty', 'debug' or 'ref'.
- * @type {string}
- */
-panel.currentTab = 'sim';
-
-/**
  * When STOP switch is pressed.
  */
 panel.onStop = function() {
@@ -105,6 +99,9 @@ panel.onReset = function() {
  */
 panel.onPowerOn = function() {
     panel.sim.powerOn();
+    panel.isPoweredOn = true;
+    panel.switchDown('off-on');
+    panel.updateHelperSwitches();
     // Only a live machine has a blinking carriage.
     document.body.classList.add('powered-on');
     panel.updateMemoryControls();
@@ -119,6 +116,9 @@ panel.onPowerOn = function() {
  */
 panel.onPowerOff = function() {
     panel.sim.powerOff();
+    panel.isPoweredOn = false;
+    panel.switchUp('off-on');
+    panel.updateHelperSwitches();
     document.body.classList.remove('powered-on');
     if (panel.sio) {
         // Keys typed but never read do not survive the power going off.
@@ -127,11 +127,11 @@ panel.onPowerOff = function() {
     panel.renderTeletype();
     panel.updateMemoryControls();
     panel.setStatus('status-off');
-    panel.updateHelperSwitches();
 };
 
 /**
- * When ZERO ALL MEMORY button is pressed.
+ * When Zero All Memory is pressed. There is no such switch on the real
+ * machine.
  */
 panel.onFillZero = function() {
     if (panel.reportIfUnavailable('debug-fill-zero')) {
@@ -164,32 +164,18 @@ panel.MIN_BASIC_MEM = 4096;
 panel.MAX_IMAGE_BYTES = 65536;
 
 /**
- * The example programs offered in the Debugger tab.
+ * The example programs offered in the Debugger tab, in the order they
+ * are offered.
  *
- * The order is deliberate, and the rule is two deep. First by which
- * face of the machine the program speaks through - the front panel,
- * then the teletype - because that is what a reader has to know before
- * pressing RUN: a teletype program watched on the panel looks like a
- * machine that has died. Within each group, by how much you need to
- * know to follow it.
+ * First by which face of the machine the program speaks through - the
+ * front panel, then the teletype - because a teletype program watched
+ * on the panel looks like a machine that has died. Within each group,
+ * by how much you need to know to follow it. See Part 5 of
+ * docs/ms-basic-4k.md.
  *
- * On the panel: something that runs by itself and moves the lights,
- * then the same with your hand on the switches, then arithmetic you
- * read out of memory, then a loop with a direction to remember, then
- * a game from 1975.
- *
- * On the teletype: print one message, print many, read one key back,
- * read a key and take it apart, then a game to play.
- *
- * Size is not the rule, though it nearly agrees: Kill the Bit is 24
- * bytes and the hardest thing here to follow, and Guess my letter is
- * 218 and the easiest to enjoy.
- *
- * Only the names are here. Everything shown about a program - its
- * title, its size, where to watch it, its bytes - is read out of
- * examples/<id>.asm when the list is built, so this cannot drift out
- * of step with the listings, and a test keeps it in step with the
- * directory and with the order described above.
+ * Only the names are here. Everything else - title, size, device,
+ * bytes - is read out of examples/<id>.asm, and tests/listing.test.js
+ * keeps this list in step with the directory.
  * @type {Array<string>}
  */
 panel.EXAMPLES = [
@@ -210,16 +196,11 @@ panel.EXAMPLES = [
 /**
  * Whether the page was opened straight off the disk.
  *
- * Everything the simulator needs to be a simulator is already in the
- * page. Two things are not: the example listings and the BASIC tape,
- * which are separate files it reads at the moment they are asked for.
- * A browser will not let a file:// page read a neighbouring file - it
- * treats every one of them as a different site - so those two are the
- * only part of the app that needs the folder to be served.
- *
- * Kept as the check rather than letting the fetch fail, so that the
- * controls can be greyed out before they are pressed and the reason
- * given is the real one, not "could not be read".
+ * A browser will not let a file:// page fetch the files beside it, so
+ * the example listings and the BASIC tape need the folder to be served.
+ * Checked up front rather than by letting the fetch fail, so that those
+ * controls are greyed out before they are pressed and give the real
+ * reason. See D22 in docs/ms-basic-4k.md.
  * @return {boolean} True if the page cannot read its own folder.
  */
 panel.needsServer = function() {
@@ -230,11 +211,8 @@ panel.needsServer = function() {
  * Fills the example menu, once, the first time the debugger is looked
  * at. A reader who never opens that tab never fetches anything.
  *
- * A menu rather than a button apiece: ten buttons crowded the tab and
- * pushed the dumps - which are what a debugger is for - below the
- * fold. The menu acts on choosing and then returns to its prompt, so
- * it reads as a list of things to do rather than a setting, and the
- * same program can be loaded twice running.
+ * The menu acts on choosing and holds no selection, so the same
+ * program can be loaded twice running.
  */
 panel.buildExampleMenu = function() {
     if (panel.exampleMenuBuilt) {
@@ -255,24 +233,20 @@ panel.buildExampleMenu = function() {
                         {name: program.name, bytes: loaded});
     });
     panel.refreshExampleMenu();
-    // Pressing it says why, like every other control that cannot be
-    // used. The Dropdown's own listener is on the same element and
-    // runs first; it declines to open an empty list, so nothing but
-    // this happens. See panel.onExampleMenuPress.
+    // An empty menu does not open (see Dropdown.open), so pressing it
+    // only says why it is empty.
     document.getElementById('example-button').addEventListener(
-        'click', panel.onExampleMenuPress, false);
+        'click', function() {
+            panel.reportIfUnavailable('example-button');
+        }, false);
 
     if (panel.needsServer()) {
-        // Asking would only fill the console with CORS failures for
-        // something already known to be impossible.
         panel.examplesProblem = 'needs-server';
         panel.updateDebugControls();
         return;
     }
 
-    // Fetched together but listed in the order panel.EXAMPLES gives,
-    // which is the order they are worth meeting in - not whichever
-    // request happens to finish first.
+    // Fetched together, but listed in the order panel.EXAMPLES gives.
     var fetches = panel.EXAMPLES.map(function(id) {
         return window.fetch('examples/' + id + '.asm').then(function(response) {
             if (!response.ok) {
@@ -296,8 +270,7 @@ panel.buildExampleMenu = function() {
             }
             panel.examplePrograms[results[i].id] = results[i].program;
             // A rule where the panel programs end and the teletype
-            // ones begin, so that the order reads as deliberate rather
-            // than as whatever came out of the directory.
+            // ones begin.
             let device = results[i].program.device;
             items.push({
                 value: results[i].id,
@@ -308,19 +281,9 @@ panel.buildExampleMenu = function() {
             lastDevice = device;
         }
         panel.exampleMenu.setItems(items);
-        // An empty menu used to open as a box of nothing, which said
-        // less than saying nothing would have.
         panel.examplesProblem = items.length ? null : 'examples-unreadable';
         panel.updateDebugControls();
     });
-};
-
-/**
- * When the example menu is pressed and has nothing to offer.
- * @param {Event} event The click.
- */
-panel.onExampleMenuPress = function(event) {
-    panel.reportIfUnavailable('example-button');
 };
 
 /**
@@ -359,16 +322,11 @@ panel.refreshExampleMenu = function() {
 };
 
 /**
- * Says something on the status line at the foot of the machine.
+ * Says something on the status line at the foot of the machine. See
+ * D15 in docs/ms-basic-4k.md.
  *
- * A lot of what the simulator does is only obvious if you already know
- * how these machines worked: installing memory switches the power off,
- * the memory dump goes blank because the machine is off, a tape is
- * loaded but not started. Rather than leave a newcomer to infer that
- * from a panel that has gone quiet, every such moment says so here.
- *
- * The message is held as an id rather than as text, so that it stays
- * readable after a change of language.
+ * The message is held as an id rather than as text, so that it can be
+ * redrawn after a change of language.
  * @param {?string} id The l10n message id, or null to clear the line.
  * @param {Object=} params Values for {placeholders} in the message.
  * @param {string=} severity '', 'warn' or 'error'.
@@ -412,33 +370,21 @@ panel.formatMemSize = function(bytes) {
 };
 
 /**
- * Switches the machine on if it is not on already.
- *
- * Every way of getting a program in does this, so that none of them is
- * a dead end: you press the thing that loads, and it loads. The machine
- * coming up is visible on the panel - the OFF/ON button turns green -
- * and memory fills with the random bytes a real one powers up with,
- * which is worth seeing rather than being protected from.
+ * Switches the machine on if it is not on already. Every way of getting
+ * a program in does this (D20 in docs/ms-basic-4k.md).
  */
 panel.ensurePoweredOn = function() {
-    if (panel.isPoweredOn) {
-        return;
+    if (!panel.isPoweredOn) {
+        panel.onPowerOn();
     }
-    panel.onPowerOn();
-    panel.switchDown('off-on');
-    panel.isPoweredOn = true;
-    panel.updateHelperSwitches();
 };
 
 /**
- * Puts an image into memory at 0000H and presses RESET, powering the
+ * Zeroes memory, puts an image at 0000H and presses RESET, powering the
  * machine up first if it is off.
  *
- * It deliberately stops there rather than running. On the real machine
- * loading and starting were two separate acts, and stopping here lets
- * the memory map above show what was just loaded before the program
- * starts writing over it - which for BASIC is fifteen of the sixteen
- * pages of a 4 KB machine.
+ * It deliberately stops short of running, so that the memory map shows
+ * what was just loaded before the program writes over it (D14).
  * @param {Array<number>|Uint8Array} bytes The image. Anything longer
  *     than the installed memory is ignored past the top.
  * @return {number} How many bytes actually fit in the machine.
@@ -454,7 +400,7 @@ panel.loadImage = function(bytes) {
 };
 
 /**
- * When LOAD 4K BASIC is pressed.
+ * When Load 4K BASIC is pressed.
  */
 panel.onLoadBasic = function() {
     if (panel.reportIfUnavailable('load-basic')) {
@@ -474,7 +420,7 @@ panel.onLoadBasic = function() {
 };
 
 /**
- * When a binary file is chosen with LOAD BINARY FILE.
+ * When a binary file is chosen with Load Binary File.
  * @param {Event} event The change event from the file input.
  */
 panel.onBinaryFileChosen = function(event) {
@@ -494,10 +440,7 @@ panel.onBinaryFileChosen = function(event) {
     }
     var reader = new FileReader();
     reader.onload = function() {
-        // Only what fits is converted. Handing the whole file to
-        // loadImage would build a JavaScript array the length of the
-        // file - seconds of frozen page for a large one - to load the
-        // first few hundred bytes of it.
+        // Only what fits is handed on.
         var size = panel.sim.mem.length;
         var bytes = new Uint8Array(reader.result, 0,
                                    Math.min(reader.result.byteLength, size));
@@ -535,27 +478,17 @@ panel.onSetMemSize = function(memSize) {
         return;
     panel.sim.setMemSize(memSize);
     // setMemSize powered the machine down; show that on the panel.
-    panel.isPoweredOn = false;
-    panel.switchUp('off-on');
-    panel.updateHelperSwitches();
-    document.body.classList.remove('powered-on');
-    if (panel.sio) {
-        panel.sio.reset();
-    }
-    panel.renderTeletype();
+    panel.onPowerOff();
     panel.setStatus('status-mem-installed',
                     {size: panel.formatMemSize(memSize)}, 'warn');
-    panel.updateMemoryControls();
 };
 
 /**
  * Why each Debugger control cannot be used at the moment.
  *
- * This is the only place that decides. The greying out and the message
+ * This is the only place that decides: the greying out and the message
  * a greyed control gives when pressed both read from here, so the two
- * cannot drift apart - which is exactly what went wrong before: ZERO
- * ALL MEMORY explained itself and FOLLOW PC went quiet, and the window
- * label counted up pages the dump was not showing.
+ * cannot drift apart.
  *
  * @return {Object<string, ?{id: string, params: Object}>} A reason for
  *     each control, or null where the control is available.
@@ -564,11 +497,8 @@ panel.debugControlReasons = function() {
     var on = panel.sim.isPoweredOn;
     var memSize = panel.sim.mem.length;
     var reasons = {};
-    // The loaders are never unavailable: each one switches the machine
-    // on for you, so there is nothing to be unavailable about. Except
-    // BASIC, which needs a memory board this machine may not have.
-    // The tape is a file beside the page, so this comes first: on a
-    // page opened off the disk, no amount of memory will help.
+    // The loaders switch the machine on for you, so only BASIC can be
+    // unavailable: it needs its tape to be fetchable, then enough memory.
     reasons['load-basic'] = panel.needsServer() ?
         {id: 'needs-server', params: {}} :
         (memSize < panel.MIN_BASIC_MEM ?
@@ -595,12 +525,8 @@ panel.debugControlReasons = function() {
 };
 
 /**
- * Says why a control cannot be used, if it cannot be.
- *
- * A greyed control here still takes the press and answers. That is not
- * what most software does - a disabled button usually ignores you -
- * but a simulator is for learning what the machine can do, and a
- * control that goes dead without saying why teaches nothing.
+ * Says why a control cannot be used, if it cannot be. A greyed control
+ * still takes the press and answers (D19 in docs/ms-basic-4k.md).
  *
  * @param {string} id The control.
  * @return {boolean} True if it is unavailable, and the reason has been
@@ -616,11 +542,7 @@ panel.reportIfUnavailable = function(id) {
 };
 
 /**
- * Greys out whatever cannot be used just now.
- *
- * Nothing is hidden. A control that disappears when it does not apply
- * takes its explanation with it and moves everything beside it; one
- * that greys out stays where it was and can still be asked why.
+ * Greys out whatever cannot be used just now. Nothing is hidden (D18).
  */
 panel.updateDebugControls = function() {
     var reasons = panel.debugControlReasons();
@@ -685,7 +607,7 @@ panel.onMemPage = function(direction) {
 };
 
 /**
- * When FOLLOW PC is pressed.
+ * When Follow PC is pressed.
  */
 panel.onToggleFollowPc = function() {
     if (panel.reportIfUnavailable('mem-follow-pc')) {
@@ -697,14 +619,8 @@ panel.onToggleFollowPc = function() {
 
 /**
  * When a cell of the memory map is pressed, moves the window there.
- *
- * Still pointerdown rather than click, though it no longer has to be.
- * It had to be once: the strip was rebuilt from innerHTML on every
- * repaint, so a press and its release landed on different elements and
- * no click was ever fired while a program ran. The cells survive now
- * (see panel.renderMemMap), so a click would work - but a strip you
- * may want to move along quickly is better answering the press, and
- * this covers touch with the same code.
+ * Answers the press rather than the click, so that a strip you move
+ * along quickly responds at once, for mouse and touch alike.
  * @param {Event} event The pointerdown event.
  */
 panel.onMemMapPress = function(event) {
@@ -724,12 +640,7 @@ panel.onMemMapPress = function(event) {
  */
 panel.setAddressLedsCallback = function(bits) {
     for (let i = 0; i < bits.length; i++) {
-        var ledId = 'a' + i;
-        if (bits[i]) {
-            panel.ledOn(ledId);
-        } else {
-            panel.ledOff(ledId);
-        }
+        panel.setLed('a' + i, bits[i]);
     }
     panel.setRepeaterLeds('tty-a', bits);
 };
@@ -739,12 +650,7 @@ panel.setAddressLedsCallback = function(bits) {
  */
 panel.setDataLedsCallback = function(bits) {
     for (let i = 0; i < bits.length; i++) {
-        var ledId = 'd' + i;
-        if (bits[i]) {
-            panel.ledOn(ledId);
-        } else {
-            panel.ledOff(ledId);
-        }
+        panel.setLed('d' + i, bits[i]);
     }
     panel.setRepeaterLeds('tty-d', bits);
 };
@@ -753,12 +659,7 @@ panel.setDataLedsCallback = function(bits) {
  * When CPU sets the WAIT LED.
  */
 panel.setWaitLedCallback = function(isRunning) {
-    var ledId = 'wait';
-    if (!isRunning) {
-        panel.ledOn(ledId);
-    } else {
-        panel.ledOff(ledId);
-    }
+    panel.setLed('wait', !isRunning);
     var repeater = document.getElementById('tty-wait-led');
     if (repeater) {
         repeater.classList.toggle('on', !isRunning);
@@ -769,26 +670,15 @@ panel.setWaitLedCallback = function(isRunning) {
  * When CPU sets the status LEDs.
  */
 panel.setStatusLedsCallback = function(isPoweredOn) {
-    var ledIds = ['memr', 'mi', 'wo'];
-    for (let i = 0; i < ledIds.length; i++) {
-        if (isPoweredOn) {
-            panel.ledOn(ledIds[i]);
-        } else {
-            panel.ledOff(ledIds[i]);
-        }
-    }
+    ['memr', 'mi', 'wo'].forEach(function(id) {
+        panel.setLed(id, isPoweredOn);
+    });
 };
 
 /**
  * Repaints the helper buttons that stand for a switch, so that the
- * board below the panel reads the same way the panel does.
- *
- * The panel's own switches are 20 px sprites that show their position
- * by being drawn up or down. The helper buttons had no such tell: an
- * address switch that was up looked exactly like one that was down,
- * and the only way to know the machine was on was to look at the
- * panel. Now the raised ones carry the same orange the rest of the app
- * uses for an active choice, and the power button lights.
+ * board below the panel reads the same way the panel does: a raised
+ * address switch is orange, and the power button lights while on.
  */
 panel.updateHelperSwitches = function() {
     for (let i = 0; i < 16; i++) {
@@ -820,19 +710,17 @@ panel.getInputAddressCallback = function() {
  * When CPU dumps the CPU status for debug.
  */
 panel.dumpCpuCallback = function(dumpHtml) {
-    var dumpCpuElem = document.getElementById('cpu-dump');
-    dumpCpuElem.innerHTML = dumpHtml;
+    document.getElementById('cpu-dump').innerHTML = dumpHtml;
 };
 
 /**
  * When CPU dumps the MEM contents for debug.
  */
 panel.dumpMemCallback = function(dumpHtml, pages) {
-    var dumpMemElem = document.getElementById('mem-dump');
-    dumpMemElem.innerHTML = dumpHtml;
+    document.getElementById('mem-dump').innerHTML = dumpHtml;
     panel.renderMemMap(pages);
-    // FOLLOW PC moves the window on its own, so the label has to be
-    // refreshed with the dump rather than only when a button is hit.
+    // Follow PC moves the window on its own, so the label is refreshed
+    // with every dump.
     panel.updateMemWindowLabel();
 };
 
@@ -840,18 +728,12 @@ panel.dumpMemCallback = function(dumpHtml, pages) {
  * Draws the memory map strip, editing the cells rather than replacing
  * them.
  *
- * The strip is redrawn on every repaint - sixty times a second while a
- * program runs - and the cells have to be the same elements each time.
- * A browser hangs a good deal off an element that only lives as long
- * as the element does: the dwell that brings up a tooltip, the hover
- * state, the press that pairs with a release to make a click. Rebuilt
- * from innerHTML, every cell was destroyed before any of that could
- * finish, and a tooltip that needs a second of stillness never had a
- * hundredth of one.
- *
- * So the cells are built once and only what changed is written. Each
- * assignment is guarded by a comparison, because assigning the same
- * title again is enough to dismiss a tooltip that is already up.
+ * The strip is redrawn on every repaint, sixty times a second while a
+ * program runs, and a cell rebuilt that often cannot keep a tooltip or
+ * a hover state. So the cells are built once and only what changed is
+ * written. Each assignment is guarded by a comparison, because
+ * assigning the same title again dismisses a tooltip that is already
+ * up. See D21 in docs/ms-basic-4k.md.
  *
  * @param {?Array<Object>} pages From Sim8800.getMemMap(), or null when
  *     the machine has no more memory than one window shows.
@@ -916,11 +798,9 @@ panel.parseBytes = function(text) {
         if (token.length > 2 && token.length % 2) {
             return {error: 'load-data-odd', params: {text: token}};
         }
-        // A longer run of hex digits is simply several bytes running
-        // together. That covers a listing copied out of the
-        // documentation: a one line input box drops the newlines out of
-        // a paste, so "3e 8c\nd3 ff" arrives as "3e 8cd3 ff", and
-        // rejecting it would be blaming the reader for the box.
+        // A longer run of hex digits is several bytes running together.
+        // A one line input box drops the newlines out of a paste, so
+        // "3e 8c\nd3 ff" arrives as "3e 8cd3 ff".
         for (let j = 0; j < token.length; j += 2) {
             bytes.push(parseInt(token.substr(j, 2), 16));
         }
@@ -930,7 +810,7 @@ panel.parseBytes = function(text) {
 
 /**
  * Reads the hex box and puts those bytes at 0000H, saying in the status
- * bar what happened. Every way this can fail used to fail in silence.
+ * bar what happened.
  */
 panel.debugLoadData = function() {
     var text = document.getElementById('debug-data-input').value.trim();
@@ -1109,292 +989,80 @@ panel.setRepeaterLeds = function(prefix, bits) {
 };
 
 /**
- * The info of all LEDs.
+ * The position of every LED on the panel artwork.
  */
 panel.LED_INFO = [
-    {
-        id: 'inte',
-        x: 194,
-        y: 120
-    },
-    {
-        id: 'prot',
-        x: 245,
-        y: 120
-    },
-    {
-        id: 'memr',
-        x: 296,
-        y: 120
-    },
-    {
-        id: 'inp',
-        x: 347,
-        y: 120
-    },
-    {
-        id: 'mi',
-        x: 398,
-        y: 120
-    },
-    {
-        id: 'out',
-        x: 449,
-        y: 120
-    },
-    {
-        id: 'hlta',
-        x: 500,
-        y: 120
-    },
-    {
-        id: 'stack',
-        x: 551,
-        y: 120
-    },
-    {
-        id: 'wo',
-        x: 602,
-        y: 120
-    },
-    {
-        id: 'int',
-        x: 653,
-        y: 120
-    },
-    {
-        id: 'd7',
-        x: 830,
-        y: 120
-    },
-    {
-        id: 'd6',
-        x: 880,
-        y: 120
-    },
-    {
-        id: 'd5',
-        x: 959,
-        y: 120
-    },
-    {
-        id: 'd4',
-        x: 1009,
-        y: 120
-    },
-    {
-        id: 'd3',
-        x: 1059,
-        y: 120
-    },
-    {
-        id: 'd2',
-        x: 1138,
-        y: 120
-    },
-    {
-        id: 'd1',
-        x: 1188,
-        y: 120
-    },
-    {
-        id: 'd0',
-        x: 1238,
-        y: 120
-    },
-    {
-        id: 'wait',
-        x: 194,
-        y: 230
-    },
-    {
-        id: 'hlda',
-        x: 245,
-        y: 230
-    },
-    {
-        id: 'a15',
-        x: 346,
-        y: 230
-    },
-    {
-        id: 'a14',
-        x: 423,
-        y: 230
-    },
-    {
-        id: 'a13',
-        x: 473,
-        y: 230
-    },
-    {
-        id: 'a12',
-        x: 523,
-        y: 230
-    },
-    {
-        id: 'a11',
-        x: 602,
-        y: 230
-    },
-    {
-        id: 'a10',
-        x: 652,
-        y: 230
-    },
-    {
-        id: 'a9',
-        x: 702,
-        y: 230
-    },
-    {
-        id: 'a8',
-        x: 780,
-        y: 230
-    },
-    {
-        id: 'a7',
-        x: 830,
-        y: 230
-    },
-    {
-        id: 'a6',
-        x: 880,
-        y: 230
-    },
-    {
-        id: 'a5',
-        x: 959,
-        y: 230
-    },
-    {
-        id: 'a4',
-        x: 1009,
-        y: 230
-    },
-    {
-        id: 'a3',
-        x: 1059,
-        y: 230
-    },
-    {
-        id: 'a2',
-        x: 1138,
-        y: 230
-    },
-    {
-        id: 'a1',
-        x: 1188,
-        y: 230
-    },
-    {
-        id: 'a0',
-        x: 1238,
-        y: 230
-    },
+    {id: 'inte', x: 194, y: 120},
+    {id: 'prot', x: 245, y: 120},
+    {id: 'memr', x: 296, y: 120},
+    {id: 'inp', x: 347, y: 120},
+    {id: 'mi', x: 398, y: 120},
+    {id: 'out', x: 449, y: 120},
+    {id: 'hlta', x: 500, y: 120},
+    {id: 'stack', x: 551, y: 120},
+    {id: 'wo', x: 602, y: 120},
+    {id: 'int', x: 653, y: 120},
+    {id: 'd7', x: 830, y: 120},
+    {id: 'd6', x: 880, y: 120},
+    {id: 'd5', x: 959, y: 120},
+    {id: 'd4', x: 1009, y: 120},
+    {id: 'd3', x: 1059, y: 120},
+    {id: 'd2', x: 1138, y: 120},
+    {id: 'd1', x: 1188, y: 120},
+    {id: 'd0', x: 1238, y: 120},
+    {id: 'wait', x: 194, y: 230},
+    {id: 'hlda', x: 245, y: 230},
+    {id: 'a15', x: 346, y: 230},
+    {id: 'a14', x: 423, y: 230},
+    {id: 'a13', x: 473, y: 230},
+    {id: 'a12', x: 523, y: 230},
+    {id: 'a11', x: 602, y: 230},
+    {id: 'a10', x: 652, y: 230},
+    {id: 'a9', x: 702, y: 230},
+    {id: 'a8', x: 780, y: 230},
+    {id: 'a7', x: 830, y: 230},
+    {id: 'a6', x: 880, y: 230},
+    {id: 'a5', x: 959, y: 230},
+    {id: 'a4', x: 1009, y: 230},
+    {id: 'a3', x: 1059, y: 230},
+    {id: 'a2', x: 1138, y: 230},
+    {id: 'a1', x: 1188, y: 230},
+    {id: 'a0', x: 1238, y: 230},
 ];
 
 /**
- * The info of all toggle switches.
+ * The position of every toggle switch on the panel artwork.
  *
  * A toggle switch has an upper state (which means 1 for address
  * switches) and a lower state (which means 0 for address switches).
  */
 panel.TOGGLE_SWITCH_INFO = [
-    {
-        id: 'off-on',
-        x: 105,
-        y: 439
-    },
-    {
-        id: 's15',
-        x: 346,
-        y: 334
-    },
-    {
-        id: 's14',
-        x: 423,
-        y: 334
-    },
-    {
-        id: 's13',
-        x: 473,
-        y: 334
-    },
-    {
-        id: 's12',
-        x: 523,
-        y: 334
-    },
-    {
-        id: 's11',
-        x: 602,
-        y: 334
-    },
-    {
-        id: 's10',
-        x: 652,
-        y: 334
-    },
-    {
-        id: 's9',
-        x: 702,
-        y: 334
-    },
-    {
-        id: 's8',
-        x: 780,
-        y: 334
-    },
-    {
-        id: 's7',
-        x: 830,
-        y: 334
-    },
-    {
-        id: 's6',
-        x: 880,
-        y: 334
-    },
-    {
-        id: 's5',
-        x: 959,
-        y: 334
-    },
-    {
-        id: 's4',
-        x: 1009,
-        y: 334
-    },
-    {
-        id: 's3',
-        x: 1059,
-        y: 334
-    },
-    {
-        id: 's2',
-        x: 1138,
-        y: 334
-    },
-    {
-        id: 's1',
-        x: 1188,
-        y: 334
-    },
-    {
-        id: 's0',
-        x: 1238,
-        y: 334
-    },
+    {id: 'off-on', x: 105, y: 439},
+    {id: 's15', x: 346, y: 334},
+    {id: 's14', x: 423, y: 334},
+    {id: 's13', x: 473, y: 334},
+    {id: 's12', x: 523, y: 334},
+    {id: 's11', x: 602, y: 334},
+    {id: 's10', x: 652, y: 334},
+    {id: 's9', x: 702, y: 334},
+    {id: 's8', x: 780, y: 334},
+    {id: 's7', x: 830, y: 334},
+    {id: 's6', x: 880, y: 334},
+    {id: 's5', x: 959, y: 334},
+    {id: 's4', x: 1009, y: 334},
+    {id: 's3', x: 1059, y: 334},
+    {id: 's2', x: 1138, y: 334},
+    {id: 's1', x: 1188, y: 334},
+    {id: 's0', x: 1238, y: 334},
 ];
 
 /**
  * The info of all stateless switches.
  *
- * A stateless switch may has a upper command and a lower
- * command. When a command is clicked, the switch moves up or down
- * then back to its middle position, without keeping upper or lower
- * state.
+ * A stateless switch may have an upper command and a lower command.
+ * When a command is clicked, the switch moves up or down then back to
+ * its middle position, without keeping upper or lower state. Each
+ * command's box is the bounding box of its label in the artwork.
  */
 panel.STATELESS_SWITCH_INFO = [
     {
@@ -1539,38 +1207,29 @@ panel.init = function() {
     l10n.initMenu();
     l10n.restoreLocale();
 
-    // Initializes event listener for nav buttons.
-    var button = document.getElementById('nav-sim');
-    button.addEventListener('click', panel.showTabSim, false);
-    button = document.getElementById('nav-tty');
-    button.addEventListener('click', panel.showTabTty, false);
-    button = document.getElementById('nav-debug');
-    button.addEventListener('click', panel.showTabDebug, false);
-    button = document.getElementById('nav-ref');
-    button.addEventListener('click', panel.showTabRes, false);
-
-    // Initializes event listener for debug controls.
-    button = document.getElementById('debug-load-data');
-    button.addEventListener('click', panel.debugLoadData, false);
+    // The nav tabs.
+    for (let i = 0; i < panel.TABS.length; i++) {
+        let name = panel.TABS[i];
+        document.getElementById('nav-' + name).addEventListener(
+            'click', function() { panel.showTab(name); }, false);
+    }
 
     // Initializes svg components for all LEDs.
     for (let i = 0; i < panel.LED_INFO.length; i++) {
         let info = panel.LED_INFO[i];
-        let led = panel.createLed(info.id, info.x, info.y);
+        panel.createLed(info.id, info.x, info.y);
     }
 
     // Initializes svg components for all switches.
     for (let i = 0; i < panel.TOGGLE_SWITCH_INFO.length; i++) {
         let info = panel.TOGGLE_SWITCH_INFO[i];
-        let sw = panel.createSwitch(info.id, panel.TOGGLE_SWITCH,
-                                    info.x, info.y,
-                                    null, null);
+        panel.createSwitch(info.id, panel.TOGGLE_SWITCH, info.x, info.y,
+                           null, null);
     }
     for (let i = 0; i < panel.STATELESS_SWITCH_INFO.length; i++) {
         let info = panel.STATELESS_SWITCH_INFO[i];
-        let sw = panel.createSwitch(info.id, panel.STATELESS_SWITCH,
-                                    info.x, info.y,
-                                    info.upperCmd, info.lowerCmd);
+        panel.createSwitch(info.id, panel.STATELESS_SWITCH, info.x, info.y,
+                           info.upperCmd, info.lowerCmd);
     }
 
     // Initializes internal states.
@@ -1587,11 +1246,8 @@ panel.init = function() {
         panel.getInputAddressCallback,
         panel.dumpCpuCallback, panel.dumpMemCallback);
 
-    // A running CPU asks to redraw the debugger far more often than
-    // the screen can show it - hundreds of times a second, each one
-    // rebuilding the dumps as HTML. Coalesce the requests onto the
-    // browser's own repaint, and drop them altogether while the
-    // debugger is not the visible tab.
+    // Coalesce dump requests onto the browser's repaint, and drop them
+    // while the debugger is not the visible tab.
     panel.sim.dumpScheduler = function(flush) {
         window.requestAnimationFrame(flush);
     };
@@ -1615,25 +1271,24 @@ panel.init = function() {
     panel.sio2.attachTo(panel.sim, Sio.TWO_SIO_BASE_PORT, false);
     panel.initTeletypeUi();
 
-    // Adds handler for 'ZERO ALL MEMORY' Button 
-    // (it doesn't have a corresponding switch on the actual machine)
-    document.getElementById('debug-fill-zero').addEventListener('click', panel.onFillZero)
-
-    // Installed memory, and the controls for the memory dump's window.
-    for (let i = 0; i < panel.MEM_SIZES.length; i++) {
-        let memSize = panel.MEM_SIZES[i];
-        let elem = document.getElementById('mem-size-' + memSize);
-        elem.addEventListener('click', function() {
-            panel.onSetMemSize(memSize);
-        }, false);
-    }
+    // The Debugger tab: loaders, installed memory, and the controls for
+    // the memory dump's window.
     document.getElementById('load-basic').addEventListener(
         'click', panel.onLoadBasic, false);
+    document.getElementById('debug-load-data').addEventListener(
+        'click', panel.debugLoadData, false);
     var filePicker = document.getElementById('binary-file');
     document.getElementById('load-binary').addEventListener(
         'click', function() { filePicker.click(); }, false);
     filePicker.addEventListener('change', panel.onBinaryFileChosen, false);
-    // Keeps the loading message readable after a change of language.
+    document.getElementById('debug-fill-zero').addEventListener(
+        'click', panel.onFillZero, false);
+    for (let i = 0; i < panel.MEM_SIZES.length; i++) {
+        let memSize = panel.MEM_SIZES[i];
+        document.getElementById('mem-size-' + memSize).addEventListener(
+            'click', function() { panel.onSetMemSize(memSize); }, false);
+    }
+    // Text set at runtime has to be redrawn after a change of language.
     l10n.onUpdate = function() {
         panel.refreshStatus();
         panel.refreshExampleMenu();
@@ -1648,8 +1303,7 @@ panel.init = function() {
     document.getElementById('mem-follow-pc').addEventListener(
         'click', panel.onToggleFollowPc, false);
     // One listener on the strip rather than one per cell, so that
-    // cells can come and go when the memory size changes. See
-    // panel.onMemMapPress for why it is the press and not the click.
+    // cells can come and go when the memory size changes.
     document.getElementById('mem-map').addEventListener(
         'pointerdown', panel.onMemMapPress, false);
     panel.updateMemoryControls();
@@ -1738,21 +1392,13 @@ panel.createLed = function(id, x, y) {
 };
 
 /**
- * Turns on the specified LED.
+ * Turns the specified LED on or off.
  * @param {string} id The LED ID.
+ * @param {*} on Whether it is lit.
  */
-panel.ledOn = function(id) {
-    document.getElementById(id + '-on').style.display = 'inline';
-    document.getElementById(id + '-off').style.display = 'none';
-};
-
-/**
- * Turns off the specified LED.
- * @param {string} id The LED ID.
- */
-panel.ledOff = function(id) {
-    document.getElementById(id + '-on').style.display = 'none';
-    document.getElementById(id + '-off').style.display = 'inline';
+panel.setLed = function(id, on) {
+    document.getElementById(id + '-on').style.display = on ? 'inline' : 'none';
+    document.getElementById(id + '-off').style.display = on ? 'none' : 'inline';
 };
 
 /**
@@ -1769,9 +1415,10 @@ panel.SVG_NS = 'http://www.w3.org/2000/svg';
  * and cannot be clicked. This covers a label with an invisible rect so
  * that clicking it operates the switch, the way it does on the real
  * machine. The rect's position and size are the label's bounding box in
- * the panel's coordinate system.
+ * the panel's coordinate system. The matching helper button below the
+ * panel gets the same callback.
  * @param {Object} cmd The command info, holding the label's ID and
- *     bounding box plus the callback to run.
+ *     bounding box.
  * @param {function()} callback Called when the label is clicked.
  */
 panel.createCmdLabel = function(cmd, callback) {
@@ -1789,13 +1436,12 @@ panel.createCmdLabel = function(cmd, callback) {
     elem.addEventListener('click', callback, false);
     panelElem.appendChild(elem);
 
-    // Also installs the helper switch board handler.
-    var softElem = document.getElementById('s-' + cmd.id);
-    softElem.addEventListener('click', callback, false);
+    document.getElementById('s-' + cmd.id).addEventListener(
+        'click', callback, false);
 };
 
 /**
- * Creates a new toggle switch inside the panel svg.
+ * Creates a new switch inside the panel svg.
  * @param {string} id The switch ID. This ID will be used as the
  *     prefix of DOM element's ID.
  * @param {number} type The type of the switch.
@@ -1841,27 +1487,14 @@ panel.createSwitch = function(id, type, x, y, upperCmd, lowerCmd) {
     downElem.style.display = (type == panel.TOGGLE_SWITCH) ? 'inline' : 'none';
 
     if (type == panel.TOGGLE_SWITCH) {
-        var sourceId = id;
-        upElem.addEventListener('click',
-                                function() {
-                                    panel.onToggle(sourceId);
-                                },
-                                false);
-        downElem.addEventListener('click',
-                                  function() {
-                                      panel.onToggle(sourceId);
-                                  },
-                                  false);
-        // Also installs helper switch handlers.
-        let softSwitchId = 's-' + id;
-        let elem = document.getElementById(softSwitchId);
-        elem.addEventListener(
-            'click',
-            function() {
-                panel.onToggle(sourceId);
-            },
-            false
-        );
+        let toggle = function() {
+            panel.onToggle(id);
+        };
+        upElem.addEventListener('click', toggle, false);
+        downElem.addEventListener('click', toggle, false);
+        // The helper button below the panel.
+        document.getElementById('s-' + id).addEventListener(
+            'click', toggle, false);
     } else {
         if (upperCmd) {
             panel.createCmdLabel(upperCmd, function() {
@@ -1985,14 +1618,9 @@ panel.onToggle = function(id) {
     } else if (id == 'off-on') {
         if (panel.isPoweredOn) {
             panel.onPowerOff();
-            panel.switchUp(id);
-            panel.isPoweredOn = false;
         } else {
             panel.onPowerOn();
-            panel.switchDown(id);
-            panel.isPoweredOn = true;
         }
-        panel.updateHelperSwitches();
     }
 };
 
@@ -2027,36 +1655,17 @@ panel.playSwitch = function() {
 };
 
 /**
- * Highlights a nav tab or removes the effect.
- * @param {Element} elem The DOM element of the nav tab.
- * @param {boolean} highlight Whether highlight the tab.
- */
-panel.highlightNavTab = function(elem, highlight) {
-    if (highlight) {
-        elem.classList.add('selected');
-    } else {
-        elem.classList.remove('selected');
-    }
-};
-
-/**
  * The tabs, in the order they appear. The front panel and the teletype
  * are the two things a 1975 owner actually touched, so they sit
- * together; the debugger is the one view that was never part of the
- * machine. See docs/ms-basic-4k.md.
+ * together (D8 in docs/ms-basic-4k.md).
  * @type {Array<string>}
  */
 panel.TABS = ['sim', 'tty', 'debug', 'ref'];
 
 /**
- * Where the chosen tab is remembered between visits.
- *
- * Only the tab is kept, in the same spirit as the chosen language:
- * these are preferences about the view, not state belonging to the
- * machine. Reloading the page reruns the simulator - the power comes
- * back off, memory comes back up full of noise and the paper comes
- * back blank - and pretending otherwise would take saving the whole
- * machine, which is a different and much larger promise.
+ * Where the chosen tab is remembered between visits. Only the view is
+ * remembered, like the language; the machine itself starts afresh on
+ * every page load.
  * @type {string}
  */
 panel.tabStorageKey = 'sim8800tab';
@@ -2092,7 +1701,6 @@ panel.readSavedTab = function() {
  * @param {string} name One of panel.TABS.
  */
 panel.showTab = function(name) {
-    panel.currentTab = name;
     panel.saveTab(name);
     panel.isDebugTabVisible = name == 'debug';
     panel.isTtyTabVisible = name == 'tty';
@@ -2101,7 +1709,8 @@ panel.showTab = function(name) {
         let shown = tab == name;
         document.getElementById('tab-' + tab).style.display =
             shown ? 'block' : 'none';
-        panel.highlightNavTab(document.getElementById('nav-' + tab), shown);
+        document.getElementById('nav-' + tab).classList.toggle(
+            'selected', shown);
     }
     // Neither view is kept up to date while it is hidden, so catch up
     // as it comes back.
@@ -2115,41 +1724,14 @@ panel.showTab = function(name) {
         panel.setNavActivity(false);
         panel.renderTeletype();
     }
-    // The hidden input is not focused when the tab is shown. Focusing
-    // it scrolls it into view, and it sits below a paper some 600px
-    // tall, so on a narrow screen arriving at the teletype threw the
-    // page straight past the thing you came to look at. On a phone it
-    // also raised the keyboard over that paper. Nothing is lost:
-    // keystrokes are handled on document, so no focus is needed in
-    // order to type, and tapping the paper focuses it when the soft
-    // keyboard is actually wanted.
-    //
-    // What does have to be minded is focus left behind elsewhere - in
-    // the debugger's load field, or in this input after leaving the
-    // teletype - which would otherwise swallow the keys or, worse,
-    // keep feeding them to the machine from another tab.
+    // The teletype's hidden input is deliberately not focused here:
+    // focusing scrolls it into view below the paper, and on a phone
+    // raises the keyboard. Keys are handled on document, and tapping
+    // the paper focuses it when the soft keyboard is wanted. Focus left
+    // behind in another tab's input is dropped, so that it cannot
+    // swallow keys or feed them to the machine.
     var focused = document.activeElement;
     if (focused && focused !== document.body && focused.blur) {
         focused.blur();
     }
-};
-
-/** Shows the front panel. */
-panel.showTabSim = function() {
-    panel.showTab('sim');
-};
-
-/** Shows the teletype. */
-panel.showTabTty = function() {
-    panel.showTab('tty');
-};
-
-/** Shows the debugger. */
-panel.showTabDebug = function() {
-    panel.showTab('debug');
-};
-
-/** Shows the reference tab. */
-panel.showTabRes = function() {
-    panel.showTab('ref');
 };

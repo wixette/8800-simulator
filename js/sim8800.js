@@ -115,8 +115,7 @@ class Sim8800 {
      * @param {number} len The output length, with leading zeros.
      */
     static toHex(n, len) {
-        var leadingZeros = (new Array(len)).fill('0').join('');
-        return (leadingZeros + n.toString(16)).toUpperCase().substr(-len);
+        return n.toString(16).toUpperCase().padStart(len, '0').slice(-len);
     }
 
     /**
@@ -136,7 +135,9 @@ class Sim8800 {
     }
 
     /**
-     * Fills the memory with dummy bytes.
+     * Fills the memory with random bytes, as a real machine powers up,
+     * or with zeros.
+     * @param {boolean=} random False to zero the memory instead.
      */
     initMem(random = true) {
         if (random) {
@@ -163,21 +164,18 @@ class Sim8800 {
     }
 
     /**
-     * Loads data into memory.
+     * Loads data into memory from a hex string. The page parses its own
+     * input (see panel.parseBytes); this is a shorthand for tests.
      * @param {number} address The start address to load the data/program.
      * @param {string} hexString Data encoded in hex string, like 'c3 00 00'.
      */
     loadDataAsHexString(address, hexString) {
-        if (!this.isPoweredOn || !hexString)
+        if (!hexString)
             return;
-        var data = hexString.split(' ');
-        for (let i = 0; i < data.length && address < this.mem.length; i++) {
-	    var byte = parseInt('0x' + data[i]);
-            if (!isNaN(byte)) {
-                this.mem[address++] = byte;
-            }
-        }
-        this.requestDump();
+        var bytes = hexString.trim().split(/\s+/)
+            .map(function(token) { return parseInt(token, 16); })
+            .filter(function(byte) { return !isNaN(byte); });
+        this.loadData(address, bytes);
     }
 
     /**
@@ -242,15 +240,9 @@ class Sim8800 {
     /**
      * Describes the memory map strip: one entry per page of memory.
      *
-     * This is data rather than HTML, and that is the point. The strip
-     * used to be built as a string and dropped into the page with
-     * innerHTML on every repaint, which threw away and recreated every
-     * cell sixty times a second. Nothing the browser attaches to an
-     * element could survive that - the cell's tooltip was dismissed
-     * before it could appear, a :hover outline never showed while a
-     * program ran, and a click had to be caught as a pointerdown
-     * because press and release landed on different elements. The view
-     * now keeps the cells and edits them, so all of that works.
+     * Returned as data rather than HTML so that the page can keep the
+     * cells and edit them in place (see panel.renderMemMap, and D21 in
+     * docs/ms-basic-4k.md).
      *
      * Each page carries how full it is, on a scale of 0 to 4, so that
      * the shape of what is loaded is visible at a glance, and a label
@@ -264,20 +256,20 @@ class Sim8800 {
     getMemMap(window, cpu) {
         var size = Sim8800.DUMP_WINDOW_SIZE;
         var pages = [];
-        for (let page = 0; page * size < this.mem.length; page++) {
-            let base = page * size;
+        for (let base = 0; base < this.mem.length; base += size) {
+            let end = Math.min(this.mem.length, base + size);
+            let pageSize = end - base;
             let used = 0;
-            for (let i = base; i < Math.min(this.mem.length, base + size); i++) {
+            for (let i = base; i < end; i++) {
                 if (this.mem[i]) used++;
             }
-            let pageSize = Math.min(this.mem.length - base, size);
             pages.push({
                 start: base,
-                end: base + pageSize,
+                end: end,
                 level: used == 0 ? 0 : Math.min(4, Math.ceil(used / size * 4)),
                 shown: base == window.start,
-                pc: cpu.pc >= base && cpu.pc < base + size,
-                sp: cpu.sp >= base && cpu.sp < base + size,
+                pc: cpu.pc >= base && cpu.pc < end,
+                sp: cpu.sp >= base && cpu.sp < end,
                 label: Sim8800.toHex(base, 4) + '-' +
                     Sim8800.toHex(base + pageSize - 1, 4) + '  ' +
                     Math.round(used / pageSize * 100) + '%',
@@ -289,25 +281,15 @@ class Sim8800 {
     /**
      * Dumps the memory to HTML, for debugging or monitoring.
      *
-     * Only one window of memory is printed, never the whole machine.
-     * On the 256 byte machine the window is the whole machine, so this
-     * prints exactly what it always did; above that the window moves,
-     * and the map strip above it shows where in the address space you
-     * are looking. Printing all of a large memory on every repaint is
-     * what made the debugger unusable past a few hundred bytes.
+     * Only one window of memory is printed, never the whole machine. On
+     * the 256 byte machine the window is the whole machine; above that
+     * the window moves, and the map strip shows where in the address
+     * space you are looking.
      */
     dumpMem() {
-        if (!this.dumpMemCallback)
-            return;
-        // A machine that is off has no memory to print. The guard is
-        // here and not only in flushDump() because anything that calls
-        // this directly bypasses flushDump entirely - ZERO ALL MEMORY
-        // did, and painted a dump of zeros over the blank a powered
-        // down machine is supposed to show. Worse, everything that
-        // moved the window afterwards went through flushDump and was
-        // refused, so the map strip sat there taking clicks and never
-        // moving its cursor.
-        if (!this.isPoweredOn)
+        // A machine that is off has no memory to print. Checked here as
+        // well as in flushDump() so that no caller can go around it.
+        if (!this.dumpMemCallback || !this.isPoweredOn)
             return;
         var cpu = CPU8080.status();
         var window = this.getDumpWindow();
@@ -416,10 +398,7 @@ class Sim8800 {
      * @return {function(number, number)}
      */
     getWriteByteCallback() {
-        var self = this;
-        return function(address, value) {
-            self.writeByte(address, value);
-        };
+        return this.writeByte.bind(this);
     }
 
     /**
@@ -427,10 +406,7 @@ class Sim8800 {
      * @return {function(number): number}
      */
     getReadByteCallback() {
-        var self = this;
-        return function(address) {
-            return self.readByte(address);
-        };
+        return this.readByte.bind(this);
     }
 
     /**
@@ -439,8 +415,8 @@ class Sim8800 {
      * On the real machine a port number is answered by whichever board
      * decodes it, so this is the same shape: a device is any object
      * with a readPort and/or a writePort method, and the simulator
-     * does not care what is behind them. The front panel is attached
-     * this way like anything else; a serial board would be too.
+     * does not care what is behind them. The front panel and the serial
+     * boards (js/sio.js) are all attached this way.
      * @param {number} port The port number, 00h-FFh.
      * @param {Object} device The device. Its optional readPort(port)
      *     returns the byte the CPU reads, and its optional
@@ -505,8 +481,7 @@ class Sim8800 {
     /**
      * Asks for the debugger dumps to be refreshed.
      *
-     * The dumps are the most expensive thing the simulator does - the
-     * memory dump alone rebuilds the whole of memory as HTML - and a
+     * The dumps are the most expensive thing the simulator does, and a
      * running CPU would otherwise ask for them hundreds of times a
      * second. So a UI can set dumpScheduler to coalesce the requests
      * onto its own repaint, and dumpFilter to skip them entirely while
@@ -533,11 +508,8 @@ class Sim8800 {
      */
     flushDump(force = false) {
         this.dumpPending = false;
-        // A machine that is off shows nothing. powerOff() blanks the
-        // dumps deliberately, and a scheduled flush arriving after it
-        // - or the debugger tab being opened later - must not put the
-        // old contents back. dumpCpu() and dumpMem() refuse as well;
-        // stopping here just saves asking them.
+        // powerOff() blanks the dumps, and a flush arriving after it
+        // must not put the old contents back.
         if (!this.isPoweredOn)
             return;
         if (!force && this.dumpFilter && !this.dumpFilter())
@@ -620,14 +592,10 @@ class Sim8800 {
         if (!this.isPoweredOn)
             return;
         // The 8080's RESET line clears the program counter and the
-        // interrupt enable. It does NOT clear the registers, and that
-        // is not a detail: MITS BASIC patches the jump at 0000H to
-        // point at its warm start once it has finished initialising,
-        // so RESET and RUN brings back OK with your program intact
-        // rather than asking MEMORY SIZE? again - and that warm start
-        // assumes the stack pointer is still where it left it. Clear
-        // SP here and the first PUSH lands in unpopulated memory and
-        // BASIC never reaches its prompt.
+        // interrupt enable, but NOT the registers. MITS BASIC depends on
+        // that: once initialised it patches 0000H to jump to its warm
+        // start, which assumes SP is still where it left it, so RESET
+        // and RUN brings back OK with the program intact.
         //
         // The CPU core's reset() clears everything, so put the
         // registers back afterwards. powerOn() does the full clear.
@@ -651,10 +619,9 @@ class Sim8800 {
             this.setDataLedsCallback(new Array(8).fill(1));
         }
         this.requestDump();
-        // The flash is only allowed to put the lamps out if nothing
-        // has taken them over in the meantime. A program that starts
-        // inside this window owns the data LEDs, and used to have
-        // whatever it wrote wiped 400 ms later.
+        // The flash only puts the lamps out if nothing has taken them
+        // over in the meantime: a program started inside this window
+        // owns the LEDs. See endResetFlash().
         this.resetFlashPending = true;
         var token = ++this.resetFlashToken;
         var self = this;

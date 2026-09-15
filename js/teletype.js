@@ -108,7 +108,7 @@ class Teletype {
     }
 
     /**
-     * Prints a string, for tests and for canned messages.
+     * Prints a string, one byte at a time.
      * @param {string} text The text.
      */
     writeText(text) {
@@ -167,7 +167,7 @@ Teletype.LF = 0x0a;
 /** Control-C, which interrupts a running BASIC program. @type {number} */
 Teletype.BREAK = 0x03;
 
-/** Underscore, which BASIC treats as rub out the last character. */
+/** Underscore, which BASIC treats as rub out the last character. @type {number} */
 Teletype.RUBOUT = 0x5f;
 
 /** At sign, which BASIC treats as throw away the line. @type {number} */
