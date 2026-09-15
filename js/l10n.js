@@ -276,18 +276,6 @@ l10n.MESSAGES = {
         'ko': '적재',
     },
 
-    'debug-data-sample': {
-        'en': 'Bytes as a HEX string, such as \'c3 00 00\', or a binary image from disk. Either goes in at 0000H.',
-        'es': 'Bytes como cadena HEX, por ejemplo \'c3 00 00\', o una imagen binaria del disco. Ambas entran en 0000H.',
-        'fr': 'Des octets en chaîne HEX, par exemple \'c3 00 00\', ou une image binaire sur disque. L’un comme l’autre se chargent en 0000H.',
-        'de': 'Bytes als HEX-Zeichenkette, etwa \'c3 00 00\', oder ein Binärabbild von der Festplatte. Beides landet bei 0000H.',
-        'it': 'Byte come stringa HEX, ad esempio \'c3 00 00\', oppure un\'immagine binaria da disco. Entrambe entrano a 0000H.',
-        'zh': '以 HEX 字符串给出的字节，例如 \'c3 00 00\'，或磁盘上的二进制映像。两者都载入到 0000H。',
-        'zh-TW': '以 HEX 字串給出的位元組，例如 \'c3 00 00\'，或磁碟上的二進位映像。兩者都載入到 0000H。',
-        'ja': '\'c3 00 00\' のような HEX 文字列のバイト列、またはディスク上のバイナリイメージ。どちらも 0000H に読み込まれます。',
-        'ko': '\'c3 00 00\' 같은 HEX 문자열 바이트, 또는 디스크의 바이너리 이미지. 둘 다 0000H에 들어갑니다.',
-    },
-
     'status-off': {
         'en': 'The machine is off. Click OFF/ON on the front panel to switch it on.',
         'es': 'La máquina está apagada. Pulsa OFF/ON en el panel frontal para encenderla.',
@@ -516,6 +504,54 @@ l10n.MESSAGES = {
         'ko': 'roms/4kbas32.bin을 읽을 수 없습니다. 이 파일은 선택 사항이며(roms/NOTICE 참고), "바이너리 파일 불러오기"로 직접 이미지를 지정하세요.',
     },
 
+    'mem-size-256': {
+        'en': '256 B · as it shipped',
+        'es': '256 B · de fábrica',
+        'fr': '256 o · d’origine',
+        'de': '256 B · wie ausgeliefert',
+        'it': '256 B · di serie',
+        'zh': '256 B · 出厂配置',
+        'zh-TW': '256 B · 出廠配置',
+        'ja': '256 B · 出荷時のまま',
+        'ko': '256 B · 출고 상태',
+    },
+
+    'mem-size-4096': {
+        'en': '4 KB · one 88-4MCS',
+        'es': '4 KB · una 88-4MCS',
+        'fr': '4 Kio · une 88-4MCS',
+        'de': '4 KB · eine 88-4MCS',
+        'it': '4 KB · una 88-4MCS',
+        'zh': '4 KB · 一块 88-4MCS',
+        'zh-TW': '4 KB · 一塊 88-4MCS',
+        'ja': '4 KB · 88-4MCS 一枚',
+        'ko': '4 KB · 88-4MCS 한 장',
+    },
+
+    'mem-size-8192': {
+        'en': '8 KB · two 88-4MCS',
+        'es': '8 KB · dos 88-4MCS',
+        'fr': '8 Kio · deux 88-4MCS',
+        'de': '8 KB · zwei 88-4MCS',
+        'it': '8 KB · due 88-4MCS',
+        'zh': '8 KB · 两块 88-4MCS',
+        'zh-TW': '8 KB · 兩塊 88-4MCS',
+        'ja': '8 KB · 88-4MCS 二枚',
+        'ko': '8 KB · 88-4MCS 두 장',
+    },
+
+    'debug-data-placeholder': {
+        'en': 'Bytes in hex, such as c3 00 00',
+        'es': 'Bytes en hex, por ejemplo c3 00 00',
+        'fr': 'Octets en hexa, par exemple c3 00 00',
+        'de': 'Bytes in Hex, etwa c3 00 00',
+        'it': 'Byte in esadecimale, ad esempio c3 00 00',
+        'zh': '十六进制字节，例如 c3 00 00',
+        'zh-TW': '十六進位位元組，例如 c3 00 00',
+        'ja': '16 進数のバイト列、例えば c3 00 00',
+        'ko': '16진수 바이트, 예: c3 00 00',
+    },
+
     'debug-cpu-dump-title': {
         'en': '8080 CPU Status Dump',
         'es': 'Estado de la CPU 8080',
@@ -538,18 +574,6 @@ l10n.MESSAGES = {
         'zh-TW': '已安裝的記憶體',
         'ja': '搭載メモリ',
         'ko': '설치된 메모리',
-    },
-
-    'debug-memory-comment': {
-        'en': 'Memory came on boards, and you cannot add one to a running machine: changing this switches the Altair off. 256 B is the base machine, 4 KB adds an 88-4MCS board, 8 KB two of them.',
-        'es': 'La memoria venía en placas, y no se puede añadir una a una máquina encendida: cambiar esto apaga el Altair. 256 B es la máquina básica, 4 KB añade una placa 88-4MCS, 8 KB dos de ellas.',
-        'fr': 'La mémoire se présentait sous forme de cartes, et on ne peut pas en ajouter à une machine en marche : modifier ce réglage éteint l\'Altair. 256 o correspond à la machine de base, 4 Kio ajoutent une carte 88-4MCS, 8 Kio deux.',
-        'de': 'Speicher kam auf Steckkarten, und eine davon lässt sich nicht im laufenden Betrieb einbauen: Diese Änderung schaltet den Altair aus. 256 B ist die Grundmaschine, 4 KB fügen eine 88-4MCS-Karte hinzu, 8 KB zwei davon.',
-        'it': 'La memoria arrivava su schede, e non se ne può aggiungere una a macchina accesa: cambiare questa impostazione spegne l\'Altair. 256 B è la macchina base, 4 KB aggiungono una scheda 88-4MCS, 8 KB due.',
-        'zh': '内存以扩展板的形式提供，而且不能给运行中的机器加装：修改这里会关闭 Altair。256 B 是基础机型，4 KB 相当于加装一块 88-4MCS 板，8 KB 则是两块。',
-        'zh-TW': '記憶體以擴充卡的形式提供，而且無法為運行中的機器加裝：修改這裡會關閉 Altair。256 B 是基礎機型，4 KB 相當於加裝一塊 88-4MCS 卡，8 KB 則是兩塊。',
-        'ja': 'メモリはボードで供給され、動作中のマシンには追加できません。ここを変更すると Altair の電源が切れます。256 B は基本構成、4 KB は 88-4MCS ボード 1 枚、8 KB は 2 枚に相当します。',
-        'ko': '메모리는 보드 형태로 제공되었고, 켜져 있는 기계에는 추가할 수 없습니다. 이 설정을 바꾸면 Altair의 전원이 꺼집니다. 256 B는 기본 기계, 4 KB는 88-4MCS 보드 한 장, 8 KB는 두 장입니다.',
     },
 
     'mem-follow-pc': {
