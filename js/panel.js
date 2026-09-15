@@ -244,6 +244,18 @@ panel.buildExampleMenu = function() {
 };
 
 /**
+ * Puts the hex box's prompt back, in the current language. A
+ * placeholder is an attribute rather than content, so the l10n class
+ * cannot reach it.
+ */
+panel.refreshPlaceholders = function() {
+    var input = document.getElementById('debug-data-input');
+    if (input) {
+        input.placeholder = l10n.getMessage('debug-data-placeholder');
+    }
+};
+
+/**
  * Puts the menu's own label back, in the current language. The menu
  * holds no selection: picking a program is an action, not a setting,
  * so the button keeps saying the same thing.
@@ -1321,7 +1333,9 @@ panel.init = function() {
     l10n.onUpdate = function() {
         panel.refreshStatus();
         panel.refreshExampleMenu();
+        panel.refreshPlaceholders();
     };
+    panel.refreshPlaceholders();
 
     document.getElementById('mem-page-prev').addEventListener(
         'click', function() { panel.onMemPage(-1); }, false);
