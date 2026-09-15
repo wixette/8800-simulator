@@ -359,10 +359,24 @@ panel.onToggleFollowPc = function() {
 };
 
 /**
- * When a cell of the memory map is clicked, moves the window there.
- * @param {Event} event The click event.
+ * When a cell of the memory map is pressed, moves the window there.
+ *
+ * On pointerdown rather than click, and that matters. The dump is
+ * rebuilt wholesale on every repaint, so while a program is running
+ * the cell under the pointer is destroyed and recreated about sixty
+ * times a second. A click needs its press and its release to land on
+ * the same element; a human press lasts long enough to span several
+ * rebuilds, so the browser finds no surviving cell and fires the click
+ * on the container instead - and the map appeared dead whenever
+ * anything was running, while the buttons beside it, which are never
+ * rebuilt, kept working. Pointerdown is read before any rebuild can
+ * intervene. It also covers touch.
+ * @param {Event} event The pointerdown event.
  */
-panel.onMemMapClick = function(event) {
+panel.onMemMapPress = function(event) {
+    if (event.button) {
+        return;  // Not the primary button.
+    }
     var cell = event.target;
     if (!cell || !cell.classList || !cell.classList.contains('mem-page'))
         return;
@@ -1144,9 +1158,10 @@ panel.init = function() {
     document.getElementById('mem-follow-pc').addEventListener(
         'click', panel.onToggleFollowPc, false);
     // The map is rebuilt with every dump, so the listener goes on the
-    // container that survives it.
+    // container that survives it - and listens for the press rather
+    // than the click. See panel.onMemMapPress.
     document.getElementById('mem-dump').addEventListener(
-        'click', panel.onMemMapClick, false);
+        'pointerdown', panel.onMemMapPress, false);
     panel.updateMemoryControls();
     // The machine comes up switched off, and the empty dump and dark
     // panel should say why rather than look broken.
