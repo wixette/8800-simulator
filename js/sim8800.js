@@ -90,6 +90,13 @@ class Sim8800 {
          * @type {boolean}
          */
         this.followPc = false;
+        /**
+         * Counts the RESET lamp flashes, so that one which has been
+         * superseded can tell. See reset() and endResetFlash().
+         * @type {number}
+         */
+        this.resetFlashToken = 0;
+        this.resetFlashPending = false;
         this.initMem();
         this.attachDevice(Sim8800.FRONT_PANEL_PORT,
                           this.createFrontPanelDevice());
@@ -625,15 +632,36 @@ class Sim8800 {
             this.setDataLedsCallback(new Array(8).fill(1));
         }
         this.requestDump();
+        // The flash is only allowed to put the lamps out if nothing
+        // has taken them over in the meantime. A program that starts
+        // inside this window owns the data LEDs, and used to have
+        // whatever it wrote wiped 400 ms later.
+        this.resetFlashPending = true;
+        var token = ++this.resetFlashToken;
         var self = this;
         window.setTimeout(function() {
-            if (self.setAddressLedsCallback) {
-                self.setAddressLedsCallback(new Array(16).fill(0));
-            }
-            if (self.setDataLedsCallback) {
-                self.setDataLedsCallback(new Array(8).fill(0));
-            }
+            if (self.resetFlashToken != token || !self.resetFlashPending)
+                return;
+            self.endResetFlash();
         }, 400);
+    }
+
+    /**
+     * Ends the RESET lamp flash and hands the LEDs back. Called by the
+     * flash's own timeout, and by anything that starts the CPU, so
+     * that a running program's display is never overwritten.
+     */
+    endResetFlash() {
+        if (!this.resetFlashPending)
+            return;
+        this.resetFlashPending = false;
+        this.resetFlashToken++;
+        if (this.setAddressLedsCallback) {
+            this.setAddressLedsCallback(new Array(16).fill(0));
+        }
+        if (this.setDataLedsCallback) {
+            this.setDataLedsCallback(new Array(8).fill(0));
+        }
     }
 
     /**
@@ -654,6 +682,7 @@ class Sim8800 {
     start() {
         if (!this.isPoweredOn)
             return;
+        this.endResetFlash();
         this.isRunning = true;
         if (this.setWaitLedCallback) {
             this.setWaitLedCallback(this.isRunning);
@@ -670,6 +699,8 @@ class Sim8800 {
     step(cycles) {
         if (!this.isPoweredOn)
             return;
+        // Single stepping counts as taking the lamps over too.
+        this.endResetFlash();
         // Runs instruction by instruction, watching for LDAX. On a
         // real Altair 8800, the memory read cycle of LDAX B/D puts
         // the BC/DE register pair on the address bus, hence on the

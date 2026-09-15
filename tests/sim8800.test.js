@@ -155,6 +155,59 @@ test('reset stops the CPU and resets PC to 0', () => {
     assert.ok(state.cpuDump.includes('PC = 0000'));
 });
 
+test('the RESET flash puts the lamps out when nothing is running', () => {
+    const {sim, state} = poweredOnSim();
+    sim.reset();
+    // RESET lights every lamp for 400 ms, the way the real panel does.
+    assert.strictEqual(bitsToNumber(state.addressLeds), 0xffff);
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0xff);
+    flushTimers();
+    assert.strictEqual(bitsToNumber(state.addressLeds), 0);
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0);
+});
+
+test('a program started inside the RESET flash keeps the data LEDs', () => {
+    const {sim, state} = poweredOnSim();
+    // MVI A,8Ch / OUT FFh / HLT - writes the lamps once and stops, the
+    // shape tty-leds has. A program that rewrites them continuously
+    // would repair itself and hide this.
+    sim.loadDataAsHexString(0, '3e 8c d3 ff 76');
+    sim.reset();
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0xff, 'flash is on');
+
+    sim.step(20);
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0x8c,
+                       'the program owns the lamps now');
+
+    // The flash's pending timeout must not wipe what the program wrote.
+    flushTimers();
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0x8c,
+                       'the superseded flash must leave the lamps alone');
+});
+
+test('RUN ends the RESET flash immediately', () => {
+    const {sim, state} = poweredOnSim();
+    sim.reset();
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0xff);
+    sim.start();
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0,
+                       'pressing RUN hands the lamps over at once');
+    assert.strictEqual(bitsToNumber(state.addressLeds), 0);
+    sim.stop();
+});
+
+test('a second RESET supersedes the first flash', () => {
+    const {sim, state} = poweredOnSim();
+    sim.reset();
+    sim.reset();
+    // Two flashes are pending; the first must not put the lamps out
+    // early and leave the second one's flash half length.
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0xff);
+    flushTimers();
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0);
+    assert.strictEqual(sim.resetFlashPending, false);
+});
+
 test('reset clears the program counter and leaves the registers', () => {
     const {sim} = poweredOnSim();
     // MVI A,12h / MVI B,34h / LXI SP,0080h
