@@ -1712,6 +1712,9 @@ panel.showTab = function(name) {
         document.getElementById('nav-' + tab).classList.toggle(
             'selected', shown);
     }
+    // The status line reports on the machine, which the Tutorial tab
+    // does not show. It keeps updating while hidden.
+    document.getElementById('status-bar').hidden = name == 'ref';
     // Neither view is kept up to date while it is hidden, so catch up
     // as it comes back.
     if (panel.isDebugTabVisible) {
