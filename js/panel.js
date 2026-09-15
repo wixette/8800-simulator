@@ -197,26 +197,17 @@ panel.buildExampleMenu = function() {
         return;
     }
     panel.exampleMenuBuilt = true;
-    var menu = document.getElementById('example-select');
-    if (!menu) {
-        return;
-    }
     panel.examplePrograms = {};
-    // The markup leaves whitespace inside the select, so build the
-    // prompt rather than looking for something already there.
-    menu.textContent = '';
-    menu.appendChild(document.createElement('option'));
-    panel.refreshExampleMenu();
-    menu.addEventListener('change', function() {
-        var program = panel.examplePrograms[menu.value];
-        menu.selectedIndex = 0;
+    panel.exampleMenu = new Dropdown('example-menu', function(id) {
+        var program = panel.examplePrograms[id];
         if (!program) {
             return;
         }
         var loaded = panel.loadImage(program.bytes);
         panel.setStatus('example-loaded',
                         {name: program.name, bytes: loaded});
-    }, false);
+    });
+    panel.refreshExampleMenu();
 
     // Fetched together but listed in the order panel.EXAMPLES gives,
     // which is the order they are worth meeting in - not whichever
@@ -236,33 +227,31 @@ panel.buildExampleMenu = function() {
         });
     });
     Promise.all(fetches).then(function(results) {
+        var items = [];
         for (let i = 0; i < results.length; i++) {
             if (!results[i]) {
                 continue;
             }
-            let id = results[i].id;
-            let program = results[i].program;
-            panel.examplePrograms[id] = program;
-            let option = document.createElement('option');
-            option.value = id;
-            option.textContent = program.name + ' \u2014 ' +
-                program.bytes.length + ' bytes';
-            menu.appendChild(option);
+            panel.examplePrograms[results[i].id] = results[i].program;
+            items.push({
+                value: results[i].id,
+                label: results[i].program.name + ' \u2014 ' +
+                    results[i].program.bytes.length + ' bytes',
+            });
         }
+        panel.exampleMenu.setItems(items);
     });
 };
 
 /**
- * Puts the menu's prompt back, in the current language.
+ * Puts the menu's own label back, in the current language. The menu
+ * holds no selection: picking a program is an action, not a setting,
+ * so the button keeps saying the same thing.
  */
 panel.refreshExampleMenu = function() {
-    var menu = document.getElementById('example-select');
-    if (!menu || !menu.options.length) {
-        return;
+    if (panel.exampleMenu) {
+        panel.exampleMenu.setLabel(l10n.getMessage('example-prompt'));
     }
-    menu.options[0].value = '';
-    menu.options[0].textContent = l10n.getMessage('example-prompt');
-    menu.selectedIndex = 0;
 };
 
 /**

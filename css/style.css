@@ -126,70 +126,98 @@ main {
     font-weight: bold;
 }
 
-#locale-menu {
-    margin: 20px;
+/* A drop down the page draws itself: a button, and a list under it.
+   Shared by the language menu and the example programs menu, so that
+   they look and behave the same. js/dropdown.js says why this is not
+   a <select>. */
+.dropdown {
     /* The list below is positioned against this. */
     position: relative;
 }
 
-#switch-locale {
+.dropdown > button {
     align-items: center;
-    background-color: #369;
+    background-color: #eee;
     border: none;
     border-radius: 10px;
-    color: #6cf;
+    box-sizing: border-box;
+    color: #222;
     cursor: pointer;
     display: flex;
     font-family: inherit;
-    font-size: 12px;
+    font-size: 14px;
     /* Roomier on the right so the arrow is not against the edge. */
-    gap: 8px;
-    padding: 6px 12px 6px 14px;
+    gap: 10px;
+    /* The same 32px the buttons beside it come to. */
+    height: 32px;
+    padding: 0 14px;
     user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     -webkit-user-select: none;
 }
 
-#locale-arrow {
+.dropdown-arrow {
     font-size: 10px;
     line-height: 1;
 }
 
-#locale-list {
+.dropdown ul {
     background-color: #eee;
     border-radius: 10px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
     color: #222;
+    left: 0;
     list-style: none;
     margin: 0;
     max-height: 60vh;
+    /* Never wider than the window, however long an entry is. */
+    max-width: calc(100vw - 32px);
     overflow-y: auto;
     padding: 4px 0;
-    /* Always directly under the button, never over it, and anchored to
-       its right edge so a long name cannot push the list off screen. */
+    /* Always directly under the button, never over it. */
     position: absolute;
-    right: 0;
     top: calc(100% + 6px);
     z-index: 10;
 }
 
-#locale-list li {
+.dropdown li {
     cursor: pointer;
-    font-size: 13px;
-    padding: 7px 18px;
+    font-size: 14px;
+    padding: 8px 18px;
     white-space: nowrap;
 }
 
-#locale-list li:hover,
-#locale-list li:focus {
+.dropdown li:hover,
+.dropdown li:focus {
     background-color: #ddd;
     outline: none;
 }
 
-#locale-list li[aria-selected='true'] {
+.dropdown li[aria-selected='true'] {
     background-color: #369;
     color: #6cf;
+}
+
+#locale-menu {
+    margin: 20px;
+}
+
+/* The language button sits in the dark header bar, so it keeps its own
+   colours and a smaller size. */
+#switch-locale {
+    background-color: #369;
+    color: #6cf;
+    font-size: 12px;
+    height: auto;
+    padding: 6px 12px 6px 14px;
+}
+
+/* Anchored to the button's right edge: it sits at the right of the
+   header, where a list growing rightwards would leave the window. */
+#locale-list {
+    left: auto;
+    right: 0;
 }
 
 .subheader-bar {
@@ -627,32 +655,3 @@ footer {
     }
 }
 
-/* The example menu, dressed to match the buttons beside it.
-
-   appearance: none is doing real work here. Left alone, Chrome gives a
-   select its own metrics and ignores line-height, so it came out
-   23.5px tall against the buttons' 32px, and the arrow it draws itself
-   sits hard against the rounded edge with no way to move it. Taking
-   both over means the height can be stated exactly and the arrow
-   placed with room around it. */
-#example-select {
-    appearance: none;
-    -webkit-appearance: none;
-    background-color: #eee;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23222' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    background-position: right 14px center;
-    background-repeat: no-repeat;
-    background-size: 10px 6px;
-    border: 0;
-    border-radius: 10px;
-    /* 2 + 28 + 2, the same 32px the buttons come to. */
-    box-sizing: border-box;
-    color: #222;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 14px;
-    height: 32px;
-    line-height: 28px;
-    max-width: 100%;
-    padding: 2px 34px 2px 10px;
-}

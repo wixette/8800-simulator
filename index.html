@@ -30,11 +30,11 @@
         <div id="header-title" class="l10n">
           Sim-8800: Altair 8800 Simulator
         </div>
-        <div id="locale-menu">
+        <div id="locale-menu" class="dropdown">
           <button id="switch-locale" type="button" aria-haspopup="listbox"
                   aria-expanded="false" aria-label="Language">
-            <span id="locale-current">English</span>
-            <span id="locale-arrow" aria-hidden="true">&#9662;</span>
+            <span id="locale-current" class="dropdown-label">English</span>
+            <span class="dropdown-arrow" aria-hidden="true">&#9662;</span>
           </button>
           <ul id="locale-list" role="listbox" aria-label="Language" hidden></ul>
         </div>
@@ -144,8 +144,14 @@
         </div>
         <div class="h-box justify-start mt-8 mb-8 align-items-center">
           <div id="load-basic" class="button m-8 l10n">LOAD 4K BASIC</div>
-          <select id="example-select" class="m-8" aria-label="Example programs">
-          </select>
+          <div id="example-menu" class="dropdown m-8">
+            <button id="example-button" type="button" aria-haspopup="listbox"
+                    aria-expanded="false">
+              <span id="example-label" class="dropdown-label"></span>
+              <span class="dropdown-arrow" aria-hidden="true">&#9662;</span>
+            </button>
+            <ul id="example-list" role="listbox" hidden></ul>
+          </div>
         </div>
 
         <div class="subheader-bar mt-8">
@@ -329,6 +335,7 @@ RUN</pre>
     <script src="js/l10n.js"></script>
     <script src="js/8080.js"></script>
     <script src="js/sim8800.js"></script>
+    <script src="js/dropdown.js"></script>
     <script src="js/listing.js"></script>
     <script src="js/sio.js"></script>
     <script src="js/teletype.js"></script>
