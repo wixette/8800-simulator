@@ -456,6 +456,42 @@ l10n.MESSAGES = {
         'ko': '{name}에서 0000H에 {bytes}바이트를 불러오고 RESET을 눌렀습니다.',
     },
 
+    'rom-file-too-big': {
+        'en': '{name} is {bytes} bytes. The 8080 can only address 64 KB, so that is not a memory image - nothing was loaded.',
+        'es': '{name} ocupa {bytes} bytes. El 8080 solo puede direccionar 64 KB, así que eso no es una imagen de memoria: no se cargó nada.',
+        'fr': '{name} fait {bytes} octets. Le 8080 ne peut adresser que 64 Kio, ce n’est donc pas une image mémoire - rien n’a été chargé.',
+        'de': '{name} ist {bytes} Bytes groß. Der 8080 kann nur 64 KB adressieren, das ist also kein Speicherabbild - es wurde nichts geladen.',
+        'it': '{name} è di {bytes} byte. L’8080 può indirizzare solo 64 KB, quindi non è un’immagine di memoria: non è stato caricato nulla.',
+        'zh': '{name} 有 {bytes} 字节。8080 最多只能寻址 64 KB，所以这不是一个内存映像——什么都没有加载。',
+        'zh-TW': '{name} 有 {bytes} 位元組。8080 最多只能定址 64 KB，所以這不是一個記憶體映像——什麼都沒有載入。',
+        'ja': '{name} は {bytes} バイトあります。8080 は 64 KB までしかアドレスできないので、これはメモリイメージではありません。何も読み込みませんでした。',
+        'ko': '{name}은(는) {bytes}바이트입니다. 8080은 64 KB까지만 주소를 지정할 수 있으므로 이것은 메모리 이미지가 아닙니다. 아무것도 불러오지 않았습니다.',
+    },
+
+    'rom-file-truncated': {
+        'en': 'Loaded the first {bytes} bytes of {name} at 0000H and pressed RESET. The file is {size} bytes; the rest does not fit in the memory installed.',
+        'es': 'Se cargaron los primeros {bytes} bytes de {name} en 0000H y se pulsó RESET. El archivo tiene {size} bytes; el resto no cabe en la memoria instalada.',
+        'fr': 'Les {bytes} premiers octets de {name} ont été chargés en 0000H et RESET appuyé. Le fichier fait {size} octets ; le reste ne tient pas dans la mémoire installée.',
+        'de': 'Die ersten {bytes} Bytes von {name} wurden bei 0000H geladen und RESET gedrückt. Die Datei hat {size} Bytes; der Rest passt nicht in den installierten Speicher.',
+        'it': 'Caricati i primi {bytes} byte di {name} a 0000H e premuto RESET. Il file è di {size} byte; il resto non entra nella memoria installata.',
+        'zh': '已把 {name} 的前 {bytes} 字节载入 0000H 并按下 RESET。该文件共 {size} 字节，其余部分装不进已安装的内存。',
+        'zh-TW': '已把 {name} 的前 {bytes} 位元組載入 0000H 並按下 RESET。該檔案共 {size} 位元組，其餘部分裝不進已安裝的記憶體。',
+        'ja': '{name} の先頭 {bytes} バイトを 0000H に読み込み、RESET を押しました。ファイルは {size} バイトあり、残りは搭載メモリに入りません。',
+        'ko': '{name}의 앞 {bytes}바이트를 0000H에 불러오고 RESET을 눌렀습니다. 파일은 {size}바이트이며, 나머지는 설치된 메모리에 들어가지 않습니다.',
+    },
+
+    'rom-file-unreadable': {
+        'en': '{name} could not be read.',
+        'es': 'No se pudo leer {name}.',
+        'fr': 'Impossible de lire {name}.',
+        'de': '{name} konnte nicht gelesen werden.',
+        'it': 'Impossibile leggere {name}.',
+        'zh': '无法读取 {name}。',
+        'zh-TW': '無法讀取 {name}。',
+        'ja': '{name} を読み込めませんでした。',
+        'ko': '{name}을(를) 읽을 수 없습니다.',
+    },
+
     'rom-missing': {
         'en': 'roms/4kbas32.bin could not be read. It is optional - see roms/NOTICE - so supply your own image with LOAD BINARY FILE.',
         'es': 'No se pudo leer roms/4kbas32.bin. Es opcional (consulta roms/NOTICE), así que carga tu propia imagen con CARGAR ARCHIVO BINARIO.',

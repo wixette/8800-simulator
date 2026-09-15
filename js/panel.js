@@ -151,6 +151,14 @@ panel.ROM_URL = 'roms/4kbas32.bin';
 panel.MIN_BASIC_MEM = 4096;
 
 /**
+ * The largest file the loader will read. The 8080 can address 64 KB
+ * and no more, so anything past that is not a memory image and there
+ * is no reason to pull it into the browser to find out.
+ * @type {number}
+ */
+panel.MAX_IMAGE_BYTES = 65536;
+
+/**
  * Says something on the status line at the foot of the machine.
  *
  * A lot of what the simulator does is only obvious if you already know
@@ -212,7 +220,8 @@ panel.formatMemSize = function(bytes) {
  * the memory map above show what was just loaded before the program
  * starts writing over it - which for BASIC is fifteen of the sixteen
  * pages of a 4 KB machine.
- * @param {Array<number>} bytes The image.
+ * @param {Array<number>|Uint8Array} bytes The image. Anything longer
+ *     than the installed memory is ignored past the top.
  * @return {number} How many bytes actually fit in the machine.
  */
 panel.loadImage = function(bytes) {
@@ -244,7 +253,7 @@ panel.onLoadBasic = function() {
         }
         return response.arrayBuffer();
     }).then(function(buffer) {
-        var loaded = panel.loadImage(Array.from(new Uint8Array(buffer)));
+        var loaded = panel.loadImage(new Uint8Array(buffer));
         panel.setStatus('rom-loaded', {bytes: loaded});
     }).catch(function() {
         panel.setStatus('rom-missing', {}, 'error');
@@ -257,18 +266,42 @@ panel.onLoadBasic = function() {
  */
 panel.onBinaryFileChosen = function(event) {
     var file = event.target.files && event.target.files[0];
+    // So that choosing the same file twice in a row still fires.
+    event.target.value = '';
     if (!file) {
+        return;
+    }
+    // Checked before reading, not after: FileReader would otherwise
+    // pull the whole thing into memory just to have it thrown away.
+    if (file.size > panel.MAX_IMAGE_BYTES) {
+        panel.setStatus('rom-file-too-big',
+                        {name: file.name, bytes: file.size,
+                         max: panel.MAX_IMAGE_BYTES}, 'error');
         return;
     }
     var reader = new FileReader();
     reader.onload = function() {
-        var loaded = panel.loadImage(Array.from(new Uint8Array(reader.result)));
-        panel.setStatus('rom-file-loaded',
-                        {bytes: loaded, name: file.name});
+        // Only what fits is converted. Handing the whole file to
+        // loadImage would build a JavaScript array the length of the
+        // file - seconds of frozen page for a large one - to load the
+        // first few hundred bytes of it.
+        var size = panel.sim.mem.length;
+        var bytes = new Uint8Array(reader.result, 0,
+                                   Math.min(reader.result.byteLength, size));
+        var loaded = panel.loadImage(bytes);
+        if (file.size > size) {
+            panel.setStatus('rom-file-truncated',
+                            {bytes: loaded, name: file.name,
+                             size: file.size}, 'warn');
+        } else {
+            panel.setStatus('rom-file-loaded',
+                            {bytes: loaded, name: file.name});
+        }
+    };
+    reader.onerror = function() {
+        panel.setStatus('rom-file-unreadable', {name: file.name}, 'error');
     };
     reader.readAsArrayBuffer(file);
-    // So that choosing the same file twice in a row still fires.
-    event.target.value = '';
 };
 
 /**
