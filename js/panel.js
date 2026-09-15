@@ -1104,7 +1104,7 @@ panel.init = function() {
     // Initializes the simulator.
     panel.sim = new Sim8800(
         256, /* 256B MEM */
-        1000000, /* 1MHz */
+        2000000, /* 2MHz, as the Altair 8800 ran */
         panel.setAddressLedsCallback, panel.setDataLedsCallback,
         panel.setWaitLedCallback, panel.setStatusLedsCallback,
         panel.getInputAddressCallback,

@@ -6,7 +6,7 @@
 ;;; pattern 10001100 sliding one place to the right on every pass,
 ;;; wrapping around from D0 back to D7.
 ;;;
-;;; The simulator runs at 1 MHz, so the rotation is far too fast to
+;;; The simulator runs at 2 MHz, so the rotation is far too fast to
 ;;; follow LED by LED; the row reads as a shimmer. Use SINGLE STEP to
 ;;; watch it move one rotation at a time.
 

@@ -51,7 +51,7 @@ bit rotate faster.
 
 ### Why you must flip the switch back down
 
-The game loop runs `IN 0FFH; XRA D; RRC` roughly every 0.23 s, and the
+The game loop runs `IN 0FFH; XRA D; RRC` roughly every 0.115 s, and the
 XOR does not *test* your switch. It unconditionally *flips* the display
 bit at every position where a switch is up, on every pass. The first
 pass kills the lit bit, but if the switch is still up on the next pass
