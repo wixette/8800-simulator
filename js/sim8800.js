@@ -730,7 +730,7 @@ class Sim8800 {
         var executed = 0;
         while (executed < cycles) {
             let cpu = CPU8080.status();
-            let opcode = this.mem[cpu.pc % this.mem.length];
+            let opcode = this.readByte(cpu.pc);
             let before = CPU8080.T();
             CPU8080.steps(1);
             let consumed = CPU8080.T() - before;
@@ -770,9 +770,8 @@ class Sim8800 {
             return;
         var address = this.step(1);
         if (this.setDataLedsCallback) {
-            let bits = Sim8800.parseBits(this.mem[address % this.mem.length],
-                                         8);
-            this.setDataLedsCallback(bits);
+            this.setDataLedsCallback(
+                Sim8800.parseBits(this.readByte(address), 8));
         }
     }
 
