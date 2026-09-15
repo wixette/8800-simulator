@@ -627,18 +627,32 @@ footer {
     }
 }
 
-/* The example menu. A native select, dressed to match the buttons
-   beside it: it carries its own disclosure arrow, which is the whole
-   reason for preferring it to a custom menu here. */
+/* The example menu, dressed to match the buttons beside it.
+
+   appearance: none is doing real work here. Left alone, Chrome gives a
+   select its own metrics and ignores line-height, so it came out
+   23.5px tall against the buttons' 32px, and the arrow it draws itself
+   sits hard against the rounded edge with no way to move it. Taking
+   both over means the height can be stated exactly and the arrow
+   placed with room around it. */
 #example-select {
+    appearance: none;
+    -webkit-appearance: none;
     background-color: #eee;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23222' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-position: right 14px center;
+    background-repeat: no-repeat;
+    background-size: 10px 6px;
     border: 0;
     border-radius: 10px;
+    /* 2 + 28 + 2, the same 32px the buttons come to. */
+    box-sizing: border-box;
     color: #222;
     cursor: pointer;
     font-family: inherit;
     font-size: 14px;
-    line-height: 2em;
+    height: 32px;
+    line-height: 28px;
     max-width: 100%;
-    padding: 2px 8px;
+    padding: 2px 34px 2px 10px;
 }
