@@ -88,7 +88,7 @@ class Sio {
     }
 
     /**
-     * Queues a whole string, for tests and for pasting.
+     * Queues a whole string, as if it had been typed.
      * @param {string} text The text.
      */
     receiveText(text) {
@@ -105,19 +105,13 @@ class Sio {
     }
 
     /**
-     * Reads the status port.
-     *
-     * The two boards report the opposite way up. On the 88-SIO a clear
-     * bit means ready, so "no input" is set when nothing is waiting
-     * and the transmit-busy bit stays clear because nothing here is
-     * ever slower than the CPU. On the 88-2SIO, whose 6850 ACIA is the
-     * usual way round, a set bit means ready. Only the bits software
-     * actually tests are modelled.
+     * Reads the status port. Only the bits software actually tests are
+     * modelled, and the transmitter is always ready: nothing here is
+     * ever slower than the CPU.
      * @return {number} The status byte.
      */
     readStatus() {
         if (this.activeLow) {
-            // Nothing here is ever slower than the CPU, so
             // STATUS_OUTPUT_BUSY stays clear.
             return this.rx.length ? 0 : Sio.STATUS_NO_INPUT;
         }

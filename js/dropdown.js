@@ -74,10 +74,8 @@ class Dropdown {
      * Fills the list.
      * @param {Array<{value: string, label: string,
      *     startsGroup: (boolean|undefined)}>} items The choices. An
-     *     item marked startsGroup gets a rule above it. It is still an
-     *     ordinary item, so nothing about moving around the list
-     *     changes - a heading would have to be skipped by the arrow
-     *     keys, and a list of ten needs a seam rather than headings.
+     *     item marked startsGroup gets a rule above it, and is otherwise
+     *     an ordinary item for the arrow keys.
      */
     setItems(items) {
         if (!this.list) {
@@ -130,9 +128,8 @@ class Dropdown {
     /** Opens the list, with the keyboard on the current choice. */
     open() {
         if (!this.list.children.length) {
-            // A menu of nothing opens as a box of nothing, which tells
-            // the reader less than not opening does. Whoever had
-            // nothing to put in it says why.
+            // An empty menu does not open; whoever left it empty says
+            // why.
             return;
         }
         this.list.hidden = false;

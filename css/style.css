@@ -17,16 +17,7 @@ div, img, pre {
     padding: 0;
 }
 
-a:link {
-    color: #6cf;
-}
-a:visited {
-    color: #6cf;
-}
-a:hover {
-    color: #6cf;
-}
-a:active {
+a {
     color: #6cf;
 }
 
@@ -46,25 +37,10 @@ a:active {
     justify-content: start;
 }
 
-.justify-end {
-    justify-content: end;
-}
 
-.justify-center {
-    justify-content: center;
-}
 
-.justify-space-between {
-    justify-content: space-between;
-}
 
-.justify-space-around {
-    justify-content: space-around;
-}
 
-.justify-space-evenly {
-    justify-content: space-evenly;
-}
 
 .align-items-center {
     align-items: center;
@@ -78,9 +54,6 @@ a:active {
     margin-top: 8px;
 }
 
-.ml-8 {
-    margin-left: 8px;
-}
 
 .mr-8 {
     margin-right: 8px;
@@ -94,13 +67,7 @@ a:active {
     flex-grow: 1;
 }
 
-.flex-grow-2 {
-    flex-grow: 2;
-}
 
-.flex-grow-4 {
-    flex-grow: 4;
-}
 
 main {
     background-color: #222;
@@ -247,12 +214,8 @@ nav {
     color: #222;
     display: flex;
     flex-direction: row;
-    /* The tabs wrap rather than run off the side. Four of them will not
-       fit across a phone - and some languages name them at length,
-       Fernschreiber and Téléscripteur among them - so on a narrow
-       screen they fall into two rows instead of pushing the whole page
-       wider than the window. row-gap only has an effect once they have
-       actually wrapped. */
+    /* On a narrow screen the tabs wrap into two rows rather than push
+       the page wider than the window. */
     flex-wrap: wrap;
     justify-content: space-around;
     min-height: 40px;
@@ -268,6 +231,8 @@ nav {
     line-height: 40px;
     margin: 0 5px;
     padding: 0 5px;
+    /* For the activity dot below. */
+    position: relative;
     text-align: center;
     user-select: none;
     -moz-user-select: none;
@@ -311,21 +276,7 @@ footer {
     padding: 5px 10px;
 }
 
-#cpu-dump {
-    background-color: #ccc;
-    border-radius: 10px;
-    color: #222;
-    font-size: 14px;
-    line-height: 24px;
-    min-height: 24px;
-    /* The dumps are fixed width text. Let a narrow window scroll across
-       them rather than cutting the right hand columns off. There is no
-       height here, so the box grows to fit and the page scrolls it
-       vertically; only this axis ever shows a bar. */
-    overflow-x: auto;
-    padding: 5px 10px;
-}
-
+#cpu-dump,
 #mem-dump {
     background-color: #ccc;
     border-radius: 10px;
@@ -333,10 +284,8 @@ footer {
     font-size: 14px;
     line-height: 24px;
     min-height: 24px;
-    /* The dumps are fixed width text. Let a narrow window scroll across
-       them rather than cutting the right hand columns off. There is no
-       height here, so the box grows to fit and the page scrolls it
-       vertically; only this axis ever shows a bar. */
+    /* Fixed width text: a narrow window scrolls across it rather than
+       cutting the right hand columns off. */
     overflow-x: auto;
     padding: 5px 10px;
 }
@@ -388,11 +337,8 @@ footer {
     margin: 10px 0;
 }
 
-/* The hidden attribute has to win. The browser's own rule for it is
-   only display: none at user agent level, which any author rule with
-   a display in it beats - and .mem-map below sets display: flex, so
-   hiding the strip by setting .hidden would otherwise do nothing at
-   all. */
+/* The hidden attribute has to beat author rules such as .mem-map's
+   display: flex. */
 [hidden] {
     display: none !important;
 }
@@ -405,10 +351,8 @@ footer {
     flex-direction: row;
     flex-wrap: wrap;
     gap: 2px;
-    /* It sits between the dump controls and the dump itself, as its
-       own element rather than inside the dump - the dump is rewritten
-       on every repaint and these cells have to outlive that. See
-       panel.renderMemMap. */
+    /* Its own element rather than part of the dump, so that its cells
+       outlive the dump's repaints. See panel.renderMemMap. */
     margin: 5px 0 0 0;
 }
 
@@ -430,22 +374,9 @@ footer {
 .mem-page-3 { background-color: #777; }
 .mem-page-4 { background-color: #555; }
 
-/* The page the dump is printing. The outline sits in the gap between
-   cells rather than inside them, so that it does not paint over the
-   PC and SP marks below - which is the usual case, since the page you
-   are looking at is normally the one the program is running in.
-
-   There is deliberately no :hover here. One was tried, a white outline
-   on the cell under the pointer, and it had to go for two reasons.
-   It could not work while a program ran: the strip is rebuilt from
-   innerHTML on every repaint, so the element under the pointer is
-   destroyed sixty times a second and the browser has nothing to keep
-   a hover state on - the same reason the click had to become a
-   pointerdown, see panel.onMemMapPress. And it used the same property
-   as the rule above, so hovering the page you were looking at replaced
-   the orange cursor with white and hid the one thing the strip is for.
-   The cursor: pointer on .mem-page is the affordance, and it survives
-   the rebuild because it is hit tested afresh on every frame. */
+/* The page the dump is printing. An outline, so that it does not paint
+   over the PC and SP marks below. No :hover rule: it would use the
+   same property and hide this one on the very cell it marks. */
 .mem-page-shown {
     outline: 2px solid #f90;
 }
@@ -469,7 +400,7 @@ footer {
 }
 
 /* A button holding a current choice: the installed memory size, or
-   FOLLOW PC while it is on. Matches the selected nav tab. A helper
+   Follow PC while it is on. Matches the selected nav tab. A helper
    button standing for a raised address switch reads the same way -
    orange means active, wherever it appears. */
 .button.selected,
@@ -478,24 +409,11 @@ footer {
     font-weight: bold;
 }
 
-/* A control that cannot be used just now: the dump buttons while the
-   machine is off or while all of memory is already on screen, LOAD 4K
-   BASIC on a machine too small to hold it.
-
-   It keeps the pointer cursor, which looks like a mistake and is not.
-   Elsewhere a greyed button ignores you; here it takes the press and
-   answers in the status bar with the reason it is grey. A simulator is
-   for finding out what the machine can do, and a control that goes
-   dead without a word teaches nothing. Coming after .selected means a
-   button that is both - FOLLOW PC, switched on, on a dead machine -
-   reads as unavailable rather than as active.
-
-   Both shapes of control are named. The controls on this page are
-   mostly .button divs, but the example menu is a real <button> inside
-   a .dropdown, and it needs the same treatment for the same reason -
-   it cannot offer anything on a page opened straight off the disk.
-   Naming only .button left it carrying the class and looking entirely
-   available. */
+/* A control that cannot be used just now. It keeps the pointer cursor
+   on purpose: pressing it answers in the status bar with the reason it
+   is grey (D19 in docs/ms-basic-4k.md). Coming after .selected means a
+   button that is both reads as unavailable. The example menu is a real
+   <button> inside a .dropdown, so both shapes of control are named. */
 .button.disabled,
 .button.disabled.selected,
 .dropdown > button.disabled {
@@ -504,21 +422,11 @@ footer {
     font-weight: normal;
 }
 
-
-/* The power switch. It is the one control that has to be found before
-   anything else in the simulator does anything, and its counterpart on
-   the panel is a 20 px sprite among thirty others, so this one is
-   deliberately the loudest thing on the helper board.
-
-   While the machine is off it keeps the pale body its neighbours have
-   - the brightest thing there is against the dark panel - and wears a
-   ring to say which button it is. A dark fill was tried first and was
-   the wrong instinct: it receded into the background at exactly the
-   moment the button most needs finding. Switched on it fills green and
-   glows, which no other control does.
-
-   No orange, which on this board means a raised address switch, and no
-   red: a machine that is merely switched off is not faulty. */
+/* The power switch, the one control that has to be found before
+   anything else works, so the loudest thing on the helper board: a
+   ring while off, green and glowing while on. No orange, which here
+   means a raised address switch, and no red: switched off is not
+   faulty. */
 .button.power-button {
     background-color: #eee;
     box-shadow: 0 0 0 3px #4da3ff;
@@ -533,7 +441,6 @@ footer {
     box-shadow: 0 0 12px rgba(61, 220, 99, 0.6);
     color: #123;
 }
-
 
 /* The Teletype tab. A printer, not a screen: paper coloured stock,
    72 columns wide, scrolled to wherever the carriage is. */
@@ -629,13 +536,7 @@ footer {
 }
 
 /* Marks the Teletype tab while its machine is printing and you are
-   looking at something else. Positioned out of the flow so that it
-   cannot change the tab's height or shift its label off the baseline
-   the other tabs sit on. */
-.nav-item {
-    position: relative;
-}
-
+   looking at something else. Out of the flow, so the tab does not move. */
 .nav-item.has-activity::after {
     background-color: #f90;
     border-radius: 50%;
@@ -678,9 +579,8 @@ footer {
     white-space: nowrap;
 }
 
-/* Phones. The only thing that did not already fit was the tab strip;
-   everything wide - the memory dump, the teletype paper - scrolls
-   inside its own box. */
+/* Phones. Everything wide - the dumps, the teletype paper - already
+   scrolls inside its own box. */
 @media (max-width: 560px) {
     /* Two tabs per row, evenly, rather than three and a stray. The
        basis is well under half so that rounding cannot leave only one
@@ -693,11 +593,8 @@ footer {
        five, five, five and a stray A00. The :not excludes the command
        buttons, whose ids all begin s-sw-. */
     [id^="s-s"]:not([id^="s-sw"]) {
-        /* border-box so the basis covers the button's own padding;
-           with the default content-box it does not, and four never
-           fit. Under a quarter so that rounding cannot drop one off
-           the row, leaving room for the 16px of margin m-8 adds, then
-           grow to share out the slack. */
+        /* border-box so the basis covers the button's padding; under a
+           quarter to leave room for m-8's 16px of margin. */
         box-sizing: border-box;
         flex: 1 1 calc(25% - 18px);
     }
@@ -712,4 +609,3 @@ footer {
         padding: 8px;
     }
 }
-
