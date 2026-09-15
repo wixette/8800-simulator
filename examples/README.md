@@ -16,6 +16,7 @@ carrying its address, its bytes and its source.
 | [tty-leds.asm](tty-leds.asm) | 18 B | Echoes it, and shows its ASCII code on the data LEDs |
 | [tty-hello.asm](tty-hello.asm) | 39 B | Prints `HELLO, WORLD!` on the teletype and halts |
 | [tty-ascii.asm](tty-ascii.asm) | 20 B | Prints every printable ASCII character, then halts |
+| [guess-letter.asm](guess-letter.asm) | 218 B | A guessing game on the teletype, with HIGHER and LOWER |
 
 ## Loading a program
 
@@ -33,6 +34,7 @@ tty-echo        db 00 e6 01 c2 00 00 db 01 e6 7f d3 01 c3 00 00
 tty-leds        db 00 e6 01 c2 00 00 db 01 e6 7f d3 ff d3 01 c3 00 00
 tty-hello       21 17 00 7e b7 ca 16 00 db 00 e6 80 c2 08 00 7e d3 01 23 c3 03 00 76 48 45 4c 4c 4f 2c 20 57 4f 52 4c 44 21 0d 0a 00
 tty-ascii       0e 20 db 00 e6 80 c2 02 00 79 d3 01 0c 79 fe 7f c2 02 00 76
+guess-letter    31 ff 00 21 87 00 cd 65 00 04 db 00 e6 01 c2 09 00 db 01 78 fe 1a da 1e 00 d6 1a c3 14 00 c6 41 47 16 00 21 b0 00 cd 65 00 cd 70 00 4f cd 7c 00 14 79 b8 ca 48 00 da 3f 00 21 bd 00 c3 42 00 21 b5 00 cd 65 00 c3 23 00 21 c4 00 cd 65 00 7a fe 0a da 56 00 3e 09 c6 30 4f cd 7c 00 21 d0 00 cd 65 00 c3 00 00 7e b7 c8 4f cd 7c 00 23 c3 65 00 db 00 e6 01 c2 70 00 db 01 e6 7f c9 db 00 e6 80 c2 7c 00 79 d3 01 c9 0d 0a 47 55 45 53 53 20 4d 59 20 4c 45 54 54 45 52 20 41 2d 5a 2e 20 41 4e 59 20 4b 45 59 20 53 54 41 52 54 53 2e 0d 0a 00 0d 0a 3f 20 00 20 48 49 47 48 45 52 00 20 4c 4f 57 45 52 00 20 47 4f 54 20 49 54 20 49 4e 20 00 20 54 52 49 45 53 2e 0d 0a 00
 ```
 
 The authentic way is the front panel, in octal, the way the original

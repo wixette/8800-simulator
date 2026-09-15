@@ -186,6 +186,79 @@ test('tty-ascii: prints the printable set, wrapping at the margin', () => {
     assert.strictEqual(tty.lines[0].length, 72);
 });
 
+test('guess-letter: plays, and its hints are truthful', () => {
+    // Played by binary search. If HIGHER or LOWER ever lied, the
+    // search would run out of alphabet before finding the letter.
+    const alphabet = (c) => c >= 0x41 && c <= 0x5a;
+    for (const startDelay of [1, 40, 91, 150]) {
+        const {sim, sio, tty} = ttySimFor('guess-letter');
+        const settle = () => {
+            let last = -1, idle = 0;
+            for (let i = 0; i < 20000; i++) {
+                sim.step(500);
+                const n = tty.getText().length;
+                if (n !== last) { last = n; idle = 0; } else if (++idle > 40) return;
+            }
+        };
+        for (let i = 0; i < startDelay; i++) sim.step(500);
+        sio.receive(0x20);           // any key starts it
+        settle();
+        assert.match(tty.getText(), /GUESS MY LETTER/);
+
+        let lo = 0x41, hi = 0x5a, tries = 0, won = false;
+        while (lo <= hi && tries < 8) {
+            const guess = (lo + hi) >> 1;
+            assert.ok(alphabet(guess), 'the search stayed inside A-Z');
+            const before = tty.getText().length;
+            sio.receive(guess);
+            settle();
+            const reply = tty.getText().slice(before);
+            tries++;
+            if (/GOT IT IN \d TRIES/.test(reply)) { won = true; break; }
+            assert.match(reply, /HIGHER| LOWER/,
+                         'every guess should get a hint: ' + reply);
+            if (/HIGHER/.test(reply)) lo = guess + 1; else hi = guess - 1;
+        }
+        assert.ok(won, 'binary search should find the letter, delay ' + startDelay);
+        assert.ok(tries <= 5, 'twenty-six letters need at most five guesses, took ' +
+                  tries);
+        assert.match(tty.getText(), new RegExp('GOT IT IN ' + tries + ' TRIES'),
+                     'it should report the number of guesses it actually took');
+    }
+});
+
+test('guess-letter: the letter is not always the same', () => {
+    // The only randomness is how long the player takes to press a key,
+    // so different start delays must give different letters.
+    const letters = new Set();
+    for (const startDelay of [1, 7, 23, 51, 88, 130, 177, 210]) {
+        const {sim, sio, tty} = ttySimFor('guess-letter');
+        const settle = () => {
+            let last = -1, idle = 0;
+            for (let i = 0; i < 20000; i++) {
+                sim.step(500);
+                const n = tty.getText().length;
+                if (n !== last) { last = n; idle = 0; } else if (++idle > 40) return;
+            }
+        };
+        for (let i = 0; i < startDelay; i++) sim.step(500);
+        sio.receive(0x20);
+        settle();
+        let lo = 0x41, hi = 0x5a;
+        for (let i = 0; i < 8 && lo <= hi; i++) {
+            const guess = (lo + hi) >> 1;
+            const before = tty.getText().length;
+            sio.receive(guess);
+            settle();
+            const reply = tty.getText().slice(before);
+            if (/GOT IT/.test(reply)) { letters.add(String.fromCharCode(guess)); break; }
+            if (/HIGHER/.test(reply)) lo = guess + 1; else hi = guess - 1;
+        }
+    }
+    assert.ok(letters.size >= 4,
+              'expected a spread of letters, got ' + [...letters].sort().join(''));
+});
+
 test('adder: adds the two bytes it is given', () => {
     const {sim} = simFor(loadExample('adder'));
     sim.loadData(0x80, [1, 2]);
