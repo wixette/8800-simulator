@@ -282,6 +282,51 @@ These numbers decide [D8](#d8--the-teletype-is-its-own-tab).
 
 ---
 
+### 1.9 Restarting BASIC: the warm start
+
+Press RESET then RUN on a machine where BASIC is already up, and it
+comes back to `OK` with your program intact rather than asking
+`MEMORY SIZE?` again. That is correct, and it is BASIC's doing, not
+the simulator's.
+
+The ROM begins:
+
+```
+0000  f3         DI
+0001  c3 21 0d   JMP 0D21h      ; cold start: the questions
+```
+
+Once initialisation has finished, BASIC **overwrites the two bytes of
+its own jump target** so that address `0000h` points at `01F9h`
+instead:
+
+```
+01F9  21 8d 01   LXI H,018Dh    ; -> "\rOK\r"
+01FC  cd ..      CALL ...       ; print it, then the command loop
+```
+
+So `0000h` is a cold start exactly once. Afterwards it is the warm
+start. Verified by diffing the running machine against the ROM file:
+66 bytes below `0EFBh` differ after a boot, and two of them are the
+jump target at `0002h`-`0003h`.
+
+**This exposed a real bug in the simulator.** A real 8080's RESET line
+clears the program counter and the interrupt enable and *leaves every
+register alone*, stack pointer included. `js/8080.js`'s `reset()`
+clears everything, which is a power-on reset. The warm start does not
+set up a stack — it assumes the one BASIC was already using — so with
+SP zeroed the first `PUSH` wrapped to `FFFEh`, which is unpopulated on
+a 4 KB machine: writes vanished, `RET` popped `FFFFh`, and BASIC never
+reached its prompt. It printed nothing at all.
+
+`Sim8800.reset()` now restores the registers after calling the core's
+`reset()`, and `powerOn()` does the full clear instead. Covered by
+tests at both levels: that RESET keeps A, B and SP while zeroing PC,
+and that RESET plus RUN warm starts BASIC with the program still
+listable.
+
+---
+
 ## Part 2 — Decisions
 
 ### D1 — Ship the ROM in `roms/`, with a NOTICE
