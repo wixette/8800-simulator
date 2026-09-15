@@ -209,10 +209,17 @@ nav {
     color: #222;
     display: flex;
     flex-direction: row;
-    flex-wrap: nowrap;
+    /* The tabs wrap rather than run off the side. Four of them will not
+       fit across a phone - and some languages name them at length,
+       Fernschreiber and Téléscripteur among them - so on a narrow
+       screen they fall into two rows instead of pushing the whole page
+       wider than the window. row-gap only has an effect once they have
+       actually wrapped. */
+    flex-wrap: wrap;
     justify-content: space-around;
     min-height: 40px;
     padding: 0;
+    row-gap: 8px;
 }
 
 .nav-item {
@@ -514,6 +521,7 @@ footer {
     color: #999;
     font-size: 11px;
     margin: 0 8px 0 0;
+    white-space: nowrap;
 }
 
 .tty-led-row {
@@ -582,4 +590,39 @@ footer {
 #mem-window-label {
     padding: 0 10px 0 8px;
     white-space: nowrap;
+}
+
+/* Phones. The only thing that did not already fit was the tab strip;
+   everything wide - the memory dump, the teletype paper - scrolls
+   inside its own box. */
+@media (max-width: 560px) {
+    /* Two tabs per row, evenly, rather than three and a stray. The
+       basis is well under half so that rounding cannot leave only one
+       per row; flex-grow then shares out what is left. */
+    .nav-item {
+        flex-basis: 40%;
+    }
+
+    /* The sixteen address switches land four to a row rather than
+       five, five, five and a stray A00. The :not excludes the command
+       buttons, whose ids all begin s-sw-. */
+    [id^="s-s"]:not([id^="s-sw"]) {
+        /* border-box so the basis covers the button's own padding;
+           with the default content-box it does not, and four never
+           fit. Under a quarter so that rounding cannot drop one off
+           the row, leaving room for the 16px of margin m-8 adds, then
+           grow to share out the slack. */
+        box-sizing: border-box;
+        flex: 1 1 calc(25% - 18px);
+    }
+
+    /* A 375 px screen has none to spare: give the panel back some of
+       the margin that a desktop window can afford. */
+    body {
+        margin: 8px;
+    }
+
+    main {
+        padding: 8px;
+    }
 }
