@@ -247,3 +247,20 @@ test('the Debugger tab reads as software, not as a machine', () => {
             b.id + ' ("' + english + '") shouts like a panel legend');
     }
 });
+
+test('every shape of control the page can grey out is actually styled', () => {
+    // The controls are mostly .button divs, but the example menu is a
+    // real <button> inside a .dropdown. It carried the disabled class
+    // and looked completely available, because the rule named only
+    // .button. Nothing else in the suite can see a computed style, so
+    // this checks the selectors themselves.
+    const css = sourceOf('css/style.css');
+    const rule = css.match(/([^}]*)\{[^}]*\}/g)
+          .find((block) => /\.disabled[^{]*\{/.test(block));
+    assert.ok(rule, 'style.css should have a rule for .disabled');
+    const selectors = rule.split('{')[0];
+    assert.match(selectors, /\.button\.disabled/,
+                 'the .button controls must grey out');
+    assert.match(selectors, /\.dropdown\s*>?\s*button\.disabled/,
+                 'the example menu button must grey out too');
+});

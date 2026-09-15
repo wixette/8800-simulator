@@ -6,9 +6,29 @@ A JavaScript simulator to demonstrate the front panel operations of Altair 8800.
 
 ## Usage
 
-Simply open index.html in browser, or copy the entire dir to your web server's root dir.
+Serve the directory over HTTP and open it. Anything will do; with no
+web server installed, Python has one built in:
 
-The simulator UI supports English and Chinese for now. In a desktop browser, you may use mouse to toggle or click the switches on the panel directly.
+```
+python3 -m http.server 8000
+```
+
+then open <http://localhost:8000/>. To deploy, copy the whole directory
+to your web server's root — there is nothing to build and no
+dependencies.
+
+Opening `index.html` straight off the disk mostly works: the front
+panel, the teletype and the debugger are all in the page itself. Two
+things are not, and will not load that way — the example programs and
+the 4K BASIC tape, which the page reads from `examples/` and `roms/`
+when you ask for them. A browser treats every `file://` page as a
+different site from the files beside it and blocks the read, so those
+two controls grey out and say so. Serving the directory is what fixes
+it.
+
+The simulator UI is translated into nine languages. In a desktop
+browser, you may use mouse to toggle or click the switches on the panel
+directly.
 
 ![8800 Panel](./screenshots/sim-panel.png)
 

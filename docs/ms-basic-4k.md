@@ -748,6 +748,46 @@ changing rewrites its own label, which will dismiss a tooltip held
 over that cell. Left alone deliberately — the alternative is showing a
 number that is no longer true.
 
+### D22 — Two files are why the app now wants a web server
+
+Everything the simulator needs to be a simulator is in the page. Two
+things are not, and both arrived with this work: the example listings
+in `examples/`, and the BASIC tape in `roms/`. The page reads them at
+the moment they are asked for.
+
+A browser treats a `file://` page as a different site from the files
+sitting beside it, so it refuses both. The README's old promise —
+*simply open index.html in browser* — became half true the day the
+first `fetch` was added, and said nothing about the half that was not.
+
+*Rejected: inlining them.* The listings could be pasted into the page
+as data, and the 4 KB tape base64'd into a string. Both would undo
+something deliberate. The listings are the only copy of those programs
+anywhere — [Part 5](#part-5--example-programs) — and a second copy in
+the page is a second copy to drift. The tape is shipped in its own
+commit with its own NOTICE, because it is Microsoft's and not under
+this repository's licence; dissolving it into a JavaScript string
+takes that separation apart.
+
+*Rejected: a build step.* It would generate exactly those copies, and
+this project has no build, no dependencies and nothing to install.
+That is worth more than saving a reader one command.
+
+*Done instead:* the README leads with serving the directory and says
+plainly what does and does not work without it, and the app detects
+the case itself. `panel.needsServer()` tests the protocol rather than
+waiting for a fetch to fail, so the two controls are grey before they
+are pressed and the reason given is the true one rather than "could
+not be read". Pressing either says what to run.
+
+This is [D19](#d19--a-greyed-control-still-answers) doing the work it
+was built for: the reader is not left guessing, and the fix is in the
+message.
+
+*Also covered:* a menu with nothing in it now declines to open.
+Previously it opened as a box of nothing, which told the reader less
+than not opening would have.
+
 ### D18 — Nothing in the Debugger is hidden; it greys out instead
 
 The memory paging controls used to disappear entirely on the 256 byte

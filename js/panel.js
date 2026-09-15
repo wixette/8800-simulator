@@ -208,6 +208,25 @@ panel.EXAMPLES = [
 ];
 
 /**
+ * Whether the page was opened straight off the disk.
+ *
+ * Everything the simulator needs to be a simulator is already in the
+ * page. Two things are not: the example listings and the BASIC tape,
+ * which are separate files it reads at the moment they are asked for.
+ * A browser will not let a file:// page read a neighbouring file - it
+ * treats every one of them as a different site - so those two are the
+ * only part of the app that needs the folder to be served.
+ *
+ * Kept as the check rather than letting the fetch fail, so that the
+ * controls can be greyed out before they are pressed and the reason
+ * given is the real one, not "could not be read".
+ * @return {boolean} True if the page cannot read its own folder.
+ */
+panel.needsServer = function() {
+    return window.location.protocol == 'file:';
+};
+
+/**
  * Fills the example menu, once, the first time the debugger is looked
  * at. A reader who never opens that tab never fetches anything.
  *
@@ -236,6 +255,20 @@ panel.buildExampleMenu = function() {
                         {name: program.name, bytes: loaded});
     });
     panel.refreshExampleMenu();
+    // Pressing it says why, like every other control that cannot be
+    // used. The Dropdown's own listener is on the same element and
+    // runs first; it declines to open an empty list, so nothing but
+    // this happens. See panel.onExampleMenuPress.
+    document.getElementById('example-button').addEventListener(
+        'click', panel.onExampleMenuPress, false);
+
+    if (panel.needsServer()) {
+        // Asking would only fill the console with CORS failures for
+        // something already known to be impossible.
+        panel.examplesProblem = 'needs-server';
+        panel.updateDebugControls();
+        return;
+    }
 
     // Fetched together but listed in the order panel.EXAMPLES gives,
     // which is the order they are worth meeting in - not whichever
@@ -275,7 +308,19 @@ panel.buildExampleMenu = function() {
             lastDevice = device;
         }
         panel.exampleMenu.setItems(items);
+        // An empty menu used to open as a box of nothing, which said
+        // less than saying nothing would have.
+        panel.examplesProblem = items.length ? null : 'examples-unreadable';
+        panel.updateDebugControls();
     });
+};
+
+/**
+ * When the example menu is pressed and has nothing to offer.
+ * @param {Event} event The click.
+ */
+panel.onExampleMenuPress = function(event) {
+    panel.reportIfUnavailable('example-button');
 };
 
 /**
@@ -522,8 +567,14 @@ panel.debugControlReasons = function() {
     // The loaders are never unavailable: each one switches the machine
     // on for you, so there is nothing to be unavailable about. Except
     // BASIC, which needs a memory board this machine may not have.
-    reasons['load-basic'] = memSize < panel.MIN_BASIC_MEM ?
-        {id: 'rom-needs-memory', params: {}} : null;
+    // The tape is a file beside the page, so this comes first: on a
+    // page opened off the disk, no amount of memory will help.
+    reasons['load-basic'] = panel.needsServer() ?
+        {id: 'needs-server', params: {}} :
+        (memSize < panel.MIN_BASIC_MEM ?
+             {id: 'rom-needs-memory', params: {}} : null);
+    reasons['example-button'] = panel.examplesProblem ?
+        {id: panel.examplesProblem, params: {}} : null;
     reasons['debug-load-data'] = null;
     reasons['load-binary'] = null;
     // The dump controls act on the memory dump. With the machine off
