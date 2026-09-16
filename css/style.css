@@ -161,8 +161,10 @@ main {
    heading is one more thing for the arrow keys to have to step over. */
 .dropdown li.dropdown-group-start {
     border-top: 1px solid #bbb;
+    /* The 4px of air above the rule is margin, so the 4px below it has
+       to be extra padding: same gap either side of the seam. */
     margin-top: 4px;
-    padding-top: 8px;
+    padding-top: 12px;
 }
 
 .dropdown li:hover,
