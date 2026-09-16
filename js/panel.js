@@ -862,11 +862,19 @@ panel.debugLoadData = function() {
 /**
  * Sends one byte to the machine, as if it had been typed at the
  * teletype keyboard.
+ *
+ * A machine that is off receives nothing: the board holding characters
+ * for the CPU to read is unpowered, so the keys go nowhere rather than
+ * being saved up for the next time it comes on (D24).
  * @param {number} byte The byte.
  */
 panel.ttySend = function(byte) {
     if (byte === null || !panel.sio)
         return;
+    if (!panel.isPoweredOn) {
+        panel.setStatus('tty-off', {}, 'warn');
+        return;
+    }
     panel.sio.receive(byte);
 };
 
@@ -1364,6 +1372,11 @@ panel.initTeletypeUi = function() {
         'click', function() { panel.ttySend(Teletype.RUBOUT); }, false);
     document.getElementById('tty-kill').addEventListener(
         'click', function() { panel.ttySend(Teletype.KILL_LINE); }, false);
+    // The ASR-33's other paper key. It goes to the machine like any
+    // other key, so the paper moves only if a program echoes it -
+    // which is the thing worth seeing (D25).
+    document.getElementById('tty-linefeed').addEventListener(
+        'click', function() { panel.ttySend(Teletype.LF); }, false);
     document.getElementById('tty-clear').addEventListener(
         'click', panel.onTtyClear, false);
 

@@ -168,6 +168,18 @@ l10n.MESSAGES = {
         'ko': '줄 취소 (@)',
     },
 
+    'tty-linefeed': {
+        'en': 'LINE FEED',
+        'es': 'AVANCE DE LÍNEA',
+        'fr': 'SAUT DE LIGNE',
+        'de': 'ZEILENVORSCHUB',
+        'it': 'AVANZAMENTO RIGA',
+        'zh': '进纸一行',
+        'zh-TW': '進紙一行',
+        'ja': '紙送り（改行）',
+        'ko': '한 줄 이송',
+    },
+
     'tty-clear': {
         'en': 'CLEAR PAPER',
         'es': 'PAPEL NUEVO',
@@ -601,6 +613,18 @@ l10n.MESSAGES = {
         'zh-TW': '十六進位位元組，例如 c3 00 00',
         'ja': '16 進数のバイト列、例えば c3 00 00',
         'ko': '16진수 바이트, 예: c3 00 00',
+    },
+
+    'tty-off': {
+        'en': 'The machine is off, so keys typed here go nowhere. Switch it on first.',
+        'es': 'La máquina está apagada, así que las teclas escritas aquí no van a ninguna parte. Enciéndela primero.',
+        'fr': 'La machine est éteinte, les touches tapées ici ne vont donc nulle part. Allumez-la d’abord.',
+        'de': 'Die Maschine ist aus, hier getippte Tasten gehen also ins Leere. Schalten Sie sie zuerst ein.',
+        'it': 'La macchina è spenta, quindi i tasti premuti qui non vanno da nessuna parte. Accendila prima.',
+        'zh': '机器已关闭，在这里打出的字符无处可去。请先开机。',
+        'zh-TW': '機器已關閉，在這裡打出的字元無處可去。請先開機。',
+        'ja': '電源が入っていないので、ここで打ったキーはどこにも届きません。先に電源を入れてください。',
+        'ko': '기계가 꺼져 있어 여기서 누른 키는 아무 데도 가지 않습니다. 먼저 전원을 켜세요.',
     },
 
     'zero-mem-off': {

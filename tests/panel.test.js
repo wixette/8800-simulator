@@ -309,3 +309,41 @@ test('every way of loading tells the status line whether it did that', () => {
                      + 'machine on');
     }
 });
+
+test('a machine that is off receives nothing from the teletype keyboard', () => {
+    // D24: the board that holds a character for the CPU to read is
+    // unpowered, so keys typed at a dead machine are gone, not saved
+    // up to arrive at whatever runs next.
+    const realSio = panel.sio;
+    const realStatus = panel.setStatus;
+    const received = [];
+    let said = null;
+    panel.sio = {receive: (byte) => received.push(byte)};
+    panel.setStatus = (id) => { said = id; };
+    try {
+        panel.isPoweredOn = false;
+        panel.ttySend(0x44);
+        assert.deepStrictEqual(received, [], 'nothing reached the board');
+        assert.strictEqual(said, 'tty-off', 'and the line says why');
+        panel.isPoweredOn = true;
+        panel.ttySend(0x44);
+        assert.deepStrictEqual(received, [0x44], 'a live board takes it');
+    } finally {
+        panel.sio = realSio;
+        panel.setStatus = realStatus;
+        panel.isPoweredOn = false;
+    }
+});
+
+test('both of the paper mechanisms can be driven by hand', () => {
+    // An ASR-33 returns the carriage and advances the paper with two
+    // separate keys (D25). RETURN is on every keyboard; LINE FEED is
+    // not, which is what the helper row is for.
+    const Teletype = require('../js/teletype.js');
+    assert.strictEqual(Teletype.keyToByte('Enter'), Teletype.CR,
+                       'RETURN sends CR and nothing else');
+    assert.match(sourceOf('index.html'), /id="tty-linefeed"/,
+                 'the helper row needs a LINE FEED key');
+    assert.match(panel.initTeletypeUi.toString(), /ttySend\(Teletype\.LF\)/,
+                 'which sends LF to the machine, like any other key');
+});
