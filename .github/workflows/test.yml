@@ -10,6 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The version check compares package.json with the newest
+          # release tag, and the default checkout fetches no tags at
+          # all - it would skip every run.
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '24.x'
