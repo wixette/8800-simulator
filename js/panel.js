@@ -95,7 +95,9 @@ panel.onReset = function() {
 };
 
 /**
- * When power is turned on.
+ * When power is turned on. Silent: the beep belongs to the OFF/ON
+ * switch, not to every way the machine can come up (D23 in
+ * docs/ms-basic-4k.md).
  */
 panel.onPowerOn = function() {
     panel.sim.powerOn();
@@ -106,9 +108,6 @@ panel.onPowerOn = function() {
     document.body.classList.add('powered-on');
     panel.updateMemoryControls();
     panel.setStatus('status-on');
-    window.setTimeout(function() {
-        panel.playBeepbeep();
-    }, 500);
 };
 
 /**
@@ -230,7 +229,8 @@ panel.buildExampleMenu = function() {
         // goes, but where to look afterwards is not the same place.
         panel.setStatus(program.device == 'teletype' ?
                             'example-loaded-tty' : 'example-loaded',
-                        {name: program.name, bytes: loaded});
+                        {name: program.name, bytes: loaded.bytes}, '',
+                        loaded.poweredOn);
     });
     panel.refreshExampleMenu();
     // An empty menu does not open (see Dropdown.open), so pressing it
@@ -330,11 +330,14 @@ panel.refreshExampleMenu = function() {
  * @param {?string} id The l10n message id, or null to clear the line.
  * @param {Object=} params Values for {placeholders} in the message.
  * @param {string=} severity '', 'warn' or 'error'.
+ * @param {boolean=} afterPowerOn Whether the machine had to be
+ *     switched on to do this, which the line says first (D23).
  */
-panel.setStatus = function(id, params, severity = '') {
+panel.setStatus = function(id, params, severity = '', afterPowerOn = false) {
     panel.statusId = id;
     panel.statusParams = params || {};
     panel.statusSeverity = severity;
+    panel.statusAfterPowerOn = afterPowerOn;
     panel.refreshStatus();
 };
 
@@ -357,6 +360,15 @@ panel.refreshStatus = function() {
     for (let key in panel.statusParams) {
         msg = msg.replace('{' + key + '}', panel.statusParams[key]);
     }
+    if (panel.statusAfterPowerOn) {
+        // First what happened, then what was loaded, then what to do
+        // next - so the note goes in front of the message, not after
+        // the instruction at the end of it. Chinese and Japanese put
+        // no space after their full stop; a space there reads as a
+        // hole in the middle of the line.
+        var note = l10n.getMessage('powered-on-first');
+        msg = note + (/\u3002$/.test(note) ? '' : ' ') + msg;
+    }
     text.textContent = msg;
 };
 
@@ -372,11 +384,15 @@ panel.formatMemSize = function(bytes) {
 /**
  * Switches the machine on if it is not on already. Every way of getting
  * a program in does this (D20 in docs/ms-basic-4k.md).
+ * @return {boolean} Whether the machine was off and had to be switched
+ *     on, which is worth saying in the status line (D23).
  */
 panel.ensurePoweredOn = function() {
-    if (!panel.isPoweredOn) {
-        panel.onPowerOn();
+    if (panel.isPoweredOn) {
+        return false;
     }
+    panel.onPowerOn();
+    return true;
 };
 
 /**
@@ -387,16 +403,19 @@ panel.ensurePoweredOn = function() {
  * what was just loaded before the program writes over it (D14).
  * @param {Array<number>|Uint8Array} bytes The image. Anything longer
  *     than the installed memory is ignored past the top.
- * @return {number} How many bytes actually fit in the machine.
+ * @return {{bytes: number, poweredOn: boolean}} How many bytes
+ *     actually fit in the machine, and whether it had to be switched
+ *     on first.
  */
 panel.loadImage = function(bytes) {
-    panel.ensurePoweredOn();
+    var poweredOn = panel.ensurePoweredOn();
     panel.sim.initMem(false);
     panel.sim.loadData(0, bytes);
     panel.sim.reset();
     panel.sim.flushDump(true);
     panel.updateMemoryControls();
-    return Math.min(bytes.length, panel.sim.mem.length);
+    return {bytes: Math.min(bytes.length, panel.sim.mem.length),
+            poweredOn: poweredOn};
 };
 
 /**
@@ -413,7 +432,8 @@ panel.onLoadBasic = function() {
         return response.arrayBuffer();
     }).then(function(buffer) {
         var loaded = panel.loadImage(new Uint8Array(buffer));
-        panel.setStatus('rom-loaded', {bytes: loaded});
+        panel.setStatus('rom-loaded', {bytes: loaded.bytes}, '',
+                        loaded.poweredOn);
     }).catch(function() {
         panel.setStatus('rom-missing', {}, 'error');
     });
@@ -447,11 +467,12 @@ panel.onBinaryFileChosen = function(event) {
         var loaded = panel.loadImage(bytes);
         if (file.size > size) {
             panel.setStatus('rom-file-truncated',
-                            {bytes: loaded, name: file.name,
-                             size: file.size}, 'warn');
+                            {bytes: loaded.bytes, name: file.name,
+                             size: file.size}, 'warn', loaded.poweredOn);
         } else {
             panel.setStatus('rom-file-loaded',
-                            {bytes: loaded, name: file.name});
+                            {bytes: loaded.bytes, name: file.name}, '',
+                            loaded.poweredOn);
         }
     };
     reader.onerror = function() {
@@ -831,10 +852,11 @@ panel.debugLoadData = function() {
     }
     // On, but not wiped: this is a deposit into the machine as it
     // stands, not a fresh tape. loadImage() is the one that clears.
-    panel.ensurePoweredOn();
+    var poweredOn = panel.ensurePoweredOn();
     panel.sim.loadData(0, parsed.bytes);
     panel.updateMemoryControls();
-    panel.setStatus('load-data-loaded', {bytes: parsed.bytes.length});
+    panel.setStatus('load-data-loaded', {bytes: parsed.bytes.length}, '',
+                    poweredOn);
 };
 
 /**
@@ -1620,6 +1642,11 @@ panel.onToggle = function(id) {
             panel.onPowerOff();
         } else {
             panel.onPowerOn();
+            // The machine finding its voice, half a second after the
+            // switch that asked for it (D23).
+            window.setTimeout(function() {
+                panel.playBeepbeep();
+            }, 500);
         }
     }
 };
