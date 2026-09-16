@@ -57,6 +57,13 @@ class Sim8800 {
         this.dumpMemCallback = dumpMemCallback;
         this.isPoweredOn = false;
         this.isRunning = false;
+        /**
+         * Whether the CPU has run into a HLT. The 8080 leaves that
+         * state only on a reset or an interrupt, so the machine stops
+         * where it is and the WAIT lamp comes on (D26).
+         * @type {boolean}
+         */
+        this.halted = false;
         this.lastAddress = 0;
         this.lastTickTime = 0;
         /**
@@ -610,6 +617,7 @@ class Sim8800 {
         CPU8080.set('H', cpu.h);
         CPU8080.set('L', cpu.l);
         CPU8080.set('SP', cpu.sp);
+        this.halted = false;
         this.stop();
         this.lastAddress = 0;
         if (this.setAddressLedsCallback) {
@@ -663,6 +671,17 @@ class Sim8800 {
     }
 
     /**
+     * The CPU has run into a HLT. It stops where it is, as the real
+     * machine did, with the WAIT lamp on - the panel's only way of
+     * saying that a program has finished rather than gone quiet
+     * (D26). RESET is what starts it again.
+     */
+    halt() {
+        this.halted = true;
+        this.stop();
+    }
+
+    /**
      * Starts the CPU.
      */
     start() {
@@ -704,14 +723,26 @@ class Sim8800 {
             executed += consumed;
             // A halted CPU consumes 1 cycle per step without
             // executing the opcode at PC.
-            if (consumed > 1) {
-                if (opcode == 0x0a) {
-                    /* LDAX B */
-                    ldaxAddress = (cpu.b << 8) | cpu.c;
-                } else if (opcode == 0x1a) {
-                    /* LDAX D */
-                    ldaxAddress = (cpu.d << 8) | cpu.e;
-                }
+            if (consumed <= 1) {
+                // No 8080 instruction is over in one cycle: this is a
+                // CPU that was already halted, marking time. It is how
+                // a halted machine stops again when RUN is pressed.
+                this.halt();
+                break;
+            }
+            if (opcode == 0x0a) {
+                /* LDAX B */
+                ldaxAddress = (cpu.b << 8) | cpu.c;
+            } else if (opcode == 0x1a) {
+                /* LDAX D */
+                ldaxAddress = (cpu.d << 8) | cpu.e;
+            } else if (opcode == 0x76) {
+                /* HLT. Caught here, on the instruction itself, rather
+                   than left to the cycle count above, so that SINGLE
+                   STEP onto a HLT stops on it instead of one press
+                   later. */
+                this.halt();
+                break;
             }
         }
         this.requestDump();

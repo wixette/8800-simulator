@@ -64,7 +64,9 @@ Then lower all the switches, click RESET, and RUN.
 The front panel programs loop forever rather than halting, which is
 normal for front panel work: click STOP when you have seen enough, and
 use EXAMINE to read memory afterwards. `tty-hello` and `tty-ascii` halt
-once they have printed; the other teletype programs wait for keys.
+once they have printed - the machine stops on its own and the WAIT lamp
+comes on, which is the panel saying the program finished rather than
+went quiet. The other teletype programs wait for keys.
 
 ### Worked example: 1 + 2 with the adder
 

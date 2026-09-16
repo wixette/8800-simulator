@@ -154,6 +154,47 @@ test('start/stop toggle the running state and the WAIT LED', () => {
     assert.strictEqual(sim.isRunning, false);
 });
 
+test('a HLT stops the machine and lights the WAIT lamp', () => {
+    // The panel's only way of saying a program finished rather than
+    // went quiet (D26). Before this, a halted CPU sat there burning
+    // cycles with the machine still calling itself running.
+    const {sim, state} = poweredOnSim();
+    sim.loadDataAsHexString(0, '76');  // HLT
+    sim.start();
+    assert.strictEqual(state.waitLedArg, true, 'running: the lamp is out');
+    sim.step(2000);
+    assert.strictEqual(sim.halted, true);
+    assert.strictEqual(sim.isRunning, false, 'the machine stopped itself');
+    assert.strictEqual(state.waitLedArg, false, 'and WAIT came on');
+});
+
+test('single stepping onto a HLT stops on it, not one press later', () => {
+    const {sim, state} = poweredOnSim();
+    sim.loadDataAsHexString(0, '00 76');  // NOP, HLT
+    sim.singleStep();
+    assert.strictEqual(sim.halted, false, 'the NOP is just a NOP');
+    sim.singleStep();
+    assert.strictEqual(sim.halted, true, 'the HLT stops it there and then');
+    assert.strictEqual(state.waitLedArg, false, 'WAIT is lit');
+});
+
+test('RESET is what starts a halted machine again', () => {
+    const {sim, state} = poweredOnSim();
+    sim.loadDataAsHexString(0, '76');
+    sim.start();
+    sim.step(100);
+    assert.strictEqual(sim.halted, true);
+    sim.reset();
+    assert.strictEqual(sim.halted, false);
+    // The CPU is out of it too, not just the panel's copy of the fact:
+    // a program put there now runs, reaches its OUT, and halts again.
+    sim.loadDataAsHexString(0, '3e 8c d3 ff 76');
+    sim.start();
+    sim.step(100);
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0x8c, 'the OUT ran');
+    assert.strictEqual(sim.halted, true, 'and it halts again at the end');
+});
+
 test('reset stops the CPU and resets PC to 0', () => {
     const {sim, state} = poweredOnSim();
     sim.loadDataAsHexString(0, 'c3 00 00');  // JMP 0000h
