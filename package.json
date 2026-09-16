@@ -1,6 +1,6 @@
 {
   "name": "8800-simulator",
-  "version": "1.0.0",
+  "version": "1.4.0",
   "private": true,
   "description": "The Altair 8800 in your browser: a working front panel, an ASR-33 Teletype, and Microsoft's original 4K BASIC.",
   "license": "Apache-2.0",
