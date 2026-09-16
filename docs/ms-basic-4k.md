@@ -912,6 +912,30 @@ a real Altair would have kept the last. The simplification is
 deliberate — losing a student's keystrokes teaches nothing about
 overrun — but it is a simplification, not the machine.
 
+### D26 — A HLT stops the machine, and the panel says so
+
+`tty-hello` and `tty-ascii` are documented as halting once they have
+printed, and the 8080 did halt: PC froze one past the `HLT`. The panel
+did not notice. `isRunning` stayed true, the status line went on saying
+*Running.*, the WAIT lamp stayed dark, and the clock ticker kept handing
+the halted CPU batches of cycles to burn. A student who ran either
+program had no way to tell that it had finished rather than gone quiet,
+and had to press STOP on a machine that had already stopped.
+
+`Sim8800.step()` now watches for it. No 8080 instruction is over in one
+cycle, so a step that consumes exactly one is a halted CPU marking time
+— the same signal the LDAX check already relied on. The machine calls
+`halt()`, which stops the run and lights WAIT, exactly as the real one
+did; `panel.setWaitLedCallback()` sees the machine stop with `halted`
+set and puts the reason on the status line, so the fact is available to
+somebody who does not yet know what the WAIT lamp means
+([D15](#d15--one-status-line-at-the-foot-of-the-machine)).
+
+RESET clears it, as on the hardware: the 8080 leaves a halt only on an
+interrupt or a reset, and `reset()` already calls the core's `reset()`.
+Pressing RUN on a machine that is still halted halts it again
+immediately, which is also what the real one did.
+
 ### D25 — LINE FEED is a key the host keyboard does not have
 
 RETURN sends `0Dh` and only that, so in `tty-echo` the carriage slams

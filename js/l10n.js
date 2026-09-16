@@ -324,6 +324,18 @@ l10n.MESSAGES = {
         'ko': '실행 중입니다.',
     },
 
+    'status-halted': {
+        'en': 'The program ran into a HLT and the machine stopped, with the WAIT lamp lit. RESET and RUN start it again.',
+        'es': 'El programa llegó a un HLT y la máquina se detuvo, con la lámpara WAIT encendida. RESET y RUN la reinician.',
+        'fr': 'Le programme a atteint un HLT et la machine s’est arrêtée, la lampe WAIT allumée. RESET puis RUN la relancent.',
+        'de': 'Das Programm ist auf ein HLT gelaufen und die Maschine steht, die WAIT-Lampe leuchtet. RESET und RUN starten sie wieder.',
+        'it': 'Il programma è arrivato a un HLT e la macchina si è fermata, con la spia WAIT accesa. RESET e RUN la riavviano.',
+        'zh': '程序执行到 HLT，机器停下了，WAIT 灯亮起。按 RESET 再按 RUN 可重新开始。',
+        'zh-TW': '程式執行到 HLT，機器停下了，WAIT 燈亮起。按 RESET 再按 RUN 可重新開始。',
+        'ja': 'プログラムが HLT に達して機械が止まり、WAIT ランプが点灯しました。RESET と RUN で再度動きます。',
+        'ko': '프로그램이 HLT에 도달해 기계가 멈추고 WAIT 램프가 켜졌습니다. RESET 후 RUN으로 다시 시작합니다.',
+    },
+
     'status-stopped': {
         'en': 'Stopped. The program counter is where it stopped; RESET puts it back to 0000H.',
         'es': 'Detenida. El contador de programa está donde se paró; RESET lo devuelve a 0000H.',
