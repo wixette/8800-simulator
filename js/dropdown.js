@@ -125,7 +125,10 @@ class Dropdown {
         }
     }
 
-    /** Opens the list, with the keyboard on the current choice. */
+    /**
+     * Opens the list, with the keyboard on the current choice if the
+     * menu holds one.
+     */
     open() {
         if (!this.list.children.length) {
             // An empty menu does not open; whoever left it empty says
@@ -134,10 +137,13 @@ class Dropdown {
         }
         this.list.hidden = false;
         this.button.setAttribute('aria-expanded', 'true');
+        // A menu of actions holds no choice - loading an example does
+        // not leave the machine on that example - so it opens with
+        // nothing picked out rather than lighting up the first entry
+        // as though it were one. The arrow keys step in from the edge.
         var current = this.list.querySelector('[aria-selected="true"]');
-        var first = current || this.list.firstElementChild;
-        if (first) {
-            first.focus();
+        if (current) {
+            current.focus();
         }
     }
 
@@ -169,7 +175,10 @@ class Dropdown {
         } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
             event.preventDefault();
             let step = event.key === 'ArrowDown' ? 1 : -1;
-            let next = (at < 0 ? 0 : at + step + items.length) % items.length;
+            // From nothing, Down steps in at the top and Up at the
+            // bottom.
+            let next = at < 0 ? (step > 0 ? 0 : items.length - 1) :
+                (at + step + items.length) % items.length;
             items[next].focus();
         } else if (event.key === 'Enter' || event.key === ' ') {
             if (at >= 0) {
