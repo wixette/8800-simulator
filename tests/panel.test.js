@@ -264,3 +264,48 @@ test('every shape of control the page can grey out is actually styled', () => {
     assert.match(selectors, /\.dropdown\s*>?\s*button\.disabled/,
                  'the example menu button must grey out too');
 });
+
+test('the beep belongs to the OFF/ON switch, not to every power-up', () => {
+    // D23: a load that finds the machine off switches it on, and used
+    // to beep for it, so loading two programs in a row chirped once
+    // and stayed silent once for reasons invisible from the Debugger
+    // tab. The sound now answers the switch and nothing else.
+    assert.doesNotMatch(panel.onPowerOn.toString(), /playBeepbeep/,
+                        'powering up is silent by itself');
+    assert.match(panel.onToggle.toString(), /playBeepbeep/,
+                 'the OFF/ON switch is what beeps');
+});
+
+test('switching the machine on for a load is reported, doing nothing is not', () => {
+    const realPowerOn = panel.onPowerOn;
+    let powerUps = 0;
+    panel.onPowerOn = function() {
+        powerUps++;
+        panel.isPoweredOn = true;
+    };
+    try {
+        panel.isPoweredOn = false;
+        assert.strictEqual(panel.ensurePoweredOn(), true,
+                           'it had to switch the machine on');
+        assert.strictEqual(panel.ensurePoweredOn(), false,
+                           'the second load found it on already');
+        assert.strictEqual(powerUps, 1);
+    } finally {
+        panel.onPowerOn = realPowerOn;
+        panel.isPoweredOn = false;
+    }
+});
+
+test('every way of loading tells the status line whether it did that', () => {
+    // All four ways in power the machine up (D20) and all four have to
+    // own up to it (D23), or the note is back to appearing for reasons
+    // the student cannot see. These functions want a document, so this
+    // reads them rather than running them.
+    const ways = ['buildExampleMenu', 'onLoadBasic', 'onBinaryFileChosen',
+                  'debugLoadData'];
+    for (const name of ways) {
+        assert.match(panel[name].toString(), /poweredOn/,
+                     name + ' loads without saying if it switched the '
+                     + 'machine on');
+    }
+});

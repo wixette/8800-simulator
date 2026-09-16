@@ -384,6 +384,21 @@ l10n.MESSAGES = {
         'ko': '예제 프로그램...',
     },
 
+    // Every way of loading switches the machine on if it is off (D20),
+    // and on the Debugger tab the front panel is not there to show it.
+    // This goes in front of whatever the load itself has to say (D23).
+    'powered-on-first': {
+        'en': 'The machine was off, so it was switched on first.',
+        'es': 'La máquina estaba apagada, así que se encendió primero.',
+        'fr': 'La machine était éteinte : elle a d’abord été allumée.',
+        'de': 'Die Maschine war aus und wurde zuerst eingeschaltet.',
+        'it': 'La macchina era spenta, quindi è stata accesa prima.',
+        'zh': '机器原本是关着的，已先行开机。',
+        'zh-TW': '機器原本是關著的，已先行開機。',
+        'ja': '電源が切れていたので、先に入れました。',
+        'ko': '기계가 꺼져 있어서 먼저 켰습니다.',
+    },
+
     'example-loaded': {
         'en': 'Loaded {name}, {bytes} bytes, at 0000H and pressed RESET. Go to the Simulator tab and click RUN.',
         'es': 'Cargado {name}, {bytes} bytes, en 0000H y pulsado RESET. Ve a la pestaña Simulador y pulsa RUN.',

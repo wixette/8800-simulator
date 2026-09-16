@@ -841,14 +841,53 @@ bytes would go nowhere*.
 dead end that costs a trip to the other tab and teaches only that the
 button was in the wrong mood. The machine coming up is not hidden —
 the OFF/ON button turns green and memory fills with the random bytes a
-real one powers up with, which is worth seeing.
+real one powers up with, which is worth seeing. It is on the other
+tab, though, which is what [D23](#d23--the-beep-belongs-to-the-switch)
+is for.
 
 *The one distinction kept:* the three that load an *image* clear
 memory first and press RESET, because a tape is a fresh start.
 Load Data is a **deposit** — the DEPOSIT switch's equivalent — so it
 leaves the rest of memory alone and puts its bytes in as they are.
 
----
+### D23 — The beep belongs to the switch
+
+The beep was the sound of `panel.onPowerOn()`, so it played whether
+the machine was switched on by hand or woken up by a load ([D20](#d20--anything-that-loads-a-program-switches-the-machine-on)).
+From the Debugger tab, where all four loaders live, that meant a
+student loading two programs in a row heard the machine chirp at the
+first one and say nothing at the second, with the OFF/ON button that
+explains why sitting on a tab they were not looking at. Worse, the
+beep is half a second late, so it does not even arrive attached to the
+click that caused it. *Loading program A beeps, loading program B does
+not* is a rule about the machine that no one can learn, because it is
+not one.
+
+Two changes, and the confusion is a fact worth knowing instead:
+
+- **The sound follows the switch.** `panel.onPowerOn()` is silent;
+  `panel.onToggle()` schedules the beep when the OFF/ON switch is what
+  turned the machine on. The rule a student can now state is the same
+  one the toggle and switch clicks already follow: *the panel makes a
+  noise when I touch the panel.*
+- **The status line says when a load switched the machine on.**
+  `panel.ensurePoweredOn()` returns whether it had to do anything,
+  `panel.loadImage()` passes that back with the byte count, and
+  `panel.setStatus()` puts *The machine was off, so it was switched on
+  first* in front of the load's own message — before it, not after, so
+  the line still ends with what to do next
+  ([D15](#d15--one-status-line-at-the-foot-of-the-machine)). It is
+  held as a message id like everything else on that line, so it
+  survives a change of language.
+
+*Why not the other way round* — a sound on every load: the beep is the
+machine coming up, and a machine that is already on has not come up.
+Making it uniform would mean a device announcing something that did
+not happen, which is the kind of small lie this simulator is otherwise
+careful not to tell. The real Altair had no power-on beep at all, so
+there is no authenticity to trade off here — only whether the sound
+means one thing or nothing in particular.
+
 
 ## Part 3 — The Teletype tab
 
