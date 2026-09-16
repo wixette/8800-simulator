@@ -888,6 +888,46 @@ careful not to tell. The real Altair had no power-on beep at all, so
 there is no authenticity to trade off here — only whether the sound
 means one thing or nothing in particular.
 
+### D24 — A dead board hears nothing
+
+Characters typed at the teletype go into the 88-SIO's receive queue,
+where they wait for the program to read them. That is right while the
+machine is *stopped*: the board receives on its own, the CPU reads when
+it gets round to it, and a character typed during a STOP is genuinely
+still there when the program runs on. It was also happening with the
+machine switched **off**, and nothing cleared the queue on the way back
+up — only on the way down. So keys typed at a dead machine were
+delivered to whatever ran next, minutes later.
+
+`panel.ttySend()` now refuses while the machine is off, and says so in
+the status line the way every other unavailable control does
+([D19](#d19--a-greyed-control-still-answers)): *the machine is off, so
+keys typed here go nowhere.* CLEAR PAPER still works, because tearing
+off the paper is something you do to the terminal, not to the machine.
+
+*What is still not the hardware:* `Sio.rx` is an unbounded queue, where
+a real board holds exactly one character and drops the rest with an
+overrun bit set. Type four keys during a STOP and all four come back;
+a real Altair would have kept the last. The simplification is
+deliberate — losing a student's keystrokes teaches nothing about
+overrun — but it is a simplification, not the machine.
+
+### D25 — LINE FEED is a key the host keyboard does not have
+
+RETURN sends `0Dh` and only that, so in `tty-echo` the carriage slams
+back to column 1 and the paper does not move; type on and you overprint
+the line, exactly as the ASR-33 did. That is the mechanism worth
+seeing, and half of it was unreachable: a PC keyboard has no LINE FEED
+key, and Ctrl+J belongs to the browser.
+
+So the helper row gets one, next to the other keys it exists to supply.
+It goes through `panel.ttySend()` like any other key, which means the
+paper moves only if a program echoes it — the terminal is not wired to
+its own printer. Press RETURN then LINE FEED under `tty-echo` and the
+two halves of a newline come apart in front of you, which is why MITS
+BASIC sends CR CR LF.
+
+---
 
 ## Part 3 — The Teletype tab
 
@@ -910,7 +950,7 @@ Minimalist, and consistent with the visual language already in
  │ [A15..A00 address]  [D7..D0 data]  [WAIT]      │   D9, ~40px
  ├────────────────────────────────────────────────┤
  │  Teletype Helper              .subheader-bar   │
- │ [CTRL-C (BREAK)] [RUBOUT (_)] [KILL (@)] [CLR] │
+ │ [CTRL-C] [RUBOUT (_)] [KILL (@)] [LINE FEED] [CLR] │
  │ Type here. The machine must be running a       │   .comments
  │ program that reads the SIO — try tty-echo.     │
  └────────────────────────────────────────────────┘
@@ -943,9 +983,13 @@ Minimalist, and consistent with the visual language already in
 | Backspace | `5Fh` (`_`) | BASIC's rubout |
 | Ctrl+C | `03h` | break |
 | Esc / Ctrl+U | `40h` (`@`) | kill line |
+| LINE FEED (helper row only) | `0Ah` | advances the paper ([D25](#d25--line-feed-is-a-key-the-host-keyboard-does-not-have)) |
 
 **Output handling:** mask with `7Fh`; CR sets column 0, LF advances a
 line; wrap at column 72.
+
+The keyboard only reaches the machine while it is on
+([D24](#d24--a-dead-board-hears-nothing)).
 
 ---
 
