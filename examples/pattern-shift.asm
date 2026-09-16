@@ -8,8 +8,14 @@
 ;;; wrapping around from D0 back to D7.
 ;;;
 ;;; The simulator runs at 2 MHz, so the rotation is far too fast to
-;;; follow LED by LED; the row reads as a shimmer. Use SINGLE STEP to
-;;; watch it move one rotation at a time.
+;;; follow LED by LED; the row reads as a shimmer. Click STOP to freeze
+;;; it and the lamps hold whichever rotation the last OUT wrote.
+;;;
+;;; SINGLE STEP does not show it. The data LEDs carry whatever is on
+;;; the data bus, which between steps is the next instruction byte:
+;;; stepping the loop shows D3H, 0FH, C3H over and over, the opcodes
+;;; of OUT, RRC and JMP. The rotating value is in the accumulator, so
+;;; watch A in the Debugger tab's CPU dump instead.
 
 0000  3e 8c      MVI A,08CH       ; the pattern to display
 0002  d3 ff      OUT 0FFH         ; port FFH drives the data LEDs
