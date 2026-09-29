@@ -279,7 +279,8 @@ footer {
 }
 
 #cpu-dump,
-#mem-dump {
+#mem-dump,
+#instr-pane {
     background-color: #ccc;
     border-radius: 10px;
     color: #222;
@@ -474,6 +475,18 @@ footer {
 .at-sp {
     background-color: #36c;
     color: #eee;
+}
+
+/* The bytes after the opcode that belong to the same instruction: the
+   PC's green, paler, so the whole instruction reads as one piece. */
+.at-operand {
+    background-color: #8fd6a4;
+    color: #222;
+}
+
+/* Blank while the machine is off, like the dumps above it. */
+#instr-pane:empty {
+    display: none;
 }
 
 /* A button holding a current choice: the installed memory size, or

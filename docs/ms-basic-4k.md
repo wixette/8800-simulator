@@ -815,6 +815,8 @@ with the reason it is grey:
 | ◀ ▶ Follow PC | machine off | *The machine is off, so there is no memory dump to move around in.* |
 | ◀ ▶ Follow PC | all memory fits one page | *All 256 B is on screen at once. Install 4 KB or 8 KB and the dump gets a window to move.* |
 | Zero All Memory | machine off | *The machine is off, so there is no memory to zero.* |
+| Stop, Run, Single Step, Reset | machine off | *The machine is off, so there is no program to run.* |
+| Single Step | machine running | *The machine is running. Press Stop first, then step one instruction at a time.* |
 
 *Why:* a dead end with no explanation teaches nothing. Every one of
 these reasons is a fact about the machine worth knowing — how much
@@ -950,6 +952,42 @@ paper moves only if a program echoes it — the terminal is not wired to
 its own printer. Press RETURN then LINE FEED under `tty-echo` and the
 two halves of a newline come apart in front of you, which is why MITS
 BASIC sends CR CR LF.
+
+### D27 — The run switches, repeated beside the memory dump
+
+Debugging a program meant stepping on the Simulator tab and reading
+the dump on the Debugger tab, a round trip per instruction. The
+Debugger now has **Power**, **Stop**, **Run**, **Single Step** and
+**Reset** next to Zero All Memory, and they call the same handlers as
+the panel switches. Power is lit the way the helper board's OFF/ON is,
+so the one thing that has to be done first is visible on this tab too.
+
+They follow the Debugger's rules rather than the panel's. They are in
+Title Case and translated ([D17](#d17--three-surfaces-three-voices)),
+because the surface decides. The run switches grey out and explain themselves
+([D19](#d19--a-greyed-control-still-answers)), where a panel switch
+thrown on a dead machine simply does nothing. They make no switch
+sound, because that belongs to touching the panel
+([D23](#d23--the-beep-belongs-to-the-switch)). Single Step is also grey
+while the machine runs: the next instruction is gone before the dump
+can show it.
+
+### D28 — The instruction at PC, decoded under the dump
+
+A pane under the memory dump names the instruction the CPU will run
+next: its address, its bytes, the mnemonic with the operand named as
+instruction tables name it (`LHLD a16`, `MVI B,d8`, `LXI H,d16`), and
+the operand's value this time. The dump marks the operand bytes in a
+paler green than the opcode, so an instruction reads as one piece
+rather than as a lone highlighted byte followed by two that look like
+the next instructions.
+
+*The twelve undocumented opcodes* decode as whatever the CPU core runs
+them as — `NOP`, `JMP`, `RET` or `CALL` — and say so. The
+disassembler's table in `js/8080.js` names `20h` and `30h` after the
+8085's RIM and SIM, which this CPU does not have, and leaves the rest
+without a name or a length. `Sim8800.UNDOCUMENTED_OPCODES` corrects
+that without touching the vendored core.
 
 ---
 

@@ -542,6 +542,15 @@ panel.debugControlReasons = function() {
     reasons['mem-page-next'] = navReason;
     reasons['mem-follow-pc'] = navReason;
     reasons['debug-fill-zero'] = on ? null : {id: 'zero-mem-off', params: {}};
+    // The run controls, so that a program can be stepped with the dump
+    // in view. SINGLE STEP does nothing useful to a running machine,
+    // where the next instruction is gone before the dump can show it.
+    var runReason = on ? null : {id: 'run-controls-off', params: {}};
+    reasons['debug-stop'] = runReason;
+    reasons['debug-run'] = runReason;
+    reasons['debug-reset'] = runReason;
+    reasons['debug-single'] = runReason ||
+        (panel.sim.isRunning ? {id: 'step-while-running', params: {}} : null);
     return reasons;
 };
 
@@ -692,6 +701,10 @@ panel.setWaitLedCallback = function(isRunning) {
     if (!isRunning && panel.sim && panel.sim.halted) {
         panel.setStatus('status-halted');
     }
+    // Single Step in the Debugger is only there for a stopped machine.
+    if (panel.sim) {
+        panel.updateDebugControls();
+    }
 };
 
 /**
@@ -715,10 +728,13 @@ panel.updateHelperSwitches = function() {
             elem.classList.toggle('switch-on', !!panel.addressSwitchStates[i]);
         }
     }
-    var power = document.getElementById('s-off-on');
-    if (power) {
-        power.classList.toggle('on', !!panel.isPoweredOn);
-    }
+    // The Debugger has a power button of its own, lit the same way.
+    ['s-off-on', 'debug-power'].forEach(function(id) {
+        var power = document.getElementById(id);
+        if (power) {
+            power.classList.toggle('on', !!panel.isPoweredOn);
+        }
+    });
 };
 
 /**
@@ -744,12 +760,59 @@ panel.dumpCpuCallback = function(dumpHtml) {
 /**
  * When CPU dumps the MEM contents for debug.
  */
-panel.dumpMemCallback = function(dumpHtml, pages) {
+panel.dumpMemCallback = function(dumpHtml, pages, instr) {
     document.getElementById('mem-dump').innerHTML = dumpHtml;
     panel.renderMemMap(pages);
+    panel.lastInstr = instr || null;
+    panel.renderInstrPane();
     // Follow PC moves the window on its own, so the label is refreshed
     // with every dump.
     panel.updateMemWindowLabel();
+};
+
+/**
+ * The instruction at the program counter, as the last dump found it.
+ * Kept so that a change of language can redraw the pane.
+ * @type {?Object}
+ */
+panel.lastInstr = null;
+
+/**
+ * Writes out the instruction at the program counter, under the memory
+ * dump: its address, its bytes, its mnemonic with the operand named,
+ * and the operand's value this time.
+ */
+panel.renderInstrPane = function() {
+    var elem = document.getElementById('instr-pane');
+    var instr = panel.lastInstr;
+    if (!elem) {
+        return;
+    }
+    if (!instr) {
+        elem.textContent = '';
+        return;
+    }
+    var hex = instr.bytes.map(function(b) {
+        return Sim8800.toHex(b, 2);
+    });
+    var parts = [
+        Sim8800.toHex(instr.address, 4),
+        '  <span class="at-pc">' + hex[0] + '</span>' +
+            hex.slice(1).map(function(b) {
+                return ' <span class="at-operand">' + b + '</span>';
+            }).join('') +
+            '   '.repeat(3 - hex.length),
+        '  ' + instr.mnemonic,
+    ];
+    if (instr.operand) {
+        // The operand's name is whatever the mnemonic ends with.
+        var name = instr.mnemonic.match(/[ad]\d+$/)[0];
+        parts.push('   ' + name + ' = ' + instr.operand);
+    }
+    if (instr.undocumented) {
+        parts.push('   ' + l10n.getMessage('instr-undocumented'));
+    }
+    elem.innerHTML = '<pre>' + parts.join('') + '</pre>';
 };
 
 /**
@@ -1320,6 +1383,27 @@ panel.init = function() {
     filePicker.addEventListener('change', panel.onBinaryFileChosen, false);
     document.getElementById('debug-fill-zero').addEventListener(
         'click', panel.onFillZero, false);
+    // The same switches as the panel's, without the switch sound: that
+    // belongs to touching the panel (D23).
+    document.getElementById('debug-power').addEventListener(
+        'click', function() {
+            if (panel.isPoweredOn) {
+                panel.onPowerOff();
+            } else {
+                panel.onPowerOn();
+            }
+        }, false);
+    [['debug-stop', panel.onStop],
+     ['debug-run', panel.onRun],
+     ['debug-single', panel.onSingle],
+     ['debug-reset', panel.onReset]].forEach(function(control) {
+        document.getElementById(control[0]).addEventListener(
+            'click', function() {
+                if (!panel.reportIfUnavailable(control[0])) {
+                    control[1]();
+                }
+            }, false);
+    });
     for (let i = 0; i < panel.MEM_SIZES.length; i++) {
         let memSize = panel.MEM_SIZES[i];
         document.getElementById('mem-size-' + memSize).addEventListener(
@@ -1330,6 +1414,7 @@ panel.init = function() {
         panel.refreshStatus();
         panel.refreshExampleMenu();
         panel.refreshPlaceholders();
+        panel.renderInstrPane();
     };
     panel.refreshPlaceholders();
 

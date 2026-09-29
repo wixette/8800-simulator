@@ -651,6 +651,42 @@ l10n.MESSAGES = {
         'ko': '기계가 꺼져 있어 0으로 만들 메모리가 없습니다. 먼저 전원을 켜세요.',
     },
 
+    'instr-undocumented': {
+        'en': '(undocumented opcode; the 8080 runs it as this)',
+        'es': '(código de operación no documentado; el 8080 lo ejecuta así)',
+        'fr': '(opcode non documenté ; le 8080 l\'exécute ainsi)',
+        'de': '(undokumentierter Opcode; der 8080 führt ihn so aus)',
+        'it': '(opcode non documentato; l\'8080 lo esegue così)',
+        'zh': '（未公开的操作码；8080 按此执行）',
+        'zh-TW': '（未公開的操作碼；8080 依此執行）',
+        'ja': '（非公開のオペコード。8080 はこのように実行します）',
+        'ko': '(문서화되지 않은 옵코드. 8080은 이렇게 실행합니다)',
+    },
+
+    'run-controls-off': {
+        'en': 'The machine is off, so there is no program to run. Switch it on first.',
+        'es': 'La máquina está apagada, así que no hay programa que ejecutar. Enciéndela primero.',
+        'fr': 'La machine est éteinte, il n\'y a donc aucun programme à exécuter. Allumez-la d\'abord.',
+        'de': 'Die Maschine ist aus, es gibt also kein Programm auszuführen. Schalten Sie sie zuerst ein.',
+        'it': 'La macchina è spenta, quindi non c\'è alcun programma da eseguire. Accendila prima.',
+        'zh': '机器已关闭，没有程序可以运行。请先开机。',
+        'zh-TW': '機器已關閉，沒有程式可以執行。請先開機。',
+        'ja': '電源が入っていないので、実行するプログラムがありません。先に電源を入れてください。',
+        'ko': '기계가 꺼져 있어 실행할 프로그램이 없습니다. 먼저 전원을 켜세요.',
+    },
+
+    'step-while-running': {
+        'en': 'The machine is running. Press Stop first, then step one instruction at a time.',
+        'es': 'La máquina está en marcha. Pulsa Detener primero y luego avanza instrucción a instrucción.',
+        'fr': 'La machine tourne. Cliquez d\'abord sur Arrêter, puis avancez instruction par instruction.',
+        'de': 'Die Maschine läuft. Drücken Sie zuerst Stopp und gehen Sie dann Befehl für Befehl vor.',
+        'it': 'La macchina è in funzione. Premi prima Ferma, poi avanza un\'istruzione alla volta.',
+        'zh': '机器正在运行。请先点击停止，再逐条单步执行。',
+        'zh-TW': '機器正在執行。請先點擊停止，再逐條單步執行。',
+        'ja': 'マシンは実行中です。先に停止を押してから、1 命令ずつ進めてください。',
+        'ko': '기계가 실행 중입니다. 먼저 정지를 누른 뒤 한 명령씩 진행하세요.',
+    },
+
     'load-data-empty': {
         'en': 'Nothing to load. Type some bytes in hex, such as c3 00 00.',
         'es': 'No hay nada que cargar. Escribe algunos bytes en hex, por ejemplo c3 00 00.',
@@ -721,6 +757,66 @@ l10n.MESSAGES = {
         'zh-TW': '記憶體清零',
         'ja': 'メモリをゼロに',
         'ko': '메모리 0으로',
+    },
+
+    'debug-power': {
+        'en': 'Power',
+        'es': 'Encendido',
+        'fr': 'Alimentation',
+        'de': 'Strom',
+        'it': 'Accensione',
+        'zh': '电源',
+        'zh-TW': '電源',
+        'ja': '電源',
+        'ko': '전원',
+    },
+
+    'debug-stop': {
+        'en': 'Stop',
+        'es': 'Detener',
+        'fr': 'Arrêter',
+        'de': 'Stopp',
+        'it': 'Ferma',
+        'zh': '停止',
+        'zh-TW': '停止',
+        'ja': '停止',
+        'ko': '정지',
+    },
+
+    'debug-run': {
+        'en': 'Run',
+        'es': 'Ejecutar',
+        'fr': 'Exécuter',
+        'de': 'Ausführen',
+        'it': 'Esegui',
+        'zh': '运行',
+        'zh-TW': '執行',
+        'ja': '実行',
+        'ko': '실행',
+    },
+
+    'debug-single': {
+        'en': 'Single Step',
+        'es': 'Paso a Paso',
+        'fr': 'Pas à Pas',
+        'de': 'Einzelschritt',
+        'it': 'Passo Singolo',
+        'zh': '单步',
+        'zh-TW': '單步',
+        'ja': '1 ステップ',
+        'ko': '한 단계',
+    },
+
+    'debug-reset': {
+        'en': 'Reset',
+        'es': 'Reiniciar',
+        'fr': 'Réinitialiser',
+        'de': 'Zurücksetzen',
+        'it': 'Reimposta',
+        'zh': '复位',
+        'zh-TW': '重置',
+        'ja': 'リセット',
+        'ko': '리셋',
     },
 
     'mem-page-prev-title': {
