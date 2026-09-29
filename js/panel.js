@@ -542,6 +542,17 @@ panel.debugControlReasons = function() {
     reasons['mem-page-next'] = navReason;
     reasons['mem-follow-pc'] = navReason;
     reasons['debug-fill-zero'] = on ? null : {id: 'zero-mem-off', params: {}};
+    // The run controls, so that a program can be stepped with the dump
+    // in view. SINGLE STEP does nothing useful to a running machine,
+    // where the next instruction is gone before the dump can show it.
+    var runReason = on ? null : {id: 'run-controls-off', params: {}};
+    reasons['debug-stop'] = runReason;
+    reasons['debug-run'] = runReason;
+    reasons['debug-reset'] = runReason;
+    reasons['debug-single'] = runReason ||
+        (panel.sim.isRunning ? {id: 'step-while-running', params: {}} : null);
+    // A machine that is off has nothing in it to link to.
+    reasons['copy-link'] = on ? null : {id: 'copy-link-off', params: {}};
     return reasons;
 };
 
@@ -692,6 +703,10 @@ panel.setWaitLedCallback = function(isRunning) {
     if (!isRunning && panel.sim && panel.sim.halted) {
         panel.setStatus('status-halted');
     }
+    // Single Step in the Debugger is only there for a stopped machine.
+    if (panel.sim) {
+        panel.updateDebugControls();
+    }
 };
 
 /**
@@ -715,10 +730,13 @@ panel.updateHelperSwitches = function() {
             elem.classList.toggle('switch-on', !!panel.addressSwitchStates[i]);
         }
     }
-    var power = document.getElementById('s-off-on');
-    if (power) {
-        power.classList.toggle('on', !!panel.isPoweredOn);
-    }
+    // The Debugger has a power button of its own, lit the same way.
+    ['s-off-on', 'debug-power'].forEach(function(id) {
+        var power = document.getElementById(id);
+        if (power) {
+            power.classList.toggle('on', !!panel.isPoweredOn);
+        }
+    });
 };
 
 /**
@@ -744,12 +762,59 @@ panel.dumpCpuCallback = function(dumpHtml) {
 /**
  * When CPU dumps the MEM contents for debug.
  */
-panel.dumpMemCallback = function(dumpHtml, pages) {
+panel.dumpMemCallback = function(dumpHtml, pages, instr) {
     document.getElementById('mem-dump').innerHTML = dumpHtml;
     panel.renderMemMap(pages);
+    panel.lastInstr = instr || null;
+    panel.renderInstrPane();
     // Follow PC moves the window on its own, so the label is refreshed
     // with every dump.
     panel.updateMemWindowLabel();
+};
+
+/**
+ * The instruction at the program counter, as the last dump found it.
+ * Kept so that a change of language can redraw the pane.
+ * @type {?Object}
+ */
+panel.lastInstr = null;
+
+/**
+ * Writes out the instruction at the program counter, under the memory
+ * dump: its address, its bytes, its mnemonic with the operand named,
+ * and the operand's value this time.
+ */
+panel.renderInstrPane = function() {
+    var elem = document.getElementById('instr-pane');
+    var instr = panel.lastInstr;
+    if (!elem) {
+        return;
+    }
+    if (!instr) {
+        elem.textContent = '';
+        return;
+    }
+    var hex = instr.bytes.map(function(b) {
+        return Sim8800.toHex(b, 2);
+    });
+    var parts = [
+        Sim8800.toHex(instr.address, 4),
+        '  <span class="at-pc">' + hex[0] + '</span>' +
+            hex.slice(1).map(function(b) {
+                return ' <span class="at-operand">' + b + '</span>';
+            }).join('') +
+            '   '.repeat(3 - hex.length),
+        '  ' + instr.mnemonic,
+    ];
+    if (instr.operand) {
+        // The operand's name is whatever the mnemonic ends with.
+        var name = instr.mnemonic.match(/[ad]\d+$/)[0];
+        parts.push('   ' + name + ' = ' + instr.operand);
+    }
+    if (instr.undocumented) {
+        parts.push('   ' + l10n.getMessage('instr-undocumented'));
+    }
+    elem.innerHTML = '<pre>' + parts.join('') + '</pre>';
 };
 
 /**
@@ -864,6 +929,447 @@ panel.debugLoadData = function() {
     panel.updateMemoryControls();
     panel.setStatus('load-data-loaded', {bytes: parsed.bytes.length}, '',
                     poweredOn);
+};
+
+/**
+ * The 8-bit registers a link can carry, by the names CPU8080.set()
+ * knows them by. PC and SP are the two 16-bit ones.
+ * @type {Array<string>}
+ */
+panel.LINK_REGS8 = ['a', 'b', 'c', 'd', 'e', 'f', 'h', 'l'];
+
+/**
+ * @type {Array<string>}
+ */
+panel.LINK_REGS16 = ['pc', 'sp'];
+
+/**
+ * What each register holds after power-on, which a link leaves out.
+ * The 8080 always reads bit 1 of the flags as set, hence F's 02H.
+ * @param {string} name A register in LINK_REGS8 or LINK_REGS16.
+ * @return {number} Its value on a machine just switched on.
+ */
+panel.linkRegDefault = function(name) {
+    return name == 'f' ? 0x02 : 0;
+};
+
+/**
+ * The memory a link installs when it does not say: the least that
+ * holds what is in use.
+ * @param {number} used Bytes in use, as usedLength() counts them.
+ * @return {number|undefined} One of MEM_SIZES, or nothing if none is
+ *     big enough.
+ */
+panel.fittingMemSize = function(used) {
+    return panel.MEM_SIZES.find(function(size) {
+        return size >= used;
+    });
+};
+
+/**
+ * The most memory a copied link writes out as hex. A program this size
+ * is one a class writes by hand, and its bytes should be there to read
+ * in the link. Past it, the memory is compressed (see stateToLink).
+ * @type {number}
+ */
+panel.LINK_HEX_LIMIT = 256;
+
+/**
+ * How much of a memory image is not the zeros at its top. Loading
+ * zeroes memory first, so those say nothing.
+ * @param {Array<number>} bytes The image.
+ * @return {number} The length without them.
+ */
+panel.usedLength = function(bytes) {
+    var end = bytes.length;
+    while (end > 0 && !bytes[end - 1]) {
+        end--;
+    }
+    return end;
+};
+
+/**
+ * Writes a machine as the query string of a link.
+ *
+ * Every field is plain hex under its own name, so a link can be written
+ * by hand as well as copied: ?hex=3E8CD3FF76 is a whole program. The
+ * memory is written without the zeros at its top, which on most
+ * programs is most of it, and so is anything else a machine just
+ * switched on would have anyway: the memory size the program needs
+ * no more than, and registers at their power-on values.
+ * @param {{memSize: number, bytes: Array<number>, cpu: ?Object<string,
+ *     number>, switches: number}} state The machine. Without cpu, only
+ *     the memory is written, and the switches are left out with the
+ *     registers.
+ * @param {string=} zip The memory already compressed, to write in place
+ *     of the hex.
+ * @return {string} The query string, without its '?'.
+ */
+panel.stateToQuery = function(state, zip) {
+    var fields = [];
+    var used = panel.usedLength(state.bytes);
+    if (state.memSize != panel.fittingMemSize(used)) {
+        fields.push('mem=' + state.memSize);
+    }
+    if (zip !== undefined) {
+        fields.push('zip=' + zip);
+    } else {
+        let hex = '';
+        for (let i = 0; i < used; i++) {
+            hex += Sim8800.toHex(state.bytes[i], 2);
+        }
+        fields.push('hex=' + hex);
+    }
+    if (!state.cpu) {
+        return fields.join('&');
+    }
+    panel.LINK_REGS16.concat(panel.LINK_REGS8).forEach(function(name) {
+        let value = state.cpu[name];
+        if (value != panel.linkRegDefault(name)) {
+            let digits = panel.LINK_REGS16.indexOf(name) >= 0 ? 4 : 2;
+            fields.push(name + '=' + Sim8800.toHex(value, digits));
+        }
+    });
+    if (state.switches) {
+        fields.push('sw=' + Sim8800.toHex(state.switches, 4));
+    }
+    return fields.join('&');
+};
+
+/**
+ * Reads a machine out of a link's query string - the reverse of
+ * stateToQuery(), but forgiving of a link written by hand. Only hex is
+ * needed; the bytes may be separated by spaces or commas, and without
+ * mem= the smallest memory the program fits in is installed.
+ * @param {string} query The query string, with or without its '?'.
+ * @param {Array<number>=} unzipped The memory from the link's zip=
+ *     field, already decompressed, to take in place of hex=.
+ * @return {?{memSize: number, bytes: Array<number>, cpu: Object<string,
+ *     number>, switches: number, error: (string|undefined),
+ *     params: (Object|undefined)}} The machine, or the l10n id of what
+ *     is wrong with the link, or null if the link carries no machine.
+ */
+panel.queryToState = function(query, unzipped) {
+    var params = new URLSearchParams(query);
+    var cpu = {};
+    var regs = panel.LINK_REGS16.concat(panel.LINK_REGS8);
+    for (let i = 0; i < regs.length; i++) {
+        let name = regs[i];
+        let text = params.get(name);
+        if (text === null) {
+            continue;
+        }
+        let max = panel.LINK_REGS16.indexOf(name) >= 0 ? 0xffff : 0xff;
+        let value = parseInt(text, 16);
+        if (!/^[0-9a-fA-F]+$/.test(text.trim()) || value > max) {
+            return {error: 'link-bad-reg',
+                    params: {name: name.toUpperCase(), text: text}};
+        }
+        cpu[name] = value;
+    }
+    var hex = params.get('hex');
+    if (hex === null && !unzipped && !Object.keys(cpu).length) {
+        return null;
+    }
+    var bytes = [];
+    if (unzipped) {
+        bytes = unzipped;
+    } else if (hex && hex.trim()) {
+        let parsed = panel.parseBytes(hex);
+        if (parsed.error) {
+            return parsed;
+        }
+        bytes = parsed.bytes;
+    }
+    // A hand-written table padded one byte past 256 still fits in 256.
+    var used = panel.usedLength(bytes);
+    var memSize = null;
+    var memText = params.get('mem');
+    if (memText !== null) {
+        memSize = parseInt(memText, 10);
+        if (panel.MEM_SIZES.indexOf(memSize) < 0) {
+            return {error: 'link-bad-mem', params: {text: memText}};
+        }
+    } else {
+        memSize = panel.fittingMemSize(used);
+    }
+    if (!memSize || used > memSize) {
+        let size = memSize || panel.MEM_SIZES[panel.MEM_SIZES.length - 1];
+        return {error: 'load-data-too-long',
+                params: {bytes: used, size: panel.formatMemSize(size)}};
+    }
+    bytes = bytes.slice(0, memSize);
+    var switches = 0;
+    var swText = params.get('sw');
+    if (swText !== null) {
+        switches = parseInt(swText, 16);
+        if (!/^[0-9a-fA-F]+$/.test(swText.trim()) || switches > 0xffff) {
+            return {error: 'link-bad-reg', params: {name: 'SW', text: swText}};
+        }
+    }
+    return {memSize: memSize, bytes: bytes, cpu: cpu, switches: switches};
+};
+
+/**
+ * Compresses or decompresses bytes with the browser's own deflate.
+ * Output past panel.MAX_IMAGE_BYTES is refused rather than collected,
+ * so a link cannot make the page inflate something enormous.
+ * @param {Array<number>|Uint8Array} bytes The input.
+ * @param {boolean} inflate True to decompress.
+ * @return {!Promise<!Uint8Array>} The output.
+ */
+panel.deflate = function(bytes, inflate) {
+    var stream = new Blob([Uint8Array.from(bytes)]).stream().pipeThrough(
+        inflate ? new DecompressionStream('deflate') :
+            new CompressionStream('deflate'));
+    var reader = stream.getReader();
+    var chunks = [];
+    var total = 0;
+    var pump = function() {
+        return reader.read().then(function(result) {
+            if (result.done) {
+                let out = new Uint8Array(total);
+                let at = 0;
+                chunks.forEach(function(chunk) {
+                    out.set(chunk, at);
+                    at += chunk.length;
+                });
+                return out;
+            }
+            total += result.value.length;
+            if (total > panel.MAX_IMAGE_BYTES) {
+                reader.cancel();
+                throw new Error('too large');
+            }
+            chunks.push(result.value);
+            return pump();
+        });
+    };
+    return pump();
+};
+
+/**
+ * Base64 in the form that goes into a URL as it is: - and _ for + and
+ * /, and no = padding.
+ * @param {Uint8Array} bytes The bytes.
+ * @return {string} The text.
+ */
+panel.toBase64Url = function(bytes) {
+    var text = '';
+    for (let i = 0; i < bytes.length; i++) {
+        text += String.fromCharCode(bytes[i]);
+    }
+    return btoa(text).replace(/\+/g, '-').replace(/\//g, '_')
+        .replace(/=+$/, '');
+};
+
+/**
+ * The reverse of toBase64Url(). Plain base64 is read too.
+ * @param {string} text The text.
+ * @return {Uint8Array} The bytes. Throws if the text is not base64.
+ */
+panel.fromBase64Url = function(text) {
+    var binary = atob(text.trim().replace(/-/g, '+').replace(/_/g, '/'));
+    var bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes;
+};
+
+/**
+ * Writes a machine as the query string of a link, the way Copy Link
+ * does: as hex when the memory in use fits in panel.LINK_HEX_LIMIT,
+ * and otherwise deflated and in base64, under zip= instead of hex=.
+ * 4K BASIC is some 8,000 hex digits, and a link much past that is
+ * refused by some servers and cut short by some of the places links
+ * get pasted.
+ * @param {Object} state The machine, as stateToQuery() takes it.
+ * @return {!Promise<string>} The query string, without its '?'.
+ */
+panel.stateToLink = function(state) {
+    var used = panel.usedLength(state.bytes);
+    if (used <= panel.LINK_HEX_LIMIT) {
+        return Promise.resolve(panel.stateToQuery(state));
+    }
+    return panel.deflate(state.bytes.slice(0, used), false).then(
+        function(zipped) {
+            return panel.stateToQuery(state, panel.toBase64Url(zipped));
+        });
+};
+
+/**
+ * Reads a machine out of a link, compressed or not. See queryToState()
+ * for what it returns.
+ * @param {string} query The query string or fragment, with or without
+ *     its '?' or '#'.
+ * @return {!Promise<?Object>} The machine, an error, or null.
+ */
+panel.linkToState = function(query) {
+    query = query.replace(/^#/, '');
+    var zip = new URLSearchParams(query).get('zip');
+    if (zip === null) {
+        return Promise.resolve(panel.queryToState(query));
+    }
+    var zipped;
+    try {
+        zipped = panel.fromBase64Url(zip);
+    } catch (e) {
+        return Promise.resolve({error: 'link-bad-zip', params: {}});
+    }
+    return panel.deflate(zipped, true).then(function(bytes) {
+        return panel.queryToState(query, Array.from(bytes));
+    }, function() {
+        return {error: 'link-bad-zip', params: {}};
+    });
+};
+
+/**
+ * Puts the address switches in the given positions, as if each had been
+ * flipped by hand but without the sound.
+ * @param {number} word Bit i up raises switch A<i>.
+ */
+panel.setAddressSwitches = function(word) {
+    for (let i = 0; i < 16; i++) {
+        let up = (word >> i) & 1;
+        panel.addressSwitchStates[i] = up;
+        if (up) {
+            panel.switchUp('s' + i);
+        } else {
+            panel.switchDown('s' + i);
+        }
+    }
+    panel.updateHelperSwitches();
+};
+
+/**
+ * Loads the machine a link describes, if the page was opened from one.
+ * The machine is left stopped, like any other load, for RUN or SINGLE
+ * STEP to take on from there.
+ */
+panel.loadFromLink = function() {
+    // Copy Link writes the fragment, which never goes to the server and
+    // so has no length limit there. A link written by hand is as likely
+    // to use the query string.
+    var search = window.location.search;
+    return panel.linkToState(window.location.hash).then(function(state) {
+        return state || panel.linkToState(search);
+    }).then(panel.applyLinkState);
+};
+
+/**
+ * Puts the machine a link described into the simulator.
+ * @param {?Object} state What linkToState() read.
+ */
+panel.applyLinkState = function(state) {
+    if (!state) {
+        return;
+    }
+    if (state.error) {
+        panel.setStatus(state.error, state.params, 'error');
+        return;
+    }
+    panel.sim.setMemSize(state.memSize);
+    var loaded = panel.loadImage(state.bytes);
+    // Every register, not just the ones the link names: a machine that
+    // was already on keeps its registers through RESET, and a register
+    // the link leaves out is one that should be at its power-on value.
+    panel.LINK_REGS16.concat(panel.LINK_REGS8).forEach(function(name) {
+        CPU8080.set(name, name in state.cpu ?
+                    state.cpu[name] : panel.linkRegDefault(name));
+    });
+    panel.setAddressSwitches(state.switches);
+    panel.sim.flushDump(true);
+    if (Object.keys(state.cpu).length || state.switches) {
+        panel.setStatus('link-state-loaded',
+                        {size: panel.formatMemSize(state.memSize),
+                         pc: Sim8800.toHex(state.cpu.pc, 4)});
+    } else {
+        panel.setStatus('link-loaded', {bytes: loaded.bytes});
+    }
+};
+
+/**
+ * A link that opens the simulator in the state the machine is in now.
+ * @return {!Promise<string>} The link.
+ */
+panel.currentLink = function() {
+    var cpu = CPU8080.status();
+    // A halted CPU has already stepped past its HLT. Pointing the link
+    // back at the HLT brings the machine up halted in the same place,
+    // which the core's halt flag, private to it, could not.
+    if (panel.sim.halted &&
+        panel.sim.readByte((cpu.pc - 1) & 0xffff) == 0x76) {
+        cpu.pc = (cpu.pc - 1) & 0xffff;
+    }
+    var base = window.location.href.split(/[?#]/)[0];
+    // Usually a link is for sharing a program, which should open at a
+    // fresh RESET; the registers are for sharing a moment in one.
+    var withState = document.getElementById('copy-link-state').checked;
+    return panel.stateToLink({
+        memSize: panel.sim.mem.length,
+        bytes: panel.sim.mem,
+        cpu: withState ? cpu : null,
+        switches: panel.getInputAddressCallback(),
+    }).then(function(query) {
+        return base + '#' + query;
+    });
+};
+
+/**
+ * When Copy Link is pressed. The link goes into the address bar as well
+ * as the clipboard, since a page opened off the disk, or a browser that
+ * says no, cannot be written to the clipboard from.
+ */
+panel.onCopyLink = function() {
+    if (panel.reportIfUnavailable('copy-link')) {
+        return;
+    }
+    panel.currentLink().then(function(link) {
+        try {
+            // Not a hashchange, so this does not load the link back in.
+            window.history.replaceState(null, '', link);
+        } catch (e) {
+            // A file:// page may refuse; the clipboard can still have it.
+        }
+        var inBar = function() {
+            panel.setStatus('link-in-address-bar');
+            panel.flashCopyLink('copy-link-in-bar');
+        };
+        if (!navigator.clipboard || !navigator.clipboard.writeText) {
+            inBar();
+            return;
+        }
+        navigator.clipboard.writeText(link).then(function() {
+            panel.setStatus(
+                document.getElementById('copy-link-state').checked ?
+                    'link-copied' : 'link-copied-program');
+            panel.flashCopyLink('copy-link-done');
+        }, inBar);
+    });
+};
+
+/**
+ * How long Copy Link shows what it did before it goes back to its name.
+ * @type {number}
+ */
+panel.COPY_LINK_FLASH_MS = 1500;
+
+/**
+ * Says on the Copy Link button itself that the link went somewhere.
+ * The status line says it too, but it is at the foot of the page,
+ * usually out of sight of the button.
+ * @param {string} id The l10n message to show on the button.
+ */
+panel.flashCopyLink = function(id) {
+    var button = document.getElementById('copy-link');
+    button.textContent = l10n.getMessage(id);
+    button.classList.add('copied');
+    window.clearTimeout(panel.copyLinkTimer);
+    panel.copyLinkTimer = window.setTimeout(function() {
+        button.textContent = l10n.getMessage('copy-link');
+        button.classList.remove('copied');
+    }, panel.COPY_LINK_FLASH_MS);
 };
 
 /**
@@ -1318,8 +1824,31 @@ panel.init = function() {
     document.getElementById('load-binary').addEventListener(
         'click', function() { filePicker.click(); }, false);
     filePicker.addEventListener('change', panel.onBinaryFileChosen, false);
+    document.getElementById('copy-link').addEventListener(
+        'click', panel.onCopyLink, false);
     document.getElementById('debug-fill-zero').addEventListener(
         'click', panel.onFillZero, false);
+    // The same switches as the panel's, without the switch sound: that
+    // belongs to touching the panel (D23).
+    document.getElementById('debug-power').addEventListener(
+        'click', function() {
+            if (panel.isPoweredOn) {
+                panel.onPowerOff();
+            } else {
+                panel.onPowerOn();
+            }
+        }, false);
+    [['debug-stop', panel.onStop],
+     ['debug-run', panel.onRun],
+     ['debug-single', panel.onSingle],
+     ['debug-reset', panel.onReset]].forEach(function(control) {
+        document.getElementById(control[0]).addEventListener(
+            'click', function() {
+                if (!panel.reportIfUnavailable(control[0])) {
+                    control[1]();
+                }
+            }, false);
+    });
     for (let i = 0; i < panel.MEM_SIZES.length; i++) {
         let memSize = panel.MEM_SIZES[i];
         document.getElementById('mem-size-' + memSize).addEventListener(
@@ -1330,6 +1859,7 @@ panel.init = function() {
         panel.refreshStatus();
         panel.refreshExampleMenu();
         panel.refreshPlaceholders();
+        panel.renderInstrPane();
     };
     panel.refreshPlaceholders();
 
@@ -1347,6 +1877,11 @@ panel.init = function() {
     // The machine comes up switched off, and the empty dump and dark
     // panel should say why rather than look broken.
     panel.setStatus('status-off');
+    // A link to a program, or to a machine part way through one.
+    panel.loadFromLink();
+    // A link pasted into the address bar while the page is open only
+    // changes the fragment, which does not reload the page.
+    window.addEventListener('hashchange', panel.loadFromLink, false);
     // Last, because showing a tab refreshes what is on it, and that
     // needs the simulator and the teletype to exist first.
     panel.showTab(panel.readSavedTab());

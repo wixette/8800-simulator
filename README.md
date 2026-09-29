@@ -80,11 +80,60 @@ the contents of memory, and is where programs are loaded:
   that page is in use, and marked where the program counter and the
   stack pointer are. Click a cell to jump there, or use **Follow PC** to
   track the running program.
+- **Copy Link** copies a link to what is in memory, which opens at
+  RESET ready to RUN. Tick *Include registers and switches* to link to
+  the machine as it stands instead, stopped at the current instruction.
 
 ![The Debugger tab: the loaders, the CPU registers, installed memory and the memory dump](./screenshots/debugger.png)
 
 **Tutorial** walks through toggling in a first program by hand and
 starting BASIC, with references for going further.
+
+### Linking to a program
+
+A link can open the simulator with a program already loaded at 0000H,
+ready to RUN. Put the bytes after `?hex=`:
+
+```
+https://wixette.github.io/8800-simulator/?hex=3E8CD3FF76
+```
+
+The bytes can run together, or be separated by `+` or `%20`. Memory is
+installed to fit: 256 bytes unless the program needs more, and zeros
+at the end do not count. Such a link can go in a Markdown file next to
+the program's listing:
+
+```markdown
+[Run it](https://wixette.github.io/8800-simulator/?hex=3E8CD3FF76)
+```
+
+A link can use `#` in place of `?`, as in `#hex=3E8CD3FF76`; both
+work.
+
+**Copy Link** in the Debugger tab writes a link after `#`. With
+*Include registers and switches* ticked it also holds the registers
+and the machine's place in the program. It leaves out whatever a
+machine just switched on would have anyway: registers that are zero
+(or `02` for `f`), switches that are all down, and `mem` when the
+program needs no more than that. When
+the memory in use fits in 256 bytes it is written as hex, to be read in
+the link. Past that it is compressed and written under `zip` instead:
+4K BASIC comes to about 4,500 characters rather than 8,300. Being after
+`#`, none of it is sent to the web server, whose limit on a link's
+length (GitHub Pages refuses one of 16,000 characters) would otherwise
+turn a large machine away. Every field is optional:
+
+| Field | Holds |
+|---|---|
+| `hex` | Memory from 0000H up, in hex |
+| `zip` | The same memory, deflated and in URL-safe base64, in place of `hex` |
+| `mem` | Installed memory: `256`, `4096` or `8192` (decimal) |
+| `pc`, `sp` | The 16-bit registers, in hex |
+| `a`, `b`, `c`, `d`, `e`, `h`, `l`, `f` | The 8-bit registers, in hex, `f` being the flags |
+| `sw` | The address switches, A15-A0, as a 16-bit hex word |
+
+A linked machine always opens stopped. The teletype's paper and the
+interrupt enable are not in the link.
 
 ## Teletype programs
 

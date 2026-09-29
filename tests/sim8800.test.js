@@ -656,6 +656,70 @@ test('the dump marks the bytes at PC and SP, and their pages', () => {
     assert.strictEqual(state.memMap[1].pc, false);
 });
 
+test('an instruction decodes with its operand named, and valued', () => {
+    const lhld = Sim8800.decodeInstruction(0x2a, 0x34, 0x12);
+    assert.deepStrictEqual(lhld, {mnemonic: 'LHLD a16', operand: '1234H',
+                                  length: 3, undocumented: false});
+    // LXI loads data, not an address.
+    assert.strictEqual(Sim8800.decodeInstruction(0x21, 0, 0).mnemonic,
+                       'LXI H,d16');
+    const mvi = Sim8800.decodeInstruction(0x06, 0x8c, 0);
+    assert.strictEqual(mvi.mnemonic, 'MVI B,d8');
+    assert.strictEqual(mvi.operand, '8CH');
+    assert.strictEqual(Sim8800.decodeInstruction(0xd3, 0xff, 0).mnemonic,
+                       'OUT d8');
+    const mov = Sim8800.decodeInstruction(0x78, 0, 0);
+    assert.deepStrictEqual(mov, {mnemonic: 'MOV A,B', operand: null,
+                                 length: 1, undocumented: false});
+});
+
+test('every opcode decodes to something the CPU core would run', () => {
+    // The disassembler's table names 20h and 30h after the 8085's RIM
+    // and SIM, and gives the rest of the gaps no name and no length.
+    // The core runs them all as the documented instruction they copy.
+    const expect = {0x20: 'NOP', 0x30: 'NOP', 0x08: 'NOP', 0x38: 'NOP',
+                    0xcb: 'JMP a16', 0xd9: 'RET', 0xdd: 'CALL a16',
+                    0xed: 'CALL a16', 0xfd: 'CALL a16'};
+    for (const op of Object.keys(expect)) {
+        const d = Sim8800.decodeInstruction(Number(op), 0, 0);
+        assert.strictEqual(d.mnemonic, expect[op], 'opcode ' + op);
+        assert.strictEqual(d.undocumented, true, 'opcode ' + op);
+    }
+    for (let op = 0; op < 256; op++) {
+        const d = Sim8800.decodeInstruction(op, 0, 0);
+        assert.ok(d.length >= 1 && d.length <= 3, 'opcode ' + op);
+        assert.ok(!/\$|RIM|SIM|^-$/.test(d.mnemonic),
+                  'opcode ' + op + ' decodes to ' + d.mnemonic);
+    }
+});
+
+test('the dump marks an instruction\'s operand bytes along with its opcode', () => {
+    const {sim, state} = poweredOnSim();
+    // LHLD 0012h, then NOP.
+    sim.loadDataAsHexString(0, '2a 12 00 00');
+    sim.flushDump(true);
+    assert.match(state.memDump,
+                 /<span class="at-pc">2A<\/span> <span class="at-operand">12<\/span> <span class="at-operand">00<\/span> 00 /);
+    assert.strictEqual(state.instr.mnemonic, 'LHLD a16');
+    assert.strictEqual(state.instr.address, 0);
+    assert.deepStrictEqual(state.instr.bytes, [0x2a, 0x12, 0x00]);
+
+    // One step on, a one byte instruction marks nothing after itself.
+    sim.singleStep();
+    sim.flushDump(true);
+    assert.strictEqual(state.instr.address, 3);
+    assert.strictEqual(state.instr.mnemonic, 'NOP');
+    assert.doesNotMatch(state.memDump, /at-operand/);
+});
+
+test('the instruction pane is blank while the machine is off', () => {
+    const {sim, state} = poweredOnSim();
+    sim.flushDump(true);
+    assert.ok(state.instr, 'a running machine has an instruction at PC');
+    sim.powerOff();
+    assert.strictEqual(state.instr, undefined);
+});
+
 test('map cells explain their own shading in a tooltip', () => {
     const {sim, state} = sizedSim(4096);
     // Page 0 half full, page 1 empty.
