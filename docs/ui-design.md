@@ -132,7 +132,8 @@ from [#10](https://github.com/wixette/8800-simulator/pull/10)) leaves the
 page the moment it is copied. People put links in textbooks and
 worksheets that nobody will edit again. Once the format has been
 released, fields may be added, but an existing field is never renamed,
-dropped or read differently.
+dropped or read differently. The whole format is in `js/link.js`, with
+nothing of the page in it, and `tests/link.test.js` pins it down.
 
 ### P9 — A phone gets the same app, not a different one
 
