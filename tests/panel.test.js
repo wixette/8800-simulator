@@ -502,3 +502,83 @@ test('a compressed link cut short says so', async () => {
     assert.strictEqual((await panel.linkToState('zip=!!!')).error,
                        'link-bad-zip');
 });
+
+/**
+ * Stands in for the parts of the page that applyLinkState() drives, and
+ * records what it asks of them, in order. Everything is put back when
+ * the test ends.
+ * @param {!Object} t The test context.
+ * @return {!Array<!Array>} The calls: ['mem', size], ['load', length]
+ *     and ['status', ...the arguments to setStatus].
+ */
+function stubLinkLoader(t) {
+    const calls = [];
+    const regs = {pc: 0};
+    const saved = {cpu: global.CPU8080, sim: global.Sim8800, panelSim: panel.sim};
+    global.Sim8800 = require('../js/sim8800.js');
+    global.CPU8080 = {
+        set: (name, value) => { regs[name.toLowerCase()] = value; },
+        status: () => ({...regs}),
+    };
+    panel.sim = {flushDump() {}};
+    t.after(() => {
+        global.CPU8080 = saved.cpu;
+        global.Sim8800 = saved.sim;
+        panel.sim = saved.panelSim;
+    });
+    t.mock.method(panel, 'onSetMemSize', (size) => calls.push(['mem', size]));
+    t.mock.method(panel, 'loadImage', (bytes) => {
+        calls.push(['load', bytes.length]);
+        return {bytes: bytes.length, poweredOn: true};
+    });
+    t.mock.method(panel, 'setAddressSwitches', () => {});
+    t.mock.method(panel, 'setStatus', (...args) => calls.push(['status', ...args]));
+    return calls;
+}
+
+test('a link with registers but no PC still says where it stopped', (t) => {
+    // Copy Link leaves out a PC of 0000H, so a link taken at RESET with
+    // a value in A, or with switches raised, has no pc= at all.
+    const calls = stubLinkLoader(t);
+    panel.applyLinkState({memSize: 256, bytes: [0x76], cpu: {a: 0x41},
+                          switches: 0});
+    panel.applyLinkState({memSize: 256, bytes: [0x76], cpu: {},
+                          switches: 0x8001});
+    const said = calls.filter((c) => c[0] == 'status');
+    assert.strictEqual(said.length, 2);
+    for (const status of said) {
+        assert.strictEqual(status[1], 'link-state-loaded');
+        assert.deepStrictEqual(status[2], {size: '256 B', pc: '0000'});
+    }
+});
+
+test('a link says so when it had to switch the machine on', (t) => {
+    const calls = stubLinkLoader(t);
+    panel.applyLinkState({memSize: 256, bytes: [0x76], cpu: {}, switches: 0});
+    const status = calls.find((c) => c[0] == 'status');
+    assert.strictEqual(status[1], 'link-loaded');
+    assert.strictEqual(status[4], true, 'the note D23 puts first');
+});
+
+test('a link installs its memory the way the memory buttons do', (t) => {
+    // The panel has to hear that installing memory switched the machine
+    // off, or the load that follows goes into a machine it thinks is on.
+    const calls = stubLinkLoader(t);
+    panel.applyLinkState({memSize: 4096, bytes: [0x76], cpu: {}, switches: 0});
+    assert.deepStrictEqual(calls.slice(0, 2), [['mem', 4096], ['load', 1]]);
+});
+
+test('a link pasted into an open page reads only the fragment', async (t) => {
+    const savedWindow = global.window;
+    global.window = {location: {hash: '', search: '?hex=76'}};
+    t.after(() => { global.window = savedWindow; });
+    const seen = [];
+    t.mock.method(panel, 'applyLinkState', (state) => seen.push(state));
+    // The fragment emptied: the query string the page was opened with
+    // is not loaded again over the machine as it stands.
+    await panel.onHashChange();
+    assert.deepStrictEqual(seen, [null]);
+    window.location.hash = '#hex=3E';
+    await panel.onHashChange();
+    assert.deepStrictEqual(seen[1].bytes, [0x3e]);
+});

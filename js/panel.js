@@ -1242,6 +1242,19 @@ panel.loadFromLink = function() {
 };
 
 /**
+ * When a link is pasted into the address bar of a page already open.
+ * That changes only the fragment, which does not reload the page, so
+ * only the fragment is read. The query string is what the page was
+ * opened with, and loading it again would throw away the machine as it
+ * stands.
+ * @return {!Promise} Settles once the link, if any, is loaded.
+ */
+panel.onHashChange = function() {
+    return panel.linkToState(window.location.hash).then(
+        panel.applyLinkState);
+};
+
+/**
  * Puts the machine a link described into the simulator.
  * @param {?Object} state What linkToState() read.
  */
@@ -1253,7 +1266,10 @@ panel.applyLinkState = function(state) {
         panel.setStatus(state.error, state.params, 'error');
         return;
     }
-    panel.sim.setMemSize(state.memSize);
+    // Through the panel, as the memory buttons do, so that the panel
+    // knows the machine went off. Behind its back, the load below would
+    // go into a machine the panel still thought was on, and be dropped.
+    panel.onSetMemSize(state.memSize);
     var loaded = panel.loadImage(state.bytes);
     // Every register, not just the ones the link names: a machine that
     // was already on keeps its registers through RESET, and a register
@@ -1264,12 +1280,15 @@ panel.applyLinkState = function(state) {
     });
     panel.setAddressSwitches(state.switches);
     panel.sim.flushDump(true);
+    // The PC as it now is: a link leaves it out when it is 0000H.
     if (Object.keys(state.cpu).length || state.switches) {
         panel.setStatus('link-state-loaded',
                         {size: panel.formatMemSize(state.memSize),
-                         pc: Sim8800.toHex(state.cpu.pc, 4)});
+                         pc: Sim8800.toHex(CPU8080.status().pc, 4)},
+                        '', loaded.poweredOn);
     } else {
-        panel.setStatus('link-loaded', {bytes: loaded.bytes});
+        panel.setStatus('link-loaded', {bytes: loaded.bytes}, '',
+                        loaded.poweredOn);
     }
 };
 
@@ -1844,7 +1863,7 @@ panel.init = function() {
     panel.loadFromLink();
     // A link pasted into the address bar while the page is open only
     // changes the fragment, which does not reload the page.
-    window.addEventListener('hashchange', panel.loadFromLink, false);
+    window.addEventListener('hashchange', panel.onHashChange, false);
     // Last, because showing a tab refreshes what is on it, and that
     // needs the simulator and the teletype to exist first.
     panel.showTab(panel.readSavedTab());
