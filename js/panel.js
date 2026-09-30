@@ -542,15 +542,6 @@ panel.debugControlReasons = function() {
     reasons['mem-page-next'] = navReason;
     reasons['mem-follow-pc'] = navReason;
     reasons['debug-fill-zero'] = on ? null : {id: 'zero-mem-off', params: {}};
-    // The run controls, so that a program can be stepped with the dump
-    // in view. SINGLE STEP does nothing useful to a running machine,
-    // where the next instruction is gone before the dump can show it.
-    var runReason = on ? null : {id: 'run-controls-off', params: {}};
-    reasons['debug-stop'] = runReason;
-    reasons['debug-run'] = runReason;
-    reasons['debug-reset'] = runReason;
-    reasons['debug-single'] = runReason ||
-        (panel.sim.isRunning ? {id: 'step-while-running', params: {}} : null);
     // A machine that is off has nothing in it to link to.
     reasons['copy-link'] = on ? null : {id: 'copy-link-off', params: {}};
     return reasons;
@@ -703,10 +694,6 @@ panel.setWaitLedCallback = function(isRunning) {
     if (!isRunning && panel.sim && panel.sim.halted) {
         panel.setStatus('status-halted');
     }
-    // Single Step in the Debugger is only there for a stopped machine.
-    if (panel.sim) {
-        panel.updateDebugControls();
-    }
 };
 
 /**
@@ -730,13 +717,10 @@ panel.updateHelperSwitches = function() {
             elem.classList.toggle('switch-on', !!panel.addressSwitchStates[i]);
         }
     }
-    // The Debugger has a power button of its own, lit the same way.
-    ['s-off-on', 'debug-power'].forEach(function(id) {
-        var power = document.getElementById(id);
-        if (power) {
-            power.classList.toggle('on', !!panel.isPoweredOn);
-        }
-    });
+    var power = document.getElementById('s-off-on');
+    if (power) {
+        power.classList.toggle('on', !!panel.isPoweredOn);
+    }
 };
 
 /**
@@ -1828,27 +1812,6 @@ panel.init = function() {
         'click', panel.onCopyLink, false);
     document.getElementById('debug-fill-zero').addEventListener(
         'click', panel.onFillZero, false);
-    // The same switches as the panel's, without the switch sound: that
-    // belongs to touching the panel (D23).
-    document.getElementById('debug-power').addEventListener(
-        'click', function() {
-            if (panel.isPoweredOn) {
-                panel.onPowerOff();
-            } else {
-                panel.onPowerOn();
-            }
-        }, false);
-    [['debug-stop', panel.onStop],
-     ['debug-run', panel.onRun],
-     ['debug-single', panel.onSingle],
-     ['debug-reset', panel.onReset]].forEach(function(control) {
-        document.getElementById(control[0]).addEventListener(
-            'click', function() {
-                if (!panel.reportIfUnavailable(control[0])) {
-                    control[1]();
-                }
-            }, false);
-    });
     for (let i = 0; i < panel.MEM_SIZES.length; i++) {
         let memSize = panel.MEM_SIZES[i];
         document.getElementById('mem-size-' + memSize).addEventListener(

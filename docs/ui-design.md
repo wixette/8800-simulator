@@ -255,9 +255,9 @@ things to the Debugger. Two of them move; one goes.
   moves beside the registers in the dock's Debugger, and the operand
   highlighting in the dump stays as it is. It says where the CPU is,
   so it belongs with the CPU state rather than under the dump.
-- **The repeated run switches** (D27) go once U1 lands, because the
-  panel they repeat is in view (P2). Until then they stay, so nobody
-  loses them in between.
+- **The repeated run switches** (D27) are taken out, because under U1
+  the panel they repeat is in view (P2). They come out on the same
+  branch that brings in U1, so they never ship and nobody loses them.
 
 ---
 

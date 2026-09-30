@@ -854,8 +854,6 @@ with the reason it is grey:
 | ◀ ▶ Follow PC | machine off | *The machine is off, so there is no memory dump to move around in.* |
 | ◀ ▶ Follow PC | all memory fits one page | *All 256 B is on screen at once. Install 4 KB or 8 KB and the dump gets a window to move.* |
 | Zero All Memory | machine off | *The machine is off, so there is no memory to zero.* |
-| Stop, Run, Single Step, Reset | machine off | *The machine is off, so there is no program to run.* |
-| Single Step | machine running | *The machine is running. Press Stop first, then step one instruction at a time.* |
 
 *Why:* a dead end with no explanation teaches nothing. Every one of
 these reasons is a fact about the machine worth knowing — how much
@@ -994,9 +992,12 @@ BASIC sends CR CR LF.
 
 ### D27 — The run switches, repeated beside the memory dump
 
-> **To be withdrawn** by [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs), and kept until then. The copies are
-> needed only because the panel and the dump cannot be seen together,
-> and U1 fixes that ([P2](ui-design.md#p2--a-control-has-one-home)).
+> **Withdrawn before release.** The copies were needed only because
+> the panel and the dump could not be seen together, and
+> [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs)
+> fixes that ([P2](ui-design.md#p2--a-control-has-one-home)). They were
+> taken out on the branch that brings in U1, so they never shipped. The
+> record stays for the reasoning.
 
 Debugging a program meant stepping on the Simulator tab and reading
 the dump on the Debugger tab, a round trip per instruction. The
