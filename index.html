@@ -84,6 +84,26 @@
           </div>
         </div>
 
+        <!-- A link to what is in the machine (U2). The format behind it
+             is a public contract: see js/link.js. -->
+        <div class="popover-wrap">
+          <button id="share-button" class="tool-button" type="button"
+                  aria-haspopup="true" aria-expanded="false">
+            <span id="share-menu" class="l10n">Share</span>
+            <span class="dropdown-arrow" aria-hidden="true">&#9662;</span>
+          </button>
+          <div id="share-popover" class="popover" hidden>
+            <div id="share-desc" class="popover-note l10n">A link that opens the simulator with what is in memory now.</div>
+            <label class="h-box align-items-center m-4 share-option">
+              <input id="copy-link-state" type="checkbox" class="mr-8">
+              <span id="copy-link-state-label" class="l10n">Include registers and switches</span>
+            </label>
+            <div class="h-box">
+              <div id="copy-link" class="button m-4 l10n">Copy Link</div>
+            </div>
+          </div>
+        </div>
+
         <div class="toolbar-spacer"></div>
 
         <!-- The Switch Board Helper's large buttons, for touch screens.
@@ -187,6 +207,9 @@
               <div class="debug-cpu">
                 <div id="debug-cpu-dump-title" class="section-label l10n">8080 CPU Status Dump</div>
                 <div id="cpu-dump"></div>
+                <!-- Where the CPU is, beside the rest of its state (U2). -->
+                <div id="instr-title" class="section-label l10n" hidden>Next Instruction</div>
+                <div id="instr-pane"></div>
               </div>
               <div class="debug-mem">
                 <div class="h-box align-items-center">
@@ -199,16 +222,8 @@
                   </div>
                   <div id="debug-fill-zero" class="button m-4 l10n">Zero All Memory</div>
                 </div>
-                <div class="h-box align-items-center copy-link-row">
-                  <div id="copy-link" class="button m-4 l10n">Copy Link</div>
-                  <label class="h-box align-items-center m-4">
-                    <input id="copy-link-state" type="checkbox" class="mr-8">
-                    <span id="copy-link-state-label" class="l10n">Include registers and switches</span>
-                  </label>
-                </div>
                 <div id="mem-map" class="mem-map" hidden></div>
                 <div id="mem-dump" class="mt-8"></div>
-                <div id="instr-pane" class="mt-8"></div>
               </div>
             </div>
           </div>

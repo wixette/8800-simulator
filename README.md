@@ -23,7 +23,7 @@ Microsoft's original 4K BASIC on a simulated Teletype.
   game on the teletype, each a checked listing you load with one click.
 - **Nine languages**, no build step and no dependencies.
 
-![The Simulator tab: the Altair 8800 front panel, switched on, with the Switch Board Helper below it](./screenshots/panel.png)
+![The simulator: the Altair 8800 front panel running a program, with the toolbar above and the Tutorial in the dock under it](./screenshots/panel.png)
 
 ## Usage
 
@@ -66,7 +66,10 @@ The toolbar's **Load** menu is how programs get in:
   Binary File**).
 
 Whatever is loaded, the dock opens on the Debugger to show it arriving.
-**Memory** chooses 256 bytes, as the Altair 8800 shipped, or 4 KB /
+**Share** copies a link to what is in memory, which opens at RESET
+ready to RUN; tick *Include registers and switches* to link to the
+machine as it stands instead, stopped at the current instruction (see
+[Linking to a program](#linking-to-a-program)). **Memory** chooses 256 bytes, as the Altair 8800 shipped, or 4 KB /
 8 KB as if you had plugged in one or two 88-4MCS memory boards. Memory
 boards are not something you add to a running machine, so changing the
 size switches the simulator off.
@@ -83,21 +86,25 @@ reading that board before anything appears — nothing echoes by itself.
 A dot on the tab says when something has printed while you were looking
 at another tool.
 
-![The Teletype tab running 4K BASIC: MEMORY SIZE?, 727 BYTES FREE, then PRINT 3.14 * 9 answered with 28.26](./screenshots/teletype.png)
+![4K BASIC on the Teletype, under the front panel: WANT SIN? Y, 727 BYTES FREE, then PRINT 3.14 * 9 answered with 28.26](./screenshots/teletype.png)
 
 **Debugger** shows the internal state of the simulated 8080 CPU and
 the contents of memory:
 
-- The **memory dump** shows one 256-byte page at a time. Above 256
-  bytes a map strip sits over it — one cell per page, shaded by how
-  much of that page is in use, and marked where the program counter
-  and the stack pointer are. Click a cell to jump there, or use
-  **Follow PC** to track the running program.
-- **Copy Link** copies a link to what is in memory, which opens at
-  RESET ready to RUN. Tick *Include registers and switches* to link to
-  the machine as it stands instead, stopped at the current instruction.
+- The **registers**, and under them the **next instruction**: its
+  address, its bytes, and its mnemonic with the operand named as
+  instruction tables name it (`LHLD a16`, `MVI B,d8`), then the
+  operand's value this time. Step with SINGLE STEP on the panel above
+  and watch it change.
+- The **memory dump** shows one 256-byte page at a time, with the
+  instruction at the program counter marked: its opcode in green and
+  the bytes that belong to it in a paler green. Above 256 bytes a map
+  strip sits over it — one cell per page, shaded by how much of that
+  page is in use, and marked where the program counter and the stack
+  pointer are. Click a cell to jump there, or use **Follow PC** to
+  track the running program.
 
-![The Debugger tab: the loaders, the CPU registers, installed memory and the memory dump](./screenshots/debugger.png)
+![The Debugger under the front panel, part way through a program: the registers, the next instruction decoded as LDA a16 = 0081H, and the memory dump marking it](./screenshots/debugger.png)
 
 **Tutorial** walks through toggling in a first program by hand and
 starting BASIC, with references for going further. It sits under the
@@ -124,7 +131,7 @@ the program's listing:
 A link can use `#` in place of `?`, as in `#hex=3E8CD3FF76`; both
 work.
 
-**Copy Link** in the Debugger writes a link after `#`. With
+**Share**, and **Copy Link** in it, writes a link after `#`. With
 *Include registers and switches* ticked it also holds the registers
 and the machine's place in the program. It leaves out whatever a
 machine just switched on would have anyway: registers that are zero

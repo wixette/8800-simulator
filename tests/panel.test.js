@@ -222,6 +222,19 @@ test('a switch on the panel has one home', () => {
     }
 });
 
+test('Share and the next instruction are where U2 put them', () => {
+    // Copying a link is done once in a while, so it is a toolbar menu
+    // (P4); the instruction at PC says where the CPU is, so it sits
+    // with the registers rather than under the memory dump.
+    const html = sourceOf('index.html');
+    const at = (id) => html.indexOf('id="' + id + '"');
+    assert.ok(at('copy-link') > at('share-popover') &&
+              at('copy-link') < at('stage'), 'Copy Link is in the Share menu');
+    assert.ok(at('instr-pane') > at('cpu-dump') &&
+              at('instr-pane') < at('mem-dump'),
+              'the next instruction is beside the registers');
+});
+
 test('a first visit opens the dock on the Tutorial', () => {
     // No storage at all - as in a private window, or here in Node -
     // is a first visit.

@@ -44,22 +44,6 @@ a {
     flex-wrap: wrap;
 }
 
-/* Copy Link and the checkbox that shapes its link are read together,
-   so they never wrap apart. The label's own words may wrap. */
-.copy-link-row {
-    flex-wrap: nowrap;
-}
-
-.copy-link-row .button {
-    flex-shrink: 0;
-    white-space: nowrap;
-}
-
-.copy-link-row label {
-    flex-wrap: nowrap;
-    cursor: pointer;
-}
-
 .v-box {
     display: flex;
     flex-direction: column;
@@ -191,6 +175,23 @@ a {
 
 .popover .section-label:first-child {
     margin-top: 0;
+}
+
+/* A sentence saying what a menu's controls are for. */
+.popover-note {
+    color: #ccc;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0 4px 6px 4px;
+}
+
+/* The Share menu's checkbox, and the words beside it, as one thing to
+   press. */
+.share-option {
+    color: #eee;
+    cursor: pointer;
+    flex-wrap: nowrap;
+    font-size: 14px;
 }
 
 /* A drop down the page draws itself: a button, and a list under it.

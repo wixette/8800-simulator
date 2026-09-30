@@ -773,15 +773,21 @@ panel.dumpMemCallback = function(dumpHtml, pages, instr) {
 panel.lastInstr = null;
 
 /**
- * Writes out the instruction at the program counter, under the memory
- * dump: its address, its bytes, its mnemonic with the operand named,
- * and the operand's value this time.
+ * Writes out the instruction at the program counter, under the
+ * registers: its address, its bytes and its mnemonic with the operand
+ * named, then the operand's value this time, then whether the opcode is
+ * one Intel never documented. A line each, to fit the CPU's column.
  */
 panel.renderInstrPane = function() {
     var elem = document.getElementById('instr-pane');
+    var title = document.getElementById('instr-title');
     var instr = panel.lastInstr;
     if (!elem) {
         return;
+    }
+    // Blank while the machine is off, like the dumps.
+    if (title) {
+        title.hidden = !instr;
     }
     if (!instr) {
         elem.textContent = '';
@@ -790,22 +796,25 @@ panel.renderInstrPane = function() {
     var hex = instr.bytes.map(function(b) {
         return Sim8800.toHex(b, 2);
     });
-    var parts = [
-        Sim8800.toHex(instr.address, 4),
-        '  <span class="at-pc">' + hex[0] + '</span>' +
+    var lines = [
+        Sim8800.toHex(instr.address, 4) +
+            '  <span class="at-pc">' + hex[0] + '</span>' +
             hex.slice(1).map(function(b) {
                 return ' <span class="at-operand">' + b + '</span>';
             }).join('') +
-            '   '.repeat(3 - hex.length),
-        '  ' + instr.mnemonic,
+            '   '.repeat(3 - hex.length) +
+            '  ' + instr.mnemonic,
     ];
+    // Under the mnemonic, lined up with it: the address, a gap, the
+    // bytes padded to three, and a gap.
+    var indent = ' '.repeat(4 + 2 + 8 + 2);
     if (instr.operand) {
-        parts.push('   ' + instr.operandName + ' = ' + instr.operand);
+        lines.push(indent + instr.operandName + ' = ' + instr.operand);
     }
     if (instr.undocumented) {
-        parts.push('   ' + l10n.getMessage('instr-undocumented'));
+        lines.push(l10n.getMessage('instr-undocumented'));
     }
-    elem.innerHTML = '<pre>' + parts.join('') + '</pre>';
+    elem.innerHTML = '<pre>' + lines.join('\n') + '</pre>';
 };
 
 /**
@@ -1514,6 +1523,9 @@ panel.init = function() {
     // first time Load opens.
     new Popover('load-button', 'load-popover', panel.buildExampleMenu);
     new Popover('memory-button', 'memory-popover');
+    // Copy Link stays open on its menu after it is pressed, so that
+    // what it did can be read off the button itself.
+    new Popover('share-button', 'share-popover');
     document.getElementById('helper-toggle').addEventListener(
         'click', function() {
             panel.setHelperShown(!panel.isHelperShown, true);

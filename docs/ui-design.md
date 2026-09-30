@@ -15,7 +15,8 @@ principle here first, with its reason.**
 **Status.** The principles hold, and the layout in
 [Part 2](#part-2--the-layout) is built:
 [U1](#u1--the-front-panel-and-a-dock-replace-the-four-tabs) replaced
-the four tabs. The questions it left open were settled as listed in
+the four tabs, and [U2](#u2--where-10s-features-go) put #10's features
+in their places. The questions it left open were settled as listed in
 [Part 4](#part-4--open-questions), and remain open to revision once the
 layout has been used for a while.
 
@@ -163,7 +164,7 @@ does.
 ```
 
 Where the pieces of the four tabs went. Share and the instruction
-pane's new place are U2's.
+pane's place are U2's.
 
 | Before | Now | By |
 | --- | --- | --- |
@@ -250,18 +251,23 @@ touches no device.
 ### U2 — Where #10's features go
 
 [#10](https://github.com/wixette/8800-simulator/pull/10) added three
-things to the Debugger. Two of them move; one goes.
+things to the Debugger. Two of them moved; one went.
 
-- **Copy Link becomes Share** in the toolbar, with its *Include
-  registers and switches* choice. Its link format is a public contract
-  from the day it is released (P8).
-- **The instruction pane** ([D28](ms-basic-4k.md#d28--the-instruction-at-pc-decoded-under-the-dump))
-  moves beside the registers in the dock's Debugger, and the operand
-  highlighting in the dump stays as it is. It says where the CPU is,
-  so it belongs with the CPU state rather than under the dump.
-- **The repeated run switches** (D27) are taken out, because under U1
-  the panel they repeat is in view (P2). They come out on the same
-  branch that brings in U1, so they never ship and nobody loses them.
+- **Copy Link became Share**, a menu in the toolbar holding Copy Link
+  and its *Include registers and switches* choice, under a sentence
+  saying what the link is for. Copy Link stays open on the menu after
+  it is pressed, so that what it did can be read off the button. Its
+  link format is a public contract from the day it is released (P8).
+- **The instruction pane**
+  ([D28](ms-basic-4k.md#d28--the-instruction-at-pc-decoded-under-the-dump))
+  moved under the registers in the dock's Debugger, headed *Next
+  Instruction*. It says where the CPU is, so it belongs with the CPU
+  state rather than under the dump. It is set out a line each - the
+  instruction, the operand's value, the undocumented note - to fit
+  that column. The operand highlighting in the dump stayed as it was.
+- **The repeated run switches** (D27) were taken out, because the panel
+  they repeat is in view (P2). They came out on the same branch that
+  brought in U1, so they never shipped and nobody lost them.
 
 ---
 

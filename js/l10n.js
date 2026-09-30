@@ -144,6 +144,30 @@ l10n.MESSAGES = {
         'ko': '도구 열기',
     },
 
+    'share-menu': {
+        'en': 'Share',
+        'es': 'Compartir',
+        'fr': 'Partager',
+        'de': 'Teilen',
+        'it': 'Condividi',
+        'zh': '分享',
+        'zh-TW': '分享',
+        'ja': '共有',
+        'ko': '공유',
+    },
+
+    'share-desc': {
+        'en': 'A link that opens the simulator with what is in memory now.',
+        'es': 'Un enlace que abre el simulador con lo que hay ahora en la memoria.',
+        'fr': 'Un lien qui ouvre le simulateur avec ce qui est en mémoire maintenant.',
+        'de': 'Ein Link, der den Simulator mit dem jetzigen Speicherinhalt öffnet.',
+        'it': 'Un link che apre il simulatore con ciò che è ora in memoria.',
+        'zh': '一个链接，打开模拟器时载入当前内存中的内容。',
+        'zh-TW': '一個連結，開啟模擬器時載入目前記憶體中的內容。',
+        'ja': '今のメモリの内容を読み込んだ状態でシミュレーターを開くリンクです。',
+        'ko': '지금 메모리에 있는 내용을 불러온 채로 시뮬레이터를 여는 링크입니다.',
+    },
+
     'nav-tty': {
         'en': 'Teletype',
         'es': 'Teletipo',
@@ -661,6 +685,18 @@ l10n.MESSAGES = {
         'zh-TW': '機器已關閉，沒有記憶體可以清零。請先開機。',
         'ja': '電源が入っていないので、ゼロにするメモリがありません。先に電源を入れてください。',
         'ko': '기계가 꺼져 있어 0으로 만들 메모리가 없습니다. 먼저 전원을 켜세요.',
+    },
+
+    'instr-title': {
+        'en': 'Next Instruction',
+        'es': 'Siguiente Instrucción',
+        'fr': 'Instruction Suivante',
+        'de': 'Nächster Befehl',
+        'it': 'Istruzione Successiva',
+        'zh': '下一条指令',
+        'zh-TW': '下一道指令',
+        'ja': '次の命令',
+        'ko': '다음 명령',
     },
 
     'instr-undocumented': {

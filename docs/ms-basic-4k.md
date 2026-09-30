@@ -1019,9 +1019,11 @@ can show it.
 
 ### D28 — The instruction at PC, decoded under the dump
 
-> **Kept, and moved** by [U2](ui-design.md#u2--where-10s-features-go):
-> beside the registers in the dock's Debugger. The operand highlighting
-> stays as it is.
+> **Kept, and moved** by [U2](ui-design.md#u2--where-10s-features-go): it is under the registers in
+> the dock's Debugger, headed *Next Instruction*, and set out a line
+> each - the instruction, the operand's value, the undocumented note -
+> to fit that column. The operand highlighting in the dump is as it
+> was.
 
 A pane under the memory dump names the instruction the CPU will run
 next: its address, its bytes, the mnemonic with the operand named as
