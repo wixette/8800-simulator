@@ -143,9 +143,10 @@ class Sim8800 {
      * @param {number} opcode The byte at the program counter.
      * @param {number} lo The byte after it.
      * @param {number} hi The byte after that.
-     * @return {{mnemonic: string, operand: ?string, length: number,
-     *     undocumented: boolean}} The operand is the value in hex, or
-     *     null when the instruction has none.
+     * @return {{mnemonic: string, operand: ?string, operandName: ?string,
+     *     length: number, undocumented: boolean}} The operand is the
+     *     value in hex and operandName its placeholder in the mnemonic
+     *     (a16, d16 or d8), both null when the instruction has none.
      */
     static decodeInstruction(opcode, lo, hi) {
         var undocumented = Sim8800.UNDOCUMENTED_OPCODES[opcode];
@@ -158,20 +159,23 @@ class Sim8800 {
         // "MVI B, $8C" and "MVI C,$8C" are both in the table.
         var text = decoded[0].replace(/,\s*/, ',');
         var operand = null;
+        var operandName = null;
         var mnemonic = text;
         if (length == 3) {
             operand = Sim8800.toHex((hi << 8) | lo, 4) + 'H';
             // LXI loads a register pair; everything else that takes two
             // bytes takes an address.
-            mnemonic = text.replace(/\$[0-9A-F]{4}/,
-                                    text.startsWith('LXI') ? 'd16' : 'a16');
+            operandName = text.startsWith('LXI') ? 'd16' : 'a16';
+            mnemonic = text.replace(/\$[0-9A-F]{4}/, operandName);
         } else if (length == 2) {
             operand = Sim8800.toHex(lo, 2) + 'H';
-            mnemonic = text.replace(/\$[0-9A-F]{2}/, 'd8');
+            operandName = 'd8';
+            mnemonic = text.replace(/\$[0-9A-F]{2}/, operandName);
         }
         return {
             mnemonic: mnemonic,
             operand: operand,
+            operandName: operandName,
             length: length,
             undocumented: undocumented !== undefined,
         };
@@ -925,8 +929,6 @@ Sim8800.FRONT_PANEL_PORT = 0xff;
  */
 Sim8800.DUMP_WINDOW_SIZE = 256;
 
-// Exports the class for unit tests when running in Node.js. This has
-// no effect when the script is loaded in a browser.
 /**
  * The undocumented opcodes, and the documented instruction the CPU core
  * runs each one as. See decodeInstruction().
@@ -940,6 +942,8 @@ Sim8800.UNDOCUMENTED_OPCODES = {
     0xdd: 0xcd, 0xed: 0xcd, 0xfd: 0xcd,  // CALL
 };
 
+// Exports the class for unit tests when running in Node.js. This has
+// no effect when the script is loaded in a browser.
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = Sim8800;
 }

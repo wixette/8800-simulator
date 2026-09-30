@@ -791,9 +791,7 @@ panel.renderInstrPane = function() {
         '  ' + instr.mnemonic,
     ];
     if (instr.operand) {
-        // The operand's name is whatever the mnemonic ends with.
-        var name = instr.mnemonic.match(/[ad]\d+$/)[0];
-        parts.push('   ' + name + ' = ' + instr.operand);
+        parts.push('   ' + instr.operandName + ' = ' + instr.operand);
     }
     if (instr.undocumented) {
         parts.push('   ' + l10n.getMessage('instr-undocumented'));
@@ -923,6 +921,7 @@ panel.debugLoadData = function() {
 panel.LINK_REGS8 = ['a', 'b', 'c', 'd', 'e', 'f', 'h', 'l'];
 
 /**
+ * The 16-bit registers a link can carry. See LINK_REGS8.
  * @type {Array<string>}
  */
 panel.LINK_REGS16 = ['pc', 'sp'];

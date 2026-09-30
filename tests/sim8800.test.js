@@ -659,7 +659,8 @@ test('the dump marks the bytes at PC and SP, and their pages', () => {
 test('an instruction decodes with its operand named, and valued', () => {
     const lhld = Sim8800.decodeInstruction(0x2a, 0x34, 0x12);
     assert.deepStrictEqual(lhld, {mnemonic: 'LHLD a16', operand: '1234H',
-                                  length: 3, undocumented: false});
+                                  operandName: 'a16', length: 3,
+                                  undocumented: false});
     // LXI loads data, not an address.
     assert.strictEqual(Sim8800.decodeInstruction(0x21, 0, 0).mnemonic,
                        'LXI H,d16');
@@ -670,7 +671,8 @@ test('an instruction decodes with its operand named, and valued', () => {
                        'OUT d8');
     const mov = Sim8800.decodeInstruction(0x78, 0, 0);
     assert.deepStrictEqual(mov, {mnemonic: 'MOV A,B', operand: null,
-                                 length: 1, undocumented: false});
+                                 operandName: null, length: 1,
+                                 undocumented: false});
 });
 
 test('every opcode decodes to something the CPU core would run', () => {

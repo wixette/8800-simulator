@@ -348,6 +348,15 @@ test('both of the paper mechanisms can be driven by hand', () => {
                  'which sends LF to the machine, like any other key');
 });
 
+// The link code writes its hex with Sim8800.toHex(), which the page has
+// as a global.
+global.Sim8800 = require('../js/sim8800.js');
+
+// The 4K BASIC tape is optional (see roms/NOTICE), as in basic.test.js.
+const BASIC_ROM = path.join(__dirname, '..', 'roms', '4kbas32.bin');
+const SKIP_WITHOUT_ROM = fs.existsSync(BASIC_ROM) ?
+    false : 'roms/4kbas32.bin is not present';
+
 // A program a class wrote out by hand and shared as a table of bytes:
 // it copies the capital letters out of a string at 0090H to 00F0H.
 const CLASS_PROGRAM =
@@ -355,7 +364,6 @@ const CLASS_PROGRAM =
     'B9 D2 1A 00 12 13 23 C3 0A 00 C3 1E 00';
 
 test('a link can carry just a program, written by hand', () => {
-    global.Sim8800 = require('../js/sim8800.js');
     const hex = CLASS_PROGRAM.replace(/ /g, '');
     const state = panel.queryToState('?hex=' + hex);
     assert.strictEqual(state.bytes.length, 33);
@@ -385,7 +393,6 @@ test('a page opened without a link loads nothing', () => {
 });
 
 test('a machine part way through a program survives the round trip', () => {
-    global.Sim8800 = require('../js/sim8800.js');
     const bytes = new Array(4096).fill(0);
     panel.parseBytes(CLASS_PROGRAM).bytes.forEach((b, i) => { bytes[i] = b; });
     bytes[0x90] = 0x48;
@@ -447,7 +454,6 @@ test('zeros padding a program past the top of memory do not count', () => {
 });
 
 test('a copied link spells out a class-sized program in hex', async () => {
-    global.Sim8800 = require('../js/sim8800.js');
     const bytes = new Array(256).fill(0);
     panel.parseBytes(CLASS_PROGRAM).bytes.forEach((b, i) => { bytes[i] = b; });
     bytes[255] = 0x50;
@@ -458,11 +464,10 @@ test('a copied link spells out a class-sized program in hex', async () => {
     assert.doesNotMatch(query, /zip=/);
 });
 
-test('a copied link compresses a big machine and reads it back', async () => {
-    global.Sim8800 = require('../js/sim8800.js');
+test('a copied link compresses a big machine and reads it back',
+     {skip: SKIP_WITHOUT_ROM}, async () => {
     // 4K BASIC is the machine this is for.
-    const basic = fs.readFileSync(
-        path.join(__dirname, '..', 'roms', '4kbas32.bin'));
+    const basic = fs.readFileSync(BASIC_ROM);
     const bytes = new Array(8192).fill(0);
     basic.forEach((b, i) => { bytes[i] = b; });
     bytes[0x1fff] = 0x76;
@@ -490,7 +495,6 @@ test('a hand-written link is read the same from ? or #', async () => {
 });
 
 test('a compressed link cut short says so', async () => {
-    global.Sim8800 = require('../js/sim8800.js');
     const bytes = new Array(4096).fill(0x3c);
     const query = await panel.stateToLink(
         {memSize: 4096, bytes: bytes,
@@ -514,8 +518,7 @@ test('a compressed link cut short says so', async () => {
 function stubLinkLoader(t) {
     const calls = [];
     const regs = {pc: 0};
-    const saved = {cpu: global.CPU8080, sim: global.Sim8800, panelSim: panel.sim};
-    global.Sim8800 = require('../js/sim8800.js');
+    const saved = {cpu: global.CPU8080, panelSim: panel.sim};
     global.CPU8080 = {
         set: (name, value) => { regs[name.toLowerCase()] = value; },
         status: () => ({...regs}),
@@ -523,7 +526,6 @@ function stubLinkLoader(t) {
     panel.sim = {flushDump() {}};
     t.after(() => {
         global.CPU8080 = saved.cpu;
-        global.Sim8800 = saved.sim;
         panel.sim = saved.panelSim;
     });
     t.mock.method(panel, 'onSetMemSize', (size) => calls.push(['mem', size]));
