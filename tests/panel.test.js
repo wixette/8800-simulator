@@ -120,16 +120,25 @@ test('every Debugger control that can be unavailable can say why', () => {
 });
 
 /**
- * The text of every button in one tab of index.html.
- * @param {string} tabId The tab's element id.
+ * The regions of index.html, in the order the page declares them: the
+ * toolbar and its menus, the stage with the front panel, the dock, its
+ * three tools, and the status line.
+ * @type {Array<string>}
+ */
+const REGIONS = ['toolbar', 'stage', 'dock', 'tab-tty', 'tab-debug',
+                 'tab-ref', 'status-bar'];
+
+/**
+ * The text of every button in one region of index.html.
+ * @param {string} regionId The region's element id, one of REGIONS.
  * @return {Array<{id: string, text: string, translated: boolean}>}
  */
-function buttonsIn(tabId) {
+function buttonsIn(regionId) {
     const html = sourceOf('index.html');
-    const start = html.indexOf('id="' + tabId + '"');
-    assert.ok(start > 0, tabId + ' is not in the page');
-    // Up to whichever tab is declared next.
-    const rest = ['tab-sim', 'tab-tty', 'tab-debug', 'tab-ref']
+    const start = html.indexOf('id="' + regionId + '"');
+    assert.ok(start > 0, regionId + ' is not in the page');
+    // Up to whichever region is declared next.
+    const rest = REGIONS
           .map((id) => html.indexOf('id="' + id + '"'))
           .filter((at) => at > start);
     const end = rest.length ? Math.min(...rest) : html.length;
@@ -148,10 +157,10 @@ function buttonsIn(tabId) {
     return found;
 }
 
-test('the Simulator tab wears the panel silkscreen: caps, untranslated', () => {
+test('the stage wears the panel silkscreen: caps, untranslated', () => {
     // These stand for switches that exist on the metal. A photograph of
     // the real panel does not change language, so neither do they.
-    const buttons = buttonsIn('tab-sim');
+    const buttons = buttonsIn('stage');
     assert.ok(buttons.length >= 25, 'expected the whole switch board');
     for (const b of buttons) {
         assert.strictEqual(b.text, b.text.toUpperCase(),
@@ -161,7 +170,7 @@ test('the Simulator tab wears the panel silkscreen: caps, untranslated', () => {
     }
 });
 
-test('the Teletype tab speaks in capitals, because the ASR-33 had no others', () => {
+test('the Teletype speaks in capitals, because the ASR-33 had no others', () => {
     // 64 characters, capitals only. The paper above these buttons
     // cannot hold a lowercase letter, so neither do they. Unlike the
     // panel legends they are translated: "CLEAR PAPER" tells you what
@@ -178,12 +187,13 @@ test('the Teletype tab speaks in capitals, because the ASR-33 had no others', ()
     }
 });
 
-test('the Debugger tab reads as software, not as a machine', () => {
+test('the toolbar and the Debugger read as software, not as a machine', () => {
     // Tooling the Altair never had, so it follows software convention:
     // Title Case, like the headings it sits under. Shouting here would
-    // borrow the machine's voice for something that is not the machine.
-    const buttons = buttonsIn('tab-debug');
-    assert.ok(buttons.length >= 7, 'expected the loaders and dump controls');
+    // borrow the machine's voice for something that is not the machine
+    // (P5 in docs/ui-design.md).
+    const buttons = buttonsIn('toolbar').concat(buttonsIn('tab-debug'));
+    assert.ok(buttons.length >= 10, 'expected the loaders and dump controls');
     const all = messages();
     for (const b of buttons) {
         assert.strictEqual(b.translated, true, b.id + ' should translate');
@@ -195,6 +205,47 @@ test('the Debugger tab reads as software, not as a machine', () => {
             letters, letters.toUpperCase(),
             b.id + ' ("' + english + '") shouts like a panel legend');
     }
+});
+
+test('a switch on the panel has one home', () => {
+    // P2: the front panel is always in view, so nothing outside it may
+    // offer its switches again. The helper under the panel is the one
+    // exception, being another way to reach them rather than a copy.
+    const switches = ['OFF/ON', 'STOP', 'RUN', 'SINGLE STEP', 'EXAMINE',
+                      'EXAMINE NEXT', 'DEPOSIT', 'DEPOSIT NEXT', 'RESET'];
+    const normal = (text) => text.toUpperCase().replace(/-/g, ' ');
+    for (const region of REGIONS.filter((id) => id != 'stage')) {
+        for (const b of buttonsIn(region)) {
+            assert.ok(!switches.includes(normal(b.text)),
+                      b.id + ' in ' + region + ' repeats a panel switch');
+        }
+    }
+});
+
+test('a first visit opens the dock on the Tutorial', () => {
+    // No storage at all - as in a private window, or here in Node -
+    // is a first visit.
+    assert.strictEqual(panel.readSavedTab(), 'ref');
+    assert.deepStrictEqual(panel.readSavedDock(), {open: true, height: null});
+});
+
+test('the dock comes back as it was left, and forgets old tabs', (t) => {
+    const stored = {};
+    const savedStorage = global.localStorage;
+    global.localStorage = {
+        getItem: (key) => (key in stored ? stored[key] : null),
+        setItem: (key, value) => { stored[key] = String(value); },
+    };
+    t.after(() => { global.localStorage = savedStorage; });
+    stored[panel.tabStorageKey] = 'tty';
+    stored[panel.dockStorageKey] = JSON.stringify({open: false, height: 250});
+    assert.strictEqual(panel.readSavedTab(), 'tty');
+    assert.deepStrictEqual(panel.readSavedDock(), {open: false, height: 250});
+    // The front panel was a tab once. It is always on screen now.
+    stored[panel.tabStorageKey] = 'sim';
+    assert.strictEqual(panel.readSavedTab(), 'ref');
+    stored[panel.dockStorageKey] = 'not json';
+    assert.deepStrictEqual(panel.readSavedDock(), {open: true, height: null});
 });
 
 test('every shape of control the page can grey out is actually styled', () => {

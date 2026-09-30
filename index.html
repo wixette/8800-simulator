@@ -25,11 +25,73 @@
   </head>
   <body>
 
-    <main>
-      <div class="header-bar">
-        <div id="header-title" class="l10n">
-          Altair 8800 Simulator
+    <!-- One frame the height of the window: the toolbar, the front panel,
+         the dock of tools under it, and the status line. The panel is the
+         one primary surface and takes whatever room the dock leaves
+         (docs/ui-design.md, U1). -->
+    <div id="app">
+
+      <header id="toolbar">
+        <div id="header-title" class="l10n">Altair 8800 Simulator</div>
+
+        <!-- Occasional actions live in menus (P4). Each holds the controls
+             that used to have a section of the Debugger to themselves. -->
+        <div class="popover-wrap">
+          <button id="load-button" class="tool-button" type="button"
+                  aria-haspopup="true" aria-expanded="false">
+            <span id="load-menu" class="l10n">Load</span>
+            <span class="dropdown-arrow" aria-hidden="true">&#9662;</span>
+          </button>
+          <div id="load-popover" class="popover" hidden>
+            <div id="debug-rom-title" class="section-label l10n">Load a Program</div>
+            <div class="h-box align-items-center">
+              <div id="load-basic" class="button m-4 l10n">Load 4K BASIC</div>
+              <div id="example-menu" class="dropdown m-4">
+                <button id="example-button" type="button" aria-haspopup="listbox"
+                        aria-expanded="false">
+                  <span id="example-label" class="dropdown-label"></span>
+                  <span class="dropdown-arrow" aria-hidden="true">&#9662;</span>
+                </button>
+                <ul id="example-list" role="listbox" hidden></ul>
+              </div>
+            </div>
+            <div id="debug-load-data-title" class="section-label l10n">Load Your Own</div>
+            <div class="h-box align-items-center">
+              <input id="debug-data-input" class="flex-grow-1 m-4" type="text">
+              <div id="debug-load-data" class="button m-4 l10n">Load Data</div>
+            </div>
+            <div class="h-box align-items-center">
+              <div id="load-binary" class="button m-4 l10n">Load Binary File</div>
+              <input id="binary-file" type="file" hidden>
+            </div>
+          </div>
         </div>
+
+        <div class="popover-wrap">
+          <button id="memory-button" class="tool-button" type="button"
+                  aria-haspopup="true" aria-expanded="false">
+            <span id="memory-menu" class="l10n">Memory</span>
+            <span id="memory-size" class="tool-value"></span>
+            <span class="dropdown-arrow" aria-hidden="true">&#9662;</span>
+          </button>
+          <div id="memory-popover" class="popover" hidden>
+            <div id="debug-memory-title" class="section-label l10n">Installed Memory</div>
+            <div class="v-box">
+              <div id="mem-size-256" class="button m-4 mem-size l10n">256 B · as it shipped</div>
+              <div id="mem-size-4096" class="button m-4 mem-size l10n">4 KB · one 88-4MCS</div>
+              <div id="mem-size-8192" class="button m-4 mem-size l10n">8 KB · two 88-4MCS</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="toolbar-spacer"></div>
+
+        <!-- The Switch Board Helper's large buttons, for touch screens.
+             Not a copy of the panel's switches but another way to reach
+             them, so it is offered rather than shown (P2). -->
+        <div id="helper-toggle" class="tool-button l10n" role="button"
+             aria-pressed="false">Big Switches</div>
+
         <div id="locale-menu" class="dropdown">
           <button id="switch-locale" type="button" aria-haspopup="listbox"
                   aria-expanded="false" aria-label="Language">
@@ -38,17 +100,9 @@
           </button>
           <ul id="locale-list" role="listbox" aria-label="Language" hidden></ul>
         </div>
-      </div>
+      </header>
 
-      <nav>
-        <div id="nav-sim" class="nav-item l10n">Simulator</div>
-        <div id="nav-tty" class="nav-item l10n">Teletype</div>
-        <div id="nav-debug" class="nav-item l10n">Debugger</div>
-        <div id="nav-ref" class="nav-item l10n">Tutorial</div>
-      </nav>
-
-      <div id="tab-sim">
-
+      <main id="stage">
         <svg id="panel" width="100%" height="100%" viewBox="0 0 1440 644" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
           <!-- Panel artwork. Edit images/panel.svg to change it. -->
           <image x="0" y="0" width="1440" height="644" href="images/panel.svg"/>
@@ -61,10 +115,7 @@
           <image id="switch-down" x="0" y="0" width="20" height="30" href="images/switch-down.svg"/>
         </svg>
 
-        <div class="subheader-bar">
-          <div id="switchboard-helper" class="l10n">Switch Board Helper</div>
-        </div>
-        <div class="v-box">
+        <div id="switch-helper" class="v-box" hidden>
           <div class="h-box justify-start">
             <div id="s-off-on" class="button power-button m-8">OFF/ON</div>
             <div id="s-sw-stop" class="button m-8">STOP</div>
@@ -95,116 +146,74 @@
             <div id="s-s0" class="button m-8">A00</div>
           </div>
         </div>
+      </main>
 
-      </div>
+      <div id="dock-splitter" role="separator" aria-orientation="horizontal"
+           tabindex="0"></div>
 
-      <div id="tab-tty">
-        <div class="subheader-bar">
-          <div id="tty-title" class="l10n">Teletype (ASR-33)</div>
+      <!-- The tools, one at a time (P3). The tabs keep the ids the four
+           page tabs had, so the code that fills them is unchanged. -->
+      <section id="dock">
+        <div id="dock-tabs" role="tablist">
+          <div id="nav-tty" class="dock-tab l10n" role="tab">Teletype</div>
+          <div id="nav-debug" class="dock-tab l10n" role="tab">Debugger</div>
+          <div id="nav-ref" class="dock-tab l10n" role="tab">Tutorial</div>
+          <div class="toolbar-spacer"></div>
+          <div id="dock-toggle" class="dock-tool" role="button"></div>
         </div>
-        <div id="tty-paper"><pre id="tty-text"></pre></div>
-        <input id="tty-input" class="tty-hidden-input" type="text"
-               autocapitalize="characters" autocomplete="off"
-               autocorrect="off" spellcheck="false" aria-label="Teletype">
 
-        <div id="tty-leds">
-          <div class="tty-led-group">
-            <div class="tty-led-label">A15-A0</div>
-            <div id="tty-address-leds" class="tty-led-row"></div>
+        <div id="dock-body">
+          <div id="tab-tty" class="dock-pane">
+            <div id="tty-paper"><pre id="tty-text"></pre></div>
+            <input id="tty-input" class="tty-hidden-input" type="text"
+                   autocapitalize="characters" autocomplete="off"
+                   autocorrect="off" spellcheck="false" aria-label="Teletype">
+            <div class="h-box align-items-center tty-helper">
+              <div id="tty-break" class="button m-4 l10n">CTRL-C (BREAK)</div>
+              <div id="tty-rubout" class="button m-4 l10n">RUBOUT (_)</div>
+              <div id="tty-kill" class="button m-4 l10n">KILL LINE (@)</div>
+              <div id="tty-linefeed" class="button m-4 l10n">LINE FEED</div>
+              <div id="tty-clear" class="button m-4 l10n">CLEAR PAPER</div>
+            </div>
+            <div id="tty-hint" class="comments l10n">
+              Type here. Nothing echoes by itself - the machine has to be
+              running a program that reads the serial board, so pick
+              tty-echo from Load, Example Programs, and RUN it first.
+            </div>
           </div>
-          <div class="tty-led-group">
-            <div class="tty-led-label">D7-D0</div>
-            <div id="tty-data-leds" class="tty-led-row"></div>
+
+          <div id="tab-debug" class="dock-pane">
+            <div class="debug-columns">
+              <div class="debug-cpu">
+                <div id="debug-cpu-dump-title" class="section-label l10n">8080 CPU Status Dump</div>
+                <div id="cpu-dump"></div>
+              </div>
+              <div class="debug-mem">
+                <div class="h-box align-items-center">
+                  <div id="debug-mem-dump-title" class="section-label l10n">Memory Dump</div>
+                  <div id="mem-window-label" class="comments"></div>
+                  <div id="mem-window-nav" class="h-box align-items-center">
+                    <div id="mem-page-prev" class="button m-4" role="button">&#9664;</div>
+                    <div id="mem-page-next" class="button m-4" role="button">&#9654;</div>
+                    <div id="mem-follow-pc" class="button m-4 l10n">Follow PC</div>
+                  </div>
+                  <div id="debug-fill-zero" class="button m-4 l10n">Zero All Memory</div>
+                </div>
+                <div class="h-box align-items-center copy-link-row">
+                  <div id="copy-link" class="button m-4 l10n">Copy Link</div>
+                  <label class="h-box align-items-center m-4">
+                    <input id="copy-link-state" type="checkbox" class="mr-8">
+                    <span id="copy-link-state-label" class="l10n">Include registers and switches</span>
+                  </label>
+                </div>
+                <div id="mem-map" class="mem-map" hidden></div>
+                <div id="mem-dump" class="mt-8"></div>
+                <div id="instr-pane" class="mt-8"></div>
+              </div>
+            </div>
           </div>
-          <div class="tty-led-group">
-            <div class="tty-led-label">WAIT</div>
-            <div id="tty-wait-led" class="tty-led"></div>
-          </div>
-        </div>
 
-        <div class="subheader-bar mt-8">
-          <div id="tty-helper-title" class="l10n">Teletype Helper</div>
-        </div>
-        <div class="h-box justify-start align-items-center">
-          <div id="tty-break" class="button m-8 l10n">CTRL-C (BREAK)</div>
-          <div id="tty-rubout" class="button m-8 l10n">RUBOUT (_)</div>
-          <div id="tty-kill" class="button m-8 l10n">KILL LINE (@)</div>
-          <div id="tty-linefeed" class="button m-8 l10n">LINE FEED</div>
-          <div id="tty-clear" class="button m-8 l10n">CLEAR PAPER</div>
-        </div>
-        <div id="tty-hint" class="comments l10n">
-          Type here. Nothing echoes by itself - the machine has to be
-          running a program that reads the serial board, so pick
-          tty-echo from Example Programs in the Debugger tab and RUN it
-          first.
-        </div>
-      </div>
-
-      <div id="tab-debug">
-        <div class="subheader-bar">
-          <div id="debug-rom-title" class="l10n">Load a Program</div>
-        </div>
-        <div class="h-box justify-start mt-8 mb-8 align-items-center">
-          <div id="load-basic" class="button m-8 l10n">Load 4K BASIC</div>
-          <div id="example-menu" class="dropdown m-8">
-            <button id="example-button" type="button" aria-haspopup="listbox"
-                    aria-expanded="false">
-              <span id="example-label" class="dropdown-label"></span>
-              <span class="dropdown-arrow" aria-hidden="true">&#9662;</span>
-            </button>
-            <ul id="example-list" role="listbox" hidden></ul>
-          </div>
-        </div>
-
-        <div class="subheader-bar mt-8">
-          <div id="debug-load-data-title" class="l10n">Load Your Own</div>
-        </div>
-        <div class="h-box justify-start mt-8 align-items-center">
-          <input id="debug-data-input" class="flex-grow-1 mr-8" type="text">
-          <div id="debug-load-data" class="button l10n">Load Data</div>
-          <div id="load-binary" class="button m-8 l10n">Load Binary File</div>
-          <input id="binary-file" type="file" hidden>
-        </div>
-
-        <div class="subheader-bar mt-8">
-          <div id="debug-cpu-dump-title" class="l10n">8080 CPU Status Dump</div>
-        </div>
-        <div id="cpu-dump" class="mt-8"></div>
-
-        <div class="subheader-bar mt-8">
-          <div id="debug-memory-title" class="l10n">Installed Memory</div>
-        </div>
-        <div class="h-box justify-start mt-8 align-items-center">
-          <div id="mem-size-256" class="button m-8 mem-size l10n">256 B · as it shipped</div>
-          <div id="mem-size-4096" class="button m-8 mem-size l10n">4 KB · one 88-4MCS</div>
-          <div id="mem-size-8192" class="button m-8 mem-size l10n">8 KB · two 88-4MCS</div>
-        </div>
-
-        <div class="subheader-bar mt-8">
-          <div id="debug-mem-dump-title" class="l10n">Memory Dump</div>
-        </div>
-        <div class="h-box justify-start mt-8 align-items-center">
-          <div id="mem-window-label" class="comments"></div>
-          <div id="mem-window-nav" class="h-box align-items-center">
-            <div id="mem-page-prev" class="button m-8" role="button">&#9664;</div>
-            <div id="mem-page-next" class="button m-8" role="button">&#9654;</div>
-            <div id="mem-follow-pc" class="button m-8 l10n">Follow PC</div>
-          </div>
-          <div id="debug-fill-zero" class="button m-8 l10n">Zero All Memory</div>
-        </div>
-        <div class="h-box justify-start align-items-center copy-link-row">
-          <div id="copy-link" class="button m-8 l10n">Copy Link</div>
-          <label class="h-box align-items-center m-8">
-            <input id="copy-link-state" type="checkbox" class="mr-8">
-            <span id="copy-link-state-label" class="l10n">Include registers and switches</span>
-          </label>
-        </div>
-        <div id="mem-map" class="mem-map" hidden></div>
-        <div id="mem-dump" class="mt-8"></div>
-        <div id="instr-pane" class="mt-8"></div>
-      </div>
-
-      <div id="tab-ref">
+          <div id="tab-ref" class="dock-pane">
         <div class="subheader-bar">
           <div id="tutorial-title" class="l10n">Quick Tutorial</div>
         </div>
@@ -295,17 +304,16 @@ RUN</pre>
           <li><a href="https://s2js.com/altair/" target="_blank" rel="noopener"><span id="ref-altair-simulator" class="l10n">MITS Altair Simulator - another JavaScript simulator, running Microsoft BASIC on a simulated teletype</span></a></li>
         </ul>
 
-      </div>
-      <div id="status-bar">
-        <span id="status-text"></span>
-      </div>
-    </main>
+          </div>
+        </div>
+      </section>
 
-    <footer>
-      <p>&copy; 2020-2026 wixette
-        <a href="https://github.com/wixette/8800-simulator" target="_blank" rel="noopener"><span id="back-home" class="l10n">Source Code</span></a>
-      </p>
-    </footer>
+      <footer id="status-bar">
+        <span id="status-text"></span>
+        <span class="status-credit">&copy; 2020-2026 wixette
+          <a href="https://github.com/wixette/8800-simulator" target="_blank" rel="noopener"><span id="back-home" class="l10n">Source Code</span></a></span>
+      </footer>
+    </div>
 
     <audio id="sound-beepbeep" src="audio/beepbeep.mp3"></audio>
     <audio id="sound-switch" src="audio/switch.mp3"></audio>
@@ -315,6 +323,7 @@ RUN</pre>
     <script src="js/8080.js"></script>
     <script src="js/sim8800.js"></script>
     <script src="js/dropdown.js"></script>
+    <script src="js/popover.js"></script>
     <script src="js/listing.js"></script>
     <script src="js/link.js"></script>
     <script src="js/sio.js"></script>

@@ -13,8 +13,8 @@ visible if we later change our minds.
 **UI decisions have their own document now.** The principles the page
 is laid out by, and every UI decision after D28, are in
 [ui-design.md](ui-design.md). The UI decisions below stay where they
-are, because the code cites them by number. Those that the planned
-panel + dock layout changes say so at the top.
+are, because the code cites them by number. Those that the panel +
+dock layout (U1) changed say so at the top.
 
 Everything in [Part 1](#part-1--what-was-verified) was verified by
 running the real ROM against this repository's own CPU core, not read
@@ -285,8 +285,8 @@ a merged Panel+Teletype tab                     1609 px
 ```
 
 These numbers decide [D8](#d8--the-teletype-is-its-own-tab). They
-describe a page that scrolls. Under the planned layout, [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs), it
-does not: the panel scales to the height the dock leaves it.
+describe a page that scrolls. Since [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs) it does not: the panel
+scales to the height the dock leaves it.
 
 ---
 
@@ -503,10 +503,10 @@ tutorial says as much rather than pretending otherwise.
 
 ### D8 — The Teletype is its own tab
 
-> **To be superseded** by [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs): the front panel always in view,
-> and the Teletype, Debugger and Tutorial in a dock beside it. The dock
-> is option E below, applied to every tool. This still describes the
-> page until U1 lands.
+> **Superseded** by [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs): the front panel always in view, and
+> the Teletype, Debugger and Tutorial in a dock under it. The dock is
+> option E below, applied to every tool. What follows is kept for the
+> reasoning, and describes the page as it was.
 
 Tab order: **Simulator | Teletype | Debugger | Tutorial.**
 
@@ -561,8 +561,8 @@ meaningless flicker through ROM. The tab switch *is* the head-turn.
 
 ### D9 — An LED repeater strip on the Teletype tab
 
-> **To be withdrawn** by [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs): with the panel always in view,
-> there is nothing left for the strip to repeat
+> **Withdrawn** by [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs): with the panel always in view, there
+> is nothing left for the strip to repeat
 > ([P2](ui-design.md#p2--a-control-has-one-home)).
 
 A compact row on the Teletype tab: the 16 address LEDs, the 8 data
@@ -579,7 +579,7 @@ merged tab, where the LEDs would sit 900 px above the paper.
 
 ### D10 — An activity indicator on the Teletype nav item
 
-> **Carried over** by [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs): the dot moves to the dock's Teletype
+> **Carried over** by [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs): the dot is on the dock's Teletype
 > tab.
 
 When the SIO emits output while another tab is showing, mark the
@@ -596,15 +596,15 @@ DOM, and nothing in `js/sio.js` touches `document`.
 
 *Why:* besides being correct, it makes [D8](#d8--the-teletype-is-its-own-tab)
 purely presentational. Moving later from design F to design E becomes a
-markup-and-CSS change with no core impact. That move is now planned, as
-[U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs).
+markup-and-CSS change with no core impact. That move was made, as
+[U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs), and touched no device.
 
 ### D14 — Loading stops short of running
 
-> **Still holds under** [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs), but the loaders move from the
-> Debugger tab to the toolbar's Load menu. Keeping the memory map in view
-> as a program loads is an
-> [open question](ui-design.md#part-4--open-questions) there.
+> **Still holds under** [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs). The loaders moved from the
+> Debugger tab to the toolbar's Load menu, and every load now opens the
+> dock on the Debugger, so the memory map is in view as the program
+> arrives ([settled](ui-design.md#settled-with-u1)).
 
 `panel.loadImage` powers the machine up if needed, zeroes memory, puts
 the image at `0000H` and presses RESET — and stops there. It does not
@@ -621,9 +621,9 @@ picture worth seeing.
 
 ### D15 — One status line, at the foot of the machine
 
-> **Still holds**, and gets stronger under
-> [P7](ui-design.md#p7--one-status-line-always-visible): the line stops
-> hiding on the Tutorial tab.
+> **Still holds**, and got stronger under
+> [P7](ui-design.md#p7--one-status-line-always-visible): the line sits at
+> the foot of the page and no longer hides for the Tutorial.
 
 Everything the simulator wants to say — the power went off, a board
 was installed, a tape was loaded, something will not work — says it in
@@ -731,11 +731,12 @@ set shout in uppercase, as `LOAD 4K BASIC`, `FOLLOW PC` and
 the machine never had, and left the tab reading in three different
 cases at once next to `Load Data` and `Example programs...`.
 
-*Under the planned layout*
+*Under the panel + dock layout*
 ([P5](ui-design.md#p5--each-surface-keeps-its-voice)), the rule is
 unchanged and the unit is still the surface: the toolbar and the dock
 speak with the instrument's voice, and the dock's Teletype keeps its
-capitals.
+capitals. The tests check it by region of the page rather than by
+tab.
 
 *As it stands, audited:*
 
@@ -1041,9 +1042,10 @@ that without touching the vendored core.
 
 ## Part 3 — The Teletype tab
 
-> Under [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs) this becomes the dock's Teletype tab. The paper, the
-> key mapping and the helper row carry over unchanged. The LED row (D9)
-> goes, and the paper gets the dock's full width.
+> Since [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs) this is the dock's Teletype tab. The paper, the key
+> mapping and the helper row carried over unchanged. The LED row (D9)
+> went, the headings went with the tab, and the paper takes the dock's
+> full width and whatever height the helper row leaves it.
 
 Minimalist, and consistent with the visual language already in
 `css/style.css`: `#ccc` rounded panels with `#222` monospace text,
@@ -1113,9 +1115,9 @@ Per [D4](#d4--the-memory-dump-is-windowed-never-grown). At 256 B
 nothing changes at all — the window is the whole machine, which is the
 point.
 
-Under [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs), *Installed Memory* moves to the toolbar's Memory menu
+Since [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs), *Installed Memory* is the toolbar's Memory menu
 ([P4](ui-design.md#p4--occasional-actions-go-in-menus)), and the dump
-and its map strip go to the dock's Debugger. D4 itself is unchanged.
+and its map strip are in the dock's Debugger. D4 itself is unchanged.
 
 ```
  ┌────────────────────────────────────────────────┐

@@ -23,14 +23,14 @@
 panel = {};
 
 /**
- * Whether the debugger is the tab currently on screen. The dumps are
- * expensive, so they are not built while it is not.
+ * Whether the dock is open on the Debugger. The dumps are expensive, so
+ * they are not built while it is not.
  * @type {boolean}
  */
 panel.isDebugTabVisible = false;
 
 /**
- * Whether the teletype is the tab currently on screen.
+ * Whether the dock is open on the Teletype, which is when keys go to it.
  * @type {boolean}
  */
 panel.isTtyTabVisible = false;
@@ -163,8 +163,8 @@ panel.MIN_BASIC_MEM = 4096;
 panel.MAX_IMAGE_BYTES = 65536;
 
 /**
- * The example programs offered in the Debugger tab, in the order they
- * are offered.
+ * The example programs offered in the Load menu, in the order they are
+ * offered.
  *
  * First by which face of the machine the program speaks through - the
  * front panel, then the teletype - because a teletype program watched
@@ -207,8 +207,8 @@ panel.needsServer = function() {
 };
 
 /**
- * Fills the example menu, once, the first time the debugger is looked
- * at. A reader who never opens that tab never fetches anything.
+ * Fills the example menu, once, the first time the Load menu opens. A
+ * reader who never opens it never fetches anything.
  *
  * The menu acts on choosing and holds no selection, so the same
  * program can be loaded twice running.
@@ -414,8 +414,19 @@ panel.loadImage = function(bytes) {
     panel.sim.reset();
     panel.sim.flushDump(true);
     panel.updateMemoryControls();
+    panel.showLoaded();
     return {bytes: Math.min(bytes.length, panel.sim.mem.length),
             poweredOn: poweredOn};
+};
+
+/**
+ * After a program goes in, by any of the ways in: the menu it came from
+ * closes, and the dock shows the Debugger, where the memory map shows
+ * what arrived before anything has run over it (D14).
+ */
+panel.showLoaded = function() {
+    Popover.closeAll();
+    panel.showTab('debug');
 };
 
 /**
@@ -593,6 +604,10 @@ panel.updateMemoryControls = function() {
     if (follow) {
         follow.classList.toggle('selected', panel.sim.followPc);
     }
+    var installed = document.getElementById('memory-size');
+    if (installed) {
+        installed.textContent = panel.formatMemSize(memSize);
+    }
     panel.updateDebugControls();
     panel.updateMemWindowLabel();
 };
@@ -665,7 +680,6 @@ panel.setAddressLedsCallback = function(bits) {
     for (let i = 0; i < bits.length; i++) {
         panel.setLed('a' + i, bits[i]);
     }
-    panel.setRepeaterLeds('tty-a', bits);
 };
 
 /**
@@ -675,7 +689,6 @@ panel.setDataLedsCallback = function(bits) {
     for (let i = 0; i < bits.length; i++) {
         panel.setLed('d' + i, bits[i]);
     }
-    panel.setRepeaterLeds('tty-d', bits);
 };
 
 /**
@@ -683,10 +696,6 @@ panel.setDataLedsCallback = function(bits) {
  */
 panel.setWaitLedCallback = function(isRunning) {
     panel.setLed('wait', !isRunning);
-    var repeater = document.getElementById('tty-wait-led');
-    if (repeater) {
-        repeater.classList.toggle('on', !isRunning);
-    }
     // A machine that stopped by itself ran into a HLT. The lamp says
     // so to anyone who knows the panel; the status line says it to
     // everyone else (D26). A stop asked for from the panel writes its
@@ -878,6 +887,7 @@ panel.debugLoadData = function() {
     var poweredOn = panel.ensurePoweredOn();
     panel.sim.loadData(0, parsed.bytes);
     panel.updateMemoryControls();
+    panel.showLoaded();
     panel.setStatus('load-data-loaded', {bytes: parsed.bytes.length}, '',
                     poweredOn);
 };
@@ -1084,14 +1094,14 @@ panel.ttySend = function(byte) {
 panel.onTtyPrint = function(byte) {
     panel.tty.write(byte);
     if (!panel.isTtyTabVisible) {
-        // Something is being printed on a tab nobody is looking at.
+        // Something is being printed where nobody is looking.
         panel.setNavActivity(true);
     }
     panel.requestTtyRender();
 };
 
 /**
- * Marks, or unmarks, the teletype nav tab as having something new.
+ * Marks, or unmarks, the dock's Teletype tab as having something new.
  * @param {boolean} active Whether to mark it.
  */
 panel.setNavActivity = function(active) {
@@ -1168,12 +1178,19 @@ panel.onTtyClear = function() {
 };
 
 /**
- * Handles a key pressed while the teletype tab is on screen.
+ * Handles a key pressed while the teletype is on screen.
  * @param {Event} event The keydown event.
  */
 panel.onTtyKeyDown = function(event) {
     if (!panel.isTtyTabVisible || event.metaKey || event.altKey)
         return;
+    // A menu open over the paper, or a box of its own being typed in,
+    // has the keyboard first.
+    var target = event.target;
+    if (Popover.anyOpen() ||
+        (target && target.tagName == 'INPUT' && target.id != 'tty-input')) {
+        return;
+    }
     var byte = Teletype.keyToByte(event.key, event.ctrlKey);
     if (byte === null)
         return;
@@ -1191,27 +1208,11 @@ panel.onTtyInput = function(event) {
     event.target.value = '';
     if (!panel.isTtyTabVisible) {
         // Focus left in here after switching away must not go on
-        // feeding the machine from another tab.
+        // feeding the machine once the Teletype is out of sight.
         return;
     }
     for (let i = 0; i < text.length; i++) {
         panel.ttySend(Teletype.keyToByte(text.charAt(i)));
-    }
-};
-
-/**
- * Updates the teletype tab's repeat of the address, data and WAIT
- * lamps. The panel's own LEDs are SVG sprites inside the front panel
- * artwork; these are plain elements carrying the same two images.
- * @param {string} prefix The element id prefix, 'tty-a' or 'tty-d'.
- * @param {Array<number>} bits The bits, lowest first.
- */
-panel.setRepeaterLeds = function(prefix, bits) {
-    for (let i = 0; i < bits.length; i++) {
-        let elem = document.getElementById(prefix + i);
-        if (elem) {
-            elem.classList.toggle('on', !!bits[i]);
-        }
     }
 };
 
@@ -1434,12 +1435,23 @@ panel.init = function() {
     l10n.initMenu();
     l10n.restoreLocale();
 
-    // The nav tabs.
+    // The dock as it was left, before anything below redraws it - and
+    // so saves it - with the defaults.
+    var savedDock = panel.readSavedDock();
+    panel.dock = {tab: panel.readSavedTab(), open: savedDock.open,
+                  height: savedDock.height};
+
+    // The dock's tabs, and the button and handle that size it.
     for (let i = 0; i < panel.TABS.length; i++) {
         let name = panel.TABS[i];
         document.getElementById('nav-' + name).addEventListener(
-            'click', function() { panel.showTab(name); }, false);
+            'click', function() { panel.onDockTab(name); }, false);
     }
+    document.getElementById('dock-toggle').addEventListener(
+        'click', function() { panel.setDockOpen(!panel.dock.open); }, false);
+    panel.initDockSplitter();
+    window.addEventListener('resize', function() { panel.applyDock(); },
+                            false);
 
     // Initializes svg components for all LEDs.
     for (let i = 0; i < panel.LED_INFO.length; i++) {
@@ -1474,7 +1486,7 @@ panel.init = function() {
         panel.dumpCpuCallback, panel.dumpMemCallback);
 
     // Coalesce dump requests onto the browser's repaint, and drop them
-    // while the debugger is not the visible tab.
+    // while the dock is not showing the Debugger.
     panel.sim.dumpScheduler = function(flush) {
         window.requestAnimationFrame(flush);
     };
@@ -1483,8 +1495,8 @@ panel.init = function() {
     };
 
     // The teletype. The paper and the serial board are plain objects
-    // that keep working whether or not the tab is on screen; only the
-    // drawing waits for the tab.
+    // that keep working whether or not the dock shows them; only the
+    // drawing waits for it.
     panel.tty = new Teletype();
     // Two boards, one teletype. Software picks which one it talks to -
     // MITS BASIC reads the sense switches at startup and chooses the
@@ -1498,8 +1510,18 @@ panel.init = function() {
     panel.sio2.attachTo(panel.sim, Sio.TWO_SIO_BASE_PORT, false);
     panel.initTeletypeUi();
 
-    // The Debugger tab: loaders, installed memory, and the controls for
-    // the memory dump's window.
+    // The toolbar's menus. The example menu inside Load is filled the
+    // first time Load opens.
+    new Popover('load-button', 'load-popover', panel.buildExampleMenu);
+    new Popover('memory-button', 'memory-popover');
+    document.getElementById('helper-toggle').addEventListener(
+        'click', function() {
+            panel.setHelperShown(!panel.isHelperShown, true);
+        }, false);
+    panel.setHelperShown(panel.readHelperShown(), false);
+
+    // The loaders, installed memory, and the controls for the memory
+    // dump's window.
     document.getElementById('load-basic').addEventListener(
         'click', panel.onLoadBasic, false);
     document.getElementById('debug-load-data').addEventListener(
@@ -1515,7 +1537,10 @@ panel.init = function() {
     for (let i = 0; i < panel.MEM_SIZES.length; i++) {
         let memSize = panel.MEM_SIZES[i];
         document.getElementById('mem-size-' + memSize).addEventListener(
-            'click', function() { panel.onSetMemSize(memSize); }, false);
+            'click', function() {
+                Popover.closeAll();
+                panel.onSetMemSize(memSize);
+            }, false);
     }
     // Text set at runtime has to be redrawn after a change of language.
     l10n.onUpdate = function() {
@@ -1523,6 +1548,7 @@ panel.init = function() {
         panel.refreshExampleMenu();
         panel.refreshPlaceholders();
         panel.renderInstrPane();
+        panel.refreshDockToggle();
     };
     panel.refreshPlaceholders();
 
@@ -1545,32 +1571,15 @@ panel.init = function() {
     // A link pasted into the address bar while the page is open only
     // changes the fragment, which does not reload the page.
     window.addEventListener('hashchange', panel.onHashChange, false);
-    // Last, because showing a tab refreshes what is on it, and that
+    // Last, because showing the dock refreshes what is in it, and that
     // needs the simulator and the teletype to exist first.
-    panel.showTab(panel.readSavedTab());
+    panel.applyDock();
 };
 
 /**
- * Builds the teletype tab's lamps and hooks up its controls.
+ * Hooks up the teletype's controls.
  */
 panel.initTeletypeUi = function() {
-    // The repeater: A15-A0 and D7-D0, highest bit on the left, so that
-    // it reads the same way round as the front panel does.
-    var row = document.getElementById('tty-address-leds');
-    for (let i = 15; i >= 0; i--) {
-        let led = document.createElement('div');
-        led.id = 'tty-a' + i;
-        led.className = 'tty-led';
-        row.appendChild(led);
-    }
-    row = document.getElementById('tty-data-leds');
-    for (let i = 7; i >= 0; i--) {
-        let led = document.createElement('div');
-        led.id = 'tty-d' + i;
-        led.className = 'tty-led';
-        row.appendChild(led);
-    }
-
     document.getElementById('tty-break').addEventListener(
         'click', function() { panel.ttySend(Teletype.BREAK); }, false);
     document.getElementById('tty-rubout').addEventListener(
@@ -1589,9 +1598,8 @@ panel.initTeletypeUi = function() {
     var input = document.getElementById('tty-input');
     document.getElementById('tty-paper').addEventListener(
         'click', function() {
-            // preventScroll for the same reason the tab switch does
-            // not focus at all: the input sits below the paper, and
-            // scrolling it into view would jump the page.
+            // preventScroll: the input sits below the paper, and
+            // scrolling it into view would move the dock's contents.
             input.focus({preventScroll: true});
         }, false);
     input.addEventListener('input', panel.onTtyInput, false);
@@ -1726,35 +1734,72 @@ panel.createSwitch = function(id, type, x, y, upperCmd, lowerCmd) {
     }
     downElem.style.display = (type == panel.TOGGLE_SWITCH) ? 'inline' : 'none';
 
+    panelElem.appendChild(midElem);
+    panelElem.appendChild(upElem);
+    panelElem.appendChild(downElem);
+
+    // Each switch also takes a press anywhere near its lever, not only
+    // on the 20 by 30 sprite: a scaled-down panel leaves that very
+    // small. The address switches stand 50 apart, so a target 40 wide
+    // still leaves a gap between neighbours.
     if (type == panel.TOGGLE_SWITCH) {
         let toggle = function() {
             panel.onToggle(id);
         };
         upElem.addEventListener('click', toggle, false);
         downElem.addEventListener('click', toggle, false);
+        panel.createHitArea(x - 10, y - 8, 40, 46, toggle);
         // The helper button below the panel.
         document.getElementById('s-' + id).addEventListener(
             'click', toggle, false);
     } else {
-        if (upperCmd) {
-            panel.createCmdLabel(upperCmd, function() {
-                panel.switchUpThenBack(id);
-                panel.playSwitch();
-                upperCmd.callback();
-            });
+        let upper = upperCmd && function() {
+            panel.switchUpThenBack(id);
+            panel.playSwitch();
+            upperCmd.callback();
+        };
+        let lower = lowerCmd && function() {
+            panel.switchDownThenBack(id);
+            panel.playSwitch();
+            lowerCmd.callback();
+        };
+        if (upper) {
+            panel.createCmdLabel(upperCmd, upper);
         }
-        if (lowerCmd) {
-            panel.createCmdLabel(lowerCmd, function() {
-                panel.switchDownThenBack(id);
-                panel.playSwitch();
-                lowerCmd.callback();
-            });
+        if (lower) {
+            panel.createCmdLabel(lowerCmd, lower);
+        }
+        // The lever's top half throws it up and its bottom half down,
+        // as on the metal. SINGLE STEP only goes one way, so all of its
+        // lever is that way.
+        if (upper) {
+            panel.createHitArea(x - 15, y - 8, 50, lower ? 23 : 46, upper);
+        }
+        if (lower) {
+            panel.createHitArea(x - 15, y + 15, 50, 23, lower);
         }
     }
+};
 
-    panelElem.appendChild(midElem);
-    panelElem.appendChild(upElem);
-    panelElem.appendChild(downElem);
+/**
+ * Lays an invisible target over part of the panel artwork.
+ * @param {number} x The left edge, in the artwork's coordinates.
+ * @param {number} y The top edge.
+ * @param {number} width The width.
+ * @param {number} height The height.
+ * @param {function()} callback What a press does.
+ */
+panel.createHitArea = function(x, y, width, height, callback) {
+    var elem = document.createElementNS(panel.SVG_NS, 'rect');
+    elem.setAttribute('x', x);
+    elem.setAttribute('y', y);
+    elem.setAttribute('width', width);
+    elem.setAttribute('height', height);
+    elem.setAttribute('fill', 'transparent');
+    elem.setAttribute('pointer-events', 'all');
+    elem.style.cursor = 'pointer';
+    elem.addEventListener('click', callback, false);
+    document.getElementById('panel').appendChild(elem);
 };
 
 /**
@@ -1900,12 +1945,20 @@ panel.playSwitch = function() {
 };
 
 /**
- * The tabs, in the order they appear. The front panel and the teletype
- * are the two things a 1975 owner actually touched, so they sit
- * together (D8 in docs/ms-basic-4k.md).
+ * The dock's tabs, in the order they appear. The teletype comes first:
+ * it and the front panel are the two things a 1975 owner actually
+ * touched (D8 in docs/ms-basic-4k.md, which U1 in docs/ui-design.md
+ * carries over).
  * @type {Array<string>}
  */
-panel.TABS = ['sim', 'tty', 'debug', 'ref'];
+panel.TABS = ['tty', 'debug', 'ref'];
+
+/**
+ * The tab a first visit opens on: the Tutorial, which says what to do
+ * with the machine it sits under.
+ * @type {string}
+ */
+panel.DEFAULT_TAB = 'ref';
 
 /**
  * Where the chosen tab is remembered between visits. Only the view is
@@ -1916,12 +1969,34 @@ panel.TABS = ['sim', 'tty', 'debug', 'ref'];
 panel.tabStorageKey = 'sim8800tab';
 
 /**
- * Remembers the tab on screen.
- * @param {string} name One of panel.TABS.
+ * Where whether the dock is open, and how tall, is remembered.
+ * @type {string}
  */
-panel.saveTab = function(name) {
+panel.dockStorageKey = 'sim8800dock';
+
+/**
+ * The dock as it stands: which tab, whether it is open or folded down
+ * to its tabs, and its height in pixels (null for the default).
+ * @type {{tab: string, open: boolean, height: ?number}}
+ */
+panel.dock = {tab: 'ref', open: true, height: null};
+
+/**
+ * The least the dock and the front panel may each be left with, in
+ * pixels, however the dock is dragged.
+ * @type {number}
+ */
+panel.DOCK_MIN_HEIGHT = 120;
+panel.STAGE_MIN_HEIGHT = 160;
+
+/**
+ * Remembers the dock: its tab, and whether it is open and how tall.
+ */
+panel.saveDock = function() {
     try {
-        localStorage.setItem(panel.tabStorageKey, name);
+        localStorage.setItem(panel.tabStorageKey, panel.dock.tab);
+        localStorage.setItem(panel.dockStorageKey, JSON.stringify(
+            {open: panel.dock.open, height: panel.dock.height}));
     } catch (e) {
         // Site data is blocked, so the choice is not remembered. The
         // simulator itself works either way.
@@ -1929,7 +2004,9 @@ panel.saveTab = function(name) {
 };
 
 /**
- * @return {string} The tab to open on, defaulting to the front panel.
+ * @return {string} The tab to open on. A tab that no longer exists -
+ *     'sim', from before the front panel stopped being one - opens the
+ *     default instead.
  */
 panel.readSavedTab = function() {
     var name = null;
@@ -1938,48 +2015,245 @@ panel.readSavedTab = function() {
     } catch (e) {
         name = null;
     }
-    return panel.TABS.indexOf(name) < 0 ? 'sim' : name;
+    return panel.TABS.indexOf(name) < 0 ? panel.DEFAULT_TAB : name;
 };
 
 /**
- * Shows one tab and hides the others.
+ * @return {{open: boolean, height: ?number}} The dock as it was left,
+ *     or open at its default height on a first visit.
+ */
+panel.readSavedDock = function() {
+    var saved = null;
+    try {
+        saved = JSON.parse(localStorage.getItem(panel.dockStorageKey));
+    } catch (e) {
+        saved = null;
+    }
+    if (!saved || typeof saved != 'object') {
+        return {open: true, height: null};
+    }
+    return {open: saved.open !== false,
+            height: typeof saved.height == 'number' ? saved.height : null};
+};
+
+/**
+ * When one of the dock's tabs is pressed. The tab already showing
+ * folds the dock away, as a tool window does in an IDE; any other opens
+ * the dock on itself.
+ * @param {string} name One of panel.TABS.
+ */
+panel.onDockTab = function(name) {
+    if (name == panel.dock.tab && panel.dock.open) {
+        panel.setDockOpen(false);
+    } else {
+        panel.showTab(name);
+    }
+};
+
+/**
+ * Opens the dock on one tab.
  * @param {string} name One of panel.TABS.
  */
 panel.showTab = function(name) {
-    panel.saveTab(name);
-    panel.isDebugTabVisible = name == 'debug';
-    panel.isTtyTabVisible = name == 'tty';
+    panel.dock.tab = name;
+    panel.dock.open = true;
+    panel.applyDock();
+};
+
+/**
+ * Opens the dock, or folds it down to its tabs.
+ * @param {boolean} open Whether it should be open.
+ */
+panel.setDockOpen = function(open) {
+    panel.dock.open = open;
+    panel.applyDock();
+};
+
+/**
+ * The tallest the dock may be in this window: whatever leaves the front
+ * panel its minimum, on top of the Switch Board Helper when that is
+ * showing.
+ * @return {number} Pixels.
+ */
+panel.maxDockHeight = function() {
+    var app = document.getElementById('app');
+    var toolbar = document.getElementById('toolbar');
+    var status = document.getElementById('status-bar');
+    var splitter = document.getElementById('dock-splitter');
+    var helper = document.getElementById('switch-helper');
+    var room = app.clientHeight - toolbar.offsetHeight -
+        status.offsetHeight - splitter.offsetHeight - panel.STAGE_MIN_HEIGHT -
+        (helper.hidden ? 0 : helper.offsetHeight);
+    return Math.max(panel.DOCK_MIN_HEIGHT, room);
+};
+
+/**
+ * The dock's height in this window: the one chosen, or the default,
+ * kept between the least it may be and the most.
+ * @return {number} Pixels.
+ */
+panel.dockHeight = function() {
+    var app = document.getElementById('app');
+    var wanted = panel.dock.height !== null ? panel.dock.height :
+        Math.round(app.clientHeight * 0.4);
+    return Math.min(Math.max(wanted, panel.DOCK_MIN_HEIGHT),
+                    panel.maxDockHeight());
+};
+
+/**
+ * Puts the dock on screen as panel.dock says, and brings whatever it
+ * now shows up to date.
+ */
+panel.applyDock = function() {
+    var dock = panel.dock;
+    var app = document.getElementById('app');
+    panel.isDebugTabVisible = dock.open && dock.tab == 'debug';
+    panel.isTtyTabVisible = dock.open && dock.tab == 'tty';
+    app.classList.toggle('dock-closed', !dock.open);
+    app.style.setProperty('--dock-height', panel.dockHeight() + 'px');
     for (let i = 0; i < panel.TABS.length; i++) {
         let tab = panel.TABS[i];
-        let shown = tab == name;
-        document.getElementById('tab-' + tab).style.display =
-            shown ? 'block' : 'none';
-        document.getElementById('nav-' + tab).classList.toggle(
-            'selected', shown);
+        let shown = dock.open && tab == dock.tab;
+        document.getElementById('tab-' + tab).hidden = !shown;
+        let nav = document.getElementById('nav-' + tab);
+        nav.classList.toggle('selected', shown);
+        nav.setAttribute('aria-selected', shown ? 'true' : 'false');
     }
-    // The status line reports on the machine, which the Tutorial tab
-    // does not show. It keeps updating while hidden.
-    document.getElementById('status-bar').hidden = name == 'ref';
-    // Neither view is kept up to date while it is hidden, so catch up
-    // as it comes back.
-    if (panel.isDebugTabVisible) {
-        panel.buildExampleMenu();
-        if (panel.sim) {
-            panel.sim.flushDump(true);
-        }
+    panel.refreshDockToggle();
+    panel.saveDock();
+    // Neither tool is kept up to date while it is out of sight, so catch
+    // up as it comes back.
+    if (panel.isDebugTabVisible && panel.sim) {
+        panel.sim.flushDump(true);
     }
     if (panel.isTtyTabVisible) {
         panel.setNavActivity(false);
         panel.renderTeletype();
     }
     // The teletype's hidden input is deliberately not focused here:
-    // focusing scrolls it into view below the paper, and on a phone
-    // raises the keyboard. Keys are handled on document, and tapping
-    // the paper focuses it when the soft keyboard is wanted. Focus left
-    // behind in another tab's input is dropped, so that it cannot
-    // swallow keys or feed them to the machine.
+    // focusing it on a phone raises the keyboard. Keys are handled on
+    // document, and tapping the paper focuses it when the soft
+    // keyboard is wanted. Focus left behind in a tool that has gone out
+    // of sight is dropped, so that it cannot swallow keys or feed them
+    // to the machine.
     var focused = document.activeElement;
-    if (focused && focused !== document.body && focused.blur) {
+    if (focused && focused !== document.body && focused.blur &&
+        focused.closest && focused.closest('#dock-body') &&
+        !focused.closest('.dock-pane:not([hidden])')) {
         focused.blur();
     }
+};
+
+/**
+ * Names the dock's fold button for what it will do, in the current
+ * language. It is an arrowhead, so the words live in a tooltip and on
+ * the element, where a screen reader can reach them.
+ */
+panel.refreshDockToggle = function() {
+    var toggle = document.getElementById('dock-toggle');
+    if (!toggle) {
+        return;
+    }
+    var id = panel.dock.open ? 'dock-hide' : 'dock-show';
+    toggle.textContent = panel.dock.open ? '▾' : '▴';
+    toggle.title = l10n.getMessage(id);
+    toggle.setAttribute('aria-label', l10n.getMessage(id));
+};
+
+/**
+ * Lets the handle between the front panel and the dock be dragged, or
+ * moved with the arrow keys.
+ */
+panel.initDockSplitter = function() {
+    var splitter = document.getElementById('dock-splitter');
+    var resizeTo = function(height) {
+        panel.dock.height = Math.min(
+            Math.max(Math.round(height), panel.DOCK_MIN_HEIGHT),
+            panel.maxDockHeight());
+        panel.dock.open = true;
+        panel.applyDock();
+    };
+    splitter.addEventListener('pointerdown', function(event) {
+        if (event.button) {
+            return;
+        }
+        event.preventDefault();
+        splitter.setPointerCapture(event.pointerId);
+        splitter.classList.add('dragging');
+        var bottom = document.getElementById('dock').getBoundingClientRect()
+            .bottom;
+        var move = function(e) {
+            resizeTo(bottom - e.clientY);
+        };
+        var up = function() {
+            splitter.classList.remove('dragging');
+            splitter.removeEventListener('pointermove', move);
+            splitter.removeEventListener('pointerup', up);
+            splitter.removeEventListener('pointercancel', up);
+        };
+        splitter.addEventListener('pointermove', move);
+        splitter.addEventListener('pointerup', up);
+        splitter.addEventListener('pointercancel', up);
+    }, false);
+    splitter.addEventListener('keydown', function(event) {
+        var step = {ArrowUp: 24, ArrowDown: -24}[event.key];
+        if (step) {
+            event.preventDefault();
+            resizeTo(panel.dockHeight() + step);
+        }
+    }, false);
+};
+
+/**
+ * Where showing the Switch Board Helper is remembered.
+ * @type {string}
+ */
+panel.helperStorageKey = 'sim8800helper';
+
+/**
+ * Whether the Switch Board Helper's large buttons are under the panel.
+ * @type {boolean}
+ */
+panel.isHelperShown = false;
+
+/**
+ * @return {boolean} Whether to show the Switch Board Helper: as it was
+ *     left, or, on a first visit, only on a touch screen, where the
+ *     panel's own switches are too small and too close to hit.
+ */
+panel.readHelperShown = function() {
+    var saved = null;
+    try {
+        saved = localStorage.getItem(panel.helperStorageKey);
+    } catch (e) {
+        saved = null;
+    }
+    if (saved == 'on' || saved == 'off') {
+        return saved == 'on';
+    }
+    return !!(window.matchMedia &&
+              window.matchMedia('(pointer: coarse)').matches);
+};
+
+/**
+ * Shows or hides the Switch Board Helper.
+ * @param {boolean} shown Whether to show it.
+ * @param {boolean} save Whether this is the reader's choice, to be
+ *     remembered, rather than the default for this screen.
+ */
+panel.setHelperShown = function(shown, save) {
+    panel.isHelperShown = shown;
+    document.getElementById('switch-helper').hidden = !shown;
+    var toggle = document.getElementById('helper-toggle');
+    toggle.classList.toggle('selected', shown);
+    toggle.setAttribute('aria-pressed', shown ? 'true' : 'false');
+    if (save) {
+        try {
+            localStorage.setItem(panel.helperStorageKey, shown ? 'on' : 'off');
+        } catch (e) {
+            // Not remembered; it still applies to this visit.
+        }
+    }
+    // The panel gives up or takes back the room the helper uses.
+    panel.applyDock();
 };

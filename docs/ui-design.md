@@ -12,10 +12,12 @@ decisions are recorded here, in [Part 3](#part-3--decisions), as U1,
 U2 and so on. **If a change needs to break a principle, change the
 principle here first, with its reason.**
 
-**Status.** The principles hold now. The layout in
-[Part 2](#part-2--the-layout) is **planned, not built**: until
-[U1](#u1--the-front-panel-and-a-dock-replace-the-four-tabs) lands, the
-page still has four tabs ([D8](ms-basic-4k.md#d8--the-teletype-is-its-own-tab)).
+**Status.** The principles hold, and the layout in
+[Part 2](#part-2--the-layout) is built:
+[U1](#u1--the-front-panel-and-a-dock-replace-the-four-tabs) replaced
+the four tabs. The questions it left open were settled as listed in
+[Part 4](#part-4--open-questions), and remain open to revision once the
+layout has been used for a while.
 
 ---
 
@@ -66,7 +68,7 @@ option you turn on, not shown by default.
 
 ### P3 — Tools live in one dock, one at a time
 
-The teletype, the debugger and the guide share a single dock beside the
+The teletype, the debugger and the tutorial share a single dock beside the
 panel. You choose which one it shows, how big it is, and whether it is
 open at all.
 
@@ -99,7 +101,7 @@ case and translation, and the unit is still the surface:
 | --- | --- | --- |
 | The front panel, and the Switch Board Helper | UPPERCASE | no: silkscreen |
 | The teletype | UPPERCASE | yes: the ASR-33 had no lowercase |
-| The instrument: toolbar, dock tabs, debugger, guide | Title Case | yes |
+| The instrument: toolbar, dock tabs, debugger, tutorial | Title Case | yes |
 
 Density follows the surface too. The panel is a photograph. The dock is
 a tool, and reads like one: compact, with no page-style heading bar
@@ -146,38 +148,37 @@ does.
 
 ## Part 2 — The layout
 
-*Planned. The page does not look like this yet.*
-
 ```
-┌ Altair 8800 Simulator   Load ▾   Memory ▾   Share     Big switches  EN ▾  ? ┐  toolbar
-│                                                                            │
-│                      FRONT PANEL (the SVG artwork)                         │  scales to
-│                                                                            │  the room left
-├────────────────────────────── ═══ drag ═══ ────────────────────────────────┤
-│ Teletype •   Debugger   Guide                                    ◨   ▾     │  dock tabs
-│ PC 0004  SP 0000  A 8C  B 00 …   │  0000  3E 8C D3 FF 76 00 …              │  one tool
-│ Next  0002  D3 FF   OUT FFH      │  0010  …                                │
-├────────────────────────────────────────────────────────────────────────────┤
-│ ● Stopped   PC 0004   256 B   Stepped to 0004H.                            │  status line
-└────────────────────────────────────────────────────────────────────────────┘
+┌ Altair 8800 Simulator  Load ▾  Memory 256 B ▾  Share ▾     Big Switches  EN ▾ ┐  toolbar
+│                                                                               │
+│                      FRONT PANEL (the SVG artwork)                            │  scales to
+│                                                                               │  the room left
+├──────────────────────────────── ═══ drag ═══ ─────────────────────────────────┤
+│ Teletype •   Debugger   Tutorial                                          ▾   │  dock tabs
+│ PC = 0004  SP = 0000        │  Memory Dump 0000 - 00FF  ◀ ▶ Follow PC  …      │  one tool
+│ Next  0002  D3 FF  OUT d8   │  0000  3E 8C D3 FF 76 00 …                      │
+├───────────────────────────────────────────────────────────────────────────────┤
+│ Stepped one instruction.                             © 2020-2026 Source Code  │  status line
+└───────────────────────────────────────────────────────────────────────────────┘
 ```
 
-Where today's pieces go:
+Where the pieces of the four tabs went. Share and the instruction
+pane's new place are U2's.
 
-| Today | Under U1 | By |
+| Before | Now | By |
 | --- | --- | --- |
 | Simulator tab: the panel | The stage, always shown | P1 |
-| Simulator tab: Switch Board Helper | *Big switches*, off by default | P2 |
+| Simulator tab: Switch Board Helper | *Big Switches*, on by default only on a touch screen | P2 |
 | Teletype tab: paper and helper row | Dock: Teletype | P3 |
 | Teletype tab: LED repeater (D9) | Removed: the panel is in view | P2 |
 | Teletype nav dot (D10) | The same dot, on the dock's tab | P3 |
 | Debugger: *Load a Program*, *Load Your Own* | Toolbar: Load menu | P4 |
 | Debugger: *Installed Memory* | Toolbar: Memory menu | P4 |
 | Debugger: CPU dump, memory dump, map strip | Dock: Debugger | P3 |
-| Debugger: instruction pane (D28) | Dock: Debugger, beside the registers | P3 |
+| Debugger: instruction pane (D28) | Dock: Debugger, beside the registers (U2) | P3 |
 | Debugger: run buttons (D27) | Removed: the panel is in view | P2 |
-| Debugger: Copy Link | Toolbar: Share | P4 |
-| Tutorial tab | Dock: Guide | P3 |
+| Debugger: Copy Link | Toolbar: Share (U2) | P4 |
+| Tutorial tab | Dock: Tutorial | P3 |
 | Status line (D15) | Foot of the page, never hidden | P7 |
 
 *Why the dock sits below the panel:* the panel is wide and short
@@ -190,8 +191,10 @@ default.
 *Why the panel scales to the height left:* the page stops scrolling and
 becomes a fixed frame (toolbar, stage, dock, status line). Growing the
 dock shrinks the panel, keeping its shape, rather than pushing it off
-the top of the screen. That is P1 in one line of CSS, and the riskiest
-part of the work.
+the top of the screen. The dock is kept to what leaves the panel at
+least 160 px, on top of the Switch Board Helper when that is showing.
+On a phone the panel takes the height its width gives it and the dock
+the rest, with no handle to drag (P9).
 
 ---
 
@@ -264,26 +267,47 @@ things to the Debugger. Two of them move; one goes.
 
 ## Part 4 — Open questions
 
-- **Which tool does a load open?** [D14](ms-basic-4k.md#d14--loading-stops-short-of-running)
-  wants the memory map in view as BASIC loads: fifteen of sixteen pages
-  filling on a 4 KB machine is the lesson. That argues for opening the
-  Debugger on every load, letting the Teletype tab's dot (D10) say when
-  BASIC starts printing. Opening the Teletype for teletype programs is
-  the alternative.
-- **Keyboard shortcuts.** IDE convention would be F5 RUN, Shift+F5
-  STOP, F10 SINGLE STEP. But F5 is the browser's reload, and a Mac
-  keyboard needs Fn for the function keys. Letters are out, because
-  letters belong to the teletype while its tab is showing.
-- **Big switches or bigger hit areas.** Instead of a helper row, the
-  SVG switches could simply get larger invisible hit areas on touch
-  screens, which would need no second set of controls at all.
-- **The Guide in a short dock.** A 300 px dock is a small window to read
-  the Tutorial through. Is it enough, or does the Guide want the
-  right-hand dock position by default?
-- **Text that names tabs.** Several messages and tutorial steps say
-  "the Debugger tab" or "the Teletype tab" (for example `basic-1` in
-  `js/l10n.js`, and the load messages in
-  [Part 5](ms-basic-4k.md#part-5--example-programs)). They need
-  rewording, in all nine locales, when U1 lands. So do `README.md` and
-  its screenshots, and `examples/kill-the-bit.md`, which describe the
-  tabs as they are today.
+### Settled with U1
+
+- **Which tool does a load open?** The Debugger, for every load,
+  whichever of the ways in: the four loaders and a program link.
+  [D14](ms-basic-4k.md#d14--loading-stops-short-of-running) wants the
+  memory map in view as a program arrives, before anything has run over
+  it. What a program prints afterwards never switches the dock by
+  itself; the Teletype tab's dot (D10) and the status line say so. A
+  view that changes on its own while you are reading it is worse than
+  one that asks to be looked at.
+- **Keyboard shortcuts.** None, for now. The panel is always in view,
+  so a switch is one click away. F5 is the browser's reload, a Mac
+  needs Fn for the function keys, letters belong to the teletype, and
+  so does Escape, which is KILL LINE there.
+- **Big switches or bigger hit areas.** Both, because hit areas alone
+  cannot be enough on a phone: at 390 px wide the address switches end
+  up about 13 px apart, well under a thumb. Each switch on the panel
+  takes a press anywhere near its lever, as far as its neighbours
+  allow; and *Big Switches* in the toolbar shows the Switch Board
+  Helper under the panel. It starts on by itself on a touch screen
+  (`pointer: coarse`), and off with a mouse, and is remembered once
+  chosen.
+- **The Tutorial in a short dock.** No special case. The dock can be
+  resized and remembers its size, and about eight steps fit at the
+  default height: enough to follow one at a time.
+- **Its name.** Tutorial, as before, not the mockup's Guide: it keeps
+  its translations in nine locales and the name the README uses.
+- **The first visit.** The dock opens on the Tutorial, which says what
+  to do with the machine above it. After that the page remembers the
+  reader's choice. A saved tab from before U1 that no longer exists
+  (the front panel's) opens the Tutorial too.
+- **Text that names tabs.** Reworded, in all nine locales: messages now
+  name the front panel, the Load and Memory menus and the Teletype
+  rather than tabs to go to. So were `README.md`, `examples/README.md`
+  and `examples/kill-the-bit.md`.
+
+### Still open
+
+- **A dock on the right**, for tall or very wide screens. Left out of
+  U1 as one more layout to test for a minority of screens.
+- **Keyboard shortcuts**, if people ask for them, avoiding F5, letters
+  and Escape.
+- **Marking the Tutorial step you are on**, so that coming back to it
+  after toggling switches finds your place.

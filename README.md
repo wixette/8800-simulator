@@ -45,41 +45,54 @@ browser treats every `file://` page as a different site from the files
 beside it and blocks the read, so those two controls grey out and say
 so. Serving the directory is what fixes it.
 
-The simulator has four tabs.
+The simulator is one screen: the front panel, with a dock of tools
+under it, a toolbar above and a status line along the foot.
 
-**Simulator** is the front panel. In a desktop browser you can click
-the switches on the panel directly. On a phone a single switch is hard
-to touch, so the *Switch Board Helper* buttons below the panel do the
-same job, and show which switches are up.
+**The front panel** is always in view, and grows or shrinks to fill
+whatever room the dock leaves. In a desktop browser you click its
+switches directly. On a phone a single switch is hard to touch, so
+**Big Switches** in the toolbar puts the *Switch Board Helper* under
+the panel: large buttons that do the same job and show which switches
+are up. It starts on by itself on a touch screen.
 
-**Teletype** holds a simulated ASR-33: the paper, its keyboard, and a
-repeat of the address and data LEDs so a program that prints and
-lights lamps at once can be watched on one screen. The machine talks
-to it through an 88-SIO serial board on ports 00H and 01H (and an
-88-2SIO on 10H and 11H), so a program has to be running and reading
-that board before anything appears — nothing echoes by itself.
+The toolbar's **Load** menu is how programs get in:
+
+- **Load 4K BASIC**, and the **Example Programs** menu, which lists
+  every program in [examples/](./examples/). Pick one and it is loaded
+  at 0000H with RESET pressed, ready to RUN. The menu reads the listing
+  files themselves, so there is no assembled copy of a program anywhere
+  to fall out of step with its source.
+- A hex string (**Load Data**) or a binary file from disk (**Load
+  Binary File**).
+
+Whatever is loaded, the dock opens on the Debugger to show it arriving.
+**Memory** chooses 256 bytes, as the Altair 8800 shipped, or 4 KB /
+8 KB as if you had plugged in one or two 88-4MCS memory boards. Memory
+boards are not something you add to a running machine, so changing the
+size switches the simulator off.
+
+The dock holds three tools, one at a time. Click a tab to open it;
+click the open tab again, or ▾, to fold the dock away; drag the handle
+above it to share the height between the dock and the panel. The page
+remembers how you left it.
+
+**Teletype** is a simulated ASR-33: the paper, and its keyboard. The
+machine talks to it through an 88-SIO serial board on ports 00H and 01H
+(and an 88-2SIO on 10H and 11H), so a program has to be running and
+reading that board before anything appears — nothing echoes by itself.
+A dot on the tab says when something has printed while you were looking
+at another tool.
 
 ![The Teletype tab running 4K BASIC: MEMORY SIZE?, 727 BYTES FREE, then PRINT 3.14 * 9 answered with 28.26](./screenshots/teletype.png)
 
 **Debugger** shows the internal state of the simulated 8080 CPU and
-the contents of memory, and is where programs are loaded:
+the contents of memory:
 
-- *Load a Program* has **Load 4K BASIC** and the **Example Programs**
-  menu, which lists every program in [examples/](./examples/). Pick one
-  and it is loaded at 0000H with RESET pressed, ready to RUN. The menu
-  reads the listing files themselves, so there is no assembled copy of
-  a program anywhere to fall out of step with its source.
-- *Load Your Own* takes a hex string (**Load Data**) or a binary file
-  from disk (**Load Binary File**).
-- *Installed Memory* chooses 256 bytes, as the Altair 8800 shipped, or
-  4 KB / 8 KB as if you had plugged in one or two 88-4MCS memory boards.
-  Memory boards are not something you add to a running machine, so
-  changing the size switches the simulator off.
-- *Memory Dump* shows one 256-byte page at a time. Above 256 bytes a
-  map strip sits over it — one cell per page, shaded by how much of
-  that page is in use, and marked where the program counter and the
-  stack pointer are. Click a cell to jump there, or use **Follow PC** to
-  track the running program.
+- The **memory dump** shows one 256-byte page at a time. Above 256
+  bytes a map strip sits over it — one cell per page, shaded by how
+  much of that page is in use, and marked where the program counter
+  and the stack pointer are. Click a cell to jump there, or use
+  **Follow PC** to track the running program.
 - **Copy Link** copies a link to what is in memory, which opens at
   RESET ready to RUN. Tick *Include registers and switches* to link to
   the machine as it stands instead, stopped at the current instruction.
@@ -87,7 +100,8 @@ the contents of memory, and is where programs are loaded:
 ![The Debugger tab: the loaders, the CPU registers, installed memory and the memory dump](./screenshots/debugger.png)
 
 **Tutorial** walks through toggling in a first program by hand and
-starting BASIC, with references for going further.
+starting BASIC, with references for going further. It sits under the
+panel it is about, so you can follow it step by step.
 
 ### Linking to a program
 
@@ -110,7 +124,7 @@ the program's listing:
 A link can use `#` in place of `?`, as in `#hex=3E8CD3FF76`; both
 work.
 
-**Copy Link** in the Debugger tab writes a link after `#`. With
+**Copy Link** in the Debugger writes a link after `#`. With
 *Include registers and switches* ticked it also holds the registers
 and the machine's place in the program. It leaves out whatever a
 machine just switched on would have anyway: registers that are zero
@@ -153,7 +167,7 @@ GUESS MY LETTER A-Z. ANY KEY STARTS.
 
 ## Microsoft BASIC
 
-The simulator runs the Altair's first piece of software, and Microsoft's: [Altair BASIC 3.2](http://altairbasic.org), written in 1975 by Bill Gates, Paul Allen and Monte Davidoff. Choose 4 KB or 8 KB under *Installed Memory* in the Debugger tab, click **Load 4K BASIC**, then RUN from the front panel and type at the Teletype tab.
+The simulator runs the Altair's first piece of software, and Microsoft's: [Altair BASIC 3.2](http://altairbasic.org), written in 1975 by Bill Gates, Paul Allen and Monte Davidoff. Choose 4 KB or 8 KB from the **Memory** menu, then **Load 4K BASIC** from the **Load** menu, then RUN from the front panel and type at the Teletype.
 
 ```
 MEMORY SIZE?
@@ -168,13 +182,13 @@ BASIC VERSION 3.2
 OK
 ```
 
-On a 4 KB machine that leaves 727 bytes for your program, which is exactly what the name means — load it and look at the memory map before pressing RUN, and you can see BASIC filling fifteen of the machine's sixteen pages. The Tutorial tab walks through it, including what Load 4K BASIC quietly skips: toggling in a 28 byte boot loader by hand and then waiting seven minutes for the paper tape.
+On a 4 KB machine that leaves 727 bytes for your program, which is exactly what the name means — load it and look at the memory map before pressing RUN, and you can see BASIC filling fifteen of the machine's sixteen pages. The Tutorial walks through it, including what Load 4K BASIC quietly skips: toggling in a 28 byte boot loader by hand and then waiting seven minutes for the paper tape.
 
 The ROM is in [roms/](./roms/), and [roms/NOTICE](./roms/NOTICE) explains what it is and why it is not under this repository's licence. It is optional; **Load Binary File** will load an image of your own instead.
 
 ## A Quick Tutorial
 
-How to input and run the following program to calculate 1 + 2 = 3, by hand, on the front panel. The same steps are in the simulator's Tutorial tab.
+How to input and run the following program to calculate 1 + 2 = 3, by hand, on the front panel. The same steps are in the simulator's Tutorial.
 
 ```
         LDA 0080H  ; 00 111 010
