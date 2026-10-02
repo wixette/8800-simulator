@@ -547,7 +547,7 @@ panel.showLoaded = function() {
 };
 
 /**
- * When Load 4K BASIC is pressed.
+ * When Microsoft 4K BASIC is chosen from the Load menu.
  */
 panel.onLoadBasic = function() {
     if (panel.reportIfUnavailable('load-basic')) {
@@ -568,7 +568,7 @@ panel.onLoadBasic = function() {
 };
 
 /**
- * When a binary file is chosen with Load Binary File.
+ * When a file is chosen with Binary File... in the Load menu.
  * @param {Event} event The change event from the file input.
  */
 panel.onBinaryFileChosen = function(event) {

@@ -182,7 +182,7 @@ GUESS MY LETTER A-Z. ANY KEY STARTS.
 
 ## Microsoft BASIC
 
-The simulator runs the Altair's first piece of software, and Microsoft's: [Altair BASIC 3.2](http://altairbasic.org), written in 1975 by Bill Gates, Paul Allen and Monte Davidoff. Choose 4 KB or 8 KB from the **Memory** menu, then **Load 4K BASIC** from the **Load** menu, then RUN from the front panel and type at the Teletype.
+The simulator runs the Altair's first piece of software, and Microsoft's: [Altair BASIC 3.2](http://altairbasic.org), written in 1975 by Bill Gates, Paul Allen and Monte Davidoff. Choose 4 KB or 8 KB from the **Memory** menu, then **Microsoft 4K BASIC** from the **Load** menu, then RUN from the front panel and type at the Teletype.
 
 ```
 MEMORY SIZE?
@@ -197,9 +197,9 @@ BASIC VERSION 3.2
 OK
 ```
 
-On a 4 KB machine that leaves 727 bytes for your program, which is exactly what the name means — load it and look at the memory map before pressing RUN, and you can see BASIC filling fifteen of the machine's sixteen pages. The Tutorial walks through it, including what Load 4K BASIC quietly skips: toggling in a 28 byte boot loader by hand and then waiting seven minutes for the paper tape.
+On a 4 KB machine that leaves 727 bytes for your program, which is exactly what the name means — load it and look at the memory map before pressing RUN, and you can see BASIC filling fifteen of the machine's sixteen pages. The Tutorial walks through it, including what loading 4K BASIC quietly skips: toggling in a 28 byte boot loader by hand and then waiting seven minutes for the paper tape.
 
-The ROM is in [roms/](./roms/), and [roms/NOTICE](./roms/NOTICE) explains what it is and why it is not under this repository's licence. It is optional; **Load Binary File** will load an image of your own instead.
+The ROM is in [roms/](./roms/), and [roms/NOTICE](./roms/NOTICE) explains what it is and why it is not under this repository's licence. It is optional; **Binary File…** in the **Load** menu will load an image of your own instead.
 
 ## A Quick Tutorial
 

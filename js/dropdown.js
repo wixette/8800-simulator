@@ -236,8 +236,9 @@ class Dropdown {
             this.close();
             return;
         }
-        // A key the menu takes is the menu's alone: Escape here must not
-        // also reach the teletype, where it is KILL LINE.
+        // A key the menu takes is the menu's alone. (The teletype also
+        // leaves the keyboard to any open menu - panel.onTtyKeyDown -
+        // but this one may hear a key first or last.)
         if (event.key === 'Escape') {
             event.preventDefault();
             event.stopImmediatePropagation();

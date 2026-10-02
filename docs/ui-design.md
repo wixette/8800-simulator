@@ -72,7 +72,7 @@ lays the switches out, and folds away for whoever does not want it
 
 ### P3 — Tools live in one dock, one at a time
 
-The teletype, the debugger and the tutorial share a single dock beside the
+The teletype, the debugger and the tutorial share a single dock under the
 panel. You choose which one it shows, how big it is, and whether it is
 open at all.
 
@@ -92,10 +92,10 @@ sharing a link, choosing a language - as a menu when it is a choice,
 and as a dialog when it needs more (P10).
 
 *Why:* this is what went wrong when the panel and the tabs were tried
-side by side. The Debugger tab gives *Load a Program*, *Load Your Own*
+side by side. The Debugger tab gave *Load a Program*, *Load Your Own*
 and *Installed Memory* a heading bar and a row of buttons each, all the
-time. Put that beside the panel and the page is crowded before it shows
-anything that moves.
+time. Put that beside the panel and the page was crowded before it
+showed anything that moves.
 
 ### P5 — Each surface keeps its voice
 
@@ -128,8 +128,8 @@ reader chose it, and the way back is in plain sight.
 
 [D15](ms-basic-4k.md#d15--one-status-line-at-the-foot-of-the-machine)'s
 single status line stays at the foot of the page. It belongs to the
-machine, so like the panel it is never hidden. Today it hides on the
-Tutorial tab, because that tab does not show the machine. Under U1
+machine, so like the panel it is never hidden. It used to hide on the
+Tutorial tab, because that tab did not show the machine; since U1
 nothing hides the machine, so nothing hides the line.
 
 ### P8 — A link is a public contract
@@ -342,7 +342,7 @@ open, so that Escape there is not KILL LINE.
 ### U4 — The switch strip is shown, and folds itself
 
 The Switch Board Helper is shown by default on every screen, as it was
-before U1 (P2). A *Switches* tab on its own top edge folds it away and
+before U1 (P2). A small tab on its own top edge folds it away and
 brings it back - next to what it controls, rather than a toggle in the
 toolbar - and the choice is remembered. The tab is an arrow alone, the
 size of the dock's handle, its words in a tooltip: a chevron on an edge

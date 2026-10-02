@@ -1018,15 +1018,15 @@ l10n.MESSAGES = {
     },
 
     'rom-missing': {
-        'en': 'roms/4kbas32.bin could not be read. It is optional - see roms/NOTICE - so supply your own image with Load Binary File.',
-        'es': 'No se pudo leer roms/4kbas32.bin. Es opcional (consulta roms/NOTICE), así que carga tu propia imagen con Cargar archivo binario.',
-        'fr': 'Impossible de lire roms/4kbas32.bin. Ce fichier est facultatif (voir roms/NOTICE) : fournissez votre propre image avec Charger un fichier binaire.',
-        'de': 'roms/4kbas32.bin konnte nicht gelesen werden. Die Datei ist optional - siehe roms/NOTICE - laden Sie also mit Binärdatei laden Ihr eigenes Abbild.',
-        'it': 'Impossibile leggere roms/4kbas32.bin. È facoltativo (vedi roms/NOTICE), quindi carica una tua immagine con Carica file binario.',
-        'zh': '无法读取 roms/4kbas32.bin。该文件是可选的（见 roms/NOTICE），请用“加载二进制文件”提供你自己的映像。',
-        'zh-TW': '無法讀取 roms/4kbas32.bin。該檔案是選用的（見 roms/NOTICE），請用「載入二進位檔」提供你自己的映像。',
-        'ja': 'roms/4kbas32.bin を読み込めませんでした。このファイルは任意です（roms/NOTICE を参照）。「バイナリファイルを読み込む」で自分のイメージを指定してください。',
-        'ko': 'roms/4kbas32.bin을 읽을 수 없습니다. 이 파일은 선택 사항이며(roms/NOTICE 참고), "바이너리 파일 불러오기"로 직접 이미지를 지정하세요.',
+        'en': 'roms/4kbas32.bin could not be read. It is optional - see roms/NOTICE - so supply your own image with Binary File… in the Load menu.',
+        'es': 'No se pudo leer roms/4kbas32.bin. Es opcional (consulta roms/NOTICE), así que aporta tu propia imagen con Archivo binario… en el menú Cargar.',
+        'fr': 'roms/4kbas32.bin n\'a pas pu être lu. Il est facultatif (voir roms/NOTICE) : fournissez votre propre image avec Fichier binaire… dans le menu Charger.',
+        'de': 'roms/4kbas32.bin konnte nicht gelesen werden. Es ist optional (siehe roms/NOTICE), laden Sie also ein eigenes Abbild mit Binärdatei… im Menü Laden.',
+        'it': 'Impossibile leggere roms/4kbas32.bin. È facoltativo (vedi roms/NOTICE), quindi fornisci una tua immagine con File binario… nel menu Carica.',
+        'zh': '无法读取 roms/4kbas32.bin。它是可选的（见 roms/NOTICE），请用“加载”菜单中的“二进制文件…”载入你自己的映像。',
+        'zh-TW': '無法讀取 roms/4kbas32.bin。它是選用的（見 roms/NOTICE），請用「載入」選單中的「二進位檔案…」載入你自己的映像。',
+        'ja': 'roms/4kbas32.bin を読み込めませんでした。これは任意のものなので（roms/NOTICE を参照）、「読み込み」メニューの「バイナリファイル…」で自分のイメージを読み込んでください。',
+        'ko': 'roms/4kbas32.bin을 읽을 수 없습니다. 선택 사항이므로(roms/NOTICE 참고) "불러오기" 메뉴의 "바이너리 파일…"로 직접 가진 이미지를 불러오세요.',
     },
 
     'mem-size-256': {

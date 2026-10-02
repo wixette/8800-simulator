@@ -126,7 +126,7 @@
            tabindex="0"></div>
 
       <!-- The tools, one at a time (P3). The tabs keep the ids the four
-           page tabs had, so the code that fills them is unchanged. -->
+           tabs the page used to have, so the code that fills them is unchanged. -->
       <section id="dock">
         <div id="dock-tabs" role="tablist">
           <div id="nav-tty" class="dock-tab l10n" role="tab" tabindex="0" aria-controls="tab-tty">Teletype</div>
@@ -234,12 +234,12 @@ JMP 0000H  ; 11 000 011
         <div class="tutorial">
           <p id="basic-desc" class="tutorial-lead l10n">The Altair's first piece of software, and Microsoft's: Altair BASIC 3.2, written in 1975 by Bill Gates, Paul Allen and Monte Davidoff. How to start it:</p>
           <ol class="steps">
-            <li><span id="basic-1" class="l10n">Go to the Debugger tab and choose 4 KB (or 8 KB, for room to write longer programs) under Installed Memory. Installing memory switches the machine off, which is what opening the case would have done.</span></li>
-            <li><span id="basic-2" class="l10n">Click Load 4K BASIC. The machine powers up, the tape is read for you, and RESET is pressed.</span></li>
+            <li><span id="basic-1" class="l10n">In the Memory menu, choose 4 KB (or 8 KB, for room to write longer programs). Installing memory switches the machine off, which is what opening the case would have done.</span></li>
+            <li><span id="basic-2" class="l10n">In the Load menu, choose Microsoft 4K BASIC. The machine powers up, the tape is read for you, RESET is pressed, and the Debugger opens to show what arrived.</span></li>
             <li><span id="basic-3" class="l10n">Before going any further, look at the memory map above the dump. Fifteen of the sixteen pages of a 4 KB machine are full: that is BASIC, and the one page left over is all the room you have for a program. This is what "4K BASIC" means.</span></li>
             <li><span id="basic-4" class="l10n">The address switches A15-A8 tell BASIC which terminal board to use: all down is the 88-SIO at ports 00H and 01H, switch A11 up is the 88-2SIO at 10H and 11H. The teletype here is wired to both slots, so either setting works - a real Altair would have had only one of the two boards fitted, and the wrong setting left it silent.</span></li>
-            <li><span id="basic-5" class="l10n">Go to the Simulator tab and click RUN.</span></li>
-            <li><span id="basic-6" class="l10n">Go to the Teletype tab. BASIC asks MEMORY SIZE? - press Enter to take everything it found. Press Enter again for TERMINAL WIDTH?, then Y for WANT SIN? to keep the maths functions.</span></li>
+            <li><span id="basic-5" class="l10n">Click RUN on the front panel.</span></li>
+            <li><span id="basic-6" class="l10n">Open the Teletype, under the panel. BASIC asks MEMORY SIZE? - press Enter to take everything it found. Press Enter again for TERMINAL WIDTH?, then Y for WANT SIN? to keep the maths functions.</span></li>
             <li><span id="basic-7" class="l10n">It prints how many bytes are free, then OK. Try PRINT 22/7 for an answer straight away. To enter a program, type these lines one at a time, pressing Enter after each:</span>
               <pre class="tutorial-code">10 FOR I=1 TO 10
 20 PRINT I,I*I
@@ -248,7 +248,7 @@ RUN</pre>
             </li>
             <li><span id="basic-8" class="l10n">The keyboard is upper case only. Underscore rubs out the last character, at-sign throws away the line, and Ctrl-C stops a running program.</span></li>
           </ol>
-          <p id="basic-note" class="tutorial-note l10n">What Load 4K BASIC skips: on a real Altair you first toggled a 28 byte boot loader in through the front panel, one byte at a time, then started the paper tape reader and waited about seven minutes while BASIC clattered in. Get one switch wrong and you did it again.</p>
+          <p id="basic-note" class="tutorial-note l10n">What loading 4K BASIC skips: on a real Altair you first toggled a 28 byte boot loader in through the front panel, one byte at a time, then started the paper tape reader and waited about seven minutes while BASIC clattered in. Get one switch wrong and you did it again.</p>
         </div>
 
         <div class="subheader-bar">

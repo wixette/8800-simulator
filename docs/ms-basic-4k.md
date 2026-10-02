@@ -738,12 +738,14 @@ speak with the instrument's voice, and the dock's Teletype keeps its
 capitals. The tests check it by region of the page rather than by
 tab.
 
-*As it stands, audited:*
+*As it stood, audited, by tab. Since [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs) the same voices hold by
+region - the stage, the Teletype, and the toolbar, Debugger and
+dialogs - and the tests check them that way:*
 
 | Tab | Case | Translated | Why |
 | --- | --- | --- | --- |
 | Simulator | UPPERCASE | no (25 of 25) | silkscreen on the panel |
-| Teletype | UPPERCASE | yes (4 of 4) | the ASR-33 had no lowercase |
+| Teletype | UPPERCASE | yes (5 of 5, with LINE FEED) | the ASR-33 had no lowercase |
 | Debugger | Title Case | yes | software the machine never had |
 
 ### D21 — The map strip is edited, not rebuilt
@@ -881,9 +883,9 @@ bytes would go nowhere*.
 dead end that costs a trip to the other tab and teaches only that the
 button was in the wrong mood. The machine coming up is not hidden —
 the OFF/ON button turns green and memory fills with the random bytes a
-real one powers up with, which is worth seeing. It is on the other
-tab, though, which is what [D23](#d23--the-beep-belongs-to-the-switch)
-is for.
+real one powers up with, which is worth seeing. It was on another tab
+then, though, which is what [D23](#d23--the-beep-belongs-to-the-switch)
+was for; since [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs) the panel is always in view.
 
 *The one distinction kept:* the three that load an *image* clear
 memory first and press RESET, because a tape is a fresh start.
@@ -1202,9 +1204,12 @@ happens on the lamps. Each listing declares its own face in a
 `;;; device:` header, so the page reads it from the same file it reads
 the bytes from, and a test refuses a listing that does not say.
 
-The menu draws a rule at the seam. A rule and not a heading: a heading
-is one more thing the arrow keys have to step over, and ten entries
-need a seam rather than titles.
+The menu drew a rule at the seam, at first: a rule and not a heading,
+because a heading is one more thing the arrow keys have to step over.
+Since [U3](ui-design.md#u3--the-top-bar-is-menus-dialogs-and-icons) each group has a heading instead - *Front Panel
+Examples*, *Teletype Examples* - which the arrow keys step over by
+themselves. In a menu that also holds the ways to load your own
+program, the groups needed names, not only a seam.
 
 **Then, within each group, by how much you have to know.**
 
@@ -1226,7 +1231,7 @@ is 24 bytes and the hardest thing here to follow; `guess-letter` is
 
 *What the reader is told after loading:* the status line names the tab
 to watch, which differs by device — the panel ones end at "click RUN",
-the teletype ones go on to "then watch the Teletype tab". Without
+the teletype ones go on to "then watch the Teletype". Without
 that, the grouping would only exist in the menu and the first run of
 `tty-hello` would look like a failure.
 

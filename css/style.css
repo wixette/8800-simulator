@@ -339,8 +339,8 @@ a {
 }
 
 /* A drop down the page draws itself: a button, and a list under it.
-   Shared by the language menu and the example programs menu, so that
-   they look and behave the same. js/dropdown.js says why this is not
+   Shared by the Load, Memory and language menus, so that they look and
+   behave the same. js/dropdown.js says why this is not
    a <select>. */
 .dropdown {
     /* The list below is positioned against this. */
@@ -992,8 +992,8 @@ a {
     color: #222;
 }
 
-/* A button holding a current choice: the installed memory size, or
-   Follow PC while it is on. Matches the selected dock tab. A helper
+/* A button holding a current choice: Follow PC while it is on.
+   Matches the selected dock tab. A helper
    button standing for a raised address switch reads the same way -
    orange means active, wherever it appears. */
 .button.selected,
@@ -1005,8 +1005,8 @@ a {
 /* A control that cannot be used just now. It keeps the pointer cursor
    on purpose: pressing it answers in the status bar with the reason it
    is grey (D19 in docs/ms-basic-4k.md). Coming after .selected means a
-   button that is both reads as unavailable. The example menu is a real
-   <button> inside a .dropdown, so both shapes of control are named. */
+   button that is both reads as unavailable. Items in a menu and buttons
+   in a dialog grey out by their own rules. */
 .button.disabled,
 .button.disabled.selected {
     background-color: #bbb;
@@ -1044,7 +1044,7 @@ a {
 
 /* The Teletype. A printer, not a screen: paper coloured stock, 72
    columns wide, scrolled to wherever the carriage is. The paper takes
-   the dock's height, less the helper row under it. */
+   the dock's height, less the row of keys above it. */
 #tab-tty:not([hidden]) {
     display: flex;
     flex-direction: column;

@@ -16,8 +16,8 @@ machine that the simulator did not model. That story is in
 
 ### Quick way (the Load menu)
 
-1. Open the *Load* menu and pick *Kill the Bit* from *Example
-   Programs*. The machine is switched on, the program is loaded at
+1. Open the *Load* menu and pick *Kill the Bit* from *Front Panel
+   Examples*. The machine is switched on, the program is loaded at
    0000H and RESET is pressed for you.
 2. Make sure all 16 address switches are down, then click RUN on the
    front panel.
