@@ -394,6 +394,49 @@ test('a machine that is off receives nothing from the teletype keyboard', () => 
     }
 });
 
+test('the teletype has the keyboard only while nothing else has it', (t) => {
+    // A focused control keeps its own keys: Space on the switch strip's
+    // tab once folded the strip and typed a space at the machine too,
+    // and Tab out of the language menu sent a TAB.
+    const body = {};
+    const saved = {document: global.document, Dialog: global.Dialog,
+                   Teletype: global.Teletype, send: panel.ttySend,
+                   visible: panel.isTtyTabVisible};
+    global.document = {body: body, querySelector: () => null};
+    global.Dialog = {anyOpen: () => false};
+    global.Teletype = require('../js/teletype.js');
+    const sent = [];
+    panel.ttySend = (byte) => sent.push(byte);
+    panel.isTtyTabVisible = true;
+    t.after(() => {
+        global.document = saved.document;
+        global.Dialog = saved.Dialog;
+        global.Teletype = saved.Teletype;
+        panel.ttySend = saved.send;
+        panel.isTtyTabVisible = saved.visible;
+    });
+    const press = (key, target) => panel.onTtyKeyDown(
+        {key: key, target: target, preventDefault: () => {}});
+    press('A', body);
+    press('B', {id: 'tty-input'});
+    assert.deepStrictEqual(sent, [0x41, 0x42], 'the page, or the paper\'s box');
+    press(' ', {id: 'strip-tab'});
+    press('Tab', {id: 'switch-locale'});
+    press('Enter', {id: 'load-button', tagName: 'BUTTON'});
+    press('C', {id: 'debug-data-input', tagName: 'TEXTAREA'});
+    assert.deepStrictEqual(sent, [0x41, 0x42], 'no other control\'s keys');
+    global.Dialog = {anyOpen: () => true};
+    press('D', body);
+    assert.deepStrictEqual(sent, [0x41, 0x42], 'nor while a dialog is open');
+});
+
+test('the greyed Loading item answers, as every greyed item does', (t) => {
+    const said = [];
+    t.mock.method(panel, 'setStatus', (id) => said.push(id));
+    panel.onLoadMenu('examples-loading');
+    assert.deepStrictEqual(said, ['examples-still-loading']);
+});
+
 test('both of the paper mechanisms can be driven by hand', () => {
     // An ASR-33 returns the carriage and advances the paper with two
     // separate keys (D25). RETURN is on every keyboard; LINE FEED is

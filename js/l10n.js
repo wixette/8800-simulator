@@ -234,6 +234,18 @@ l10n.MESSAGES = {
         'ko': '예제',
     },
 
+    'examples-still-loading': {
+        'en': 'The example programs are still being read. Try again in a moment.',
+        'es': 'Todavía se están leyendo los programas de ejemplo. Inténtalo de nuevo en un momento.',
+        'fr': 'Les programmes d’exemple sont encore en cours de lecture. Réessayez dans un instant.',
+        'de': 'Die Beispielprogramme werden noch gelesen. Versuchen Sie es gleich noch einmal.',
+        'it': 'I programmi di esempio sono ancora in lettura. Riprova tra un momento.',
+        'zh': '示例程序还在读取中，请稍后再试。',
+        'zh-TW': '範例程式還在讀取中，請稍後再試。',
+        'ja': 'サンプルプログラムをまだ読み込んでいます。少し待ってからもう一度どうぞ。',
+        'ko': '예제 프로그램을 아직 읽는 중입니다. 잠시 후 다시 시도하세요.',
+    },
+
     'examples-loading': {
         'en': 'Loading…',
         'es': 'Cargando…',

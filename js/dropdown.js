@@ -84,25 +84,24 @@ class Dropdown {
      * Fills the list.
      * @param {Array<{value: (string|undefined), label: string,
      *     detail: (string|undefined), heading: (boolean|undefined),
-     *     disabled: (boolean|undefined),
-     *     startsGroup: (boolean|undefined)}>} items The choices, in
-     *     order. An item marked heading names the group below it and
-     *     cannot be chosen; the arrow keys step over it. An item marked
-     *     startsGroup gets a rule above it. A disabled one is greyed but
-     *     still answers, and its detail - quieter text at its right -
-     *     is the place to say why.
+     *     disabled: (boolean|undefined)}>} items The choices, in order.
+     *     An item marked heading names the group below it and cannot be
+     *     chosen; the arrow keys step over it. A disabled one is greyed
+     *     but still answers, and its detail - quieter text at its right
+     *     - is the place to say why.
      */
     setItems(items) {
         if (!this.list) {
             return;
         }
         var self = this;
+        // A list rebuilt while it is open - Load, when the examples
+        // arrive - keeps the keyboard on the item it was on.
+        var focused = this.list.contains(document.activeElement) ?
+            document.activeElement.dataset.value : null;
         this.list.textContent = '';
         for (let i = 0; i < items.length; i++) {
             let item = document.createElement('li');
-            if (items[i].startsGroup) {
-                item.classList.add('dropdown-group-start');
-            }
             if (items[i].heading) {
                 item.setAttribute('role', 'presentation');
                 item.classList.add('dropdown-heading');
@@ -132,6 +131,9 @@ class Dropdown {
                 self.onSelect(items[i].value);
             }, false);
             this.list.appendChild(item);
+            if (focused !== null && item.dataset.value === focused) {
+                item.focus();
+            }
         }
     }
 

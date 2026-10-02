@@ -668,6 +668,11 @@ class Sim8800 {
             this.dumpMemCallback('', null);
         }
         this.isPoweredOn = false;
+        // A machine switched off mid-run is not running any more. Left
+        // set, the clock goes on ticking every millisecond, stepping a
+        // CPU that has no power, until the next power-on clears it.
+        this.isRunning = false;
+        this.halted = false;
     }
 
     /**

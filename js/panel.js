@@ -337,6 +337,8 @@ panel.onLoadMenu = function(value) {
         panel.onLoadBasic();
     } else if (value == 'examples') {
         panel.reportIfUnavailable('examples');
+    } else if (value == 'examples-loading') {
+        panel.setStatus('examples-still-loading', {}, 'warn');
     } else if (value.indexOf('example:') == 0) {
         panel.loadExample(value.substring('example:'.length));
     }
@@ -560,8 +562,7 @@ panel.onBinaryFileChosen = function(event) {
     // pull the whole thing into memory just to have it thrown away.
     if (file.size > panel.MAX_IMAGE_BYTES) {
         panel.setStatus('rom-file-too-big',
-                        {name: file.name, bytes: file.size,
-                         max: panel.MAX_IMAGE_BYTES}, 'error');
+                        {name: file.name, bytes: file.size}, 'error');
         return;
     }
     var reader = new FileReader();
@@ -632,7 +633,6 @@ panel.debugControlReasons = function() {
              {id: 'rom-needs-memory', params: {}} : null);
     reasons['examples'] = panel.examplesProblem ?
         {id: panel.examplesProblem, params: {}} : null;
-    reasons['debug-load-data'] = null;
     // The dump controls act on the memory dump. With the machine off
     // it is blank, and on the base machine it is one page that cannot
     // be moved.
@@ -975,7 +975,8 @@ panel.debugLoadData = function() {
     if (parsed.bytes.length > panel.sim.mem.length) {
         panel.setStatus('load-data-too-long',
                         {bytes: parsed.bytes.length,
-                         size: panel.sim.mem.length}, 'error');
+                         size: panel.formatMemSize(panel.sim.mem.length)},
+                        'error');
         return false;
     }
     // On, but not wiped: this is a deposit into the machine as it
@@ -1387,13 +1388,15 @@ panel.onTtyClear = function() {
 panel.onTtyKeyDown = function(event) {
     if (!panel.isTtyTabVisible || event.metaKey || event.altKey)
         return;
-    // A dialog or a menu open over the paper, or a box of its own being
-    // typed in, has the keyboard first.
+    // The keyboard is the teletype's only while nothing else has it:
+    // no dialog or menu open over the paper, and no other control
+    // holding the focus - a toolbar button, a tab, a text box. Such a
+    // control keeps its own keys, Enter and Space and Tab among them,
+    // instead of acting and typing at once.
     var target = event.target;
     if (Dialog.anyOpen() ||
         document.querySelector('[role="listbox"]:not([hidden])') ||
-        (target && target.tagName == 'TEXTAREA') ||
-        (target && target.tagName == 'INPUT' && target.id != 'tty-input')) {
+        (target && target !== document.body && target.id != 'tty-input')) {
         return;
     }
     var byte = Teletype.keyToByte(event.key, event.ctrlKey);
@@ -1646,14 +1649,16 @@ panel.init = function() {
     panel.dock = {tab: panel.readSavedTab(), open: savedDock.open,
                   height: savedDock.height};
 
-    // The dock's tabs, and the button and handle that size it.
+    // The dock's tabs, and the button and handle that size it. Each is
+    // reached with the Tab key and pressed with Enter or Space.
     for (let i = 0; i < panel.TABS.length; i++) {
         let name = panel.TABS[i];
-        document.getElementById('nav-' + name).addEventListener(
-            'click', function() { panel.onDockTab(name); }, false);
+        panel.makePressable(document.getElementById('nav-' + name),
+                            function(byKey) { panel.onDockTab(name, byKey); });
     }
-    document.getElementById('dock-toggle').addEventListener(
-        'click', function() { panel.setDockOpen(!panel.dock.open); }, false);
+    panel.makePressable(document.getElementById('dock-toggle'), function() {
+        panel.setDockOpen(!panel.dock.open);
+    });
     panel.initDockSplitter();
     window.addEventListener('resize', function() { panel.applyDock(); },
                             false);
@@ -2261,14 +2266,50 @@ panel.readSavedDock = function() {
  * When one of the dock's tabs is pressed. The tab already showing
  * folds the dock away, as a tool window does in an IDE; any other opens
  * the dock on itself.
+ *
+ * Opening the Teletype hands it the keyboard: from a mouse by letting go
+ * of whatever control last had the focus - a menu button, typically -
+ * and from the keyboard by putting the focus on the paper.
  * @param {string} name One of panel.TABS.
+ * @param {boolean=} byKey Whether it was pressed from the keyboard.
  */
-panel.onDockTab = function(name) {
+panel.onDockTab = function(name, byKey) {
     if (name == panel.dock.tab && panel.dock.open) {
         panel.setDockOpen(false);
-    } else {
-        panel.showTab(name);
+        return;
     }
+    panel.showTab(name);
+    if (name != 'tty') {
+        return;
+    }
+    var focused = document.activeElement;
+    if (byKey) {
+        document.getElementById('tty-input').focus({preventScroll: true});
+    } else if (focused && focused !== document.body && focused.blur) {
+        focused.blur();
+    }
+};
+
+/**
+ * Makes a <div> standing for a button work like one: a click, or Enter
+ * or Space while it has the focus. A mouse press does not give it the
+ * focus, though, so that clicking it leaves the keyboard where it was -
+ * with the teletype, say - instead of on itself.
+ * @param {Element} elem The element, given a tabindex in the page.
+ * @param {function(boolean)} action What a press does; told whether it
+ *     came from the keyboard.
+ */
+panel.makePressable = function(elem, action) {
+    elem.addEventListener('mousedown', function(event) {
+        event.preventDefault();
+    }, false);
+    elem.addEventListener('click', function() { action(false); }, false);
+    elem.addEventListener('keydown', function(event) {
+        if (event.key == 'Enter' || event.key == ' ') {
+            event.preventDefault();
+            action(true);
+        }
+    }, false);
 };
 
 /**
@@ -2446,17 +2487,9 @@ panel.refreshStripTab = function() {
  * or by keyboard.
  */
 panel.initSwitchStrip = function() {
-    var tab = document.getElementById('strip-tab');
-    var toggle = function() {
+    panel.makePressable(document.getElementById('strip-tab'), function() {
         panel.setHelperShown(!panel.isHelperShown, true);
-    };
-    tab.addEventListener('click', toggle, false);
-    tab.addEventListener('keydown', function(event) {
-        if (event.key == 'Enter' || event.key == ' ') {
-            event.preventDefault();
-            toggle();
-        }
-    }, false);
+    });
 };
 
 /**

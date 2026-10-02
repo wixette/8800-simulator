@@ -798,3 +798,16 @@ test('moving the dump window while off leaves the screen blank', () => {
                        'the map marks the window that is showing');
     assert.strictEqual(sim.getDumpWindow().start, 0x0800);
 });
+
+test('switching off a running machine stops its clock', () => {
+    // powerOff() used to leave isRunning set, so the clock went on
+    // ticking every millisecond, stepping a CPU with no power, until
+    // the next power-on cleared it.
+    const {sim} = poweredOnSim();
+    sim.loadDataAsHexString(0, 'c3 00 00');  // JMP 0000H, for ever.
+    sim.start();
+    assert.strictEqual(sim.isRunning, true);
+    sim.powerOff();
+    assert.strictEqual(sim.isRunning, false);
+    assert.strictEqual(sim.halted, false);
+});

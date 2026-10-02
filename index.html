@@ -129,15 +129,15 @@
            page tabs had, so the code that fills them is unchanged. -->
       <section id="dock">
         <div id="dock-tabs" role="tablist">
-          <div id="nav-tty" class="dock-tab l10n" role="tab">Teletype</div>
-          <div id="nav-debug" class="dock-tab l10n" role="tab">Debugger</div>
-          <div id="nav-ref" class="dock-tab l10n" role="tab">Tutorial</div>
+          <div id="nav-tty" class="dock-tab l10n" role="tab" tabindex="0" aria-controls="tab-tty">Teletype</div>
+          <div id="nav-debug" class="dock-tab l10n" role="tab" tabindex="0" aria-controls="tab-debug">Debugger</div>
+          <div id="nav-ref" class="dock-tab l10n" role="tab" tabindex="0" aria-controls="tab-ref">Tutorial</div>
           <div class="toolbar-spacer"></div>
-          <div id="dock-toggle" class="dock-tool" role="button"></div>
+          <div id="dock-toggle" class="dock-tool" role="button" tabindex="0"></div>
         </div>
 
         <div id="dock-body">
-          <div id="tab-tty" class="dock-pane">
+          <div id="tab-tty" class="dock-pane" role="tabpanel">
             <!-- The keys a PC keyboard lacks, above the paper as a
                  console's toolbar is; tearing the paper off is apart from
                  them, being done to the terminal rather than typed. -->
@@ -159,7 +159,7 @@
                    autocorrect="off" spellcheck="false" aria-label="Teletype">
           </div>
 
-          <div id="tab-debug" class="dock-pane">
+          <div id="tab-debug" class="dock-pane" role="tabpanel">
             <!-- The CPU across the top, its state and where it is, side
                  by side; memory under them, the whole width. -->
             <div class="debug-top">
@@ -185,7 +185,7 @@
             <div id="mem-dump" class="mt-8"></div>
           </div>
 
-          <div id="tab-ref" class="dock-pane">
+          <div id="tab-ref" class="dock-pane" role="tabpanel">
         <div class="subheader-bar">
           <div id="tutorial-title" class="l10n">Quick Tutorial</div>
         </div>
