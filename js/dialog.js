@@ -23,7 +23,7 @@
  *
  * The browser's <dialog> already does the hard parts - it sits above the
  * page, keeps the keyboard inside, and closes on Escape - so this adds
- * only the habits the page wants on top: a click on the dimmed backdrop
+ * only the habits the page wants on top: a press on the dimmed backdrop
  * closes it, so does any element inside marked data-close, and an
  * onOpen hook fills it in just before it shows.
  *
@@ -42,8 +42,25 @@ class Dialog {
             return;
         }
         var self = this;
+        // The backdrop closes the dialog only when the button went down
+        // and came up on it. A click lands on whatever holds both ends,
+        // so a selection dragged out of the text box and let go over the
+        // backdrop arrives as a click on the <dialog> itself, and must
+        // not close it; nor must a press on the backdrop let go inside.
+        this.pressedOnBackdrop = false;
+        this.releasedOnBackdrop = false;
+        this.elem.addEventListener('pointerdown', function(event) {
+            self.pressedOnBackdrop = event.target === self.elem;
+        }, false);
+        this.elem.addEventListener('pointerup', function(event) {
+            self.releasedOnBackdrop = event.target === self.elem;
+        }, false);
         this.elem.addEventListener('click', function(event) {
-            if (event.target === self.elem ||
+            var onBackdrop = event.target === self.elem &&
+                self.pressedOnBackdrop && self.releasedOnBackdrop;
+            self.pressedOnBackdrop = false;
+            self.releasedOnBackdrop = false;
+            if (onBackdrop ||
                 (event.target.closest && event.target.closest('[data-close]'))) {
                 self.close();
             }
