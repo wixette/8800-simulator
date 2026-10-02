@@ -15,8 +15,9 @@ principle here first, with its reason.**
 **Status.** The principles hold, and the layout in
 [Part 2](#part-2--the-layout) is built:
 [U1](#u1--the-front-panel-and-a-dock-replace-the-four-tabs) replaced
-the four tabs, and [U2](#u2--where-10s-features-go) put #10's features
-in their places. The questions it left open were settled as listed in
+the four tabs, [U2](#u2--where-10s-features-go) put #10's features
+in their places, and U3 to U5 came of the first review of both, which
+also gave P10. The questions U1 left open were settled as listed in
 [Part 4](#part-4--open-questions), and remain open to revision once the
 layout has been used for a while.
 
@@ -63,9 +64,11 @@ each different from the switch it copies. Copies also crowd, and they
 teach two ways of doing one thing.
 
 *Not copies:* keyboard shortcuts, which take no room on screen, and the
-Switch Board Helper's large buttons. The helper is an alternative way
-to reach the same switches on a touch screen, so it is offered as an
-option you turn on, not shown by default.
+Switch Board Helper's large buttons. The helper is another way to reach
+the same switches - the only practical one on a phone, and the easier
+one in a classroom - so it is shown by default, laid out as the panel
+lays the switches out, and folds away for whoever does not want it
+([U4](#u4--the-switch-strip-is-shown-and-folds-itself)).
 
 ### P3 — Tools live in one dock, one at a time
 
@@ -80,12 +83,13 @@ opening when the program runs. The dock lets the reader decide how much
 room goes to the instrument and how much to the machine, and with the
 dock collapsed the page is just the Altair.
 
-### P4 — Occasional actions go in menus
+### P4 — Occasional actions go in menus and dialogs
 
 Screen space that is always there is for things that change while you
 watch: the lamps, the paper, the registers, the dump. Things you do once
-a session go in menus: loading a program, installing memory, sharing a
-link, choosing a language.
+a session go in the toolbar: loading a program, installing memory,
+sharing a link, choosing a language - as a menu when it is a choice,
+and as a dialog when it needs more (P10).
 
 *Why:* this is what went wrong when the panel and the tabs were tried
 side by side. The Debugger tab gives *Load a Program*, *Load Your Own*
@@ -145,42 +149,68 @@ the toolbar packed down. Nothing may depend on hover, and nothing needs
 a precise drag to reach: the dock's tabs open it, as the drag handle
 does.
 
+### P10 — One component for each kind of thing
+
+Each kind of control is one component, used the same way everywhere:
+
+| Component | For | Rule |
+| --- | --- | --- |
+| Menu | choosing one thing: Load, Memory, the language | items only - no text boxes, no buttons, no menu over a menu; an item that cannot be used is greyed, with why at its right |
+| Dialog | anything that needs input or explaining: hex bytes, Share, About | a title, what it is for, the controls, and the actions at the bottom right; Escape or a click outside closes it |
+| Icon button | familiar app-level actions: Share, the language, About | always with a tooltip and a screen-reader name, both translated |
+| Empty state | guidance that matters only until something happens: the teletype's hint | shown inside the empty area, and gone once there is content |
+
+These are Material Design's patterns, not its look: the simulator keeps
+its own dark, period style.
+
+*Why:* the first toolbar put the old Debugger sections into it as they
+were - a menu opening over another menu, a text box beside buttons in
+a popup. Each piece worked; together they looked like a different app
+in each place. A reader who has used one menu, or one dialog, then
+knows how all of them behave.
+
 ---
 
 ## Part 2 — The layout
 
 ```
-┌ Altair 8800 Simulator  Load ▾  Memory 256 B ▾  Share ▾     Big Switches  EN ▾ ┐  toolbar
-│                                                                               │
-│                      FRONT PANEL (the SVG artwork)                            │  scales to
-│                                                                               │  the room left
-├──────────────────────────────── ═══ drag ═══ ─────────────────────────────────┤
-│ Teletype •   Debugger   Tutorial                                          ▾   │  dock tabs
-│ PC = 0004  SP = 0000        │  Memory Dump 0000 - 00FF  ◀ ▶ Follow PC  …      │  one tool
-│ Next  0002  D3 FF  OUT d8   │  0000  3E 8C D3 FF 76 00 …                      │
-├───────────────────────────────────────────────────────────────────────────────┤
-│ Stepped one instruction.                             © 2020-2026 Source Code  │  status line
-└───────────────────────────────────────────────────────────────────────────────┘
+┌ Altair 8800 Simulator  [📂] Load ▾  [▦] Memory: 256 B ▾           [share] [文A] EN ▾ [ⓘ] ┐
+│                                                                                       │
+│                         FRONT PANEL (the SVG artwork)                                 │
+│                         ˅ Switches                                                    │
+│         [OFF/ON] [STOP|RUN] [SINGLE STEP] [EXAMINE|NEXT] [DEPOSIT|NEXT] [RESET]        │
+│         [A15] [A14 A13 A12] [A11 A10 A09] [A08 A07 A06] [A05 A04 A03] [A02 A01 A00]    │
+├─────────────────────────────────── ═══ drag ═══ ──────────────────────────────────────┤
+│ Teletype •   Debugger   Tutorial                                                  ▾   │
+│ ┌ 8080 CPU Status Dump ─────────────┐  ┌ Next Instruction ────────────────────────┐   │
+│ │ PC = 0004  SP = 0000 … FLAGS S Z… │  │ 0004  3A 81 00  LDA a16                   │   │
+│ └───────────────────────────────────┘  └───────────────────────────────────────────┘   │
+│ Memory Dump 0000 - 00FF  ◀ ▶ Follow PC                               Zero All Memory  │
+│ 0000  3A 80 00 47 3A 81 00 80  32 82 00 C3 00 00 00 00 …                              │
+├───────────────────────────────────────────────────────────────────────────────────────┤
+│ Stepped one instruction.                                                              │
+└───────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 Where the pieces of the four tabs went. Share and the instruction
-pane's place are U2's.
+pane's place are U2's; the menus, dialogs and icons U3's; the switch
+strip U4's; the tools' layouts U5's.
 
 | Before | Now | By |
 | --- | --- | --- |
 | Simulator tab: the panel | The stage, always shown | P1 |
-| Simulator tab: Switch Board Helper | *Big Switches*, on by default only on a touch screen | P2 |
+| Simulator tab: Switch Board Helper | The switch strip under the panel, shown, folding from its own tab (U4) | P2 |
 | Teletype tab: paper and helper row | Dock: Teletype | P3 |
 | Teletype tab: LED repeater (D9) | Removed: the panel is in view | P2 |
 | Teletype nav dot (D10) | The same dot, on the dock's tab | P3 |
-| Debugger: *Load a Program*, *Load Your Own* | Toolbar: Load menu | P4 |
+| Debugger: *Load a Program*, *Load Your Own* | Toolbar: Load menu, and its Hex Bytes dialog (U3) | P4 |
 | Debugger: *Installed Memory* | Toolbar: Memory menu | P4 |
 | Debugger: CPU dump, memory dump, map strip | Dock: Debugger | P3 |
 | Debugger: instruction pane (D28) | Dock: Debugger, beside the registers (U2) | P3 |
 | Debugger: run buttons (D27) | Removed: the panel is in view | P2 |
-| Debugger: Copy Link | Toolbar: Share (U2) | P4 |
+| Debugger: Copy Link | Toolbar: Share, a dialog (U2, U3) | P4 |
 | Tutorial tab | Dock: Tutorial | P3 |
-| Status line (D15) | Foot of the page, never hidden | P7 |
+| Status line (D15) | Foot of the page, never hidden; the credit line moved to About (U3) | P7 |
 
 *Why the dock sits below the panel:* the panel is wide and short
 (1440 × 644, 2.24 : 1), so on a landscape screen the room it leaves is
@@ -253,21 +283,84 @@ touches no device.
 [#10](https://github.com/wixette/8800-simulator/pull/10) added three
 things to the Debugger. Two of them moved; one went.
 
-- **Copy Link became Share**, a menu in the toolbar holding Copy Link
-  and its *Include registers and switches* choice, under a sentence
-  saying what the link is for. Copy Link stays open on the menu after
-  it is pressed, so that what it did can be read off the button. Its
-  link format is a public contract from the day it is released (P8).
+- **Copy Link became Share**, in the toolbar. It was a popup at first;
+  [U3](#u3--the-top-bar-is-menus-dialogs-and-icons) made it a dialog. Its link format is a public contract from
+  the day it is released (P8).
 - **The instruction pane**
   ([D28](ms-basic-4k.md#d28--the-instruction-at-pc-decoded-under-the-dump))
-  moved under the registers in the dock's Debugger, headed *Next
-  Instruction*. It says where the CPU is, so it belongs with the CPU
-  state rather than under the dump. It is set out a line each - the
+  moved beside the registers in the dock's Debugger, headed *Next
+  Instruction* (U5 put the two side by side). It says where the CPU is,
+  so it belongs with the CPU state rather than under the dump. It is set out a line each - the
   instruction, the operand's value, the undocumented note - to fit
   that column. The operand highlighting in the dump stayed as it was.
 - **The repeated run switches** (D27) were taken out, because the panel
   they repeat is in view (P2). They came out on the same branch that
   brought in U1, so they never shipped and nobody lost them.
+
+### U3 — The top bar is menus, dialogs and icons
+
+The first toolbar (U1) carried the old Debugger sections over as
+popups. The second follows P10:
+
+- **Left, what you do to the machine; right, what you do with the app.**
+  Load and Memory, each an icon with its name (`Memory: 256 B`), on the
+  left; Share, the language and About, as icons, on the right, where
+  Share sits in most editors. On a phone the names go, the size stays,
+  and the title goes too - the artwork says ALTAIR 8800 - so it fits
+  one row.
+- **Load is a menu.** The ways in that never change come first - *Hex
+  Bytes…*, *Binary File…*, *Microsoft 4K BASIC* - so that they keep
+  their place as the examples grow; then *Front Panel Examples* and
+  *Teletype Examples*, named for where each group's output appears.
+  4K BASIC on too small a machine is greyed with *needs 4 KB* beside
+  it, and still answers (D19).
+- **Hex Bytes is a dialog**, with a box that keeps the line breaks of a
+  pasted listing, and says what is wrong inside itself.
+- **Share is a dialog**: two choices with a line each - the program at
+  RESET, or the machine as it is now, naming its PC - and the link in a
+  field, which a blocked clipboard leaves selected rather than the
+  address bar being rewritten.
+- **About is a dialog**, with the version (checked against
+  package.json by a test), the source code, problems and contributors,
+  and the licences: Apache 2.0 for the simulator, Microsoft's for the
+  4K BASIC tape (roms/NOTICE), BSD for the 8080 core (8080js by Martin
+  Maly), Apache 2.0 for the icons. The credit line left the status line
+  for it.
+- **The icons are Material Icons, inline SVG**, not Google's icon font:
+  the font would make the page need the network, fail offline and from
+  `file://`, and show the word "share" until it loads.
+
+Menus and dialogs keep the keyboard from the teletype while they are
+open, so that Escape there is not KILL LINE.
+
+### U4 — The switch strip is shown, and folds itself
+
+The Switch Board Helper is shown by default on every screen, as it was
+before U1 (P2). A *Switches* tab on its own top edge folds it away and
+brings it back - next to what it controls, rather than a toggle in the
+toolbar - and the choice is remembered.
+
+It is laid out as the panel lays the switches out, so that it reads as
+part of the machine: the command switches by lever in panel order, a
+two-way lever (STOP and RUN, EXAMINE and EXAMINE NEXT) drawn as one
+control with two halves; the address switches in the octal threes of
+the silkscreen. Its rows stay on one line where the window has room,
+so it is always two rows high, and it widens to the panel's artwork;
+on a phone the address switches go eight to a row. It keeps the panel's
+voice (P5).
+
+### U5 — Each tool laid out as a tool
+
+- **Teletype:** the keys a PC keyboard lacks are the paper's toolbar,
+  above it as a console's is, with CLEAR PAPER apart at the right. The
+  hint is an empty state (P10): centred in the paper until anything
+  prints, back after CLEAR PAPER. Nothing but the status line sits at
+  the dock's foot.
+- **Debugger:** the CPU across the top - the registers and the next
+  instruction, side by side and the same height, stacked in a narrow
+  dock - and memory under them, the whole width, with its toolbar on
+  one line and Zero All Memory kept apart at the far right. The flags
+  are shown by letter, S Z AC P CY, each lit when set.
 
 ---
 
@@ -291,10 +384,9 @@ things to the Debugger. Two of them moved; one went.
   cannot be enough on a phone: at 390 px wide the address switches end
   up about 13 px apart, well under a thumb. Each switch on the panel
   takes a press anywhere near its lever, as far as its neighbours
-  allow; and *Big Switches* in the toolbar shows the Switch Board
-  Helper under the panel. It starts on by itself on a touch screen
-  (`pointer: coarse`), and off with a mouse, and is remembered once
-  chosen.
+  allow; and the Switch Board Helper is under the panel. U1 showed it
+  only on touch screens, from a toolbar toggle; [U4](#u4--the-switch-strip-is-shown-and-folds-itself) shows it
+  everywhere and folds it from its own tab.
 - **The Tutorial in a short dock.** No special case. The dock can be
   resized and remembers its size, and about eight steps fit at the
   default height: enough to follow one at a time.

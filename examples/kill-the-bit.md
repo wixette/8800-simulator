@@ -22,8 +22,8 @@ machine that the simulator did not model. That story is in
 2. Make sure all 16 address switches are down, then click RUN on the
    front panel.
 
-Or, in the same menu, paste the bytes into the box under *Load Your
-Own*, click *Load Data*, then RESET and RUN:
+Or choose *Hex Bytes…* in the same menu, paste the bytes into the box,
+click *Load Data*, then RESET and RUN:
 
 ```
 21 00 00 16 80 01 0e 00 1a 1a 1a 1a 09 d2 08 00 db ff aa 0f 57 c3 08 00

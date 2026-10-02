@@ -23,7 +23,7 @@ Microsoft's original 4K BASIC on a simulated Teletype.
   game on the teletype, each a checked listing you load with one click.
 - **Nine languages**, no build step and no dependencies.
 
-![The simulator: the Altair 8800 front panel running a program, with the toolbar above and the Tutorial in the dock under it](./screenshots/panel.png)
+![The simulator: the Altair 8800 front panel running a program, the switch strip under it, the toolbar above, and the Tutorial in the dock](./screenshots/panel.png)
 
 ## Usage
 
@@ -50,52 +50,60 @@ under it, a toolbar above and a status line along the foot.
 
 **The front panel** is always in view, and grows or shrinks to fill
 whatever room the dock leaves. In a desktop browser you click its
-switches directly. On a phone a single switch is hard to touch, so
-**Big Switches** in the toolbar puts the *Switch Board Helper* under
-the panel: large buttons that do the same job and show which switches
-are up. It starts on by itself on a touch screen.
+switches directly. Under it sits the *Switch Board Helper*: the same
+switches as large buttons, laid out as the panel lays them out, which
+show which switches are up and are much easier to hit on a phone. The
+*Switches* tab on its top edge folds it away, and brings it back.
 
-The toolbar's **Load** menu is how programs get in:
+The toolbar has what you do to the machine on the left, and what you do
+with the app on the right. **Load** is how programs get in:
 
-- **Load 4K BASIC**, and the **Example Programs** menu, which lists
-  every program in [examples/](./examples/). Pick one and it is loaded
-  at 0000H with RESET pressed, ready to RUN. The menu reads the listing
-  files themselves, so there is no assembled copy of a program anywhere
-  to fall out of step with its source.
-- A hex string (**Load Data**) or a binary file from disk (**Load
-  Binary File**).
+- **Hex Bytes…** opens a box to paste or type bytes in hex, and
+  **Binary File…** reads one from disk.
+- **Microsoft 4K BASIC**, which needs 4 KB or more installed, and says
+  so in the menu until it has it.
+- **Front Panel Examples** and **Teletype Examples**: every program in
+  [examples/](./examples/), grouped by where its output appears. Pick
+  one and it is loaded at 0000H with RESET pressed, ready to RUN. The
+  menu reads the listing files themselves, so there is no assembled
+  copy of a program anywhere to fall out of step with its source.
 
 Whatever is loaded, the dock opens on the Debugger to show it arriving.
-**Share** copies a link to what is in memory, which opens at RESET
-ready to RUN; tick *Include registers and switches* to link to the
-machine as it stands instead, stopped at the current instruction (see
-[Linking to a program](#linking-to-a-program)). **Memory** chooses 256 bytes, as the Altair 8800 shipped, or 4 KB /
+**Memory** chooses 256 bytes, as the Altair 8800 shipped, or 4 KB /
 8 KB as if you had plugged in one or two 88-4MCS memory boards. Memory
 boards are not something you add to a running machine, so changing the
 size switches the simulator off.
+
+On the right, the share icon opens **Share a Link**: a link to the
+program at RESET, ready to RUN, or to the machine as it is now, stopped
+where it is with its registers and switches (see
+[Linking to a program](#linking-to-a-program)). The language icon
+switches between nine languages, and the ⓘ opens **About**: the
+version, the source code and how to report a problem, and the licences.
 
 The dock holds three tools, one at a time. Click a tab to open it;
 click the open tab again, or ▾, to fold the dock away; drag the handle
 above it to share the height between the dock and the panel. The page
 remembers how you left it.
 
-**Teletype** is a simulated ASR-33: the paper, and its keyboard. The
-machine talks to it through an 88-SIO serial board on ports 00H and 01H
-(and an 88-2SIO on 10H and 11H), so a program has to be running and
-reading that board before anything appears — nothing echoes by itself.
-A dot on the tab says when something has printed while you were looking
-at another tool.
+**Teletype** is a simulated ASR-33: the paper, and its keyboard, with
+the keys a PC keyboard lacks along the top. The machine talks to it
+through an 88-SIO serial board on ports 00H and 01H (and an 88-2SIO on
+10H and 11H), so a program has to be running and reading that board
+before anything appears — nothing echoes by itself, and the empty paper
+says so. A dot on the tab says when something has printed while you
+were looking at another tool.
 
-![4K BASIC on the Teletype, under the front panel: WANT SIN? Y, 727 BYTES FREE, then PRINT 3.14 * 9 answered with 28.26](./screenshots/teletype.png)
+![4K BASIC on the Teletype, under the front panel: MEMORY SIZE?, 727 BYTES FREE, then PRINT 3.14 * 9 answered with 28.26](./screenshots/teletype.png)
 
 **Debugger** shows the internal state of the simulated 8080 CPU and
 the contents of memory:
 
-- The **registers**, and under them the **next instruction**: its
-  address, its bytes, and its mnemonic with the operand named as
-  instruction tables name it (`LHLD a16`, `MVI B,d8`), then the
-  operand's value this time. Step with SINGLE STEP on the panel above
-  and watch it change.
+- The **registers**, with the flags S Z AC P CY lit when set, and
+  beside them the **next instruction**: its address, its bytes, and its
+  mnemonic with the operand named as instruction tables name it
+  (`LHLD a16`, `MVI B,d8`), then the operand's value this time. Step
+  with SINGLE STEP on the panel above and watch it change.
 - The **memory dump** shows one 256-byte page at a time, with the
   instruction at the program counter marked: its opcode in green and
   the bytes that belong to it in a paler green. Above 256 bytes a map
@@ -104,7 +112,7 @@ the contents of memory:
   pointer are. Click a cell to jump there, or use **Follow PC** to
   track the running program.
 
-![The Debugger under the front panel, part way through a program: the registers, the next instruction decoded as LDA a16 = 0081H, and the memory dump marking it](./screenshots/debugger.png)
+![The Debugger under the front panel, part way through a program: the registers beside the next instruction, decoded as LDA a16 = 0081H, and the memory dump marking it](./screenshots/debugger.png)
 
 **Tutorial** walks through toggling in a first program by hand and
 starting BASIC, with references for going further. It sits under the
@@ -131,9 +139,9 @@ the program's listing:
 A link can use `#` in place of `?`, as in `#hex=3E8CD3FF76`; both
 work.
 
-**Share**, and **Copy Link** in it, writes a link after `#`. With
-*Include registers and switches* ticked it also holds the registers
-and the machine's place in the program. It leaves out whatever a
+**Share a Link** writes a link after `#`. Linking to the machine as it
+is now also holds the registers and the machine's place in the
+program. It leaves out whatever a
 machine just switched on would have anyway: registers that are zero
 (or `02` for `f`), switches that are all down, and `mem` when the
 program needs no more than that. When

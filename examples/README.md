@@ -24,15 +24,16 @@ speak through the teletype, each group from the simplest up.
 
 ## Loading a program
 
-The quick way is the *Load* menu: pick one from *Example Programs*.
+The quick way is the *Load* menu: pick one from its examples, which
+are grouped as in the table above.
 The machine is switched on if it was off, the program is loaded at
 0000H and RESET is pressed for you; then click RUN on the front panel,
 and watch whichever device the table above names. The menu reads the
 same listing files you are looking at, so what runs is what is printed
 below.
 
-Pasting works too, if you would rather see the bytes go in. In the same
-menu, under *Load Your Own*, paste a program's bytes into the box and
+Pasting works too, if you would rather see the bytes go in. Choose *Hex
+Bytes…* in the same menu, paste a program's bytes into the box and
 click *Load Data*, then RESET and RUN from the front panel. *Load Data* switches the
 machine on if needed, but unlike the menu it does not clear memory or
 press RESET - it deposits the bytes into the machine as it stands.

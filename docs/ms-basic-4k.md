@@ -851,7 +851,7 @@ with the reason it is grey:
 
 | Control | Grey when | Says |
 | --- | --- | --- |
-| Load 4K BASIC | less than 4 KB installed | *4K BASIC needs at least 4 KB installed. Choose 4 KB or 8 KB under Installed Memory.* |
+| Microsoft 4K BASIC, in the Load menu | less than 4 KB installed | *4K BASIC needs at least 4 KB installed. Choose 4 KB or 8 KB in the Memory menu.* The menu item says *needs 4 KB* beside itself, too. |
 | ◀ ▶ Follow PC | machine off | *The machine is off, so there is no memory dump to move around in.* |
 | ◀ ▶ Follow PC | all memory fits one page | *All 256 B is on screen at once. Install 4 KB or 8 KB and the dump gets a window to move.* |
 | Zero All Memory | machine off | *The machine is off, so there is no memory to zero.* |
@@ -1019,11 +1019,10 @@ can show it.
 
 ### D28 — The instruction at PC, decoded under the dump
 
-> **Kept, and moved** by [U2](ui-design.md#u2--where-10s-features-go): it is under the registers in
-> the dock's Debugger, headed *Next Instruction*, and set out a line
+> **Kept, and moved** by [U2](ui-design.md#u2--where-10s-features-go): it is beside the registers
+> in the dock's Debugger, headed *Next Instruction*, and set out a line
 > each - the instruction, the operand's value, the undocumented note -
-> to fit that column. The operand highlighting in the dump is as it
-> was.
+> to fit its box. The operand highlighting in the dump is as it was.
 
 A pane under the memory dump names the instruction the CPU will run
 next: its address, its bytes, the mnemonic with the operand named as
@@ -1044,10 +1043,11 @@ that without touching the vendored core.
 
 ## Part 3 — The Teletype tab
 
-> Since [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs) this is the dock's Teletype tab. The paper, the key
-> mapping and the helper row carried over unchanged. The LED row (D9)
-> went, the headings went with the tab, and the paper takes the dock's
-> full width and whatever height the helper row leaves it.
+> Since [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs) this is the dock's Teletype tab. The paper and the key
+> mapping carried over unchanged. The LED row (D9) went, and the
+> headings with the tab. Since [U5](ui-design.md#u5--each-tool-laid-out-as-a-tool), the helper row is the
+> paper's toolbar, above it, and the hint is the empty paper's own
+> explanation rather than a line under it.
 
 Minimalist, and consistent with the visual language already in
 `css/style.css`: `#ccc` rounded panels with `#222` monospace text,
@@ -1118,7 +1118,7 @@ nothing changes at all — the window is the whole machine, which is the
 point.
 
 Since [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs), *Installed Memory* is the toolbar's Memory menu
-([P4](ui-design.md#p4--occasional-actions-go-in-menus)), and the dump
+([P4](ui-design.md#p4--occasional-actions-go-in-menus-and-dialogs)), and the dump
 and its map strip are in the dock's Debugger. D4 itself is unchanged.
 
 ```
