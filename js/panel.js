@@ -862,22 +862,18 @@ panel.dumpMemCallback = function(dumpHtml, pages, instr) {
 panel.lastInstr = null;
 
 /**
- * Writes out the instruction at the program counter, under the
+ * Writes out the instruction at the program counter, beside the
  * registers: its address, its bytes and its mnemonic with the operand
  * named, then the operand's value this time, then whether the opcode is
- * one Intel never documented. A line each, to fit the CPU's column.
+ * one Intel never documented. A line each, to fit its box.
  */
 panel.renderInstrPane = function() {
     var elem = document.getElementById('instr-pane');
-    var title = document.getElementById('instr-title');
     var instr = panel.lastInstr;
     if (!elem) {
         return;
     }
     // Blank while the machine is off, like the dumps.
-    if (title) {
-        title.hidden = !instr;
-    }
     if (!instr) {
         elem.textContent = '';
         return;
@@ -1318,6 +1314,12 @@ panel.renderTeletype = function() {
                  panel.escapeHtml(line.substring(panel.tty.column + 1)));
     }
     textElem.innerHTML = out.join('\n');
+    // Until something prints, the paper says what it takes to make it.
+    var hint = document.getElementById('tty-hint');
+    if (hint) {
+        hint.hidden = !(lines.length == 1 && lines[0] == '' &&
+                        panel.tty.column == 0);
+    }
     var paper = document.getElementById('tty-paper');
     if (paper) {
         paper.scrollTop = paper.scrollHeight;

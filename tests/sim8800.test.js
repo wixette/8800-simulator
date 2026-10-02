@@ -46,14 +46,19 @@ test('static helpers: toHex and parseBits', () => {
     assert.deepStrictEqual(Sim8800.parseBits(0x03, 4), [1, 1, 0, 0]);
 });
 
-test('the CPU dump names exactly the flags that are set', () => {
+test('the CPU dump shows every flag, and lights exactly the set ones', () => {
     const {sim, state} = poweredOnSim();
+    const lit = () => [...state.cpuDump.matchAll(
+        /<span class="flag flag-set">([A-Z]+)<\/span>/g)].map((m) => m[1]);
+    const all = () => [...state.cpuDump.matchAll(
+        /<span class="flag[^"]*">([A-Z]+)<\/span>/g)].map((m) => m[1]);
     CPU8080.set('F', 0x81);  // SIGN and CARRY.
     sim.dumpCpu();
-    assert.match(state.cpuDump, /FLAGS: SIGN CARRY </);
+    assert.deepStrictEqual(all(), ['S', 'Z', 'AC', 'P', 'CY']);
+    assert.deepStrictEqual(lit(), ['S', 'CY']);
     CPU8080.set('F', 0x44);  // ZERO and PARITY.
     sim.dumpCpu();
-    assert.match(state.cpuDump, /FLAGS: ZERO PARITY </);
+    assert.deepStrictEqual(lit(), ['Z', 'P']);
 });
 
 test('powerOn initializes memory, LEDs and dumps', () => {

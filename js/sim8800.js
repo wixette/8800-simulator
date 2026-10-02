@@ -433,14 +433,16 @@ class Sim8800 {
         sb.push('F = ' + Sim8800.toHex(cpu.f, 2) + '  ');
         sb.push('H = ' + Sim8800.toHex(cpu.h, 2) + '  ');
         sb.push('L = ' + Sim8800.toHex(cpu.l, 2) + '\n');
+        // Every flag, by the letter 8080 references give it, lit when
+        // set: a flag that is clear is as much a fact as one that is set.
         var flags = this.decodeFlags(cpu.f);
-        sb.push('FLAGS: ');
-        if (flags.sign) sb.push('SIGN ');
-        if (flags.zero) sb.push('ZERO ');
-        if (flags.auxiliaryCarry) sb.push('AC ');
-        if (flags.parity) sb.push('PARITY ');
-        if (flags.carry) sb.push('CARRY ');
-        sb.push('</pre>\n');
+        sb.push('FLAGS');
+        [['S', flags.sign], ['Z', flags.zero], ['AC', flags.auxiliaryCarry],
+         ['P', flags.parity], ['CY', flags.carry]].forEach(function(flag) {
+            sb.push(' <span class="flag' + (flag[1] ? ' flag-set' : '') +
+                    '">' + flag[0] + '</span>');
+        });
+        sb.push('\n</pre>\n');
         this.dumpCpuCallback(sb.join(''));
     }
 

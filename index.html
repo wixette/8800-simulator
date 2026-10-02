@@ -139,48 +139,51 @@
 
         <div id="dock-body">
           <div id="tab-tty" class="dock-pane">
-            <div id="tty-paper"><pre id="tty-text"></pre></div>
+            <!-- The keys a PC keyboard lacks, above the paper as a
+                 console's toolbar is; tearing the paper off is apart from
+                 them, being done to the terminal rather than typed. -->
+            <div class="tty-keys">
+              <div id="tty-break" class="button l10n">CTRL-C (BREAK)</div>
+              <div id="tty-rubout" class="button l10n">RUBOUT (_)</div>
+              <div id="tty-kill" class="button l10n">KILL LINE (@)</div>
+              <div id="tty-linefeed" class="button l10n">LINE FEED</div>
+              <div class="toolbar-spacer"></div>
+              <div id="tty-clear" class="button l10n">CLEAR PAPER</div>
+            </div>
+            <div id="tty-paper">
+              <!-- Shown only while nothing has printed (panel.renderTeletype). -->
+              <div id="tty-hint" class="tty-empty l10n">Nothing has printed yet. Run a program that reads the serial board - try Teletype echo from Load - then type here.</div>
+              <pre id="tty-text"></pre>
+            </div>
             <input id="tty-input" class="tty-hidden-input" type="text"
                    autocapitalize="characters" autocomplete="off"
                    autocorrect="off" spellcheck="false" aria-label="Teletype">
-            <div class="h-box align-items-center tty-helper">
-              <div id="tty-break" class="button m-4 l10n">CTRL-C (BREAK)</div>
-              <div id="tty-rubout" class="button m-4 l10n">RUBOUT (_)</div>
-              <div id="tty-kill" class="button m-4 l10n">KILL LINE (@)</div>
-              <div id="tty-linefeed" class="button m-4 l10n">LINE FEED</div>
-              <div id="tty-clear" class="button m-4 l10n">CLEAR PAPER</div>
-            </div>
-            <div id="tty-hint" class="comments l10n">
-              Type here. Nothing echoes by itself - the machine has to be
-              running a program that reads the serial board, so pick
-              tty-echo from Load, Example Programs, and RUN it first.
-            </div>
           </div>
 
           <div id="tab-debug" class="dock-pane">
-            <div class="debug-columns">
-              <div class="debug-cpu">
+            <!-- The CPU across the top, its state and where it is, side
+                 by side; memory under them, the whole width. -->
+            <div class="debug-top">
+              <div class="debug-box">
                 <div id="debug-cpu-dump-title" class="section-label l10n">8080 CPU Status Dump</div>
                 <div id="cpu-dump"></div>
-                <!-- Where the CPU is, beside the rest of its state (U2). -->
-                <div id="instr-title" class="section-label l10n" hidden>Next Instruction</div>
+              </div>
+              <div class="debug-box">
+                <div id="instr-title" class="section-label l10n">Next Instruction</div>
                 <div id="instr-pane"></div>
               </div>
-              <div class="debug-mem">
-                <div class="h-box align-items-center">
-                  <div id="debug-mem-dump-title" class="section-label l10n">Memory Dump</div>
-                  <div id="mem-window-label" class="comments"></div>
-                  <div id="mem-window-nav" class="h-box align-items-center">
-                    <div id="mem-page-prev" class="button m-4" role="button">&#9664;</div>
-                    <div id="mem-page-next" class="button m-4" role="button">&#9654;</div>
-                    <div id="mem-follow-pc" class="button m-4 l10n">Follow PC</div>
-                  </div>
-                  <div id="debug-fill-zero" class="button m-4 l10n">Zero All Memory</div>
-                </div>
-                <div id="mem-map" class="mem-map" hidden></div>
-                <div id="mem-dump" class="mt-8"></div>
-              </div>
             </div>
+            <div class="mem-toolbar">
+              <div id="debug-mem-dump-title" class="section-label l10n">Memory Dump</div>
+              <div id="mem-window-label"></div>
+              <div id="mem-page-prev" class="button" role="button">&#9664;</div>
+              <div id="mem-page-next" class="button" role="button">&#9654;</div>
+              <div id="mem-follow-pc" class="button l10n">Follow PC</div>
+              <div class="toolbar-spacer"></div>
+              <div id="debug-fill-zero" class="button l10n">Zero All Memory</div>
+            </div>
+            <div id="mem-map" class="mem-map" hidden></div>
+            <div id="mem-dump" class="mt-8"></div>
           </div>
 
           <div id="tab-ref" class="dock-pane">

@@ -782,22 +782,53 @@ a {
     padding: 0 10px;
 }
 
-/* The Debugger: the CPU on the left, memory on the right, stacked when
-   the dock is too narrow for both. */
-.debug-columns {
+/* The Debugger: the CPU across the top - its registers and the
+   instruction it will run next, side by side and the same height,
+   stacked in a narrow dock - and memory under them, the whole width. */
+.debug-top {
+    align-items: stretch;
     display: flex;
     flex-wrap: wrap;
     gap: 8px 16px;
 }
 
-.debug-cpu {
-    flex: 0 1 320px;
-    min-width: 240px;
+.debug-box {
+    display: flex;
+    flex: 1 1 300px;
+    flex-direction: column;
+    min-width: 0;
 }
 
-.debug-mem {
-    flex: 1 1 520px;
-    min-width: 0;
+.debug-box > #cpu-dump,
+.debug-box > #instr-pane {
+    box-sizing: border-box;
+    flex: 1;
+}
+
+/* The dump's own toolbar: one row, on one baseline, with the one
+   control that destroys something kept apart at the far right. */
+.mem-toolbar {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.mem-toolbar .section-label {
+    margin: 0 4px 0 0;
+}
+
+/* The flags by letter, lit when set. */
+.flag {
+    color: #999;
+}
+
+.flag-set {
+    background-color: #555;
+    border-radius: 3px;
+    color: #fff;
+    padding: 0 2px;
 }
 
 #cpu-dump,
@@ -992,11 +1023,6 @@ a {
     color: #222;
 }
 
-/* Blank while the machine is off, like the dumps above it. */
-#instr-pane:empty {
-    display: none;
-}
-
 /* A button holding a current choice: the installed memory size, or
    Follow PC while it is on. Matches the selected dock tab. A helper
    button standing for a raised address switch reads the same way -
@@ -1070,12 +1096,34 @@ a {
     padding: 5px 10px;
 }
 
-.tty-helper {
+/* The keys a PC keyboard lacks, as the paper's toolbar. */
+.tty-keys {
+    align-items: center;
+    display: flex;
     flex: none;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
 }
 
-#tty-hint {
-    flex: none;
+/* The empty paper's own explanation, until anything prints. */
+#tty-paper {
+    position: relative;
+}
+
+.tty-empty {
+    box-sizing: border-box;
+    color: #8a8270;
+    font-size: 14px;
+    left: 50%;
+    line-height: 1.6;
+    max-width: 90%;
+    pointer-events: none;
+    position: absolute;
+    text-align: center;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 520px;
 }
 
 #tty-text {
@@ -1157,7 +1205,9 @@ a {
 }
 
 #mem-window-label {
-    padding: 0 10px 0 8px;
+    color: #999;
+    font-size: 14px;
+    padding: 0 6px 0 0;
     white-space: nowrap;
 }
 

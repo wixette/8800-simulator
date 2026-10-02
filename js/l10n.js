@@ -703,15 +703,15 @@ l10n.MESSAGES = {
     },
 
     'tty-hint': {
-        'en': 'Type here. Nothing echoes by itself - the machine has to be running a program that reads the serial board, so pick tty-echo from Example Programs in the Load menu and RUN it first.',
-        'es': 'Escribe aquí. Nada se repite por sí solo: la máquina tiene que estar ejecutando un programa que lea la placa serie, así que elige tty-echo en Programas de Ejemplo, en el menú Cargar, y ejecútalo primero.',
-        'fr': 'Tapez ici. Rien ne s\'affiche tout seul : la machine doit exécuter un programme qui lit la carte série, alors choisissez tty-echo dans Programmes d’Exemple, dans le menu Charger, et lancez-le d\'abord.',
-        'de': 'Hier tippen. Nichts erscheint von selbst - die Maschine muss ein Programm ausführen, das die serielle Karte liest. Wählen Sie also zuerst tty-echo unter Beispielprogramme im Menü Laden und starten Sie es.',
-        'it': 'Scrivi qui. Nulla viene ripetuto da solo: la macchina deve eseguire un programma che legge la scheda seriale, quindi scegli tty-echo da Programmi di Esempio nel menu Carica ed eseguilo prima.',
-        'zh': '在这里输入。字符不会自动回显——机器必须正在运行一个读取串口板的程序，所以请先在“加载”菜单的“示例程序”中选择 tty-echo 并运行它。',
-        'zh-TW': '在這裡輸入。字元不會自動回顯——機器必須正在執行一個讀取串列埠板的程式，所以請先在「載入」選單的「範例程式」中選擇 tty-echo 並執行它。',
-        'ja': 'ここで入力します。文字は自動では表示されません。シリアルボードを読むプログラムを動かしている必要があるので、まず「読み込み」メニューの「サンプルプログラム」から tty-echo を選んで RUN してください。',
-        'ko': '여기에 입력하세요. 문자는 저절로 표시되지 않습니다. 직렬 보드를 읽는 프로그램이 실행 중이어야 하므로, 먼저 "불러오기" 메뉴의 "예제 프로그램"에서 tty-echo를 골라 실행하세요.',
+        'en': 'Nothing has printed yet. Run a program that reads the serial board - try Teletype echo from Load - then type here.',
+        'es': 'Todavía no se ha impreso nada. Ejecuta un programa que lea la placa serie - prueba Teletype echo en Cargar - y escribe aquí.',
+        'fr': 'Rien n\'a encore été imprimé. Lancez un programme qui lit la carte série - essayez Teletype echo dans Charger - puis tapez ici.',
+        'de': 'Noch wurde nichts gedruckt. Starten Sie ein Programm, das die serielle Karte liest - etwa Teletype echo unter Laden - und tippen Sie dann hier.',
+        'it': 'Non è ancora stato stampato nulla. Esegui un programma che legge la scheda seriale - prova Teletype echo da Carica - poi scrivi qui.',
+        'zh': '还没有打印任何内容。先运行一个读取串口板的程序——试试“加载”里的 Teletype echo——然后在这里输入。',
+        'zh-TW': '還沒有列印任何內容。先執行一個讀取串列埠板的程式——試試「載入」裡的 Teletype echo——然後在這裡輸入。',
+        'ja': 'まだ何も印字されていません。シリアルボードを読むプログラムを動かしてから（「読み込み」の Teletype echo など）、ここで入力してください。',
+        'ko': '아직 아무것도 인쇄되지 않았습니다. 직렬 보드를 읽는 프로그램을 실행한 뒤("불러오기"의 Teletype echo 등) 여기에 입력하세요.',
     },
 
     'nav-debug': {
