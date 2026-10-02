@@ -19,8 +19,8 @@ nothing to install.
 [4. Around the simulator](#4-around-the-simulator) →
 [5. The Teletype](#5-the-teletype) →
 [6. 4K BASIC](#6-microsoft-4k-basic) →
-[7. More programs](#7-more-programs) ·
-[For developers](#for-developers)
+[7. More programs](#7-more-programs) →
+[8. For developers](#8-for-developers)
 
 ## 1. Try it in a minute
 
@@ -34,8 +34,6 @@ nothing to install.
 A pattern now walks across the data lamps, D7–D0. That is a real
 program: eight bytes of 8080 machine code, running at the Altair's
 own 2 MHz. Click **STOP** to stop it.
-
-![The Load menu: Hex Bytes, Binary File and Microsoft 4K BASIC first, then the Front Panel Examples and the Teletype Examples](./screenshots/load-menu.png)
 
 ## 2. Meet the front panel
 
@@ -232,7 +230,7 @@ explains what it is and why it is not under this repository's licence.
   [Run it](https://wixette.github.io/8800-simulator/?hex=3E8CD3FF76)
   ```
 
-## For developers
+## 8. For developers
 
 ### Run it locally
 
