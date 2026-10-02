@@ -36,9 +36,26 @@ panel.isDebugTabVisible = false;
 panel.isTtyTabVisible = false;
 
 /**
+ * Says so, if the machine is off. A switch thrown on a dead machine does
+ * nothing, as on the metal (D17), but the status line says why, rather
+ * than reporting a RUN or a RESET that did not happen.
+ * @return {boolean} True if the machine is off, and that has been said.
+ */
+panel.reportIfOff = function() {
+    if (panel.isPoweredOn) {
+        return false;
+    }
+    panel.setStatus('status-off');
+    return true;
+};
+
+/**
  * When STOP switch is pressed.
  */
 panel.onStop = function() {
+    if (panel.reportIfOff()) {
+        return;
+    }
     panel.sim.stop();
     panel.setStatus('status-stopped');
 };
@@ -47,6 +64,9 @@ panel.onStop = function() {
  * When RUN switch is pressed.
  */
 panel.onRun = function() {
+    if (panel.reportIfOff()) {
+        return;
+    }
     panel.sim.start();
     panel.setStatus('status-running');
 };
@@ -55,6 +75,9 @@ panel.onRun = function() {
  * When SINGLE STEP switch is pressed.
  */
 panel.onSingle = function() {
+    if (panel.reportIfOff()) {
+        return;
+    }
     panel.sim.singleStep();
 };
 
@@ -62,6 +85,9 @@ panel.onSingle = function() {
  * When EXAMINE switch is pressed.
  */
 panel.onExamine = function() {
+    if (panel.reportIfOff()) {
+        return;
+    }
     panel.sim.examine();
 };
 
@@ -69,6 +95,9 @@ panel.onExamine = function() {
  * When EXAMINE NEXT switch is pressed.
  */
 panel.onExamineNext = function() {
+    if (panel.reportIfOff()) {
+        return;
+    }
     panel.sim.examineNext();
 };
 
@@ -76,6 +105,9 @@ panel.onExamineNext = function() {
  * When DEPOSIT switch is pressed.
  */
 panel.onDeposit = function() {
+    if (panel.reportIfOff()) {
+        return;
+    }
     panel.sim.deposit();
 };
 
@@ -83,6 +115,9 @@ panel.onDeposit = function() {
  * When DEPOSIT NEXT switch is pressed.
  */
 panel.onDepositNext = function() {
+    if (panel.reportIfOff()) {
+        return;
+    }
     panel.sim.depositNext();
 };
 
@@ -90,6 +125,9 @@ panel.onDepositNext = function() {
  * When RESET switch is pressed.
  */
 panel.onReset = function() {
+    if (panel.reportIfOff()) {
+        return;
+    }
     panel.sim.reset();
     panel.setStatus('status-reset');
 };

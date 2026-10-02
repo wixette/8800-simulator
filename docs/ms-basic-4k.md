@@ -692,7 +692,9 @@ are the legend printed on the metal, and a photograph of the real
 panel does not change language. They are never hidden and never
 disabled, because a physical switch is always there to be thrown —
 throwing one on a dead machine simply does nothing, which is also true
-here.
+here. The status line says why, though - *the machine is off* - rather
+than reporting a RUN or a RESET that did not happen; it once said
+"Running." for a RUN that never started.
 
 **The teletype.** The Teletype tab is uppercase too, but for a
 different reason, and this one matters: the ASR-33 had **no

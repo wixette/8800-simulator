@@ -379,6 +379,29 @@ test('every way of loading tells the status line whether it did that', () => {
     }
 });
 
+test('a switch thrown on a dead machine does nothing, and says the machine is off', (t) => {
+    // RUN on a machine that was off said "Running." while nothing ran.
+    const said = [];
+    const done = [];
+    const savedSim = panel.sim;
+    const savedOn = panel.isPoweredOn;
+    panel.sim = new Proxy({}, {get: (target, name) => () => done.push(name)});
+    t.after(() => { panel.sim = savedSim; panel.isPoweredOn = savedOn; });
+    t.mock.method(panel, 'setStatus', (id) => said.push(id));
+    const switches = ['onRun', 'onStop', 'onSingle', 'onExamine',
+                      'onExamineNext', 'onDeposit', 'onDepositNext', 'onReset'];
+    panel.isPoweredOn = false;
+    switches.forEach((name) => panel[name]());
+    assert.deepStrictEqual(done, [], 'nothing reached the machine');
+    assert.deepStrictEqual(said, switches.map(() => 'status-off'));
+    // Switched on, each goes through.
+    said.length = 0;
+    panel.isPoweredOn = true;
+    switches.forEach((name) => panel[name]());
+    assert.strictEqual(done.length, switches.length);
+    assert.ok(!said.includes('status-off'));
+});
+
 test('a machine that is off receives nothing from the teletype keyboard', () => {
     // D24: the board that holds a character for the CPU to read is
     // unpowered, so keys typed at a dead machine are gone, not saved
