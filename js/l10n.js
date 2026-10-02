@@ -594,6 +594,42 @@ l10n.MESSAGES = {
         'ko': '더 읽을거리',
     },
 
+    'strip-label': {
+        'en': 'Switches',
+        'es': 'Interruptores',
+        'fr': 'Interrupteurs',
+        'de': 'Schalter',
+        'it': 'Interruttori',
+        'zh': '开关',
+        'zh-TW': '開關',
+        'ja': 'スイッチ',
+        'ko': '스위치',
+    },
+
+    'strip-hide': {
+        'en': 'Fold the switches away',
+        'es': 'Recoger los interruptores',
+        'fr': 'Replier les interrupteurs',
+        'de': 'Schalter einklappen',
+        'it': 'Ripiega gli interruttori',
+        'zh': '收起开关',
+        'zh-TW': '收起開關',
+        'ja': 'スイッチをたたむ',
+        'ko': '스위치 접기',
+    },
+
+    'strip-show': {
+        'en': 'Show the switches',
+        'es': 'Mostrar los interruptores',
+        'fr': 'Afficher les interrupteurs',
+        'de': 'Schalter zeigen',
+        'it': 'Mostra gli interruttori',
+        'zh': '显示开关',
+        'zh-TW': '顯示開關',
+        'ja': 'スイッチを表示',
+        'ko': '스위치 보이기',
+    },
+
     'nav-tty': {
         'en': 'Teletype',
         'es': 'Teletipo',

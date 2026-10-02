@@ -1668,6 +1668,7 @@ panel.init = function() {
     panel.sio2.attachTo(panel.sim, Sio.TWO_SIO_BASE_PORT, false);
     panel.initTeletypeUi();
 
+    panel.initSwitchStrip();
     panel.setHelperShown(panel.readHelperShown(), false);
 
     // The toolbar. Load is built as it opens, since what it offers
@@ -1714,6 +1715,7 @@ panel.init = function() {
         panel.refreshPlaceholders();
         panel.renderInstrPane();
         panel.refreshDockToggle();
+        panel.refreshStripTab();
         if (panel.memoryMenu) {
             panel.memoryMenu.setItems(panel.memoryMenuItems());
             panel.updateMemoryControls();
@@ -2243,8 +2245,7 @@ panel.setDockOpen = function(open) {
 
 /**
  * The tallest the dock may be in this window: whatever leaves the front
- * panel its minimum, on top of the Switch Board Helper when that is
- * showing.
+ * panel its minimum, on top of the switch strip.
  * @return {number} Pixels.
  */
 panel.maxDockHeight = function() {
@@ -2252,10 +2253,10 @@ panel.maxDockHeight = function() {
     var toolbar = document.getElementById('toolbar');
     var status = document.getElementById('status-bar');
     var splitter = document.getElementById('dock-splitter');
-    var helper = document.getElementById('switch-helper');
+    var strip = document.getElementById('switch-strip');
     var room = app.clientHeight - toolbar.offsetHeight -
         status.offsetHeight - splitter.offsetHeight - panel.STAGE_MIN_HEIGHT -
-        (helper.hidden ? 0 : helper.offsetHeight);
+        strip.offsetHeight;
     return Math.max(panel.DOCK_MIN_HEIGHT, room);
 };
 
@@ -2293,6 +2294,7 @@ panel.applyDock = function() {
     }
     panel.refreshDockToggle();
     panel.saveDock();
+    panel.fitSwitchStrip();
     // Neither tool is kept up to date while it is out of sight, so catch
     // up as it comes back.
     if (panel.isDebugTabVisible && panel.sim) {
@@ -2377,6 +2379,54 @@ panel.initDockSplitter = function() {
 };
 
 /**
+ * Names the strip's tab for what pressing it will do, in the current
+ * language.
+ */
+panel.refreshStripTab = function() {
+    var tab = document.getElementById('strip-tab');
+    if (tab) {
+        tab.title = l10n.getMessage(panel.isHelperShown ?
+                                    'strip-hide' : 'strip-show');
+    }
+};
+
+/**
+ * Lets the strip's tab fold the strip away and bring it back, by mouse
+ * or by keyboard.
+ */
+panel.initSwitchStrip = function() {
+    var tab = document.getElementById('strip-tab');
+    var toggle = function() {
+        panel.setHelperShown(!panel.isHelperShown, true);
+    };
+    tab.addEventListener('click', toggle, false);
+    tab.addEventListener('keydown', function(event) {
+        if (event.key == 'Enter' || event.key == ' ') {
+            event.preventDefault();
+            toggle();
+        }
+    }, false);
+};
+
+/**
+ * Widens the strip to the panel's artwork, so that it reads as part of
+ * the machine rather than as a row of the page. The artwork keeps its
+ * shape inside the space it is given, so it is often narrower than that
+ * space. The strip is never narrower than its own two rows, so its
+ * height - and so the panel's - does not depend on this.
+ */
+panel.fitSwitchStrip = function() {
+    var svg = document.getElementById('panel');
+    var strip = document.getElementById('switch-strip');
+    if (!svg || !strip) {
+        return;
+    }
+    var box = svg.getBoundingClientRect();
+    var artwork = Math.min(box.width, box.height * 1440 / 644);
+    strip.style.minWidth = Math.round(artwork) + 'px';
+};
+
+/**
  * Where showing the Switch Board Helper is remembered.
  * @type {string}
  */
@@ -2405,14 +2455,18 @@ panel.readHelperShown = function() {
 };
 
 /**
- * Shows or hides the Switch Board Helper.
+ * Shows the Switch Board Helper, or folds it away to the tab on its top
+ * edge.
  * @param {boolean} shown Whether to show it.
  * @param {boolean} save Whether this is the reader's choice, to be
- *     remembered, rather than the default for this screen.
+ *     remembered, rather than how a first visit finds it.
  */
 panel.setHelperShown = function(shown, save) {
     panel.isHelperShown = shown;
-    document.getElementById('switch-helper').hidden = !shown;
+    document.getElementById('switch-strip').classList.toggle('folded', !shown);
+    var tab = document.getElementById('strip-tab');
+    tab.setAttribute('aria-expanded', shown ? 'true' : 'false');
+    panel.refreshStripTab();
     if (save) {
         try {
             localStorage.setItem(panel.helperStorageKey, shown ? 'on' : 'off');

@@ -91,35 +91,34 @@
           <image id="switch-down" x="0" y="0" width="20" height="30" href="images/switch-down.svg"/>
         </svg>
 
-        <div id="switch-helper" class="v-box" hidden>
-          <div class="h-box justify-start">
-            <div id="s-off-on" class="button power-button m-8">OFF/ON</div>
-            <div id="s-sw-stop" class="button m-8">STOP</div>
-            <div id="s-sw-run" class="button m-8">RUN</div>
-            <div id="s-sw-single" class="button m-8">SINGLE STEP</div>
-            <div id="s-sw-examine" class="button m-8">EXAMINE</div>
-            <div id="s-sw-examine-next" class="button m-8">EXAMINE-NEXT</div>
-            <div id="s-sw-deposit" class="button m-8">DEPOSIT</div>
-            <div id="s-sw-deposit-next" class="button m-8">DEPOSIT-NEXT</div>
-            <div id="s-sw-reset" class="button m-8">RESET</div>
+        <!-- The Switch Board Helper: the panel's switches again, large
+             enough for a thumb, and laid out as the panel lays them out -
+             the command switches by lever, the address switches in the
+             octal threes of the silkscreen. Shown unless folded away,
+             from the tab on its own top edge. -->
+        <div id="switch-strip">
+          <div id="strip-tab" class="strip-tab" role="button" tabindex="0"
+               aria-controls="switch-helper" aria-expanded="true">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
+            <span id="strip-label" class="l10n">Switches</span>
           </div>
-          <div class="h-box justify-start">
-            <div id="s-s15" class="button m-8">A15</div>
-            <div id="s-s14" class="button m-8">A14</div>
-            <div id="s-s13" class="button m-8">A13</div>
-            <div id="s-s12" class="button m-8">A12</div>
-            <div id="s-s11" class="button m-8">A11</div>
-            <div id="s-s10" class="button m-8">A10</div>
-            <div id="s-s9" class="button m-8">A09</div>
-            <div id="s-s8" class="button m-8">A08</div>
-            <div id="s-s7" class="button m-8">A07</div>
-            <div id="s-s6" class="button m-8">A06</div>
-            <div id="s-s5" class="button m-8">A05</div>
-            <div id="s-s4" class="button m-8">A04</div>
-            <div id="s-s3" class="button m-8">A03</div>
-            <div id="s-s2" class="button m-8">A02</div>
-            <div id="s-s1" class="button m-8">A01</div>
-            <div id="s-s0" class="button m-8">A00</div>
+          <div id="switch-helper" class="strip-body">
+            <div class="strip-row">
+              <div class="lever"><div id="s-off-on" class="button power-button">OFF/ON</div></div>
+              <div class="lever pair"><div id="s-sw-stop" class="button">STOP</div><div id="s-sw-run" class="button">RUN</div></div>
+              <div class="lever"><div id="s-sw-single" class="button">SINGLE STEP</div></div>
+              <div class="lever pair"><div id="s-sw-examine" class="button">EXAMINE</div><div id="s-sw-examine-next" class="button">EXAMINE-NEXT</div></div>
+              <div class="lever pair"><div id="s-sw-deposit" class="button">DEPOSIT</div><div id="s-sw-deposit-next" class="button">DEPOSIT-NEXT</div></div>
+              <div class="lever"><div id="s-sw-reset" class="button">RESET</div></div>
+            </div>
+            <div class="strip-row strip-address">
+              <div class="octal"><div id="s-s15" class="button">A15</div></div>
+              <div class="octal"><div id="s-s14" class="button">A14</div><div id="s-s13" class="button">A13</div><div id="s-s12" class="button">A12</div></div>
+              <div class="octal"><div id="s-s11" class="button">A11</div><div id="s-s10" class="button">A10</div><div id="s-s9" class="button">A09</div></div>
+              <div class="octal"><div id="s-s8" class="button">A08</div><div id="s-s7" class="button">A07</div><div id="s-s6" class="button">A06</div></div>
+              <div class="octal"><div id="s-s5" class="button">A05</div><div id="s-s4" class="button">A04</div><div id="s-s3" class="button">A03</div></div>
+              <div class="octal"><div id="s-s2" class="button">A02</div><div id="s-s1" class="button">A01</div><div id="s-s0" class="button">A00</div></div>
+            </div>
           </div>
         </div>
       </main>

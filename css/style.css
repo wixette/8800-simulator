@@ -543,14 +543,115 @@ a {
     width: 100%;
 }
 
-/* The Switch Board Helper, under the panel when Big Switches is on. */
-#switch-helper {
+/* The Switch Board Helper, a strip under the panel and as wide as its
+   artwork (panel.fitSwitchStrip). Its tab, on its top edge, folds it
+   away; folded, the tab is all that is left. */
+#switch-strip {
+    align-items: center;
+    display: flex;
     flex: none;
+    flex-direction: column;
+    margin-top: 4px;
+    max-width: 100%;
+}
+
+.strip-tab {
+    align-items: center;
+    background-color: #2b2b2b;
+    border: 1px solid #3a3a3a;
+    border-bottom: 0;
+    border-radius: 8px 8px 0 0;
+    color: #999;
+    cursor: pointer;
+    display: flex;
+    font-size: 12px;
+    gap: 2px;
+    padding: 1px 12px 1px 8px;
+    user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+}
+
+.strip-tab:hover,
+.strip-tab:focus-visible {
+    color: #eee;
+    outline: none;
+}
+
+.strip-tab .icon {
+    height: 16px;
+    transition: transform 0.15s;
+    width: 16px;
+}
+
+#switch-strip.folded .strip-tab {
+    border-bottom: 1px solid #3a3a3a;
+    border-radius: 8px;
+}
+
+#switch-strip.folded .strip-tab .icon {
+    transform: rotate(180deg);
+}
+
+#switch-strip.folded .strip-body {
+    display: none;
+}
+
+.strip-body {
+    background-color: #2b2b2b;
+    border: 1px solid #3a3a3a;
+    border-radius: 10px;
+    box-sizing: border-box;
+    padding: 8px 10px;
     width: 100%;
 }
 
-#switch-helper .h-box {
+/* Each row on one line where the window has room for it, so that the
+   strip is always two rows high. */
+.strip-row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px 14px;
     justify-content: center;
+}
+
+.strip-row + .strip-row {
+    margin-top: 8px;
+}
+
+/* One lever, or one octal digit of the address: its buttons touch. */
+.lever,
+.octal {
+    display: flex;
+    gap: 3px;
+}
+
+/* A lever with two directions - STOP and RUN, EXAMINE and EXAMINE-NEXT -
+   is one control with two halves, as on the metal. */
+.lever.pair .button:first-child {
+    border-radius: 10px 0 0 10px;
+}
+
+.lever.pair .button:last-child {
+    border-radius: 0 10px 10px 0;
+}
+
+.strip-body .button {
+    font-size: 13px;
+    min-width: 30px;
+    padding: 2px 8px;
+}
+
+.strip-address .button {
+    padding: 2px 4px;
+}
+
+/* A window too narrow for the rows lets them wrap. */
+@media (max-width: 900px) {
+    .strip-row {
+        flex-wrap: wrap;
+    }
 }
 
 /* The handle between the panel and the dock. */
@@ -1100,20 +1201,33 @@ a {
         display: none;
     }
 
-    /* The helper packed tight, so the dock keeps some room: the command
-       buttons as they fall, and the sixteen address switches eight to
-       a row, still a thumb wide each. The :not excludes the command
-       buttons, whose ids all begin s-sw-. */
-    #switch-helper .button {
-        margin: 3px;
+    /* The strip packed tight, so the dock keeps some room: the levers
+       as they fall, and the sixteen address switches eight to a row,
+       still a thumb wide each. The octal groups give way to the grid. */
+    .strip-body {
+        padding: 6px;
+    }
+
+    .strip-row {
+        gap: 4px 8px;
+    }
+
+    .strip-body .button {
         padding: 2px 6px;
     }
 
-    [id^="s-s"]:not([id^="s-sw"]) {
-        /* border-box so the basis covers the button's padding; under an
-           eighth to leave room for the 6px of margin. */
-        box-sizing: border-box;
-        flex: 1 1 calc(12.5% - 8px);
+    .strip-address {
+        display: grid;
+        gap: 4px;
+        grid-template-columns: repeat(8, 1fr);
+    }
+
+    .strip-address .octal {
+        display: contents;
+    }
+
+    .strip-address .button {
+        min-width: 0;
         padding: 2px 0;
     }
 
