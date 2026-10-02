@@ -3,6 +3,14 @@ body {
     height: 100%;
 }
 
+/* The one hover the dark chrome uses - toolbar buttons, dock tabs, the
+   strip's tab - so that every flat control answers the pointer alike,
+   and visibly. */
+:root {
+    --hover-bg: rgba(255, 255, 255, 0.14);
+    --open-bg: rgba(255, 255, 255, 0.2);
+}
+
 body {
     background-color: #222;
     color: #eee;
@@ -130,8 +138,14 @@ a {
 }
 
 .tool-button:hover,
+.tool-button:focus-visible {
+    background-color: var(--hover-bg);
+    color: #fff;
+    outline: none;
+}
+
 .tool-button.selected {
-    background-color: #444;
+    background-color: var(--open-bg);
 }
 
 .tool-value {
@@ -156,7 +170,7 @@ a {
 
 .icon-button:hover,
 .icon-button:focus-visible {
-    background-color: #444;
+    background-color: var(--hover-bg);
     color: #fff;
     outline: none;
 }
@@ -191,6 +205,8 @@ a {
     background-color: #2b2b2b;
     border: 1px solid #444;
     border-radius: 12px;
+    /* So the title band keeps the rounded corners. */
+    overflow: hidden;
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
     color: #eee;
     max-width: calc(100vw - 24px);
@@ -206,20 +222,20 @@ a {
     padding: 16px 20px 18px 20px;
 }
 
+/* The title, in a lighter band across the top, as a dialog's title bar
+   is. */
 .dialog-head {
     align-items: center;
+    background-color: #3a3a3a;
+    border-bottom: 1px solid #4a4a4a;
     display: flex;
     justify-content: space-between;
-    margin-bottom: 8px;
+    padding: 8px 10px 8px 20px;
 }
 
 .dialog-title {
-    font-size: 17px;
+    font-size: 16px;
     margin: 0;
-}
-
-.dialog-close {
-    margin-right: -8px;
 }
 
 .dialog-subtitle {
@@ -438,13 +454,19 @@ a {
     font-size: 12px;
 }
 
-/* Names the group of items under it. Not an item: the arrow keys step
-   over it. */
+/* Names the group of items under it. Not an item - the arrow keys step
+   over it - so it is a band across the menu, ruled off, rather than
+   another line of text that might be chosen. */
 .dropdown li.dropdown-heading {
-    color: #777;
+    background-color: #dcdcdc;
+    border-bottom: 1px solid #c6c6c6;
+    border-top: 1px solid #c6c6c6;
+    color: #555;
     cursor: default;
     font-size: 12px;
-    padding: 10px 18px 4px 18px;
+    font-weight: bold;
+    margin: 4px 0 2px 0;
+    padding: 5px 18px;
 }
 
 /* An item that cannot be used just now. It still answers, in the status
@@ -472,7 +494,7 @@ a {
 }
 
 .dropdown li.dropdown-heading:hover {
-    background: none;
+    background-color: #dcdcdc;
 }
 
 .dropdown li[aria-selected='true'] {
@@ -491,8 +513,14 @@ a {
 }
 
 #toolbar .dropdown > .tool-button:hover,
+#toolbar .dropdown > .tool-button:focus-visible {
+    background-color: var(--hover-bg);
+    color: #fff;
+    outline: none;
+}
+
 #toolbar .dropdown > .tool-button[aria-expanded="true"] {
-    background-color: #444;
+    background-color: var(--open-bg);
 }
 
 /* The menus open under the toolbar's own buttons, which are on the
@@ -564,9 +592,9 @@ a {
     color: #999;
     cursor: pointer;
     display: flex;
-    font-size: 12px;
-    gap: 2px;
-    padding: 1px 12px 1px 8px;
+    height: 14px;
+    justify-content: center;
+    width: 44px;
     user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -575,14 +603,15 @@ a {
 
 .strip-tab:hover,
 .strip-tab:focus-visible {
-    color: #eee;
+    background-color: #3a3a3a;
+    color: #fff;
     outline: none;
 }
 
 .strip-tab .icon {
-    height: 16px;
+    height: 18px;
     transition: transform 0.15s;
-    width: 16px;
+    width: 18px;
 }
 
 #switch-strip.folded .strip-tab {
@@ -733,7 +762,8 @@ a {
 }
 
 .dock-tab:hover {
-    color: #eee;
+    background-color: var(--hover-bg);
+    color: #fff;
 }
 
 .dock-tab.selected {
@@ -756,7 +786,8 @@ a {
 }
 
 .dock-tool:hover {
-    color: #eee;
+    background-color: var(--hover-bg);
+    color: #fff;
 }
 
 #dock-body {

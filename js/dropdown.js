@@ -55,6 +55,7 @@ class Dropdown {
         this.list = this.root.querySelector('ul');
         this.onSelect = onSelect;
         this.onOpen = onOpen || null;
+        Dropdown.all.push(this);
 
         var self = this;
         this.button.addEventListener('click', function(event) {
@@ -179,6 +180,13 @@ class Dropdown {
      * menu holds one.
      */
     open() {
+        // One menu at a time. The button's click stops where it is, so
+        // another menu never hears it as a click outside itself.
+        Dropdown.all.forEach((other) => {
+            if (other !== this && other.isOpen()) {
+                other.close(false);
+            }
+        });
         if (this.onOpen) {
             this.onOpen();
         }
@@ -252,6 +260,12 @@ class Dropdown {
         }
     }
 };
+
+/**
+ * Every menu on the page, so that opening one can close the rest.
+ * @type {Array<Dropdown>}
+ */
+Dropdown.all = [];
 
 // Exports the class for unit tests when running in Node.js. This has
 // no effect when the script is loaded in a browser.

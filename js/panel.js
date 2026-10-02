@@ -1004,6 +1004,50 @@ panel.onHexDialogLoad = function() {
 };
 
 /**
+ * Reads the version out of package.json, which is the one place it is
+ * kept: the page has no build step to copy it anywhere else.
+ * @param {string} text The file.
+ * @return {?string} The version, or null if the text does not hold one.
+ */
+panel.versionFrom = function(text) {
+    try {
+        var version = JSON.parse(text).version;
+        return /^\d+\.\d+\.\d+$/.test(version) ? version : null;
+    } catch (e) {
+        return null;
+    }
+};
+
+/**
+ * Puts the version in the About dialog, the first time it opens. A
+ * page opened straight off the disk cannot read package.json (D22), and
+ * shows no version rather than a wrong one.
+ */
+panel.showVersion = function() {
+    if (panel.versionAsked) {
+        return;
+    }
+    panel.versionAsked = true;
+    var line = document.querySelector('.about-version');
+    var shown = document.getElementById('app-version');
+    line.hidden = true;
+    if (panel.needsServer()) {
+        return;
+    }
+    window.fetch('package.json').then(function(response) {
+        return response.ok ? response.text() : '';
+    }).then(function(text) {
+        var version = panel.versionFrom(text);
+        if (version) {
+            shown.textContent = version;
+            line.hidden = false;
+        }
+    }).catch(function() {
+        // No version, rather than a wrong one.
+    });
+};
+
+/**
  * When Further Reading is pressed in the About dialog: the Tutorial,
  * at its references.
  */
@@ -1702,7 +1746,7 @@ panel.init = function() {
     });
     document.getElementById('copy-link').addEventListener(
         'click', panel.onCopyLink, false);
-    panel.aboutDialog = new Dialog('about-dialog');
+    panel.aboutDialog = new Dialog('about-dialog', panel.showVersion);
     document.getElementById('about-button').addEventListener(
         'click', function() { panel.aboutDialog.open(); }, false);
     document.getElementById('about-references').addEventListener(
@@ -2387,8 +2431,12 @@ panel.initDockSplitter = function() {
 panel.refreshStripTab = function() {
     var tab = document.getElementById('strip-tab');
     if (tab) {
-        tab.title = l10n.getMessage(panel.isHelperShown ?
-                                    'strip-hide' : 'strip-show');
+        // An arrow and nothing else, so its words are its tooltip and
+        // its name for a screen reader.
+        var text = l10n.getMessage(panel.isHelperShown ?
+                                   'strip-hide' : 'strip-show');
+        tab.title = text;
+        tab.setAttribute('aria-label', text);
     }
 };
 

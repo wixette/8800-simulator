@@ -76,14 +76,18 @@ test('the package version is not behind the newest release tag', () => {
             + newest + '. Bump it to the version being prepared.');
 });
 
-test('the About dialog shows the version the package is', () => {
-    // The page has no build step to stamp it in, so it is written into
-    // index.html by hand, and this is what notices when it is not.
-    const html = require('node:fs').readFileSync(
-        path.join(ROOT, 'index.html'), 'utf8');
-    const shown = html.match(/id="app-version">([^<]*)</);
-    assert.ok(shown, 'index.html should have an #app-version');
-    assert.strictEqual(shown[1], VERSION,
-                       'index.html shows ' + shown[1] + ', package.json says '
-                       + VERSION);
+test('the About dialog reads the version from package.json', () => {
+    // The page has no build step to stamp a copy of the version in, so
+    // About reads this file itself (panel.showVersion), and index.html
+    // must not carry a copy that could fall behind.
+    const fs = require('node:fs');
+    const vm = require('node:vm');
+    vm.runInThisContext(fs.readFileSync(path.join(ROOT, 'js', 'panel.js'), 'utf8'));
+    const text = fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8');
+    assert.strictEqual(globalThis.panel.versionFrom(text), VERSION);
+    assert.strictEqual(globalThis.panel.versionFrom('not json'), null);
+    assert.strictEqual(globalThis.panel.versionFrom('{"version": "two"}'), null);
+    const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+    assert.match(html, /id="app-version"><\/span>/,
+                 'index.html should leave the version to package.json');
 });

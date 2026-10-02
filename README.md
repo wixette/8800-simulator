@@ -53,7 +53,7 @@ whatever room the dock leaves. In a desktop browser you click its
 switches directly. Under it sits the *Switch Board Helper*: the same
 switches as large buttons, laid out as the panel lays them out, which
 show which switches are up and are much easier to hit on a phone. The
-*Switches* tab on its top edge folds it away, and brings it back.
+small arrow on its top edge folds it away, and brings it back.
 
 The toolbar has what you do to the machine on the left, and what you do
 with the app on the right. **Load** is how programs get in:

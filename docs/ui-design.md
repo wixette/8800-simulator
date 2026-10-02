@@ -155,13 +155,15 @@ Each kind of control is one component, used the same way everywhere:
 
 | Component | For | Rule |
 | --- | --- | --- |
-| Menu | choosing one thing: Load, Memory, the language | items only - no text boxes, no buttons, no menu over a menu; an item that cannot be used is greyed, with why at its right |
-| Dialog | anything that needs input or explaining: hex bytes, Share, About | a title, what it is for, the controls, and the actions at the bottom right; Escape or a click outside closes it |
-| Icon button | familiar app-level actions: Share, the language, About | always with a tooltip and a screen-reader name, both translated |
+| Menu | choosing one thing: Load, Memory, the language | items only - no text boxes, no buttons, no menu over a menu; one open at a time; a group heading is a ruled band, not another item; an item that cannot be used is greyed, with why at its right |
+| Dialog | anything that needs input or explaining: hex bytes, Share, About | a title in a lighter band across the top, what it is for, the controls, and the actions at the bottom right; Escape or a click outside closes it |
+| Icon button | familiar app-level actions: Share, the language, About; folding the switch strip | always with a tooltip and a screen-reader name, both translated |
 | Empty state | guidance that matters only until something happens: the teletype's hint | shown inside the empty area, and gone once there is content |
 
 These are Material Design's patterns, not its look: the simulator keeps
-its own dark, period style.
+its own dark, period style. Every flat control on that dark chrome -
+toolbar buttons, dock tabs, the strip's tab - answers the pointer with
+the same highlight.
 
 *Why:* the first toolbar put the old Debugger sections into it as they
 were - a menu opening over another menu, a text box beside buttons in
@@ -174,10 +176,10 @@ knows how all of them behave.
 ## Part 2 — The layout
 
 ```
-┌ Altair 8800 Simulator  [📂] Load ▾  [▦] Memory: 256 B ▾           [share] [文A] EN ▾ [ⓘ] ┐
+┌ Altair 8800 Simulator  [📄] Load ▾  [▦] Memory: 256 B ▾           [share] [文A] EN ▾ [ⓘ] ┐
 │                                                                                       │
 │                         FRONT PANEL (the SVG artwork)                                 │
-│                         ˅ Switches                                                    │
+│                                    [˅]                                                │
 │         [OFF/ON] [STOP|RUN] [SINGLE STEP] [EXAMINE|NEXT] [DEPOSIT|NEXT] [RESET]        │
 │         [A15] [A14 A13 A12] [A11 A10 A09] [A08 A07 A06] [A05 A04 A03] [A02 A01 A00]    │
 ├─────────────────────────────────── ═══ drag ═══ ──────────────────────────────────────┤
@@ -303,7 +305,8 @@ The first toolbar (U1) carried the old Debugger sections over as
 popups. The second follows P10:
 
 - **Left, what you do to the machine; right, what you do with the app.**
-  Load and Memory, each an icon with its name (`Memory: 256 B`), on the
+  Load (a file being opened) and Memory, each an icon with its name
+  (`Memory: 256 B`), on the
   left; Share, the language and About, as icons, on the right, where
   Share sits in most editors. On a phone the names go, the size stays,
   and the title goes too - the artwork says ALTAIR 8800 - so it fits
@@ -320,8 +323,11 @@ popups. The second follows P10:
   RESET, or the machine as it is now, naming its PC - and the link in a
   field, which a blocked clipboard leaves selected rather than the
   address bar being rewritten.
-- **About is a dialog**, with the version (checked against
-  package.json by a test), the source code, problems and contributors,
+- **About is a dialog**, with the version - read from package.json
+  as it opens, the one place the version is kept, since the page has
+  no build step to copy it anywhere; a page opened off the disk shows
+  none rather than a wrong one - the source code, problems and
+  contributors,
   and the licences: Apache 2.0 for the simulator, Microsoft's for the
   4K BASIC tape (roms/NOTICE), BSD for the 8080 core (8080js by Martin
   Maly), Apache 2.0 for the icons. The credit line left the status line
@@ -338,7 +344,9 @@ open, so that Escape there is not KILL LINE.
 The Switch Board Helper is shown by default on every screen, as it was
 before U1 (P2). A *Switches* tab on its own top edge folds it away and
 brings it back - next to what it controls, rather than a toggle in the
-toolbar - and the choice is remembered.
+toolbar - and the choice is remembered. The tab is an arrow alone, the
+size of the dock's handle, its words in a tooltip: a chevron on an edge
+is the familiar sign for folding.
 
 It is laid out as the panel lays the switches out, so that it reads as
 part of the machine: the command switches by lever in panel order, a

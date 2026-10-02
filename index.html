@@ -40,7 +40,7 @@
         <div id="load-dropdown" class="dropdown">
           <button id="load-button" class="tool-button" type="button"
                   aria-haspopup="listbox" aria-expanded="false">
-            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 22H6c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h8l6 6v6h-2V9h-5V4H6v16h9v2zm4-.34v-2.24l2.95 2.95 1.41-1.41L20.41 18h2.24v-2H17v5.66h2z"/></svg>
             <span id="load-menu" class="tool-label l10n">Load</span>
             <span class="dropdown-arrow" aria-hidden="true">&#9662;</span>
           </button>
@@ -100,7 +100,6 @@
           <div id="strip-tab" class="strip-tab" role="button" tabindex="0"
                aria-controls="switch-helper" aria-expanded="true">
             <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
-            <span id="strip-label" class="l10n">Switches</span>
           </div>
           <div id="switch-helper" class="strip-body">
             <div class="strip-row">
@@ -289,11 +288,11 @@ RUN</pre>
 
     <!-- Dialogs: for what needs more than a choice from a menu. -->
     <dialog id="hex-dialog" class="dialog" aria-labelledby="hex-dialog-title">
+      <div class="dialog-head">
+        <h2 id="hex-dialog-title" class="dialog-title l10n">Load Hex Bytes</h2>
+        <button class="icon-button dialog-close" type="button" data-close><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+      </div>
       <div class="dialog-body">
-        <div class="dialog-head">
-          <h2 id="hex-dialog-title" class="dialog-title l10n">Load Hex Bytes</h2>
-          <button class="icon-button dialog-close" type="button" data-close><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
-        </div>
         <p id="hex-dialog-desc" class="dialog-text l10n">Bytes in hex, put into memory from 0000H. Spaces, commas and line breaks may separate them.</p>
         <textarea id="debug-data-input" rows="6" spellcheck="false" autofocus
                   autocapitalize="off" autocomplete="off"></textarea>
@@ -306,11 +305,11 @@ RUN</pre>
     </dialog>
 
     <dialog id="share-dialog" class="dialog" aria-labelledby="share-title">
+      <div class="dialog-head">
+        <h2 id="share-title" class="dialog-title l10n">Share a Link</h2>
+        <button class="icon-button dialog-close" type="button" data-close><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+      </div>
       <div class="dialog-body">
-        <div class="dialog-head">
-          <h2 id="share-title" class="dialog-title l10n">Share a Link</h2>
-          <button class="icon-button dialog-close" type="button" data-close><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
-        </div>
         <p id="share-off" class="dialog-text" hidden></p>
         <div id="share-choices">
           <p id="share-question" class="dialog-text l10n">What should the link open?</p>
@@ -338,12 +337,12 @@ RUN</pre>
     </dialog>
 
     <dialog id="about-dialog" class="dialog" aria-labelledby="about-title">
+      <div class="dialog-head">
+        <h2 id="about-title" class="dialog-title l10n">Altair 8800 Simulator</h2>
+        <button class="icon-button dialog-close" type="button" data-close><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+      </div>
       <div class="dialog-body">
-        <div class="dialog-head">
-          <h2 id="about-title" class="dialog-title l10n">Altair 8800 Simulator</h2>
-          <button class="icon-button dialog-close" type="button" data-close><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
-        </div>
-        <p class="dialog-text about-version"><span id="about-version" class="l10n">Version</span> <span id="app-version">1.4.0</span></p>
+        <p class="dialog-text about-version"><span id="about-version" class="l10n">Version</span> <span id="app-version"></span></p>
         <p id="about-desc" class="dialog-text l10n">An Altair 8800 you can switch on in a web page: its front panel, a teletype running Microsoft's 4K BASIC, and a debugger the real one never had.</p>
         <ul class="about-links">
           <li><a href="https://github.com/wixette/8800-simulator" target="_blank" rel="noopener"><span id="about-source" class="l10n">Source code on GitHub</span></a></li>
