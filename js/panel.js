@@ -380,12 +380,25 @@ panel.memoryMenuItems = function() {
  * @type {Object<string, string>}
  */
 panel.TOOLTIPS = {
+    // Load keeps its word on a desktop, but loses it on a phone.
+    'load-button': 'load-menu',
+    'dock-splitter': 'splitter-label',
     'mem-page-prev': 'mem-page-prev-title',
     'mem-page-next': 'mem-page-next-title',
     'share-button': 'share-menu',
     'switch-locale': 'language-menu',
     'about-button': 'about-button',
     'memory-button': 'debug-memory-title',
+};
+
+/**
+ * The name each menu's list gives a screen reader, as a message.
+ * @type {Object<string, string>}
+ */
+panel.LIST_LABELS = {
+    'load-list': 'load-menu',
+    'memory-list': 'debug-memory-title',
+    'locale-list': 'language-menu',
 };
 
 /**
@@ -410,6 +423,13 @@ panel.refreshPlaceholders = function() {
             if (id != 'memory-button') {
                 elem.setAttribute('aria-label', text);
             }
+        }
+    }
+    // The menus' lists, for a screen reader, in the current language.
+    for (let id in panel.LIST_LABELS) {
+        let elem = document.getElementById(id);
+        if (elem) {
+            elem.setAttribute('aria-label', l10n.getMessage(panel.LIST_LABELS[id]));
         }
     }
     var closers = document.querySelectorAll('.dialog-close');

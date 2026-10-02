@@ -92,6 +92,7 @@ test('every message the panel asks for by name exists', () => {
     // Ids kept in tables rather than written at a call.
     Object.values(panel.SHORT_REASONS).forEach((id) => asked.add(id));
     Object.values(panel.TOOLTIPS).forEach((id) => asked.add(id));
+    Object.values(panel.LIST_LABELS).forEach((id) => asked.add(id));
     for (const size of panel.MEM_SIZES) {
         asked.add('mem-size-' + size);
     }
@@ -233,7 +234,9 @@ test('the toolbar, the Debugger and the dialogs read as software', () => {
                     'about-dialog'].flatMap(labelsIn);
     assert.ok(labels.length >= 20, 'expected the menus, dialogs and dump');
     const all = messages();
-    for (const b of buttonsIn('tab-debug')) {
+    const debugButtons = buttonsIn('tab-debug');
+    assert.ok(debugButtons.length >= 2, 'expected Follow PC and Zero All Memory');
+    for (const b of debugButtons) {
         assert.strictEqual(b.translated, true, b.id + ' should translate');
     }
     for (const id of labels) {
@@ -253,14 +256,23 @@ test('a switch on the panel has one home', () => {
     // offer its switches again. The helper under the panel is the one
     // exception, being another way to reach them rather than a copy.
     const switches = ['OFF/ON', 'STOP', 'RUN', 'SINGLE STEP', 'EXAMINE',
-                      'EXAMINE NEXT', 'DEPOSIT', 'DEPOSIT NEXT', 'RESET'];
-    const normal = (text) => text.toUpperCase().replace(/-/g, ' ');
+                      'EXAMINE NEXT', 'DEPOSIT', 'DEPOSIT NEXT', 'RESET',
+                      'POWER'];
+    const normal = (text) => text.toUpperCase().replace(/-/g, ' ').trim();
+    const all = messages();
+    let checked = 0;
     for (const region of REGIONS.filter((id) => id != 'stage')) {
-        for (const b of buttonsIn(region)) {
-            assert.ok(!switches.includes(normal(b.text)),
-                      b.id + ' in ' + region + ' repeats a panel switch');
+        // Buttons by their text, and every translated label by its
+        // English, so that a <button> or a tab counts as much as a div.
+        const texts = buttonsIn(region).map((b) => [b.id, b.text])
+              .concat(labelsIn(region).map((id) => [id, all[id]['en']]));
+        for (const [id, text] of texts) {
+            checked++;
+            assert.ok(!switches.includes(normal(text)),
+                      id + ' in ' + region + ' repeats a panel switch');
         }
     }
+    assert.ok(checked > 60, 'expected every region to be read: ' + checked);
 });
 
 test('Share and the next instruction are where U2 put them', () => {
@@ -304,11 +316,11 @@ test('the dock comes back as it was left, and forgets old tabs', (t) => {
 });
 
 test('every shape of control the page can grey out is actually styled', () => {
-    // The controls are mostly .button divs, but the example menu is a
-    // real <button> inside a .dropdown. It carried the disabled class
-    // and looked completely available, because the rule named only
-    // .button. Nothing else in the suite can see a computed style, so
-    // this checks the selectors themselves.
+    // The controls are .button divs, items in a menu, and buttons in a
+    // dialog. The example menu's own button once carried the disabled
+    // class and looked completely available, because the rule named
+    // only .button. Nothing else in the suite can see a computed style,
+    // so this checks the selectors themselves.
     const css = sourceOf('css/style.css');
     const rules = css.match(/([^}]*)\{[^}]*\}/g)
           .filter((block) => /\.disabled[^{]*\{/.test(block));
@@ -316,8 +328,6 @@ test('every shape of control the page can grey out is actually styled', () => {
     const selectors = rules.map((rule) => rule.split('{')[0]).join(',');
     assert.match(selectors, /\.button\.disabled/,
                  'the .button controls must grey out');
-    assert.match(selectors, /\.dropdown\s*>?\s*button\.disabled/,
-                 'a menu button must grey out too');
     assert.match(selectors, /\.dropdown li\.disabled/,
                  'and so must an item inside a menu');
     assert.match(selectors, /\.dialog-button\.disabled/,

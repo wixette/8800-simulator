@@ -46,53 +46,12 @@ a {
     color: #6cf;
 }
 
-.h-box {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-}
-
-.v-box {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-}
-
-.justify-start {
-    justify-content: start;
-}
-
-.align-items-center {
-    align-items: center;
-}
-
-.m-4 {
-    margin: 4px;
-}
-
-.m-8 {
-    margin: 8px;
-}
-
 .mt-8 {
     margin-top: 8px;
 }
 
-
-.mr-8 {
-    margin-right: 8px;
-}
-
-.mb-8 {
-    margin-bottom: 8px;
-}
-
-.flex-grow-1 {
-    flex-grow: 1;
-}
-
-/* The toolbar: the title, then the menus for what is done once a
-   session (P4), then the helper and language on the right. */
+/* The toolbar: the title, the menus for what is done to the machine
+   (P4), then the app's own actions on the right (U3). */
 #toolbar {
     align-items: center;
     background-color: #2b2b2b;
@@ -142,10 +101,6 @@ a {
     background-color: var(--hover-bg);
     color: #fff;
     outline: none;
-}
-
-.tool-button.selected {
-    background-color: var(--open-bg);
 }
 
 .tool-value {
@@ -355,7 +310,8 @@ a {
 }
 
 /* Copy Link while there is nothing to copy: it still answers. */
-.dialog-button.disabled {
+.dialog-button.disabled,
+.dialog-button.primary.disabled:hover {
     background-color: #555;
     color: #999;
 }
@@ -474,18 +430,6 @@ a {
    line (D19). */
 .dropdown li.disabled {
     color: #999;
-}
-
-/* The seam between two kinds of entry - in the example menu, between
-   the programs that speak through the front panel and the ones that
-   speak through the teletype. A rule rather than a heading, because a
-   heading is one more thing for the arrow keys to have to step over. */
-.dropdown li.dropdown-group-start {
-    border-top: 1px solid #bbb;
-    /* The 4px of air above the rule is margin, so the 4px below it has
-       to be extra padding: same gap either side of the seam. */
-    margin-top: 4px;
-    padding-top: 12px;
 }
 
 .dropdown li:hover,
@@ -807,13 +751,6 @@ a {
     padding: 8px 12px;
 }
 
-.comments {
-    color: #999;
-    font-size: 14px;
-    line-height: 1.5em;
-    padding: 0 10px;
-}
-
 /* The Debugger: the CPU across the top - its registers and the
    instruction it will run next, side by side and the same height,
    stacked in a narrow dock - and memory under them, the whole width. */
@@ -1071,8 +1008,7 @@ a {
    button that is both reads as unavailable. The example menu is a real
    <button> inside a .dropdown, so both shapes of control are named. */
 .button.disabled,
-.button.disabled.selected,
-.dropdown > button.disabled {
+.button.disabled.selected {
     background-color: #bbb;
     color: #777;
     font-weight: normal;
@@ -1100,7 +1036,8 @@ a {
 
 /* Copy Link, for a moment after it has copied. The same green as a
    machine that is on. */
-.button.copied {
+.dialog-button.copied,
+.dialog-button.copied:hover {
     background-color: #3ddc63;
     color: #123;
 }
@@ -1126,6 +1063,8 @@ a {
     overflow-x: auto;
     overflow-y: auto;
     padding: 5px 10px;
+    /* For the empty paper's explanation, centred in it. */
+    position: relative;
 }
 
 /* The keys a PC keyboard lacks, as the paper's toolbar. */
@@ -1139,10 +1078,6 @@ a {
 }
 
 /* The empty paper's own explanation, until anything prints. */
-#tty-paper {
-    position: relative;
-}
-
 .tty-empty {
     box-sizing: border-box;
     color: #8a8270;

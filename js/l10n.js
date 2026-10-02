@@ -126,6 +126,18 @@ l10n.MESSAGES = {
         'ko': '메모리:',
     },
 
+    'splitter-label': {
+        'en': 'Drag to share the height between the panel and the tools',
+        'es': 'Arrastra para repartir la altura entre el panel y las herramientas',
+        'fr': 'Faites glisser pour partager la hauteur entre le panneau et les outils',
+        'de': 'Ziehen, um die Höhe zwischen Frontplatte und Werkzeugen aufzuteilen',
+        'it': 'Trascina per dividere l’altezza tra il pannello e gli strumenti',
+        'zh': '拖动以分配面板和工具的高度',
+        'zh-TW': '拖曳以分配面板和工具的高度',
+        'ja': 'ドラッグしてパネルとツールの高さを配分',
+        'ko': '드래그해 패널과 도구의 높이를 나누세요',
+    },
+
     'dock-hide': {
         'en': 'Fold the tools away',
         'es': 'Recoger las herramientas',
