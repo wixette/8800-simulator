@@ -85,8 +85,15 @@ test('every message the panel asks for by name exists', () => {
     for (const m of panelSource.matchAll(/setStatus\(\s*'([^']+)'/g)) {
         asked.add(m[1]);
     }
-    for (const m of panelSource.matchAll(/getMessage\(\s*'([^']+)'/g)) {
+    // A whole id, not the front of one being built with +.
+    for (const m of panelSource.matchAll(/(?:getMessage|msg)\(\s*'([^']+)'\s*\)/g)) {
         asked.add(m[1]);
+    }
+    // Ids kept in tables rather than written at a call.
+    Object.values(panel.SHORT_REASONS).forEach((id) => asked.add(id));
+    Object.values(panel.TOOLTIPS).forEach((id) => asked.add(id));
+    for (const size of panel.MEM_SIZES) {
+        asked.add('mem-size-' + size);
     }
     // The reasons a control gives for being unavailable.
     for (const m of panelSource.matchAll(/\{id:\s*'([^']+)',\s*params:/g)) {
@@ -110,7 +117,9 @@ test('every Debugger control that can be unavailable can say why', () => {
     assert.ok(controls.length >= 7, 'expected every control listed');
     const html = sourceOf('index.html');
     for (const id of new Set(controls)) {
-        assert.ok(html.includes('id="' + id + '"'),
+        // An item of the Load menu is built as the menu opens.
+        assert.ok(html.includes('id="' + id + '"') ||
+                  panel.MENU_CONTROLS.includes(id),
                   id + ' is given a reason but is not on the page');
     }
     const all = messages();
@@ -126,7 +135,35 @@ test('every Debugger control that can be unavailable can say why', () => {
  * @type {Array<string>}
  */
 const REGIONS = ['toolbar', 'stage', 'dock', 'tab-tty', 'tab-debug',
-                 'tab-ref', 'status-bar'];
+                 'tab-ref', 'status-bar', 'hex-dialog', 'share-dialog',
+                 'about-dialog'];
+
+/**
+ * The part of index.html one region takes up.
+ * @param {string} regionId One of REGIONS.
+ * @return {string} Its markup.
+ */
+function regionOf(regionId) {
+    const html = sourceOf('index.html');
+    const start = html.indexOf('id="' + regionId + '"');
+    assert.ok(start > 0, regionId + ' is not in the page');
+    const rest = REGIONS
+          .map((id) => html.indexOf('id="' + id + '"'))
+          .filter((at) => at > start);
+    return html.slice(start, rest.length ? Math.min(...rest) : html.length);
+}
+
+/**
+ * The translated labels in one region: the ids of its elements marked
+ * l10n.
+ * @param {string} regionId One of REGIONS.
+ * @return {Array<string>}
+ */
+function labelsIn(regionId) {
+    const tags = regionOf(regionId).match(
+        /<[^>]*\bclass="[^"]*\bl10n\b[^"]*"[^>]*>/g) || [];
+    return tags.map((tag) => tag.match(/\bid="([^"]+)"/)[1]);
+}
 
 /**
  * The text of every button in one region of index.html.
@@ -187,16 +224,20 @@ test('the Teletype speaks in capitals, because the ASR-33 had no others', () => 
     }
 });
 
-test('the toolbar and the Debugger read as software, not as a machine', () => {
+test('the toolbar, the Debugger and the dialogs read as software', () => {
     // Tooling the Altair never had, so it follows software convention:
     // Title Case, like the headings it sits under. Shouting here would
     // borrow the machine's voice for something that is not the machine
     // (P5 in docs/ui-design.md).
-    const buttons = buttonsIn('toolbar').concat(buttonsIn('tab-debug'));
-    assert.ok(buttons.length >= 10, 'expected the loaders and dump controls');
+    const labels = ['toolbar', 'tab-debug', 'hex-dialog', 'share-dialog',
+                    'about-dialog'].flatMap(labelsIn);
+    assert.ok(labels.length >= 20, 'expected the menus, dialogs and dump');
     const all = messages();
-    for (const b of buttons) {
+    for (const b of buttonsIn('tab-debug')) {
         assert.strictEqual(b.translated, true, b.id + ' should translate');
+    }
+    for (const id of labels) {
+        const b = {id: id};
         const english = all[b.id]['en'];
         // "4 KB", "Load 4K BASIC" and "Follow PC" keep their initialisms,
         // so the test is that the label is not uppercase throughout.
@@ -223,13 +264,14 @@ test('a switch on the panel has one home', () => {
 });
 
 test('Share and the next instruction are where U2 put them', () => {
-    // Copying a link is done once in a while, so it is a toolbar menu
-    // (P4); the instruction at PC says where the CPU is, so it sits
+    // Copying a link is done once in a while, so it is reached from the
+    // toolbar (P4); the instruction at PC says where the CPU is, so it sits
     // with the registers rather than under the memory dump.
     const html = sourceOf('index.html');
     const at = (id) => html.indexOf('id="' + id + '"');
-    assert.ok(at('copy-link') > at('share-popover') &&
-              at('copy-link') < at('stage'), 'Copy Link is in the Share menu');
+    assert.ok(at('copy-link') > at('share-dialog') &&
+              at('copy-link') < at('about-dialog'),
+              'Copy Link is in the Share dialog');
     assert.ok(at('instr-pane') > at('cpu-dump') &&
               at('instr-pane') < at('mem-dump'),
               'the next instruction is beside the registers');
@@ -268,14 +310,18 @@ test('every shape of control the page can grey out is actually styled', () => {
     // .button. Nothing else in the suite can see a computed style, so
     // this checks the selectors themselves.
     const css = sourceOf('css/style.css');
-    const rule = css.match(/([^}]*)\{[^}]*\}/g)
-          .find((block) => /\.disabled[^{]*\{/.test(block));
-    assert.ok(rule, 'style.css should have a rule for .disabled');
-    const selectors = rule.split('{')[0];
+    const rules = css.match(/([^}]*)\{[^}]*\}/g)
+          .filter((block) => /\.disabled[^{]*\{/.test(block));
+    assert.ok(rules.length, 'style.css should have a rule for .disabled');
+    const selectors = rules.map((rule) => rule.split('{')[0]).join(',');
     assert.match(selectors, /\.button\.disabled/,
                  'the .button controls must grey out');
     assert.match(selectors, /\.dropdown\s*>?\s*button\.disabled/,
-                 'the example menu button must grey out too');
+                 'a menu button must grey out too');
+    assert.match(selectors, /\.dropdown li\.disabled/,
+                 'and so must an item inside a menu');
+    assert.match(selectors, /\.dialog-button\.disabled/,
+                 'and a button in a dialog');
 });
 
 test('the beep belongs to the OFF/ON switch, not to every power-up', () => {
@@ -314,7 +360,7 @@ test('every way of loading tells the status line whether it did that', () => {
     // own up to it (D23), or the note is back to appearing for reasons
     // the student cannot see. These functions want a document, so this
     // reads them rather than running them.
-    const ways = ['buildExampleMenu', 'onLoadBasic', 'onBinaryFileChosen',
+    const ways = ['loadExample', 'onLoadBasic', 'onBinaryFileChosen',
                   'debugLoadData'];
     for (const name of ways) {
         assert.match(panel[name].toString(), /poweredOn/,

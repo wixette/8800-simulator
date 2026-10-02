@@ -31,95 +31,51 @@
          (docs/ui-design.md, U1). -->
     <div id="app">
 
+      <!-- Actions on the machine on the left, actions on the app on the
+           right. Icons are Material Icons (Apache License 2.0), inline
+           so that the page needs nothing from the network. -->
       <header id="toolbar">
         <div id="header-title" class="l10n">Altair 8800 Simulator</div>
 
-        <!-- Occasional actions live in menus (P4). Each holds the controls
-             that used to have a section of the Debugger to themselves. -->
-        <div class="popover-wrap">
+        <div id="load-dropdown" class="dropdown">
           <button id="load-button" class="tool-button" type="button"
-                  aria-haspopup="true" aria-expanded="false">
-            <span id="load-menu" class="l10n">Load</span>
+                  aria-haspopup="listbox" aria-expanded="false">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
+            <span id="load-menu" class="tool-label l10n">Load</span>
             <span class="dropdown-arrow" aria-hidden="true">&#9662;</span>
           </button>
-          <div id="load-popover" class="popover" hidden>
-            <div id="debug-rom-title" class="section-label l10n">Load a Program</div>
-            <div class="h-box align-items-center">
-              <div id="load-basic" class="button m-4 l10n">Load 4K BASIC</div>
-              <div id="example-menu" class="dropdown m-4">
-                <button id="example-button" type="button" aria-haspopup="listbox"
-                        aria-expanded="false">
-                  <span id="example-label" class="dropdown-label"></span>
-                  <span class="dropdown-arrow" aria-hidden="true">&#9662;</span>
-                </button>
-                <ul id="example-list" role="listbox" hidden></ul>
-              </div>
-            </div>
-            <div id="debug-load-data-title" class="section-label l10n">Load Your Own</div>
-            <div class="h-box align-items-center">
-              <input id="debug-data-input" class="flex-grow-1 m-4" type="text">
-              <div id="debug-load-data" class="button m-4 l10n">Load Data</div>
-            </div>
-            <div class="h-box align-items-center">
-              <div id="load-binary" class="button m-4 l10n">Load Binary File</div>
-              <input id="binary-file" type="file" hidden>
-            </div>
-          </div>
+          <ul id="load-list" role="listbox" hidden></ul>
         </div>
 
-        <div class="popover-wrap">
+        <div id="memory-dropdown" class="dropdown">
           <button id="memory-button" class="tool-button" type="button"
-                  aria-haspopup="true" aria-expanded="false">
-            <span id="memory-menu" class="l10n">Memory</span>
-            <span id="memory-size" class="tool-value"></span>
+                  aria-haspopup="listbox" aria-expanded="false">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 9H9v6h6V9zm-2 4h-2v-2h2v2zm8-2V9h-2V7c0-1.1-.9-2-2-2h-2V3h-2v2h-2V3H9v2H7c-1.1 0-2 .9-2 2v2H3v2h2v2H3v2h2v2c0 1.1.9 2 2 2h2v2h2v-2h2v2h2v-2h2c1.1 0 2-.9 2-2v-2h2v-2h-2v-2h2zm-4 6H7V7h10v10z"/></svg>
+            <span id="memory-menu" class="tool-label l10n">Memory:</span>
+            <span id="memory-size" class="dropdown-label tool-value"></span>
             <span class="dropdown-arrow" aria-hidden="true">&#9662;</span>
           </button>
-          <div id="memory-popover" class="popover" hidden>
-            <div id="debug-memory-title" class="section-label l10n">Installed Memory</div>
-            <div class="v-box">
-              <div id="mem-size-256" class="button m-4 mem-size l10n">256 B · as it shipped</div>
-              <div id="mem-size-4096" class="button m-4 mem-size l10n">4 KB · one 88-4MCS</div>
-              <div id="mem-size-8192" class="button m-4 mem-size l10n">8 KB · two 88-4MCS</div>
-            </div>
-          </div>
+          <ul id="memory-list" role="listbox" hidden></ul>
         </div>
-
-        <!-- A link to what is in the machine (U2). The format behind it
-             is a public contract: see js/link.js. -->
-        <div class="popover-wrap">
-          <button id="share-button" class="tool-button" type="button"
-                  aria-haspopup="true" aria-expanded="false">
-            <span id="share-menu" class="l10n">Share</span>
-            <span class="dropdown-arrow" aria-hidden="true">&#9662;</span>
-          </button>
-          <div id="share-popover" class="popover" hidden>
-            <div id="share-desc" class="popover-note l10n">A link that opens the simulator with what is in memory now.</div>
-            <label class="h-box align-items-center m-4 share-option">
-              <input id="copy-link-state" type="checkbox" class="mr-8">
-              <span id="copy-link-state-label" class="l10n">Include registers and switches</span>
-            </label>
-            <div class="h-box">
-              <div id="copy-link" class="button m-4 l10n">Copy Link</div>
-            </div>
-          </div>
-        </div>
+        <input id="binary-file" type="file" hidden>
 
         <div class="toolbar-spacer"></div>
 
-        <!-- The Switch Board Helper's large buttons, for touch screens.
-             Not a copy of the panel's switches but another way to reach
-             them, so it is offered rather than shown (P2). -->
-        <div id="helper-toggle" class="tool-button l10n" role="button"
-             aria-pressed="false">Big Switches</div>
+        <button id="share-button" class="icon-button" type="button"
+                aria-haspopup="dialog"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg></button>
 
         <div id="locale-menu" class="dropdown">
-          <button id="switch-locale" type="button" aria-haspopup="listbox"
-                  aria-expanded="false" aria-label="Language">
-            <span id="locale-current" class="dropdown-label">English</span>
+          <button id="switch-locale" class="tool-button" type="button"
+                  aria-haspopup="listbox" aria-expanded="false">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/></svg>
+            <span id="locale-current" class="dropdown-label tool-code">EN</span>
             <span class="dropdown-arrow" aria-hidden="true">&#9662;</span>
           </button>
           <ul id="locale-list" role="listbox" aria-label="Language" hidden></ul>
         </div>
+
+        <button id="about-button" class="icon-button" type="button"
+                aria-haspopup="dialog"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg></button>
       </header>
 
       <main id="stage">
@@ -325,10 +281,90 @@ RUN</pre>
 
       <footer id="status-bar">
         <span id="status-text"></span>
-        <span class="status-credit">&copy; 2020-2026 wixette
-          <a href="https://github.com/wixette/8800-simulator" target="_blank" rel="noopener"><span id="back-home" class="l10n">Source Code</span></a></span>
       </footer>
     </div>
+
+
+    <!-- Dialogs: for what needs more than a choice from a menu. -->
+    <dialog id="hex-dialog" class="dialog" aria-labelledby="hex-dialog-title">
+      <div class="dialog-body">
+        <div class="dialog-head">
+          <h2 id="hex-dialog-title" class="dialog-title l10n">Load Hex Bytes</h2>
+          <button class="icon-button dialog-close" type="button" data-close><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+        </div>
+        <p id="hex-dialog-desc" class="dialog-text l10n">Bytes in hex, put into memory from 0000H. Spaces, commas and line breaks may separate them.</p>
+        <textarea id="debug-data-input" rows="6" spellcheck="false" autofocus
+                  autocapitalize="off" autocomplete="off"></textarea>
+        <p id="hex-dialog-error" class="dialog-error" hidden></p>
+        <div class="dialog-actions">
+          <button id="hex-cancel" class="dialog-button l10n" type="button" data-close>Cancel</button>
+          <button id="debug-load-data" class="dialog-button primary l10n" type="button">Load Data</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="share-dialog" class="dialog" aria-labelledby="share-title">
+      <div class="dialog-body">
+        <div class="dialog-head">
+          <h2 id="share-title" class="dialog-title l10n">Share a Link</h2>
+          <button class="icon-button dialog-close" type="button" data-close><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+        </div>
+        <p id="share-off" class="dialog-text" hidden></p>
+        <div id="share-choices">
+          <p id="share-question" class="dialog-text l10n">What should the link open?</p>
+          <label class="dialog-option">
+            <input id="share-program" type="radio" name="share-what" checked>
+            <span class="dialog-option-text">
+              <span id="share-program-label" class="dialog-option-title l10n">The program, at RESET</span>
+              <span id="share-program-desc" class="dialog-option-desc l10n">Ready to RUN, as a fresh machine would be.</span>
+            </span>
+          </label>
+          <label class="dialog-option">
+            <input id="copy-link-state" type="radio" name="share-what">
+            <span class="dialog-option-text">
+              <span id="share-state-label" class="dialog-option-title l10n">The machine as it is now</span>
+              <span id="share-state-desc" class="dialog-option-desc"></span>
+            </span>
+          </label>
+          <input id="share-link" class="dialog-field" type="text" readonly
+                 aria-labelledby="share-title">
+        </div>
+        <div class="dialog-actions">
+          <button id="copy-link" class="dialog-button primary l10n" type="button" autofocus>Copy Link</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="about-dialog" class="dialog" aria-labelledby="about-title">
+      <div class="dialog-body">
+        <div class="dialog-head">
+          <h2 id="about-title" class="dialog-title l10n">Altair 8800 Simulator</h2>
+          <button class="icon-button dialog-close" type="button" data-close><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+        </div>
+        <p class="dialog-text about-version"><span id="about-version" class="l10n">Version</span> <span id="app-version">1.4.0</span></p>
+        <p id="about-desc" class="dialog-text l10n">An Altair 8800 you can switch on in a web page: its front panel, a teletype running Microsoft's 4K BASIC, and a debugger the real one never had.</p>
+        <ul class="about-links">
+          <li><a href="https://github.com/wixette/8800-simulator" target="_blank" rel="noopener"><span id="about-source" class="l10n">Source code on GitHub</span></a></li>
+          <li><a href="https://github.com/wixette/8800-simulator/issues" target="_blank" rel="noopener"><span id="about-issues" class="l10n">Report a problem</span></a></li>
+          <li><a href="https://github.com/wixette/8800-simulator/graphs/contributors" target="_blank" rel="noopener"><span id="about-contributors" class="l10n">Contributors</span></a></li>
+        </ul>
+        <h3 id="about-licences" class="dialog-subtitle l10n">Licences</h3>
+        <ul class="about-licences">
+          <li><span id="about-license-app" class="l10n">The simulator:</span>
+            <a href="https://github.com/wixette/8800-simulator/blob/master/LICENSE" target="_blank" rel="noopener">Apache License 2.0</a></li>
+          <li><span id="about-license-rom" class="l10n">The 4K BASIC tape is Microsoft's, and not covered by that licence:</span>
+            <a href="https://github.com/wixette/8800-simulator/blob/master/roms/NOTICE" target="_blank" rel="noopener">roms/NOTICE</a></li>
+          <li><span id="about-license-cpu" class="l10n">The 8080 CPU core is 8080js by Martin Maly, under a BSD licence:</span>
+            <a href="https://github.com/maly/8080js" target="_blank" rel="noopener">github.com/maly/8080js</a></li>
+          <li><span id="about-license-icons" class="l10n">The icons are Google's Material Icons:</span>
+            <a href="https://github.com/google/material-design-icons" target="_blank" rel="noopener">Apache License 2.0</a></li>
+        </ul>
+        <div class="dialog-actions">
+          <button id="about-references" class="dialog-button l10n" type="button">Further Reading</button>
+          <button id="about-ok" class="dialog-button primary l10n" type="button" data-close autofocus>Close</button>
+        </div>
+      </div>
+    </dialog>
 
     <audio id="sound-beepbeep" src="audio/beepbeep.mp3"></audio>
     <audio id="sound-switch" src="audio/switch.mp3"></audio>
@@ -338,7 +374,7 @@ RUN</pre>
     <script src="js/8080.js"></script>
     <script src="js/sim8800.js"></script>
     <script src="js/dropdown.js"></script>
-    <script src="js/popover.js"></script>
+    <script src="js/dialog.js"></script>
     <script src="js/listing.js"></script>
     <script src="js/link.js"></script>
     <script src="js/sio.js"></script>

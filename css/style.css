@@ -134,33 +134,43 @@ a {
     background-color: #444;
 }
 
-/* A toggle in the toolbar that is on, such as Big Switches. */
-#helper-toggle.selected {
-    background-color: #444;
-    color: #f90;
-}
-
 .tool-value {
     color: #f90;
 }
 
-/* A toolbar menu's panel of controls. See js/popover.js. */
-.popover-wrap {
-    position: relative;
+/* A toolbar action shown as an icon alone: Share, About. Its name is in
+   a tooltip and on the element (panel.TOOLTIPS). */
+.icon-button {
+    align-items: center;
+    background: none;
+    border: 0;
+    border-radius: 50%;
+    color: #ddd;
+    cursor: pointer;
+    display: flex;
+    height: 34px;
+    justify-content: center;
+    padding: 0;
+    width: 34px;
 }
 
-.popover {
-    background-color: #2b2b2b;
-    border: 1px solid #444;
-    border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-    left: 0;
-    max-width: calc(100vw - 20px);
-    min-width: 280px;
-    padding: 8px;
-    position: absolute;
-    top: calc(100% + 6px);
-    z-index: 20;
+.icon-button:hover,
+.icon-button:focus-visible {
+    background-color: #444;
+    color: #fff;
+    outline: none;
+}
+
+.icon {
+    fill: currentColor;
+    flex: none;
+    height: 20px;
+    width: 20px;
+}
+
+/* The language's short code beside its icon. */
+.tool-code {
+    font-size: 13px;
 }
 
 /* A heading inside a menu or a tool. Small and quiet: the dock is a
@@ -173,25 +183,187 @@ a {
     white-space: nowrap;
 }
 
-.popover .section-label:first-child {
-    margin-top: 0;
+/* Dialogs: for what needs more than a choice from a menu. A title,
+   what it is for, the controls, and the actions at the bottom right.
+   See js/dialog.js. The padding is on the body, so that a click on the
+   <dialog> itself can only be on the backdrop. */
+.dialog {
+    background-color: #2b2b2b;
+    border: 1px solid #444;
+    border-radius: 12px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+    color: #eee;
+    max-width: calc(100vw - 24px);
+    padding: 0;
+    width: 480px;
 }
 
-/* A sentence saying what a menu's controls are for. */
-.popover-note {
+.dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.55);
+}
+
+.dialog-body {
+    padding: 16px 20px 18px 20px;
+}
+
+.dialog-head {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.dialog-title {
+    font-size: 17px;
+    margin: 0;
+}
+
+.dialog-close {
+    margin-right: -8px;
+}
+
+.dialog-subtitle {
+    color: #999;
+    font-size: 13px;
+    font-weight: normal;
+    margin: 16px 0 6px 0;
+}
+
+.dialog-text {
     color: #ccc;
     font-size: 14px;
     line-height: 1.5;
-    margin: 0 4px 6px 4px;
+    margin: 0 0 12px 0;
 }
 
-/* The Share menu's checkbox, and the words beside it, as one thing to
-   press. */
-.share-option {
+.dialog-error {
+    color: #ffb4b4;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 8px 0 0 0;
+}
+
+#debug-data-input,
+.dialog-field {
+    background-color: #1f1f1f;
+    border: 1px solid #555;
+    border-radius: 8px;
+    box-sizing: border-box;
+    color: #eee;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 8px 10px;
+    width: 100%;
+}
+
+#debug-data-input {
+    resize: vertical;
+}
+
+#debug-data-input:focus,
+.dialog-field:focus {
+    border-color: #f90;
+    outline: none;
+}
+
+/* A choice with a line saying what it means, under its name. */
+.dialog-option {
+    align-items: flex-start;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    gap: 10px;
+    margin: 0 -8px 4px -8px;
+    padding: 8px;
+}
+
+.dialog-option:hover {
+    background-color: #333;
+}
+
+.dialog-option input {
+    accent-color: #f90;
+    margin: 3px 0 0 0;
+}
+
+.dialog-option-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dialog-option-title {
+    font-size: 14px;
+}
+
+.dialog-option-desc {
+    color: #999;
+    font-size: 13px;
+}
+
+#share-link {
+    margin-top: 8px;
+}
+
+.dialog-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 16px;
+}
+
+.dialog-button {
+    background-color: #3a3a3a;
+    border: 0;
+    border-radius: 8px;
     color: #eee;
     cursor: pointer;
-    flex-wrap: nowrap;
+    font-family: inherit;
     font-size: 14px;
+    padding: 7px 16px;
+}
+
+.dialog-button:hover {
+    background-color: #474747;
+}
+
+.dialog-button.primary {
+    background-color: #f90;
+    color: #222;
+    font-weight: bold;
+}
+
+.dialog-button.primary:hover {
+    background-color: #ffad33;
+}
+
+/* Copy Link while there is nothing to copy: it still answers. */
+.dialog-button.disabled {
+    background-color: #555;
+    color: #999;
+}
+
+.about-version {
+    color: #999;
+}
+
+.about-links,
+.about-licences {
+    font-size: 14px;
+    line-height: 1.5;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.about-links li,
+.about-licences li {
+    padding: 4px 0;
+}
+
+.about-licences li {
+    color: #ccc;
 }
 
 /* A drop down the page draws itself: a button, and a list under it.
@@ -250,10 +422,35 @@ a {
 }
 
 .dropdown li {
+    align-items: baseline;
     cursor: pointer;
+    display: flex;
     font-size: 14px;
+    gap: 24px;
+    justify-content: space-between;
     padding: 8px 18px;
     white-space: nowrap;
+}
+
+/* What an item is, or why it is grey, quieter at its right. */
+.dropdown-detail {
+    color: #777;
+    font-size: 12px;
+}
+
+/* Names the group of items under it. Not an item: the arrow keys step
+   over it. */
+.dropdown li.dropdown-heading {
+    color: #777;
+    cursor: default;
+    font-size: 12px;
+    padding: 10px 18px 4px 18px;
+}
+
+/* An item that cannot be used just now. It still answers, in the status
+   line (D19). */
+.dropdown li.disabled {
+    color: #999;
 }
 
 /* The seam between two kinds of entry - in the example menu, between
@@ -274,19 +471,35 @@ a {
     outline: none;
 }
 
+.dropdown li.dropdown-heading:hover {
+    background: none;
+}
+
 .dropdown li[aria-selected='true'] {
     background-color: #369;
     color: #6cf;
 }
 
-/* The language button sits in the dark toolbar, so it keeps its own
-   colours and a smaller size. */
-#switch-locale {
-    background-color: #369;
-    color: #6cf;
-    font-size: 12px;
+/* The toolbar's menu buttons are tool buttons, not the light buttons
+   a dropdown has elsewhere. */
+#toolbar .dropdown > .tool-button {
+    background: none;
+    border-radius: 6px;
+    color: #eee;
     height: auto;
-    padding: 6px 12px 6px 14px;
+    padding: 5px 10px;
+}
+
+#toolbar .dropdown > .tool-button:hover,
+#toolbar .dropdown > .tool-button[aria-expanded="true"] {
+    background-color: #444;
+}
+
+/* The menus open under the toolbar's own buttons, which are on the
+   right as often as the left. */
+#load-list,
+#memory-list {
+    min-width: 260px;
 }
 
 /* Anchored to the button's right edge: it sits at the right of the
@@ -466,13 +679,6 @@ a {
     font-size: 14px;
     line-height: 1.5em;
     padding: 0 10px;
-}
-
-#debug-data-input {
-    background-color: #eee;
-    border-radius: 10px;
-    line-height: 24px;
-    padding: 5px 10px;
 }
 
 /* The Debugger: the CPU on the left, memory on the right, stacked when
@@ -838,11 +1044,6 @@ a {
     flex: 1;
 }
 
-.status-credit {
-    color: #888;
-    font-size: 12px;
-    white-space: nowrap;
-}
 
 #status-bar.status-warn {
     background-color: #5a4a1a;
@@ -887,7 +1088,9 @@ a {
         flex: none;
     }
 
-    .status-credit {
+    /* The labels go, the icons and the installed size stay. */
+    #toolbar .tool-label,
+    #toolbar .tool-code {
         display: none;
     }
 

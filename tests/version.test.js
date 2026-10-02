@@ -75,3 +75,15 @@ test('the package version is not behind the newest release tag', () => {
         'package.json says ' + VERSION + ', behind the newest release tag '
             + newest + '. Bump it to the version being prepared.');
 });
+
+test('the About dialog shows the version the package is', () => {
+    // The page has no build step to stamp it in, so it is written into
+    // index.html by hand, and this is what notices when it is not.
+    const html = require('node:fs').readFileSync(
+        path.join(ROOT, 'index.html'), 'utf8');
+    const shown = html.match(/id="app-version">([^<]*)</);
+    assert.ok(shown, 'index.html should have an #app-version');
+    assert.strictEqual(shown[1], VERSION,
+                       'index.html shows ' + shown[1] + ', package.json says '
+                       + VERSION);
+});

@@ -27,17 +27,25 @@
  * means the keys a native menu would have handled - arrows, Enter,
  * Escape, Tab - have to be handled here.
  *
- * Expects a root element holding a <button> with a label element
- * inside it, and a <ul role="listbox">. See index.html.
+ * A menu holds items and nothing else (docs/ui-design.md): no text
+ * boxes, no buttons, no menu opening over it. Anything that needs more
+ * than a choice is an item that opens a dialog.
+ *
+ * Expects a root element holding a <button> and a <ul role="listbox">,
+ * and optionally an element with the class dropdown-label inside the
+ * button for setLabel(). See index.html.
  */
 class Dropdown {
     /**
      * @param {string} rootId Id of the element holding the button and
      *     the list.
      * @param {function(string)} onSelect Called with the value of
-     *     whichever item was chosen.
+     *     whichever item was chosen - an unavailable one too, so that it
+     *     can say why it is unavailable (D19).
+     * @param {function()=} onOpen Called each time the list is about to
+     *     open, for a menu whose items depend on the moment.
      */
-    constructor(rootId, onSelect) {
+    constructor(rootId, onSelect, onOpen) {
         this.root = document.getElementById(rootId);
         if (!this.root) {
             return;
@@ -46,6 +54,7 @@ class Dropdown {
         this.label = this.root.querySelector('.dropdown-label');
         this.list = this.root.querySelector('ul');
         this.onSelect = onSelect;
+        this.onOpen = onOpen || null;
 
         var self = this;
         this.button.addEventListener('click', function(event) {
@@ -72,10 +81,15 @@ class Dropdown {
 
     /**
      * Fills the list.
-     * @param {Array<{value: string, label: string,
-     *     startsGroup: (boolean|undefined)}>} items The choices. An
-     *     item marked startsGroup gets a rule above it, and is otherwise
-     *     an ordinary item for the arrow keys.
+     * @param {Array<{value: (string|undefined), label: string,
+     *     detail: (string|undefined), heading: (boolean|undefined),
+     *     disabled: (boolean|undefined),
+     *     startsGroup: (boolean|undefined)}>} items The choices, in
+     *     order. An item marked heading names the group below it and
+     *     cannot be chosen; the arrow keys step over it. An item marked
+     *     startsGroup gets a rule above it. A disabled one is greyed but
+     *     still answers, and its detail - quieter text at its right -
+     *     is the place to say why.
      */
     setItems(items) {
         if (!this.list) {
@@ -85,12 +99,32 @@ class Dropdown {
         this.list.textContent = '';
         for (let i = 0; i < items.length; i++) {
             let item = document.createElement('li');
+            if (items[i].startsGroup) {
+                item.classList.add('dropdown-group-start');
+            }
+            if (items[i].heading) {
+                item.setAttribute('role', 'presentation');
+                item.classList.add('dropdown-heading');
+                item.textContent = items[i].label;
+                this.list.appendChild(item);
+                continue;
+            }
             item.setAttribute('role', 'option');
             item.setAttribute('tabindex', '-1');
             item.dataset.value = items[i].value;
-            item.textContent = items[i].label;
-            if (items[i].startsGroup) {
-                item.className = 'dropdown-group-start';
+            let label = document.createElement('span');
+            label.className = 'dropdown-item-label';
+            label.textContent = items[i].label;
+            item.appendChild(label);
+            if (items[i].detail) {
+                let detail = document.createElement('span');
+                detail.className = 'dropdown-detail';
+                detail.textContent = items[i].detail;
+                item.appendChild(detail);
+            }
+            if (items[i].disabled) {
+                item.classList.add('disabled');
+                item.setAttribute('aria-disabled', 'true');
             }
             item.addEventListener('click', function() {
                 self.close();
@@ -98,6 +132,21 @@ class Dropdown {
             }, false);
             this.list.appendChild(item);
         }
+    }
+
+    /**
+     * @return {Array<Element>} The items that can be chosen, headings
+     *     left out.
+     */
+    options() {
+        return Array.from(this.list.querySelectorAll('[role="option"]'));
+    }
+
+    /**
+     * @return {boolean} Whether the list is open.
+     */
+    isOpen() {
+        return !!this.list && !this.list.hidden;
     }
 
     /**
@@ -119,7 +168,7 @@ class Dropdown {
         if (!this.list) {
             return;
         }
-        for (const item of this.list.children) {
+        for (const item of this.options()) {
             item.setAttribute('aria-selected',
                               item.dataset.value === value ? 'true' : 'false');
         }
@@ -130,7 +179,10 @@ class Dropdown {
      * menu holds one.
      */
     open() {
-        if (!this.list.children.length) {
+        if (this.onOpen) {
+            this.onOpen();
+        }
+        if (!this.options().length) {
             // An empty menu does not open; whoever left it empty says
             // why.
             return;
@@ -168,12 +220,21 @@ class Dropdown {
         if (!this.list || this.list.hidden) {
             return;
         }
-        var items = Array.from(this.list.children);
+        var items = this.options();
         var at = items.indexOf(document.activeElement);
-        if (event.key === 'Escape' || event.key === 'Tab') {
+        if (event.key === 'Tab') {
+            this.close();
+            return;
+        }
+        // A key the menu takes is the menu's alone: Escape here must not
+        // also reach the teletype, where it is KILL LINE.
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopImmediatePropagation();
             this.close();
         } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
             event.preventDefault();
+            event.stopImmediatePropagation();
             let step = event.key === 'ArrowDown' ? 1 : -1;
             // From nothing, Down steps in at the top and Up at the
             // bottom.
@@ -183,6 +244,7 @@ class Dropdown {
         } else if (event.key === 'Enter' || event.key === ' ') {
             if (at >= 0) {
                 event.preventDefault();
+                event.stopImmediatePropagation();
                 let value = items[at].dataset.value;
                 this.close();
                 this.onSelect(value);

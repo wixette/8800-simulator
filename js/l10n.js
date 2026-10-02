@@ -57,6 +57,24 @@ l10n.LOCALE_NAMES = {
 };
 
 /**
+ * What the language button shows for each locale: short, since the
+ * button sits in the toolbar beside an icon that already says
+ * "language". The menu itself lists the full names.
+ * @type {Object}
+ */
+l10n.LOCALE_SHORT = {
+    'en': 'EN',
+    'es': 'ES',
+    'fr': 'FR',
+    'de': 'DE',
+    'it': 'IT',
+    'zh': '简',
+    'zh-TW': '繁',
+    'ja': '日',
+    'ko': '한',
+};
+
+/**
  * Localized messages.
  */
 l10n.MESSAGES = {
@@ -97,27 +115,15 @@ l10n.MESSAGES = {
     },
 
     'memory-menu': {
-        'en': 'Memory',
-        'es': 'Memoria',
-        'fr': 'Mémoire',
-        'de': 'Speicher',
-        'it': 'Memoria',
-        'zh': '内存',
-        'zh-TW': '記憶體',
-        'ja': 'メモリ',
-        'ko': '메모리',
-    },
-
-    'helper-toggle': {
-        'en': 'Big Switches',
-        'es': 'Interruptores Grandes',
-        'fr': 'Gros Interrupteurs',
-        'de': 'Große Schalter',
-        'it': 'Interruttori Grandi',
-        'zh': '大开关',
-        'zh-TW': '大開關',
-        'ja': '大きなスイッチ',
-        'ko': '큰 스위치',
+        'en': 'Memory:',
+        'es': 'Memoria:',
+        'fr': 'Mémoire :',
+        'de': 'Speicher:',
+        'it': 'Memoria:',
+        'zh': '内存：',
+        'zh-TW': '記憶體：',
+        'ja': 'メモリ：',
+        'ko': '메모리:',
     },
 
     'dock-hide': {
@@ -156,16 +162,436 @@ l10n.MESSAGES = {
         'ko': '공유',
     },
 
-    'share-desc': {
-        'en': 'A link that opens the simulator with what is in memory now.',
-        'es': 'Un enlace que abre el simulador con lo que hay ahora en la memoria.',
-        'fr': 'Un lien qui ouvre le simulateur avec ce qui est en mémoire maintenant.',
-        'de': 'Ein Link, der den Simulator mit dem jetzigen Speicherinhalt öffnet.',
-        'it': 'Un link che apre il simulatore con ciò che è ora in memoria.',
-        'zh': '一个链接，打开模拟器时载入当前内存中的内容。',
-        'zh-TW': '一個連結，開啟模擬器時載入目前記憶體中的內容。',
-        'ja': '今のメモリの内容を読み込んだ状態でシミュレーターを開くリンクです。',
-        'ko': '지금 메모리에 있는 내용을 불러온 채로 시뮬레이터를 여는 링크입니다.',
+    'load-hex': {
+        'en': 'Hex Bytes…',
+        'es': 'Bytes en hex…',
+        'fr': 'Octets en hexa…',
+        'de': 'Hex-Bytes…',
+        'it': 'Byte in esadecimale…',
+        'zh': '十六进制字节…',
+        'zh-TW': '十六進位位元組…',
+        'ja': '16 進数のバイト…',
+        'ko': '16진수 바이트…',
+    },
+
+    'load-file': {
+        'en': 'Binary File…',
+        'es': 'Archivo binario…',
+        'fr': 'Fichier binaire…',
+        'de': 'Binärdatei…',
+        'it': 'File binario…',
+        'zh': '二进制文件…',
+        'zh-TW': '二進位檔案…',
+        'ja': 'バイナリファイル…',
+        'ko': '바이너리 파일…',
+    },
+
+    'basic-needs-memory': {
+        'en': 'needs 4 KB',
+        'es': 'necesita 4 KB',
+        'fr': 'exige 4 Kio',
+        'de': 'braucht 4 KB',
+        'it': 'richiede 4 KB',
+        'zh': '需要 4 KB',
+        'zh-TW': '需要 4 KB',
+        'ja': '4 KB が必要',
+        'ko': '4 KB 필요',
+    },
+
+    'needs-server-short': {
+        'en': 'needs a web server',
+        'es': 'necesita un servidor web',
+        'fr': 'exige un serveur web',
+        'de': 'braucht einen Webserver',
+        'it': 'richiede un server web',
+        'zh': '需要 Web 服务器',
+        'zh-TW': '需要 Web 伺服器',
+        'ja': 'Web サーバーが必要',
+        'ko': '웹 서버 필요',
+    },
+
+    'examples-unreadable-short': {
+        'en': 'could not be read',
+        'es': 'no se pudieron leer',
+        'fr': 'illisibles',
+        'de': 'nicht lesbar',
+        'it': 'non leggibili',
+        'zh': '无法读取',
+        'zh-TW': '無法讀取',
+        'ja': '読み込めません',
+        'ko': '읽을 수 없음',
+    },
+
+    'examples-heading': {
+        'en': 'Examples',
+        'es': 'Ejemplos',
+        'fr': 'Exemples',
+        'de': 'Beispiele',
+        'it': 'Esempi',
+        'zh': '示例',
+        'zh-TW': '範例',
+        'ja': 'サンプル',
+        'ko': '예제',
+    },
+
+    'examples-loading': {
+        'en': 'Loading…',
+        'es': 'Cargando…',
+        'fr': 'Chargement…',
+        'de': 'Wird geladen…',
+        'it': 'Caricamento…',
+        'zh': '正在加载…',
+        'zh-TW': '正在載入…',
+        'ja': '読み込み中…',
+        'ko': '불러오는 중…',
+    },
+
+    'examples-heading-panel': {
+        'en': 'Front Panel Examples',
+        'es': 'Ejemplos del Panel Frontal',
+        'fr': 'Exemples en Façade',
+        'de': 'Beispiele für die Frontplatte',
+        'it': 'Esempi sul Pannello Frontale',
+        'zh': '前面板示例',
+        'zh-TW': '前面板範例',
+        'ja': 'フロントパネルのサンプル',
+        'ko': '앞판 예제',
+    },
+
+    'examples-heading-tty': {
+        'en': 'Teletype Examples',
+        'es': 'Ejemplos del Teletipo',
+        'fr': 'Exemples au Téléscripteur',
+        'de': 'Beispiele für den Fernschreiber',
+        'it': 'Esempi sulla Telescrivente',
+        'zh': '电传打字机示例',
+        'zh-TW': '電傳打字機範例',
+        'ja': 'テレタイプのサンプル',
+        'ko': '텔레타이프 예제',
+    },
+
+    'example-size': {
+        'en': '{bytes} bytes',
+        'es': '{bytes} bytes',
+        'fr': '{bytes} octets',
+        'de': '{bytes} Bytes',
+        'it': '{bytes} byte',
+        'zh': '{bytes} 字节',
+        'zh-TW': '{bytes} 位元組',
+        'ja': '{bytes} バイト',
+        'ko': '{bytes}바이트',
+    },
+
+    'language-menu': {
+        'en': 'Language',
+        'es': 'Idioma',
+        'fr': 'Langue',
+        'de': 'Sprache',
+        'it': 'Lingua',
+        'zh': '语言',
+        'zh-TW': '語言',
+        'ja': '言語',
+        'ko': '언어',
+    },
+
+    'about-button': {
+        'en': 'About',
+        'es': 'Acerca de',
+        'fr': 'À propos',
+        'de': 'Über',
+        'it': 'Informazioni',
+        'zh': '关于',
+        'zh-TW': '關於',
+        'ja': 'このアプリについて',
+        'ko': '정보',
+    },
+
+    'dialog-close': {
+        'en': 'Close',
+        'es': 'Cerrar',
+        'fr': 'Fermer',
+        'de': 'Schließen',
+        'it': 'Chiudi',
+        'zh': '关闭',
+        'zh-TW': '關閉',
+        'ja': '閉じる',
+        'ko': '닫기',
+    },
+
+    'about-ok': {
+        'en': 'Close',
+        'es': 'Cerrar',
+        'fr': 'Fermer',
+        'de': 'Schließen',
+        'it': 'Chiudi',
+        'zh': '关闭',
+        'zh-TW': '關閉',
+        'ja': '閉じる',
+        'ko': '닫기',
+    },
+
+    'hex-cancel': {
+        'en': 'Cancel',
+        'es': 'Cancelar',
+        'fr': 'Annuler',
+        'de': 'Abbrechen',
+        'it': 'Annulla',
+        'zh': '取消',
+        'zh-TW': '取消',
+        'ja': 'キャンセル',
+        'ko': '취소',
+    },
+
+    'hex-dialog-title': {
+        'en': 'Load Hex Bytes',
+        'es': 'Cargar Bytes en Hex',
+        'fr': 'Charger des Octets en Hexa',
+        'de': 'Hex-Bytes laden',
+        'it': 'Carica Byte in Esadecimale',
+        'zh': '加载十六进制字节',
+        'zh-TW': '載入十六進位位元組',
+        'ja': '16 進数のバイトを読み込む',
+        'ko': '16진수 바이트 불러오기',
+    },
+
+    'hex-dialog-desc': {
+        'en': 'Bytes in hex, put into memory from 0000H. Spaces, commas and line breaks may separate them.',
+        'es': 'Bytes en hexadecimal, que se ponen en la memoria a partir de 0000H. Pueden ir separados por espacios, comas o saltos de línea.',
+        'fr': 'Des octets en hexadécimal, placés en mémoire à partir de 0000H. Espaces, virgules et retours à la ligne peuvent les séparer.',
+        'de': 'Bytes in Hex, ab 0000H in den Speicher gelegt. Leerzeichen, Kommas und Zeilenumbrüche dürfen sie trennen.',
+        'it': 'Byte in esadecimale, messi in memoria a partire da 0000H. Possono essere separati da spazi, virgole e a capo.',
+        'zh': '十六进制字节，从 0000H 起放入内存。字节之间可以用空格、逗号或换行分隔。',
+        'zh-TW': '十六進位位元組，從 0000H 起放入記憶體。位元組之間可以用空格、逗號或換行分隔。',
+        'ja': '16 進数のバイトを 0000H からメモリに置きます。空白、カンマ、改行で区切ってかまいません。',
+        'ko': '16진수 바이트를 0000H부터 메모리에 넣습니다. 공백, 쉼표, 줄바꿈으로 구분해도 됩니다.',
+    },
+
+    'share-title': {
+        'en': 'Share a Link',
+        'es': 'Compartir un Enlace',
+        'fr': 'Partager un Lien',
+        'de': 'Einen Link teilen',
+        'it': 'Condividi un Link',
+        'zh': '分享链接',
+        'zh-TW': '分享連結',
+        'ja': 'リンクを共有',
+        'ko': '링크 공유',
+    },
+
+    'share-question': {
+        'en': 'What should the link open?',
+        'es': '¿Qué debe abrir el enlace?',
+        'fr': 'Que doit ouvrir le lien ?',
+        'de': 'Was soll der Link öffnen?',
+        'it': 'Cosa deve aprire il link?',
+        'zh': '链接要打开什么？',
+        'zh-TW': '連結要開啟什麼？',
+        'ja': 'リンクで何を開きますか？',
+        'ko': '링크로 무엇을 열까요?',
+    },
+
+    'share-program-label': {
+        'en': 'The program, at RESET',
+        'es': 'El programa, tras RESET',
+        'fr': 'Le programme, après RESET',
+        'de': 'Das Programm, nach RESET',
+        'it': 'Il programma, dopo RESET',
+        'zh': '程序，按下 RESET 后',
+        'zh-TW': '程式，按下 RESET 後',
+        'ja': 'プログラム（RESET 直後）',
+        'ko': '프로그램, RESET 직후',
+    },
+
+    'share-program-desc': {
+        'en': 'Ready to RUN, as a fresh machine would be.',
+        'es': 'Listo para RUN, como estaría una máquina recién encendida.',
+        'fr': 'Prêt pour RUN, comme une machine fraîchement allumée.',
+        'de': 'Bereit für RUN, wie eine frisch eingeschaltete Maschine.',
+        'it': 'Pronto per RUN, come una macchina appena accesa.',
+        'zh': '可直接按 RUN，就像刚开机的机器。',
+        'zh-TW': '可直接按 RUN，就像剛開機的機器。',
+        'ja': '電源を入れたばかりのマシンのように、すぐ RUN できます。',
+        'ko': '막 켠 기계처럼 바로 RUN할 수 있습니다.',
+    },
+
+    'share-state-label': {
+        'en': 'The machine as it is now',
+        'es': 'La máquina tal como está ahora',
+        'fr': 'La machine telle qu’elle est maintenant',
+        'de': 'Die Maschine, wie sie jetzt ist',
+        'it': 'La macchina com’è adesso',
+        'zh': '机器现在的样子',
+        'zh-TW': '機器現在的樣子',
+        'ja': '今のままのマシン',
+        'ko': '지금 상태 그대로의 기계',
+    },
+
+    'share-state-desc': {
+        'en': 'Stopped at {pc}H, with its registers and switches.',
+        'es': 'Detenida en {pc}H, con sus registros e interruptores.',
+        'fr': 'Arrêtée en {pc}H, avec ses registres et ses interrupteurs.',
+        'de': 'Angehalten bei {pc}H, mit ihren Registern und Schaltern.',
+        'it': 'Ferma a {pc}H, con i suoi registri e interruttori.',
+        'zh': '停在 {pc}H，连同寄存器和开关。',
+        'zh-TW': '停在 {pc}H，連同暫存器和開關。',
+        'ja': '{pc}H で停止したまま、レジスタとスイッチも含めて。',
+        'ko': '{pc}H에서 멈춘 채, 레지스터와 스위치도 함께.',
+    },
+
+    'link-copy-blocked': {
+        'en': 'The browser would not copy the link, so it is selected in the box instead. Copy it from there.',
+        'es': 'El navegador no quiso copiar el enlace, así que está seleccionado en el cuadro. Cópialo desde ahí.',
+        'fr': 'Le navigateur n\'a pas voulu copier le lien, il est donc sélectionné dans la case. Copiez-le depuis là.',
+        'de': 'Der Browser wollte den Link nicht kopieren, deshalb ist er im Feld markiert. Kopieren Sie ihn von dort.',
+        'it': 'Il browser non ha voluto copiare il link, quindi è selezionato nella casella. Copialo da lì.',
+        'zh': '浏览器不允许复制链接，所以已在框中选中它。请从那里复制。',
+        'zh-TW': '瀏覽器不允許複製連結，所以已在框中選取它。請從那裡複製。',
+        'ja': 'ブラウザーがリンクをコピーさせなかったので、欄の中で選択してあります。そこからコピーしてください。',
+        'ko': '브라우저가 링크 복사를 허용하지 않아 상자에서 선택해 두었습니다. 거기서 복사하세요.',
+    },
+
+    'about-title': {
+        'en': 'Altair 8800 Simulator',
+        'es': 'Simulador de Altair 8800',
+        'fr': 'Simulateur Altair 8800',
+        'de': 'Altair-8800-Simulator',
+        'it': 'Simulatore Altair 8800',
+        'zh': 'Altair 8800 模拟器',
+        'zh-TW': 'Altair 8800 模擬器',
+        'ja': 'Altair 8800 シミュレーター',
+        'ko': 'Altair 8800 시뮬레이터',
+    },
+
+    'about-version': {
+        'en': 'Version',
+        'es': 'Versión',
+        'fr': 'Version',
+        'de': 'Version',
+        'it': 'Versione',
+        'zh': '版本',
+        'zh-TW': '版本',
+        'ja': 'バージョン',
+        'ko': '버전',
+    },
+
+    'about-desc': {
+        'en': 'An Altair 8800 you can switch on in a web page: its front panel, a teletype running Microsoft\'s 4K BASIC, and a debugger the real one never had.',
+        'es': 'Un Altair 8800 que puedes encender en una página web: su panel frontal, un teletipo con el 4K BASIC de Microsoft y un depurador que el auténtico nunca tuvo.',
+        'fr': 'Un Altair 8800 qu\'on allume dans une page web : sa façade, un téléscripteur qui fait tourner le 4K BASIC de Microsoft, et un débogueur que le vrai n\'a jamais eu.',
+        'de': 'Ein Altair 8800, den man in einer Webseite einschalten kann: seine Frontplatte, ein Fernschreiber mit Microsofts 4K BASIC und ein Debugger, den das Original nie hatte.',
+        'it': 'Un Altair 8800 da accendere in una pagina web: il suo pannello frontale, una telescrivente con il 4K BASIC di Microsoft e un debugger che quello vero non ha mai avuto.',
+        'zh': '一台能在网页里开机的 Altair 8800：它的前面板、一台运行微软 4K BASIC 的电传打字机，以及真机从未有过的调试器。',
+        'zh-TW': '一台能在網頁裡開機的 Altair 8800：它的前面板、一台執行微軟 4K BASIC 的電傳打字機，以及真機從未有過的除錯器。',
+        'ja': 'Web ページの中で電源を入れられる Altair 8800。フロントパネル、Microsoft の 4K BASIC が動くテレタイプ、そして本物にはなかったデバッガーを備えています。',
+        'ko': '웹 페이지에서 켤 수 있는 Altair 8800: 앞판, 마이크로소프트 4K BASIC이 돌아가는 텔레타이프, 그리고 진짜에는 없던 디버거.',
+    },
+
+    'about-source': {
+        'en': 'Source code on GitHub',
+        'es': 'Código fuente en GitHub',
+        'fr': 'Code source sur GitHub',
+        'de': 'Quellcode auf GitHub',
+        'it': 'Codice sorgente su GitHub',
+        'zh': 'GitHub 上的源代码',
+        'zh-TW': 'GitHub 上的原始碼',
+        'ja': 'GitHub のソースコード',
+        'ko': 'GitHub의 소스 코드',
+    },
+
+    'about-issues': {
+        'en': 'Report a problem',
+        'es': 'Informar de un problema',
+        'fr': 'Signaler un problème',
+        'de': 'Ein Problem melden',
+        'it': 'Segnala un problema',
+        'zh': '报告问题',
+        'zh-TW': '回報問題',
+        'ja': '問題を報告',
+        'ko': '문제 신고',
+    },
+
+    'about-contributors': {
+        'en': 'Contributors',
+        'es': 'Colaboradores',
+        'fr': 'Contributeurs',
+        'de': 'Mitwirkende',
+        'it': 'Collaboratori',
+        'zh': '贡献者',
+        'zh-TW': '貢獻者',
+        'ja': 'コントリビューター',
+        'ko': '기여자',
+    },
+
+    'about-licences': {
+        'en': 'Licences',
+        'es': 'Licencias',
+        'fr': 'Licences',
+        'de': 'Lizenzen',
+        'it': 'Licenze',
+        'zh': '许可证',
+        'zh-TW': '授權條款',
+        'ja': 'ライセンス',
+        'ko': '라이선스',
+    },
+
+    'about-license-app': {
+        'en': 'The simulator:',
+        'es': 'El simulador:',
+        'fr': 'Le simulateur :',
+        'de': 'Der Simulator:',
+        'it': 'Il simulatore:',
+        'zh': '本模拟器：',
+        'zh-TW': '本模擬器：',
+        'ja': 'このシミュレーター：',
+        'ko': '이 시뮬레이터:',
+    },
+
+    'about-license-rom': {
+        'en': 'The 4K BASIC tape is Microsoft\'s, and not covered by that licence:',
+        'es': 'La cinta de 4K BASIC es de Microsoft y esa licencia no la cubre:',
+        'fr': 'La bande 4K BASIC appartient à Microsoft et cette licence ne la couvre pas :',
+        'de': 'Das 4K-BASIC-Band gehört Microsoft und fällt nicht unter diese Lizenz:',
+        'it': 'Il nastro di 4K BASIC è di Microsoft e quella licenza non lo copre:',
+        'zh': '4K BASIC 纸带归微软所有，不在该许可证范围内：',
+        'zh-TW': '4K BASIC 紙帶歸微軟所有，不在該授權範圍內：',
+        'ja': '4K BASIC のテープは Microsoft のもので、このライセンスの対象外です：',
+        'ko': '4K BASIC 테이프는 마이크로소프트의 것이며 이 라이선스가 적용되지 않습니다:',
+    },
+
+    'about-license-cpu': {
+        'en': 'The 8080 CPU core is 8080js by Martin Maly, under a BSD licence:',
+        'es': 'El núcleo de la CPU 8080 es 8080js, de Martin Maly, con licencia BSD:',
+        'fr': 'Le cœur du processeur 8080 est 8080js, de Martin Maly, sous licence BSD :',
+        'de': 'Der 8080-CPU-Kern ist 8080js von Martin Maly, unter einer BSD-Lizenz:',
+        'it': 'Il nucleo della CPU 8080 è 8080js di Martin Maly, con licenza BSD:',
+        'zh': '8080 CPU 内核是 Martin Maly 的 8080js，采用 BSD 许可证：',
+        'zh-TW': '8080 CPU 核心是 Martin Maly 的 8080js，採用 BSD 授權：',
+        'ja': '8080 CPU コアは Martin Maly による 8080js で、BSD ライセンスです：',
+        'ko': '8080 CPU 코어는 Martin Maly의 8080js이며 BSD 라이선스입니다:',
+    },
+
+    'about-license-icons': {
+        'en': 'The icons are Google\'s Material Icons:',
+        'es': 'Los iconos son los Material Icons de Google:',
+        'fr': 'Les icônes sont les Material Icons de Google :',
+        'de': 'Die Symbole sind Googles Material Icons:',
+        'it': 'Le icone sono i Material Icons di Google:',
+        'zh': '图标来自 Google 的 Material Icons：',
+        'zh-TW': '圖示來自 Google 的 Material Icons：',
+        'ja': 'アイコンは Google の Material Icons です：',
+        'ko': '아이콘은 Google의 Material Icons입니다:',
+    },
+
+    'about-references': {
+        'en': 'Further Reading',
+        'es': 'Para Saber Más',
+        'fr': 'Pour Aller Plus Loin',
+        'de': 'Weiterlesen',
+        'it': 'Per Approfondire',
+        'zh': '延伸阅读',
+        'zh-TW': '延伸閱讀',
+        'ja': '参考資料',
+        'ko': '더 읽을거리',
     },
 
     'nav-tty': {
@@ -276,18 +702,6 @@ l10n.MESSAGES = {
         'ko': '튜토리얼',
     },
 
-    'back-home': {
-        'en': 'Source Code',
-        'es': 'Código fuente',
-        'fr': 'Code source',
-        'de': 'Quellcode',
-        'it': 'Codice sorgente',
-        'zh': '源代码',
-        'zh-TW': '原始碼',
-        'ja': 'ソースコード',
-        'ko': '소스 코드',
-    },
-
     'source-code': {
         'en': 'Source code',
         'es': 'Código fuente',
@@ -298,18 +712,6 @@ l10n.MESSAGES = {
         'zh-TW': '原始碼',
         'ja': 'ソースコード',
         'ko': '소스 코드',
-    },
-
-    'debug-load-data-title': {
-        'en': 'Load Your Own',
-        'es': 'Cargar lo tuyo',
-        'fr': 'Charger le vôtre',
-        'de': 'Eigenes laden',
-        'it': 'Carica il tuo',
-        'zh': '加载你自己的程序',
-        'zh-TW': '載入你自己的程式',
-        'ja': '自分のプログラムを読み込む',
-        'ko': '직접 만든 프로그램 불러오기',
     },
 
     'debug-load-data': {
@@ -420,30 +822,6 @@ l10n.MESSAGES = {
         'ko': '메모리를 모두 0으로 지웠습니다.',
     },
 
-    'debug-rom-title': {
-        'en': 'Load a Program',
-        'es': 'Cargar un programa',
-        'fr': 'Charger un programme',
-        'de': 'Ein Programm laden',
-        'it': 'Carica un programma',
-        'zh': '加载程序',
-        'zh-TW': '載入程式',
-        'ja': 'プログラムを読み込む',
-        'ko': '프로그램 불러오기',
-    },
-
-    'example-prompt': {
-        'en': 'Example Programs...',
-        'es': 'Programas de Ejemplo...',
-        'fr': 'Programmes d’Exemple...',
-        'de': 'Beispielprogramme...',
-        'it': 'Programmi di Esempio...',
-        'zh': '示例程序...',
-        'zh-TW': '範例程式...',
-        'ja': 'サンプルプログラム...',
-        'ko': '예제 프로그램...',
-    },
-
     // Every way of loading switches the machine on if it is off (D20),
     // and on the Debugger tab the front panel is not there to show it.
     // This goes in front of whatever the load itself has to say (D23).
@@ -484,27 +862,15 @@ l10n.MESSAGES = {
     },
 
     'load-basic': {
-        'en': 'Load 4K BASIC',
-        'es': 'Cargar 4K BASIC',
-        'fr': 'Charger 4K BASIC',
-        'de': '4K BASIC laden',
-        'it': 'Carica 4K BASIC',
-        'zh': '加载 4K BASIC',
-        'zh-TW': '載入 4K BASIC',
-        'ja': '4K BASIC を読み込む',
-        'ko': '4K BASIC 불러오기',
-    },
-
-    'load-binary': {
-        'en': 'Load Binary File',
-        'es': 'Cargar archivo binario',
-        'fr': 'Charger un fichier binaire',
-        'de': 'Binärdatei laden',
-        'it': 'Carica file binario',
-        'zh': '加载二进制文件',
-        'zh-TW': '載入二進位檔',
-        'ja': 'バイナリファイルを読み込む',
-        'ko': '바이너리 파일 불러오기',
+        'en': 'Microsoft 4K BASIC',
+        'es': 'Microsoft 4K BASIC',
+        'fr': 'Microsoft 4K BASIC',
+        'de': 'Microsoft 4K BASIC',
+        'it': 'Microsoft 4K BASIC',
+        'zh': 'Microsoft 4K BASIC',
+        'zh-TW': 'Microsoft 4K BASIC',
+        'ja': 'Microsoft 4K BASIC',
+        'ko': 'Microsoft 4K BASIC',
     },
 
     'needs-server': {
@@ -735,18 +1101,6 @@ l10n.MESSAGES = {
         'ko': '복사됨 \u2713',
     },
 
-    'copy-link-in-bar': {
-        'en': 'See address bar',
-        'es': 'Mira la barra de direcciones',
-        'fr': 'Voir la barre d\'adresse',
-        'de': 'Siehe Adressleiste',
-        'it': 'Vedi la barra degli indirizzi',
-        'zh': '见地址栏',
-        'zh-TW': '見網址列',
-        'ja': 'アドレスバーを参照',
-        'ko': '주소창을 보세요',
-    },
-
     'copy-link-off': {
         'en': 'The machine is off, so there is nothing to link to. Load a program first.',
         'es': 'La máquina está apagada, así que no hay nada que enlazar. Carga un programa primero.',
@@ -781,30 +1135,6 @@ l10n.MESSAGES = {
         'zh-TW': '連結已複製。它會載入目前記憶體並按下 RESET 開啟模擬器，可直接按 RUN。',
         'ja': 'リンクをコピーしました。このメモリを読み込み RESET を押した状態でシミュレーターが開き、すぐに RUN できます。',
         'ko': '링크를 복사했습니다. 현재 메모리를 불러오고 RESET을 누른 상태로 시뮬레이터가 열리며, 바로 RUN할 수 있습니다.',
-    },
-
-    'copy-link-state-label': {
-        'en': 'Include registers and switches',
-        'es': 'Incluir registros e interruptores',
-        'fr': 'Inclure registres et interrupteurs',
-        'de': 'Register und Schalter einschließen',
-        'it': 'Includi registri e interruttori',
-        'zh': '包含寄存器和开关',
-        'zh-TW': '包含暫存器和開關',
-        'ja': 'レジスタとスイッチを含める',
-        'ko': '레지스터와 스위치 포함',
-    },
-
-    'link-in-address-bar': {
-        'en': 'The browser would not copy the link, so it is in the address bar instead. Copy it from there.',
-        'es': 'El navegador no pudo copiar el enlace, así que está en la barra de direcciones. Cópialo desde allí.',
-        'fr': 'Le navigateur n\'a pas pu copier le lien ; il est dans la barre d\'adresse. Copiez-le depuis là.',
-        'de': 'Der Browser konnte den Link nicht kopieren; er steht stattdessen in der Adressleiste. Kopieren Sie ihn dort.',
-        'it': 'Il browser non ha potuto copiare il link, che si trova nella barra degli indirizzi. Copialo da lì.',
-        'zh': '浏览器无法复制链接，链接已放在地址栏中，请从那里复制。',
-        'zh-TW': '瀏覽器無法複製連結，連結已放在網址列中，請從那裡複製。',
-        'ja': 'ブラウザがリンクをコピーできなかったため、アドレスバーに入れました。そこからコピーしてください。',
-        'ko': '브라우저가 링크를 복사하지 못해 주소창에 넣었습니다. 거기서 복사하세요.',
     },
 
     'link-loaded': {
@@ -1324,15 +1654,15 @@ l10n.MESSAGES = {
     },
 
     'basic-2': {
-        'en': 'In the Load menu, click Load 4K BASIC. The machine powers up, the tape is read for you, RESET is pressed, and the Debugger opens to show what arrived.',
-        'es': 'En el menú Cargar, pulsa Cargar 4K BASIC. La máquina se enciende, la cinta se lee por ti, se pulsa RESET y se abre el Depurador para mostrar lo que ha llegado.',
-        'fr': 'Dans le menu Charger, cliquez sur Charger 4K BASIC. La machine s\'allume, la bande est lue pour vous, RESET est appuyé et le Débogueur s\'ouvre pour montrer ce qui est arrivé.',
-        'de': 'Klicken Sie im Menü Laden auf 4K BASIC laden. Die Maschine geht an, das Band wird für Sie eingelesen, RESET gedrückt, und der Debugger öffnet sich und zeigt, was angekommen ist.',
-        'it': 'Nel menu Carica, premi Carica 4K BASIC. La macchina si accende, il nastro viene letto per te, viene premuto RESET e si apre il Debugger per mostrare cosa è arrivato.',
-        'zh': '在“加载”菜单中点击“加载 4K BASIC”。机器会开机，纸带会替你读入，按下 RESET，并打开调试器显示载入的内容。',
-        'zh-TW': '在「載入」選單中點擊「載入 4K BASIC」。機器會開機，紙帶會替你讀入，按下 RESET，並打開除錯器顯示載入的內容。',
-        'ja': '「読み込み」メニューで「4K BASIC を読み込む」を押します。電源が入り、テープが代わりに読み込まれ、RESET が押され、デバッガーが開いて読み込んだものを見せます。',
-        'ko': '"불러오기" 메뉴에서 "4K BASIC 불러오기"를 누르세요. 전원이 켜지고, 테이프가 대신 읽히고, RESET이 눌리고, 디버거가 열려 불러온 내용을 보여 줍니다.',
+        'en': 'In the Load menu, choose Microsoft 4K BASIC. The machine powers up, the tape is read for you, RESET is pressed, and the Debugger opens to show what arrived.',
+        'es': 'En el menú Cargar, elige Microsoft 4K BASIC. La máquina se enciende, la cinta se lee por ti, se pulsa RESET y se abre el Depurador para mostrar lo que ha llegado.',
+        'fr': 'Dans le menu Charger, choisissez Microsoft 4K BASIC. La machine s\'allume, la bande est lue pour vous, RESET est appuyé et le Débogueur s\'ouvre pour montrer ce qui est arrivé.',
+        'de': 'Wählen Sie im Menü Laden Microsoft 4K BASIC. Die Maschine geht an, das Band wird für Sie eingelesen, RESET gedrückt, und der Debugger öffnet sich und zeigt, was angekommen ist.',
+        'it': 'Nel menu Carica, scegli Microsoft 4K BASIC. La macchina si accende, il nastro viene letto per te, viene premuto RESET e si apre il Debugger per mostrare cosa è arrivato.',
+        'zh': '在“加载”菜单中选择 Microsoft 4K BASIC。机器会开机，纸带会替你读入，按下 RESET，并打开调试器显示载入的内容。',
+        'zh-TW': '在「載入」選單中選擇 Microsoft 4K BASIC。機器會開機，紙帶會替你讀入，按下 RESET，並打開除錯器顯示載入的內容。',
+        'ja': '「読み込み」メニューで Microsoft 4K BASIC を選びます。電源が入り、テープが代わりに読み込まれ、RESET が押され、デバッガーが開いて読み込んだものを見せます。',
+        'ko': '"불러오기" 메뉴에서 Microsoft 4K BASIC을 고르세요. 전원이 켜지고, 테이프가 대신 읽히고, RESET이 눌리고, 디버거가 열려 불러온 내용을 보여 줍니다.',
     },
 
     'basic-3': {
@@ -1408,15 +1738,15 @@ l10n.MESSAGES = {
     },
 
     'basic-note': {
-        'en': 'What Load 4K BASIC skips: on a real Altair you first toggled a 28 byte boot loader in through the front panel, one byte at a time, then started the paper tape reader and waited about seven minutes while BASIC clattered in. Get one switch wrong and you did it again.',
-        'es': 'Lo que se salta Cargar 4K BASIC: en un Altair real primero introducías con los interruptores un cargador de 28 bytes, byte a byte, luego arrancabas el lector de cinta y esperabas unos siete minutos mientras BASIC entraba traqueteando. Un interruptor mal puesto y vuelta a empezar.',
-        'fr': 'Ce que Charger 4K BASIC escamote : sur un vrai Altair, vous saisissiez d\'abord un chargeur de 28 octets aux interrupteurs, octet par octet, puis vous lanciez le lecteur de bande et attendiez sept minutes pendant que BASIC entrait en cliquetant. Un seul interrupteur de travers et on recommençait.',
-        'de': 'Was 4K BASIC laden überspringt: an einem echten Altair gaben Sie zuerst einen 28 Byte langen Urlader über die Kippschalter ein, Byte für Byte, starteten dann den Lochstreifenleser und warteten etwa sieben Minuten, während BASIC hereinratterte. Ein falscher Schalter, und Sie fingen von vorn an.',
-        'it': 'Quello che Carica 4K BASIC salta: su un Altair vero inserivi prima con gli interruttori un boot loader di 28 byte, un byte alla volta, poi avviavi il lettore di nastro e aspettavi circa sette minuti mentre BASIC entrava sferragliando. Un interruttore sbagliato e si ricominciava.',
-        'zh': '“加载 4K BASIC”替你省掉的事：在真正的 Altair 上，你得先用前面板开关一个字节一个字节地输入 28 字节的引导程序，然后启动纸带阅读机，听着 BASIC 哗啦啦读上大约七分钟。有一个开关拨错，就得从头再来。',
-        'zh-TW': '「載入 4K BASIC」替你省掉的事：在真正的 Altair 上，你得先用前面板開關一個位元組一個位元組地輸入 28 位元組的載入程式，然後啟動紙帶閱讀機，聽著 BASIC 嘩啦啦讀上大約七分鐘。有一個開關撥錯，就得從頭再來。',
-        'ja': '「4K BASIC を読み込む」が省いていること。本物の Altair では、まず 28 バイトのブートローダーをフロントパネルのスイッチで一バイトずつ入力し、それから紙テープリーダーを回して、BASIC がガチャガチャと入ってくるのを七分ほど待ちました。スイッチを一つ間違えれば、最初からやり直しです。',
-        'ko': '"4K BASIC 불러오기"가 건너뛴 것: 진짜 Altair에서는 먼저 28바이트짜리 부트로더를 앞판 스위치로 한 바이트씩 입력하고, 종이 테이프 리더를 돌린 뒤, BASIC이 달그락거리며 들어오는 7분을 기다렸습니다. 스위치 하나만 틀려도 처음부터 다시였습니다.',
+        'en': 'What loading 4K BASIC skips: on a real Altair you first toggled a 28 byte boot loader in through the front panel, one byte at a time, then started the paper tape reader and waited about seven minutes while BASIC clattered in. Get one switch wrong and you did it again.',
+        'es': 'Lo que se salta al cargar 4K BASIC: en un Altair real primero introducías con los interruptores un cargador de 28 bytes, byte a byte, luego arrancabas el lector de cinta y esperabas unos siete minutos mientras BASIC entraba traqueteando. Un interruptor mal puesto y vuelta a empezar.',
+        'fr': 'Ce que le chargement de 4K BASIC escamote : sur un vrai Altair, vous saisissiez d\'abord un chargeur de 28 octets aux interrupteurs, octet par octet, puis vous lanciez le lecteur de bande et attendiez sept minutes pendant que BASIC entrait en cliquetant. Un seul interrupteur de travers et on recommençait.',
+        'de': 'Was das Laden von 4K BASIC überspringt: an einem echten Altair gaben Sie zuerst einen 28 Byte langen Urlader über die Kippschalter ein, Byte für Byte, starteten dann den Lochstreifenleser und warteten etwa sieben Minuten, während BASIC hereinratterte. Ein falscher Schalter, und Sie fingen von vorn an.',
+        'it': 'Quello che il caricamento di 4K BASIC salta: su un Altair vero inserivi prima con gli interruttori un boot loader di 28 byte, un byte alla volta, poi avviavi il lettore di nastro e aspettavi circa sette minuti mentre BASIC entrava sferragliando. Un interruttore sbagliato e si ricominciava.',
+        'zh': '加载 4K BASIC 替你省掉的事：在真正的 Altair 上，你得先用前面板开关一个字节一个字节地输入 28 字节的引导程序，然后启动纸带阅读机，听着 BASIC 哗啦啦读上大约七分钟。有一个开关拨错，就得从头再来。',
+        'zh-TW': '載入 4K BASIC 替你省掉的事：在真正的 Altair 上，你得先用前面板開關一個位元組一個位元組地輸入 28 位元組的載入程式，然後啟動紙帶閱讀機，聽著 BASIC 嘩啦啦讀上大約七分鐘。有一個開關撥錯，就得從頭再來。',
+        'ja': '4K BASIC の読み込みが省いていること。本物の Altair では、まず 28 バイトのブートローダーをフロントパネルのスイッチで一バイトずつ入力し、それから紙テープリーダーを回して、BASIC がガチャガチャと入ってくるのを七分ほど待ちました。スイッチを一つ間違えれば、最初からやり直しです。',
+        'ko': '4K BASIC을 불러오면서 건너뛴 것: 진짜 Altair에서는 먼저 28바이트짜리 부트로더를 앞판 스위치로 한 바이트씩 입력하고, 종이 테이프 리더를 돌린 뒤, BASIC이 달그락거리며 들어오는 7분을 기다렸습니다. 스위치 하나만 틀려도 처음부터 다시였습니다.',
     },
 
     'reference-title': {
@@ -1701,7 +2031,7 @@ l10n.updateMessages = function() {
 
     // Keep the language menu showing what is actually selected.
     if (l10n.menu) {
-        l10n.menu.setLabel(l10n.LOCALE_NAMES[locale] || locale);
+        l10n.menu.setLabel(l10n.LOCALE_SHORT[locale] || locale);
         l10n.menu.setSelected(locale);
     }
 
