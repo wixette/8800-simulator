@@ -275,9 +275,10 @@ panel.SHORT_REASONS = {
 };
 
 /**
- * The Load menu as it stands: the ways in that never move first, then
- * 4K BASIC, then the examples, grouped by which face of the machine
- * they speak through. The list of examples will grow, so it goes last.
+ * The Load menu as it stands: the ways in that never move first - your
+ * own bytes, your own file, 4K BASIC - then the examples, grouped by
+ * which face of the machine they speak through, under headings that
+ * set them apart. The list of examples will grow, so it goes last.
  * @return {Array<Object>} Items, as Dropdown.setItems() takes them.
  */
 panel.loadMenuItems = function() {
@@ -289,7 +290,7 @@ panel.loadMenuItems = function() {
     var items = [
         {value: 'hex', label: msg('load-hex')},
         {value: 'file', label: msg('load-file')},
-        {value: 'basic', label: msg('load-basic'), startsGroup: true,
+        {value: 'basic', label: msg('load-basic'),
          disabled: !!reasons['load-basic'],
          detail: short(reasons['load-basic'])},
     ];

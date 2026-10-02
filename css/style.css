@@ -456,12 +456,13 @@ a {
 
 /* Names the group of items under it. Not an item - the arrow keys step
    over it - so it is a band across the menu, ruled off, rather than
-   another line of text that might be chosen. */
+   another line of text that might be chosen. Its grey sits between the
+   menu's and the hover's, so that it never reads as an item pointed at. */
 .dropdown li.dropdown-heading {
-    background-color: #dcdcdc;
-    border-bottom: 1px solid #c6c6c6;
-    border-top: 1px solid #c6c6c6;
-    color: #555;
+    background-color: #e8e8e8;
+    border-bottom: 1px solid #d0d0d0;
+    border-top: 1px solid #d0d0d0;
+    color: #777;
     cursor: default;
     font-size: 12px;
     font-weight: bold;
@@ -494,7 +495,7 @@ a {
 }
 
 .dropdown li.dropdown-heading:hover {
-    background-color: #dcdcdc;
+    background-color: #e8e8e8;
 }
 
 .dropdown li[aria-selected='true'] {
