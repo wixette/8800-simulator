@@ -126,8 +126,12 @@ class Dropdown {
                 item.classList.add('disabled');
                 item.setAttribute('aria-disabled', 'true');
             }
+            // Chosen with the mouse, the focus is let go of rather than
+            // put back on the menu's button, so that the next key goes
+            // where the reader is looking - the teletype, say. Chosen
+            // from the keyboard (onKeyDown), it goes back to the button.
             item.addEventListener('click', function() {
-                self.close();
+                self.close(false);
                 self.onSelect(items[i].value);
             }, false);
             this.list.appendChild(item);

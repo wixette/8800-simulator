@@ -1408,22 +1408,58 @@ panel.onTtyClear = function() {
 panel.onTtyKeyDown = function(event) {
     if (!panel.isTtyTabVisible || event.metaKey || event.altKey)
         return;
-    // The keyboard is the teletype's only while nothing else has it:
-    // no dialog or menu open over the paper, and no other control
-    // holding the focus - a toolbar button, a tab, a text box. Such a
-    // control keeps its own keys, Enter and Space and Tab among them,
-    // instead of acting and typing at once.
+    // The keyboard is the teletype's while nothing else needs it. Not
+    // while a dialog or a menu is open over the paper, nor while a text
+    // box or a menu item has the focus. A focused button or tab keeps
+    // only the keys it acts on, so that it never acts and types at
+    // once; everything else typed still goes to the machine.
     var target = event.target;
     if (Dialog.anyOpen() ||
-        document.querySelector('[role="listbox"]:not([hidden])') ||
-        (target && target !== document.body && target.id != 'tty-input')) {
+        document.querySelector('[role="listbox"]:not([hidden])')) {
         return;
+    }
+    if (target && target !== document.body && target.id != 'tty-input') {
+        if (!panel.isPressable(target) ||
+            panel.PRESS_KEYS.indexOf(event.key) >= 0) {
+            return;
+        }
     }
     var byte = Teletype.keyToByte(event.key, event.ctrlKey);
     if (byte === null)
         return;
     event.preventDefault();
     panel.ttySend(byte);
+};
+
+/**
+ * After a dialog closes: with the Teletype showing, the reader was
+ * typing at the machine, so the keyboard goes back to it rather than to
+ * the button the browser returns the focus to, where the first Space of
+ * a BASIC line would press that button again.
+ */
+panel.returnKeyboard = function() {
+    var focused = document.activeElement;
+    if (panel.isTtyTabVisible && focused && focused !== document.body &&
+        focused.blur) {
+        focused.blur();
+    }
+};
+
+/**
+ * The keys a focused button or tab acts on itself, and so keeps.
+ * @type {Array<string>}
+ */
+panel.PRESS_KEYS = ['Enter', ' ', 'Tab'];
+
+/**
+ * @param {Object} elem A focused element.
+ * @return {boolean} Whether it is a control that is pressed rather than
+ *     typed into: a button, a tab, the dock's splitter.
+ */
+panel.isPressable = function(elem) {
+    var role = elem.getAttribute ? elem.getAttribute('role') : null;
+    return elem.tagName == 'BUTTON' ||
+        ['button', 'tab', 'separator'].indexOf(role) >= 0;
 };
 
 /**
@@ -1676,8 +1712,13 @@ panel.init = function() {
         panel.makePressable(document.getElementById('nav-' + name),
                             function(byKey) { panel.onDockTab(name, byKey); });
     }
-    panel.makePressable(document.getElementById('dock-toggle'), function() {
+    panel.makePressable(document.getElementById('dock-toggle'),
+                        function(byKey) {
         panel.setDockOpen(!panel.dock.open);
+        // Opened on the Teletype from the keyboard, it gets the keyboard.
+        if (byKey && panel.isTtyTabVisible) {
+            document.getElementById('tty-input').focus({preventScroll: true});
+        }
     });
     panel.initDockSplitter();
     window.addEventListener('resize', function() { panel.applyDock(); },
@@ -1760,10 +1801,11 @@ panel.init = function() {
     // The dialogs.
     panel.hexDialog = new Dialog('hex-dialog', function() {
         document.getElementById('hex-dialog-error').hidden = true;
-    });
+    }, panel.returnKeyboard);
     document.getElementById('debug-load-data').addEventListener(
         'click', panel.onHexDialogLoad, false);
-    panel.shareDialog = new Dialog('share-dialog', panel.refreshShareDialog);
+    panel.shareDialog = new Dialog('share-dialog', panel.refreshShareDialog,
+                                   panel.returnKeyboard);
     document.getElementById('share-button').addEventListener(
         'click', function() { panel.shareDialog.open(); }, false);
     ['share-program', 'copy-link-state'].forEach(function(id) {
@@ -1772,7 +1814,8 @@ panel.init = function() {
     });
     document.getElementById('copy-link').addEventListener(
         'click', panel.onCopyLink, false);
-    panel.aboutDialog = new Dialog('about-dialog', panel.showVersion);
+    panel.aboutDialog = new Dialog('about-dialog', panel.showVersion,
+                                   panel.returnKeyboard);
     document.getElementById('about-button').addEventListener(
         'click', function() { panel.aboutDialog.open(); }, false);
     document.getElementById('about-references').addEventListener(

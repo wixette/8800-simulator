@@ -34,10 +34,13 @@ class Dialog {
     /**
      * @param {string} id The <dialog>'s id.
      * @param {function()=} onOpen Called each time, just before it shows.
+     * @param {function()=} onClose Called each time it has closed, by
+     *     whatever means.
      */
-    constructor(id, onOpen) {
+    constructor(id, onOpen, onClose) {
         this.elem = document.getElementById(id);
         this.onOpen = onOpen || null;
+        this.onClose = onClose || null;
         if (!this.elem) {
             return;
         }
@@ -62,7 +65,25 @@ class Dialog {
             self.releasedOnBackdrop = false;
             if (onBackdrop ||
                 (event.target.closest && event.target.closest('[data-close]'))) {
+                self.closedByPointer = true;
                 self.close();
+            }
+        }, false);
+        // The browser hands the focus back to whatever opened the dialog.
+        // That suits the keyboard, which closes it with Escape. Closed
+        // with the mouse, the focus is let go of instead, so that the
+        // next key goes where the reader is looking - the teletype, say.
+        this.closedByPointer = false;
+        this.elem.addEventListener('close', function() {
+            if (self.closedByPointer) {
+                self.closedByPointer = false;
+                var focused = document.activeElement;
+                if (focused && focused !== document.body && focused.blur) {
+                    focused.blur();
+                }
+            }
+            if (self.onClose) {
+                self.onClose();
             }
         }, false);
     }

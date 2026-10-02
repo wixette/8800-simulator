@@ -404,10 +404,12 @@ test('a machine that is off receives nothing from the teletype keyboard', () => 
     }
 });
 
-test('the teletype has the keyboard only while nothing else has it', (t) => {
-    // A focused control keeps its own keys: Space on the switch strip's
-    // tab once folded the strip and typed a space at the machine too,
-    // and Tab out of the language menu sent a TAB.
+test('the teletype has the keyboard while nothing else needs it', (t) => {
+    // A focused control keeps the keys it acts on: Space on the switch
+    // strip's tab once folded the strip and typed a space at the machine
+    // too, and Tab out of the language menu sent a TAB. But a button left
+    // focused after a menu or a dialog must not swallow the reader's
+    // typing either.
     const body = {};
     const saved = {document: global.document, Dialog: global.Dialog,
                    Teletype: global.Teletype, send: panel.ttySend,
@@ -425,19 +427,29 @@ test('the teletype has the keyboard only while nothing else has it', (t) => {
         panel.ttySend = saved.send;
         panel.isTtyTabVisible = saved.visible;
     });
+    const control = (id, tagName, role) =>
+        ({id: id, tagName: tagName, getAttribute: () => role || null});
     const press = (key, target) => panel.onTtyKeyDown(
         {key: key, target: target, preventDefault: () => {}});
     press('A', body);
     press('B', {id: 'tty-input'});
     assert.deepStrictEqual(sent, [0x41, 0x42], 'the page, or the paper\'s box');
-    press(' ', {id: 'strip-tab'});
-    press('Tab', {id: 'switch-locale'});
-    press('Enter', {id: 'load-button', tagName: 'BUTTON'});
-    press('C', {id: 'debug-data-input', tagName: 'TEXTAREA'});
-    assert.deepStrictEqual(sent, [0x41, 0x42], 'no other control\'s keys');
+    const stripTab = control('strip-tab', 'DIV', 'button');
+    const language = control('switch-locale', 'BUTTON');
+    press(' ', stripTab);
+    press('Enter', stripTab);
+    press('Tab', language);
+    assert.deepStrictEqual(sent, [0x41, 0x42], 'not the keys a control acts on');
+    press('C', language);
+    press('D', control('nav-tty', 'DIV', 'tab'));
+    assert.deepStrictEqual(sent, [0x41, 0x42, 0x43, 0x44],
+                           'but typing past a focused button or tab');
+    press('E', control('debug-data-input', 'TEXTAREA'));
+    press('F', control('', 'LI', 'option'));
+    assert.strictEqual(sent.length, 4, 'not a text box\'s, nor a menu item\'s');
     global.Dialog = {anyOpen: () => true};
-    press('D', body);
-    assert.deepStrictEqual(sent, [0x41, 0x42], 'nor while a dialog is open');
+    press('G', body);
+    assert.strictEqual(sent.length, 4, 'nor while a dialog is open');
 });
 
 test('the greyed Loading item answers, as every greyed item does', (t) => {

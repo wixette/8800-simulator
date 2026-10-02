@@ -336,8 +336,17 @@ popups. The second follows P10:
   the font would make the page need the network, fail offline and from
   `file://`, and show the word "share" until it loads.
 
-Menus and dialogs keep the keyboard from the teletype while they are
-open, so that Escape there is not KILL LINE.
+*The keyboard.* The teletype has it while nothing else needs it. Not
+while a menu or a dialog is open - so that Escape there is not KILL
+LINE - nor while a text box or a menu item has the focus. A focused
+button or tab keeps only the keys it acts on, Enter, Space and Tab, so
+that it never acts and types at once; anything else typed still goes
+to the machine. And the focus is not left where it would get in the
+way: a menu chosen from with the mouse, or a dialog closed with it,
+lets go of it; a dialog closed while the Teletype shows hands the
+keyboard back to it; opening the Teletype from the keyboard puts the
+focus on the paper. The dock's tabs, its fold button and the strip's
+tab are reached with Tab, but take no focus from a click.
 
 ### U4 — The switch strip is shown, and folds itself
 

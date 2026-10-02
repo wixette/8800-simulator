@@ -71,6 +71,30 @@ test('a selection dragged out of the dialog does not close it', (t) => {
     assert.ok(dialog.isOpen());
 });
 
+test('closed with the mouse, a dialog lets go of the focus', (t) => {
+    // The browser gives the focus back to the button that opened it,
+    // which would then keep the keyboard from the teletype.
+    const {dialog, fake} = openDialog(t);
+    let blurred = false;
+    const opener = {blur: () => { blurred = true; }};
+    global.document.activeElement = opener;
+    global.document.body = {};
+    press(fake, fake.elem, fake.elem);
+    fake.send('close', fake.elem);
+    assert.ok(!dialog.isOpen());
+    assert.ok(blurred);
+});
+
+test('closed with Escape, it leaves the focus where the browser puts it', (t) => {
+    const {dialog, fake} = openDialog(t);
+    let blurred = false;
+    global.document.activeElement = {blur: () => { blurred = true; }};
+    global.document.body = {};
+    dialog.close();
+    fake.send('close', fake.elem);
+    assert.ok(!blurred);
+});
+
 test('a press on the backdrop let go inside does not close it', (t) => {
     const {dialog, fake} = openDialog(t);
     press(fake, fake.elem, fake.textBox);
