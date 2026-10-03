@@ -470,6 +470,11 @@ panel.refreshPlaceholders = function() {
             elem.setAttribute('aria-label', l10n.getMessage(panel.LIST_LABELS[id]));
         }
     }
+    // The title is the logo; its words are its alt text.
+    var logo = document.getElementById('header-logo');
+    if (logo) {
+        logo.alt = l10n.getMessage('header-title');
+    }
     var closers = document.querySelectorAll('.dialog-close');
     for (let i = 0; i < closers.length; i++) {
         closers[i].title = l10n.getMessage('dialog-close');

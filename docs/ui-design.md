@@ -308,9 +308,12 @@ popups. The second follows P10:
   Load (a file being opened) and Memory, each an icon with its name
   (`Memory: 256 B`), on the
   left; Share, the language and About, as icons, on the right, where
-  Share sits in most editors. On a phone the names go, the size stays,
-  and the title goes too - the artwork says ALTAIR 8800 - so it fits
-  one row.
+  Share sits in most editors. The title before them is the name drawn
+  in the lettering of the panel's nameplate
+  (`images/8800-simulator-logo-white.svg`), with the translated title
+  as its alt text; just above phone width it is drawn smaller. On a
+  phone the names go, the size stays, and the title goes too - the
+  artwork says ALTAIR 8800 - so it fits one row.
 - **Load is a menu.** The ways in that never change come first - *Hex
   Bytes…*, *Binary File…*, *Microsoft 4K BASIC* - so that they keep
   their place as the examples grow; then *Front Panel Examples* and

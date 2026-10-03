@@ -64,10 +64,23 @@ a {
 }
 
 #header-title {
-    font-size: 16px;
-    font-weight: bold;
-    margin-right: 12px;
-    white-space: nowrap;
+    display: flex;
+    margin-right: 8px;
+}
+
+/* The logo carries its own margin inside its 800 by 90 box, so it is
+   drawn a little taller than the lettering it shows. */
+#header-logo {
+    display: block;
+    height: 26px;
+    width: auto;
+}
+
+/* Just wider than a phone, the menus need the room. */
+@media (max-width: 900px) {
+    #header-logo {
+        height: 20px;
+    }
 }
 
 .toolbar-spacer {
