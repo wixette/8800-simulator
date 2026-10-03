@@ -899,21 +899,37 @@ a {
 }
 
 /* Source code and references, on the dark ground. */
+/* The Tutorial's source code and references: a compact list, as a
+   reference list is, with each entry's wrapped lines hanging under its
+   first. Underlined only under the pointer, so that the column reads as
+   titles rather than as a wall of underscores. */
 .link-list {
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.45;
     list-style: none;
-    margin: 0 0 10px 0;
+    margin: 0 0 12px 0;
     padding: 0 10px;
 }
 
 .link-list li {
-    border-bottom: 1px solid #333;
-    padding: 8px 0;
+    padding: 3px 0 3px 16px;
+    position: relative;
 }
 
-.link-list li:last-child {
-    border-bottom: 0;
+.link-list li::before {
+    color: #777;
+    content: '\2022';
+    left: 2px;
+    position: absolute;
+}
+
+.link-list a {
+    text-decoration: none;
+}
+
+.link-list a:hover,
+.link-list a:focus-visible {
+    text-decoration: underline;
 }
 
 .button {
