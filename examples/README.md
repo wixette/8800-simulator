@@ -24,16 +24,17 @@ speak through the teletype, each group from the simplest up.
 
 ## Loading a program
 
-The quick way is the *Debugger* tab, under *Load a Program*: pick one
-from the *Example Programs* menu. The machine is switched on if it was
-off, the program is loaded at 0000H and RESET is pressed for you; then
-go to the *Simulator* tab and click RUN, and watch whichever tab the
-table above names. The menu reads the same listing files you are
-looking at, so what runs is what is printed below.
+The quick way is the *Load* menu: pick one from its examples, which
+are grouped as in the table above.
+The machine is switched on if it was off, the program is loaded at
+0000H and RESET is pressed for you; then click RUN on the front panel,
+and watch whichever device the table above names. The menu reads the
+same listing files you are looking at, so what runs is what is printed
+below.
 
-Pasting works too, if you would rather see the bytes go in. Under *Load
-Your Own*, paste a program's bytes into the box and click *Load Data*,
-then RESET and RUN from the *Simulator* tab. *Load Data* switches the
+Pasting works too, if you would rather see the bytes go in. Choose *Hex
+Bytes…* in the same menu, paste a program's bytes into the box and
+click *Load Data*, then RESET and RUN from the front panel. *Load Data* switches the
 machine on if needed, but unlike the menu it does not clear memory or
 press RESET - it deposits the bytes into the machine as it stands.
 
@@ -87,7 +88,7 @@ board installed. It also means the address LEDs above A7 stay dark for
 ordinary programs; Kill the Bit lights them only through the address
 bus trick described in its own listing.
 
-4 KB and 8 KB can be installed from the *Debugger* tab; that is for
+4 KB and 8 KB can be installed from the *Memory* menu; that is for
 running 4K BASIC, not for these.
 
 ## Adding a program

@@ -1,10 +1,35 @@
+html,
 body {
-    background-color: #f0f0f0;
+    height: 100%;
+}
+
+/* The one hover the dark chrome uses - toolbar buttons, dock tabs, the
+   strip's tab - so that every flat control answers the pointer alike,
+   and visibly. */
+:root {
+    --hover-bg: rgba(255, 255, 255, 0.14);
+    --open-bg: rgba(255, 255, 255, 0.2);
+}
+
+body {
+    background-color: #222;
     color: #eee;
     font-family: 'Consolas', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New', monospace;
     font-size: 16px;
-    margin: 15px;
+    margin: 0;
     padding: 0;
+}
+
+/* The whole app: toolbar, front panel, dock, status line, top to
+   bottom, filling the window and never scrolling as a page. Growing the
+   dock shrinks the panel rather than pushing it off the screen (P1 and
+   U1 in docs/ui-design.md). */
+#app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
 }
 
 input {
@@ -21,81 +46,314 @@ a {
     color: #6cf;
 }
 
-.h-box {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-}
-
-.v-box {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-}
-
-.justify-start {
-    justify-content: start;
-}
-
-
-
-
-
-
-.align-items-center {
-    align-items: center;
-}
-
-.m-8 {
-    margin: 8px;
-}
-
 .mt-8 {
     margin-top: 8px;
 }
 
-
-.mr-8 {
-    margin-right: 8px;
-}
-
-.mb-8 {
-    margin-bottom: 8px;
-}
-
-.flex-grow-1 {
-    flex-grow: 1;
-}
-
-
-
-main {
-    background-color: #222;
-    border-radius: 10px;
-    margin: 0 auto;
-    max-width: 1200px;
-    padding: 10px;
-}
-
-.header-bar {
+/* The toolbar: the title, the menus for what is done to the machine
+   (P4), then the app's own actions on the right (U3). */
+#toolbar {
     align-items: center;
-    color: #eee;
+    background-color: #2b2b2b;
+    border-bottom: 1px solid #111;
     display: flex;
-    flex-direction: row;
+    flex: none;
     flex-wrap: wrap;
-    justify-content: center;
-    margin: 10px 0;
-    min-height: 64px;
+    gap: 4px;
+    padding: 6px 10px;
 }
 
 #header-title {
-    font-size: 18px;
+    display: flex;
+    margin-right: 8px;
+}
+
+/* The logo carries its own margin inside its 800 by 90 box, so it is
+   drawn a little taller than the lettering it shows. */
+#header-logo {
+    display: block;
+    height: 26px;
+    width: auto;
+}
+
+/* Just wider than a phone, the menus need the room. */
+@media (max-width: 900px) {
+    #header-logo {
+        height: 20px;
+    }
+}
+
+.toolbar-spacer {
+    flex: 1;
+}
+
+/* A button in the toolbar, or the dock's tab strip: flat until pointed
+   at, like the rest of the instrument's chrome. */
+.tool-button {
+    align-items: center;
+    background: none;
+    border: 0;
+    border-radius: 6px;
+    color: #eee;
+    cursor: pointer;
+    display: flex;
+    font-family: inherit;
+    font-size: 14px;
+    gap: 6px;
+    line-height: 20px;
+    padding: 5px 10px;
+    user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    white-space: nowrap;
+}
+
+.tool-button:hover,
+.tool-button:focus-visible {
+    background-color: var(--hover-bg);
+    color: #fff;
+    outline: none;
+}
+
+.tool-value {
+    color: #f90;
+}
+
+/* A toolbar action shown as an icon alone: Share, About. Its name is in
+   a tooltip and on the element (panel.TOOLTIPS). */
+.icon-button {
+    align-items: center;
+    background: none;
+    border: 0;
+    border-radius: 50%;
+    color: #ddd;
+    cursor: pointer;
+    display: flex;
+    height: 34px;
+    justify-content: center;
+    padding: 0;
+    width: 34px;
+}
+
+.icon-button:hover,
+.icon-button:focus-visible {
+    background-color: var(--hover-bg);
+    color: #fff;
+    outline: none;
+}
+
+.icon {
+    fill: currentColor;
+    flex: none;
+    height: 20px;
+    width: 20px;
+}
+
+/* The language's short code beside its icon. */
+.tool-code {
+    font-size: 13px;
+}
+
+/* A heading inside a menu or a tool. Small and quiet: the dock is a
+   tool, and reads like one rather than like a page (P5). */
+.section-label {
+    color: #999;
+    font-size: 12px;
+    line-height: 20px;
+    margin: 6px 4px 2px 4px;
+    white-space: nowrap;
+}
+
+/* Dialogs: for what needs more than a choice from a menu. A title,
+   what it is for, the controls, and the actions at the bottom right.
+   See js/dialog.js. The padding is on the body, so that a click on the
+   <dialog> itself can only be on the backdrop. */
+.dialog {
+    background-color: #2b2b2b;
+    border: 1px solid #444;
+    border-radius: 12px;
+    /* So the title band keeps the rounded corners. */
+    overflow: hidden;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+    color: #eee;
+    max-width: calc(100vw - 24px);
+    padding: 0;
+    width: 480px;
+}
+
+.dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.55);
+}
+
+.dialog-body {
+    padding: 16px 20px 18px 20px;
+}
+
+/* The title, in a lighter band across the top, as a dialog's title bar
+   is. */
+.dialog-head {
+    align-items: center;
+    background-color: #3a3a3a;
+    border-bottom: 1px solid #4a4a4a;
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 10px 8px 20px;
+}
+
+.dialog-title {
+    font-size: 16px;
+    margin: 0;
+}
+
+.dialog-subtitle {
+    color: #999;
+    font-size: 13px;
+    font-weight: normal;
+    margin: 16px 0 6px 0;
+}
+
+.dialog-text {
+    color: #ccc;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0 0 12px 0;
+}
+
+.dialog-error {
+    color: #ffb4b4;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 8px 0 0 0;
+}
+
+#debug-data-input,
+.dialog-field {
+    background-color: #1f1f1f;
+    border: 1px solid #555;
+    border-radius: 8px;
+    box-sizing: border-box;
+    color: #eee;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 8px 10px;
+    width: 100%;
+}
+
+#debug-data-input {
+    resize: vertical;
+}
+
+#debug-data-input:focus,
+.dialog-field:focus {
+    border-color: #f90;
+    outline: none;
+}
+
+/* A choice with a line saying what it means, under its name. */
+.dialog-option {
+    align-items: flex-start;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    gap: 10px;
+    margin: 0 -8px 4px -8px;
+    padding: 8px;
+}
+
+.dialog-option:hover {
+    background-color: #333;
+}
+
+.dialog-option input {
+    accent-color: #f90;
+    margin: 3px 0 0 0;
+}
+
+.dialog-option-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dialog-option-title {
+    font-size: 14px;
+}
+
+.dialog-option-desc {
+    color: #999;
+    font-size: 13px;
+}
+
+#share-link {
+    margin-top: 8px;
+}
+
+.dialog-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 16px;
+}
+
+.dialog-button {
+    background-color: #3a3a3a;
+    border: 0;
+    border-radius: 8px;
+    color: #eee;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    padding: 7px 16px;
+}
+
+.dialog-button:hover {
+    background-color: #474747;
+}
+
+.dialog-button.primary {
+    background-color: #f90;
+    color: #222;
     font-weight: bold;
 }
 
+.dialog-button.primary:hover {
+    background-color: #ffad33;
+}
+
+/* Copy Link while there is nothing to copy: it still answers. */
+.dialog-button.disabled,
+.dialog-button.primary.disabled:hover {
+    background-color: #555;
+    color: #999;
+}
+
+.about-version {
+    color: #999;
+}
+
+.about-links,
+.about-licences {
+    font-size: 14px;
+    line-height: 1.5;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.about-links li,
+.about-licences li {
+    padding: 4px 0;
+}
+
+.about-licences li {
+    color: #ccc;
+}
+
 /* A drop down the page draws itself: a button, and a list under it.
-   Shared by the language menu and the example programs menu, so that
-   they look and behave the same. js/dropdown.js says why this is not
+   Shared by the Load, Memory and language menus, so that they look and
+   behave the same. js/dropdown.js says why this is not
    a <select>. */
 .dropdown {
     /* The list below is positioned against this. */
@@ -149,22 +407,42 @@ main {
 }
 
 .dropdown li {
+    align-items: baseline;
     cursor: pointer;
+    display: flex;
     font-size: 14px;
+    gap: 24px;
+    justify-content: space-between;
     padding: 8px 18px;
     white-space: nowrap;
 }
 
-/* The seam between two kinds of entry - in the example menu, between
-   the programs that speak through the front panel and the ones that
-   speak through the teletype. A rule rather than a heading, because a
-   heading is one more thing for the arrow keys to have to step over. */
-.dropdown li.dropdown-group-start {
-    border-top: 1px solid #bbb;
-    /* The 4px of air above the rule is margin, so the 4px below it has
-       to be extra padding: same gap either side of the seam. */
-    margin-top: 4px;
-    padding-top: 12px;
+/* What an item is, or why it is grey, quieter at its right. */
+.dropdown-detail {
+    color: #777;
+    font-size: 12px;
+}
+
+/* Names the group of items under it. Not an item - the arrow keys step
+   over it - so it is a band across the menu, ruled off, rather than
+   another line of text that might be chosen. Its grey sits between the
+   menu's and the hover's, so that it never reads as an item pointed at. */
+.dropdown li.dropdown-heading {
+    background-color: #e8e8e8;
+    border-bottom: 1px solid #d0d0d0;
+    border-top: 1px solid #d0d0d0;
+    color: #777;
+    cursor: default;
+    font-size: 12px;
+    font-weight: bold;
+    margin: 4px 0 2px 0;
+    padding: 5px 18px;
+}
+
+/* An item that cannot be used just now. It still answers, in the status
+   line (D19). */
+.dropdown li.disabled {
+    color: #999;
 }
 
 .dropdown li:hover,
@@ -173,113 +451,380 @@ main {
     outline: none;
 }
 
+.dropdown li.dropdown-heading:hover {
+    background-color: #e8e8e8;
+}
+
 .dropdown li[aria-selected='true'] {
     background-color: #369;
     color: #6cf;
 }
 
-#locale-menu {
-    margin: 20px;
+/* The toolbar's menu buttons are tool buttons, not the light buttons
+   a dropdown has elsewhere. */
+#toolbar .dropdown > .tool-button {
+    background: none;
+    border-radius: 6px;
+    color: #eee;
+    height: auto;
+    padding: 5px 10px;
 }
 
-/* The language button sits in the dark header bar, so it keeps its own
-   colours and a smaller size. */
-#switch-locale {
-    background-color: #369;
-    color: #6cf;
-    font-size: 12px;
-    height: auto;
-    padding: 6px 12px 6px 14px;
+#toolbar .dropdown > .tool-button:hover,
+#toolbar .dropdown > .tool-button:focus-visible {
+    background-color: var(--hover-bg);
+    color: #fff;
+    outline: none;
+}
+
+#toolbar .dropdown > .tool-button[aria-expanded="true"] {
+    background-color: var(--open-bg);
+}
+
+/* The menus open under the toolbar's own buttons, which are on the
+   right as often as the left. */
+#load-list,
+#memory-list {
+    min-width: 260px;
 }
 
 /* Anchored to the button's right edge: it sits at the right of the
-   header, where a list growing rightwards would leave the window. */
+   toolbar, where a list growing rightwards would leave the window. */
 #locale-list {
     left: auto;
     right: 0;
 }
 
+/* The Tutorial's headings: it is a document, so it has them. */
 .subheader-bar {
-    background-color: #666;
-    border-radius: 10px;
     color: #eee;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: center;
-    line-height: 3em;
-    margin: 10px 0;
-    padding: 0;
-}
-
-nav {
-    color: #222;
-    display: flex;
-    flex-direction: row;
-    /* On a narrow screen the tabs wrap into two rows rather than push
-       the page wider than the window. */
-    flex-wrap: wrap;
-    justify-content: space-around;
-    min-height: 40px;
-    padding: 0;
-    row-gap: 8px;
-}
-
-.nav-item {
-    background-color: #eee;
-    border-radius: 30px;
-    cursor: pointer;
-    flex-grow: 1;
-    line-height: 40px;
-    margin: 0 5px;
-    padding: 0 5px;
-    /* For the activity dot below. */
-    position: relative;
-    text-align: center;
-    user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
-}
-
-nav .selected {
-    background-color: #f90;
-    cursor: auto;
+    font-size: 15px;
     font-weight: bold;
+    margin: 18px 0 8px 0;
+}
+
+.subheader-bar:first-child {
+    margin-top: 4px;
+}
+
+/* The front panel, the one primary surface. It takes whatever height
+   the toolbar, the dock and the status line leave, and the artwork
+   scales to fit, keeping its shape. */
+#stage {
+    align-items: center;
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-height: 0;
+    padding: 8px 12px;
 }
 
 #panel {
+    flex: 1 1 0;
+    min-height: 0;
     user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     -webkit-user-select: none;
-    margin: 10px 0;
+    width: 100%;
 }
 
-footer {
+/* The Switch Board Helper, a strip under the panel and as wide as its
+   artwork (panel.fitSwitchStrip). Its tab, on its top edge, folds it
+   away; folded, the tab is all that is left. */
+#switch-strip {
+    align-items: center;
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    margin-top: 4px;
+    max-width: 100%;
+}
+
+.strip-tab {
+    align-items: center;
+    background-color: #2b2b2b;
+    border: 1px solid #3a3a3a;
+    border-bottom: 0;
+    border-radius: 8px 8px 0 0;
     color: #999;
-    font-size: 14px;
-    margin: 40px auto 0 auto;
-    max-width: 960px;
-    text-align: center;
+    cursor: pointer;
+    display: flex;
+    height: 14px;
+    justify-content: center;
+    width: 44px;
+    user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
 }
 
-.comments {
-    color: #999;
-    font-size: 14px;
-    line-height: 1.5em;
-    padding: 0 10px;
+.strip-tab:hover,
+.strip-tab:focus-visible {
+    background-color: #3a3a3a;
+    color: #fff;
+    outline: none;
 }
 
-#debug-data-input {
-    background-color: #eee;
+.strip-tab .icon {
+    height: 18px;
+    transition: transform 0.15s;
+    width: 18px;
+}
+
+#switch-strip.folded .strip-tab {
+    border-bottom: 1px solid #3a3a3a;
+    border-radius: 8px;
+}
+
+#switch-strip.folded .strip-tab .icon {
+    transform: rotate(180deg);
+}
+
+#switch-strip.folded .strip-body {
+    display: none;
+}
+
+.strip-body {
+    background-color: #2b2b2b;
+    border: 1px solid #3a3a3a;
     border-radius: 10px;
-    line-height: 24px;
-    padding: 5px 10px;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    width: 100%;
+}
+
+/* Each row on one line where the window has room for it, so that the
+   strip is always two rows high. */
+.strip-row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 6px 14px;
+    justify-content: center;
+}
+
+.strip-row + .strip-row {
+    margin-top: 8px;
+}
+
+/* One lever, or one octal digit of the address: its buttons touch. */
+.lever,
+.octal {
+    display: flex;
+    gap: 3px;
+}
+
+/* A lever with two directions - STOP and RUN, EXAMINE and EXAMINE-NEXT -
+   is one control with two halves, as on the metal. */
+.lever.pair .button:first-child {
+    border-radius: 10px 0 0 10px;
+}
+
+.lever.pair .button:last-child {
+    border-radius: 0 10px 10px 0;
+}
+
+.strip-body .button {
+    font-size: 13px;
+    min-width: 30px;
+    padding: 2px 8px;
+}
+
+.strip-address .button {
+    padding: 2px 4px;
+}
+
+/* Between A08 and A07: the line the panel draws between the high byte
+   and the low. */
+.byte-divider {
+    align-self: stretch;
+    background-color: #666;
+    flex: none;
+    width: 2px;
+}
+
+/* A window too narrow for the rows lets them wrap. */
+@media (max-width: 900px) {
+    .strip-row {
+        flex-wrap: wrap;
+    }
+}
+
+/* The handle between the panel and the dock. */
+#dock-splitter {
+    background-color: #111;
+    cursor: row-resize;
+    flex: none;
+    height: 6px;
+    position: relative;
+    touch-action: none;
+}
+
+#dock-splitter::after {
+    background-color: #555;
+    border-radius: 2px;
+    content: '';
+    height: 2px;
+    left: 50%;
+    position: absolute;
+    top: 2px;
+    transform: translateX(-50%);
+    width: 40px;
+}
+
+#dock-splitter:hover,
+#dock-splitter:focus-visible,
+#dock-splitter.dragging {
+    background-color: #f90;
+    outline: none;
+}
+
+.dock-closed #dock-splitter {
+    display: none;
+}
+
+/* The dock: one tool at a time, under the panel (P3). */
+#dock {
+    background-color: #262626;
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    height: var(--dock-height, 40vh);
+    min-height: 0;
+}
+
+.dock-closed #dock {
+    height: auto;
+}
+
+#dock-tabs {
+    align-items: stretch;
+    background-color: #2b2b2b;
+    border-bottom: 1px solid #111;
+    display: flex;
+    flex: none;
+    min-height: 34px;
+}
+
+.dock-closed #dock-tabs {
+    border-bottom: 0;
+}
+
+/* Flat, underlined, dense: a tool's tabs, not a page's. */
+.dock-tab {
+    align-items: center;
+    border-bottom: 2px solid transparent;
+    color: #999;
+    cursor: pointer;
+    display: flex;
+    font-size: 14px;
+    padding: 0 14px;
+    /* For the activity dot below. */
+    position: relative;
+    user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    white-space: nowrap;
+}
+
+.dock-tab:hover {
+    background-color: var(--hover-bg);
+    color: #fff;
+}
+
+.dock-tab.selected {
+    border-bottom-color: #f90;
+    color: #eee;
+}
+
+.dock-tool {
+    align-items: center;
+    color: #999;
+    cursor: pointer;
+    display: flex;
+    font-size: 14px;
+    justify-content: center;
+    min-width: 36px;
+    user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+}
+
+.dock-tool:hover {
+    background-color: var(--hover-bg);
+    color: #fff;
+}
+
+#dock-body {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: auto;
+}
+
+.dock-closed #dock-body {
+    display: none;
+}
+
+.dock-pane {
+    box-sizing: border-box;
+    min-height: 100%;
+    padding: 8px 12px;
+}
+
+/* The Debugger: the CPU across the top - its registers and the
+   instruction it will run next, side by side and the same height,
+   stacked in a narrow dock - and memory under them, the whole width. */
+.debug-top {
+    align-items: stretch;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+}
+
+.debug-box {
+    display: flex;
+    flex: 1 1 300px;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.debug-box > #cpu-dump,
+.debug-box > #instr-pane {
+    box-sizing: border-box;
+    flex: 1;
+}
+
+/* The dump's own toolbar: one row, on one baseline, with the one
+   control that destroys something kept apart at the far right. */
+.mem-toolbar {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.mem-toolbar .section-label {
+    margin: 0 4px 0 0;
+}
+
+/* The flags by letter, lit when set. */
+.flag {
+    color: #999;
+}
+
+.flag-set {
+    background-color: #555;
+    border-radius: 3px;
+    color: #fff;
+    padding: 0 2px;
 }
 
 #cpu-dump,
-#mem-dump {
+#mem-dump,
+#instr-pane {
     background-color: #ccc;
     border-radius: 10px;
     color: #222;
@@ -292,8 +837,8 @@ footer {
     padding: 5px 10px;
 }
 
-/* The Tutorial tab: an introduction, a program listing, numbered
-   steps, and a closing note. */
+/* The Tutorial: an introduction, a program listing, numbered steps,
+   and a closing note. */
 .tutorial {
     background-color: #ccc;
     border-radius: 10px;
@@ -366,22 +911,37 @@ footer {
     padding: 10px 16px;
 }
 
-/* Source code and references, on the dark ground. */
+/* The References tab's source code and further reading: a compact
+   list, as a reference list is, with each entry's wrapped lines hanging
+   under its first. Underlined only under the pointer, so that the
+   column reads as titles rather than as a wall of underscores. */
 .link-list {
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.45;
     list-style: none;
-    margin: 0 0 10px 0;
+    margin: 0 0 12px 0;
     padding: 0 10px;
 }
 
 .link-list li {
-    border-bottom: 1px solid #333;
-    padding: 8px 0;
+    padding: 3px 0 3px 16px;
+    position: relative;
 }
 
-.link-list li:last-child {
-    border-bottom: 0;
+.link-list li::before {
+    color: #777;
+    content: '\2022';
+    left: 2px;
+    position: absolute;
+}
+
+.link-list a {
+    text-decoration: none;
+}
+
+.link-list a:hover,
+.link-list a:focus-visible {
+    text-decoration: underline;
 }
 
 .button {
@@ -400,18 +960,12 @@ footer {
     -webkit-user-select: none;
 }
 
-#tab-sim {
-    margin: 10px 0;
-}
-
-#tab-debug {
-    display: none;
-    margin: 10px 0;
-}
-
-#tab-ref {
-    display: none;
-    margin: 10px 0;
+/* Every light button answers the pointer, as the toolbar, the dock and
+   the dialogs do. A shade darker rather than a fixed colour, so that a
+   raised switch's orange, a live OFF/ON's green and a greyed button
+   each keep their own colour under it. */
+.button:hover {
+    filter: brightness(0.88);
 }
 
 /* The hidden attribute has to beat author rules such as .mem-map's
@@ -476,8 +1030,15 @@ footer {
     color: #eee;
 }
 
-/* A button holding a current choice: the installed memory size, or
-   Follow PC while it is on. Matches the selected nav tab. A helper
+/* The bytes after the opcode that belong to the same instruction: the
+   PC's green, paler, so the whole instruction reads as one piece. */
+.at-operand {
+    background-color: #8fd6a4;
+    color: #222;
+}
+
+/* A button holding a current choice: Follow PC while it is on.
+   Matches the selected dock tab. A helper
    button standing for a raised address switch reads the same way -
    orange means active, wherever it appears. */
 .button.selected,
@@ -489,11 +1050,10 @@ footer {
 /* A control that cannot be used just now. It keeps the pointer cursor
    on purpose: pressing it answers in the status bar with the reason it
    is grey (D19 in docs/ms-basic-4k.md). Coming after .selected means a
-   button that is both reads as unavailable. The example menu is a real
-   <button> inside a .dropdown, so both shapes of control are named. */
+   button that is both reads as unavailable. Items in a menu and buttons
+   in a dialog grey out by their own rules. */
 .button.disabled,
-.button.disabled.selected,
-.dropdown > button.disabled {
+.button.disabled.selected {
     background-color: #bbb;
     color: #777;
     font-weight: normal;
@@ -519,11 +1079,21 @@ footer {
     color: #123;
 }
 
-/* The Teletype tab. A printer, not a screen: paper coloured stock,
-   72 columns wide, scrolled to wherever the carriage is. */
-#tab-tty {
-    display: none;
-    margin: 10px 0;
+/* Copy Link, for a moment after it has copied. The same green as a
+   machine that is on. */
+.dialog-button.copied,
+.dialog-button.copied:hover {
+    background-color: #3ddc63;
+    color: #123;
+}
+
+/* The Teletype. A printer, not a screen: paper coloured stock, 72
+   columns wide, scrolled to wherever the carriage is. The paper takes
+   the dock's height, less the row of keys above it. */
+#tab-tty:not([hidden]) {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 #tty-paper {
@@ -531,12 +1101,41 @@ footer {
     border-radius: 10px;
     color: #222;
     cursor: text;
+    flex: 1 1 0;
     font-size: 16px;
-    height: 598px;          /* 23 lines */
     line-height: 26px;
+    min-height: 52px;
     overflow-x: auto;
     overflow-y: auto;
     padding: 5px 10px;
+    /* For the empty paper's explanation, centred in it. */
+    position: relative;
+}
+
+/* The keys a PC keyboard lacks, as the paper's toolbar. */
+.tty-keys {
+    align-items: center;
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+/* The empty paper's own explanation, until anything prints. */
+.tty-empty {
+    box-sizing: border-box;
+    color: #8a8270;
+    font-size: 14px;
+    left: 50%;
+    line-height: 1.6;
+    max-width: 90%;
+    pointer-events: none;
+    position: absolute;
+    text-align: center;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 520px;
 }
 
 #tty-text {
@@ -571,75 +1170,41 @@ footer {
     width: 1px;
 }
 
-/* A repeat of the lamps that matter, so that a program which prints
-   and lights LEDs at once can be watched on one screen. */
-#tty-leds {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    margin: 10px 0 0 0;
-}
-
-.tty-led-group {
-    align-items: center;
-    display: flex;
-    flex-direction: row;
-    margin: 0 20px 0 0;
-}
-
-.tty-led-label {
-    color: #999;
-    font-size: 11px;
-    margin: 0 8px 0 0;
-    white-space: nowrap;
-}
-
-.tty-led-row {
-    display: flex;
-    flex-direction: row;
-}
-
-.tty-led {
-    background-image: url(../images/led-off.svg);
-    background-repeat: no-repeat;
-    background-size: contain;
-    height: 14px;
-    margin: 0 2px;
-    width: 14px;
-}
-
-.tty-led.on {
-    background-image: url(../images/led-on.svg);
-}
-
 /* Marks the Teletype tab while its machine is printing and you are
    looking at something else. Out of the flow, so the tab does not move. */
-.nav-item.has-activity::after {
+.dock-tab.has-activity::after {
     background-color: #f90;
     border-radius: 50%;
     content: '';
     height: 7px;
     position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
+    right: 4px;
+    top: 8px;
     width: 7px;
 }
 
-/* The status line along the foot of the machine. Everything the
-   simulator wants to tell you - the power went off, a board was
-   installed, a tape was loaded, something would not work - says it
-   here, so there is one place to look. */
+/* The status line along the foot of the app. Everything the simulator
+   wants to tell you - the power went off, a board was installed, a
+   tape was loaded, something would not work - says it here, so there
+   is one place to look. It is never hidden (P7). */
 #status-bar {
+    align-items: baseline;
     background-color: #333;
-    border-radius: 10px;
+    border-top: 1px solid #111;
     color: #ccc;
+    display: flex;
+    flex: none;
     font-size: 14px;
+    gap: 16px;
     line-height: 20px;
-    margin: 10px 0 0 0;
     min-height: 20px;
-    padding: 8px 12px;
+    padding: 6px 12px;
 }
+
+#status-text {
+    flex: 1;
+}
+
 
 #status-bar.status-warn {
     background-color: #5a4a1a;
@@ -652,37 +1217,110 @@ footer {
 }
 
 #mem-window-label {
-    padding: 0 10px 0 8px;
+    color: #999;
+    font-size: 14px;
+    padding: 0 6px 0 0;
     white-space: nowrap;
 }
 
-/* Phones. Everything wide - the dumps, the teletype paper - already
+/* Phones: the same app, packed down (P9). The panel takes the height
+   its width gives it and the dock has the rest, so there is nothing to
+   drag. Everything wide - the dumps, the teletype paper - already
    scrolls inside its own box. */
-@media (max-width: 560px) {
-    /* Two tabs per row, evenly, rather than three and a stray. The
-       basis is well under half so that rounding cannot leave only one
-       per row; flex-grow then shares out what is left. */
-    .nav-item {
-        flex-basis: 40%;
+@media (max-width: 700px) {
+    #stage {
+        flex: none;
+        padding: 6px;
     }
 
-    /* The sixteen address switches land four to a row rather than
-       five, five, five and a stray A00. The :not excludes the command
-       buttons, whose ids all begin s-sw-. */
-    [id^="s-s"]:not([id^="s-sw"]) {
-        /* border-box so the basis covers the button's padding; under a
-           quarter to leave room for m-8's 16px of margin. */
-        box-sizing: border-box;
-        flex: 1 1 calc(25% - 18px);
+    #panel {
+        flex: none;
+        height: auto;
     }
 
-    /* A 375 px screen has none to spare: give the panel back some of
-       the margin that a desktop window can afford. */
-    body {
-        margin: 8px;
+    #dock-splitter {
+        display: none;
     }
 
-    main {
-        padding: 8px;
+    #dock {
+        flex: 1 1 0;
+        height: auto;
     }
+
+    .dock-closed #dock {
+        flex: none;
+    }
+
+    /* Four tabs and the fold button across a phone: the tabs closer
+       together, and where a language's names are longer still, the row
+       scrolls under the fold button rather than pushing it off. */
+    #dock-tabs {
+        overflow-x: auto;
+        /* So a tab scrolled to is not left under the fold button. */
+        scroll-padding-right: 36px;
+        scrollbar-width: none;
+    }
+
+    #dock-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .dock-tab {
+        font-size: 13px;
+        padding: 0 9px;
+    }
+
+    #dock-toggle {
+        background-color: #2b2b2b;
+        position: sticky;
+        right: 0;
+    }
+
+    /* The labels go, the icons and the installed size stay. */
+    #toolbar .tool-label,
+    #toolbar .tool-code {
+        display: none;
+    }
+
+    /* The artwork says ALTAIR 8800 already, and the toolbar's row is
+       worth more to the dock. */
+    #header-title {
+        display: none;
+    }
+
+    /* The strip packed tight, so the dock keeps some room: the levers
+       as they fall, and the sixteen address switches eight to a row,
+       still a thumb wide each. The octal groups give way to the grid. */
+    .strip-body {
+        padding: 6px;
+    }
+
+    .strip-row {
+        gap: 4px 8px;
+    }
+
+    .strip-body .button {
+        padding: 2px 6px;
+    }
+
+    .strip-address {
+        display: grid;
+        gap: 4px;
+        grid-template-columns: repeat(8, 1fr);
+    }
+
+    .strip-address .octal {
+        display: contents;
+    }
+
+    /* Eight to a row already puts the high byte above the low. */
+    .strip-address .byte-divider {
+        display: none;
+    }
+
+    .strip-address .button {
+        min-width: 0;
+        padding: 2px 0;
+    }
+
 }

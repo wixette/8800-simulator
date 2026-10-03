@@ -25,30 +25,65 @@
   </head>
   <body>
 
-    <main>
-      <div class="header-bar">
-        <div id="header-title" class="l10n">
-          Altair 8800 Simulator
+    <!-- One frame the height of the window: the toolbar, the front panel,
+         the dock of tools under it, and the status line. The panel is the
+         one primary surface and takes whatever room the dock leaves
+         (docs/ui-design.md, U1). -->
+    <div id="app">
+
+      <!-- Actions on the machine on the left, actions on the app on the
+           right. Icons are Material Icons (Apache License 2.0), inline
+           so that the page needs nothing from the network. -->
+      <header id="toolbar">
+        <!-- The name, in the lettering of the panel's own nameplate. Its
+             alt text is the translated title (panel.refreshPlaceholders). -->
+        <div id="header-title">
+          <img id="header-logo" src="images/8800-simulator-logo-white.svg"
+               alt="Altair 8800 Simulator">
         </div>
-        <div id="locale-menu" class="dropdown">
-          <button id="switch-locale" type="button" aria-haspopup="listbox"
-                  aria-expanded="false" aria-label="Language">
-            <span id="locale-current" class="dropdown-label">English</span>
+
+        <div id="load-dropdown" class="dropdown">
+          <button id="load-button" class="tool-button" type="button"
+                  aria-haspopup="listbox" aria-expanded="false">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 22H6c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h8l6 6v6h-2V9h-5V4H6v16h9v2zm4-.34v-2.24l2.95 2.95 1.41-1.41L20.41 18h2.24v-2H17v5.66h2z"/></svg>
+            <span id="load-menu" class="tool-label l10n">Load</span>
             <span class="dropdown-arrow" aria-hidden="true">&#9662;</span>
           </button>
-          <ul id="locale-list" role="listbox" aria-label="Language" hidden></ul>
+          <ul id="load-list" role="listbox" hidden></ul>
         </div>
-      </div>
 
-      <nav>
-        <div id="nav-sim" class="nav-item l10n">Simulator</div>
-        <div id="nav-tty" class="nav-item l10n">Teletype</div>
-        <div id="nav-debug" class="nav-item l10n">Debugger</div>
-        <div id="nav-ref" class="nav-item l10n">Tutorial</div>
-      </nav>
+        <div id="memory-dropdown" class="dropdown">
+          <button id="memory-button" class="tool-button" type="button"
+                  aria-haspopup="listbox" aria-expanded="false">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 9H9v6h6V9zm-2 4h-2v-2h2v2zm8-2V9h-2V7c0-1.1-.9-2-2-2h-2V3h-2v2h-2V3H9v2H7c-1.1 0-2 .9-2 2v2H3v2h2v2H3v2h2v2c0 1.1.9 2 2 2h2v2h2v-2h2v2h2v-2h2c1.1 0 2-.9 2-2v-2h2v-2h-2v-2h2zm-4 6H7V7h10v10z"/></svg>
+            <span id="memory-menu" class="tool-label l10n">Memory:</span>
+            <span id="memory-size" class="dropdown-label tool-value"></span>
+            <span class="dropdown-arrow" aria-hidden="true">&#9662;</span>
+          </button>
+          <ul id="memory-list" role="listbox" hidden></ul>
+        </div>
+        <input id="binary-file" type="file" hidden>
 
-      <div id="tab-sim">
+        <div class="toolbar-spacer"></div>
 
+        <button id="share-button" class="icon-button" type="button"
+                aria-haspopup="dialog"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg></button>
+
+        <div id="locale-menu" class="dropdown">
+          <button id="switch-locale" class="tool-button" type="button"
+                  aria-haspopup="listbox" aria-expanded="false">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/></svg>
+            <span id="locale-current" class="dropdown-label tool-code">EN</span>
+            <span class="dropdown-arrow" aria-hidden="true">&#9662;</span>
+          </button>
+          <ul id="locale-list" role="listbox" hidden></ul>
+        </div>
+
+        <button id="about-button" class="icon-button" type="button"
+                aria-haspopup="dialog"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg></button>
+      </header>
+
+      <main id="stage">
         <svg id="panel" width="100%" height="100%" viewBox="0 0 1440 644" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
           <!-- Panel artwork. Edit images/panel.svg to change it. -->
           <image x="0" y="0" width="1440" height="644" href="images/panel.svg"/>
@@ -61,142 +96,107 @@
           <image id="switch-down" x="0" y="0" width="20" height="30" href="images/switch-down.svg"/>
         </svg>
 
-        <div class="subheader-bar">
-          <div id="switchboard-helper" class="l10n">Switch Board Helper</div>
-        </div>
-        <div class="v-box">
-          <div class="h-box justify-start">
-            <div id="s-off-on" class="button power-button m-8">OFF/ON</div>
-            <div id="s-sw-stop" class="button m-8">STOP</div>
-            <div id="s-sw-run" class="button m-8">RUN</div>
-            <div id="s-sw-single" class="button m-8">SINGLE STEP</div>
-            <div id="s-sw-examine" class="button m-8">EXAMINE</div>
-            <div id="s-sw-examine-next" class="button m-8">EXAMINE-NEXT</div>
-            <div id="s-sw-deposit" class="button m-8">DEPOSIT</div>
-            <div id="s-sw-deposit-next" class="button m-8">DEPOSIT-NEXT</div>
-            <div id="s-sw-reset" class="button m-8">RESET</div>
+        <!-- The Switch Board Helper: the panel's switches again, large
+             enough for a thumb, and laid out as the panel lays them out -
+             the command switches by lever, the address switches in the
+             octal groups of the silkscreen, parted between the high
+             byte and the low as the panel parts them. Shown unless folded away,
+             from the tab on its own top edge. -->
+        <div id="switch-strip">
+          <div id="strip-tab" class="strip-tab" role="button" tabindex="0"
+               aria-controls="switch-helper" aria-expanded="true">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
           </div>
-          <div class="h-box justify-start">
-            <div id="s-s15" class="button m-8">A15</div>
-            <div id="s-s14" class="button m-8">A14</div>
-            <div id="s-s13" class="button m-8">A13</div>
-            <div id="s-s12" class="button m-8">A12</div>
-            <div id="s-s11" class="button m-8">A11</div>
-            <div id="s-s10" class="button m-8">A10</div>
-            <div id="s-s9" class="button m-8">A09</div>
-            <div id="s-s8" class="button m-8">A08</div>
-            <div id="s-s7" class="button m-8">A07</div>
-            <div id="s-s6" class="button m-8">A06</div>
-            <div id="s-s5" class="button m-8">A05</div>
-            <div id="s-s4" class="button m-8">A04</div>
-            <div id="s-s3" class="button m-8">A03</div>
-            <div id="s-s2" class="button m-8">A02</div>
-            <div id="s-s1" class="button m-8">A01</div>
-            <div id="s-s0" class="button m-8">A00</div>
-          </div>
-        </div>
-
-      </div>
-
-      <div id="tab-tty">
-        <div class="subheader-bar">
-          <div id="tty-title" class="l10n">Teletype (ASR-33)</div>
-        </div>
-        <div id="tty-paper"><pre id="tty-text"></pre></div>
-        <input id="tty-input" class="tty-hidden-input" type="text"
-               autocapitalize="characters" autocomplete="off"
-               autocorrect="off" spellcheck="false" aria-label="Teletype">
-
-        <div id="tty-leds">
-          <div class="tty-led-group">
-            <div class="tty-led-label">A15-A0</div>
-            <div id="tty-address-leds" class="tty-led-row"></div>
-          </div>
-          <div class="tty-led-group">
-            <div class="tty-led-label">D7-D0</div>
-            <div id="tty-data-leds" class="tty-led-row"></div>
-          </div>
-          <div class="tty-led-group">
-            <div class="tty-led-label">WAIT</div>
-            <div id="tty-wait-led" class="tty-led"></div>
+          <div id="switch-helper" class="strip-body">
+            <div class="strip-row">
+              <div class="lever"><div id="s-off-on" class="button power-button">OFF/ON</div></div>
+              <div class="lever pair"><div id="s-sw-stop" class="button">STOP</div><div id="s-sw-run" class="button">RUN</div></div>
+              <div class="lever"><div id="s-sw-single" class="button">SINGLE STEP</div></div>
+              <div class="lever pair"><div id="s-sw-examine" class="button">EXAMINE</div><div id="s-sw-examine-next" class="button">EXAMINE-NEXT</div></div>
+              <div class="lever pair"><div id="s-sw-deposit" class="button">DEPOSIT</div><div id="s-sw-deposit-next" class="button">DEPOSIT-NEXT</div></div>
+              <div class="lever"><div id="s-sw-reset" class="button">RESET</div></div>
+            </div>
+            <div class="strip-row strip-address">
+              <div class="octal"><div id="s-s15" class="button">A15</div></div>
+              <div class="octal"><div id="s-s14" class="button">A14</div><div id="s-s13" class="button">A13</div><div id="s-s12" class="button">A12</div></div>
+              <div class="octal"><div id="s-s11" class="button">A11</div><div id="s-s10" class="button">A10</div><div id="s-s9" class="button">A09</div></div>
+              <div class="octal"><div id="s-s8" class="button">A08</div></div>
+              <!-- The high byte and the low byte, parted as the panel
+                   parts them: A8 alone, a line, then A7 and A6. -->
+              <div class="byte-divider" aria-hidden="true"></div>
+              <div class="octal"><div id="s-s7" class="button">A07</div><div id="s-s6" class="button">A06</div></div>
+              <div class="octal"><div id="s-s5" class="button">A05</div><div id="s-s4" class="button">A04</div><div id="s-s3" class="button">A03</div></div>
+              <div class="octal"><div id="s-s2" class="button">A02</div><div id="s-s1" class="button">A01</div><div id="s-s0" class="button">A00</div></div>
+            </div>
           </div>
         </div>
+      </main>
 
-        <div class="subheader-bar mt-8">
-          <div id="tty-helper-title" class="l10n">Teletype Helper</div>
-        </div>
-        <div class="h-box justify-start align-items-center">
-          <div id="tty-break" class="button m-8 l10n">CTRL-C (BREAK)</div>
-          <div id="tty-rubout" class="button m-8 l10n">RUBOUT (_)</div>
-          <div id="tty-kill" class="button m-8 l10n">KILL LINE (@)</div>
-          <div id="tty-linefeed" class="button m-8 l10n">LINE FEED</div>
-          <div id="tty-clear" class="button m-8 l10n">CLEAR PAPER</div>
-        </div>
-        <div id="tty-hint" class="comments l10n">
-          Type here. Nothing echoes by itself - the machine has to be
-          running a program that reads the serial board, so pick
-          tty-echo from Example Programs in the Debugger tab and RUN it
-          first.
-        </div>
-      </div>
+      <div id="dock-splitter" role="separator" aria-orientation="horizontal"
+           tabindex="0"></div>
 
-      <div id="tab-debug">
-        <div class="subheader-bar">
-          <div id="debug-rom-title" class="l10n">Load a Program</div>
+      <!-- The tools, one at a time (P3). The tabs keep the ids the four
+           tabs the page used to have, so the code that fills them is unchanged. -->
+      <section id="dock">
+        <div id="dock-tabs" role="tablist">
+          <div id="nav-tty" class="dock-tab l10n" role="tab" tabindex="0" aria-controls="tab-tty">Teletype</div>
+          <div id="nav-debug" class="dock-tab l10n" role="tab" tabindex="0" aria-controls="tab-debug">Debugger</div>
+          <div id="nav-ref" class="dock-tab l10n" role="tab" tabindex="0" aria-controls="tab-ref">Tutorial</div>
+          <div id="nav-links" class="dock-tab l10n" role="tab" tabindex="0" aria-controls="tab-links">References</div>
+          <div class="toolbar-spacer"></div>
+          <div id="dock-toggle" class="dock-tool" role="button" tabindex="0"></div>
         </div>
-        <div class="h-box justify-start mt-8 mb-8 align-items-center">
-          <div id="load-basic" class="button m-8 l10n">Load 4K BASIC</div>
-          <div id="example-menu" class="dropdown m-8">
-            <button id="example-button" type="button" aria-haspopup="listbox"
-                    aria-expanded="false">
-              <span id="example-label" class="dropdown-label"></span>
-              <span class="dropdown-arrow" aria-hidden="true">&#9662;</span>
-            </button>
-            <ul id="example-list" role="listbox" hidden></ul>
+
+        <div id="dock-body">
+          <div id="tab-tty" class="dock-pane" role="tabpanel">
+            <!-- The keys a PC keyboard lacks, above the paper as a
+                 console's toolbar is; tearing the paper off is apart from
+                 them, being done to the terminal rather than typed. -->
+            <div class="tty-keys">
+              <div id="tty-break" class="button l10n">CTRL-C (BREAK)</div>
+              <div id="tty-rubout" class="button l10n">RUBOUT (_)</div>
+              <div id="tty-kill" class="button l10n">KILL LINE (@)</div>
+              <div id="tty-linefeed" class="button l10n">LINE FEED</div>
+              <div class="toolbar-spacer"></div>
+              <div id="tty-clear" class="button l10n">CLEAR PAPER</div>
+            </div>
+            <div id="tty-paper">
+              <!-- Shown only while nothing has printed (panel.renderTeletype). -->
+              <div id="tty-hint" class="tty-empty l10n">Nothing has printed yet. Run a program that reads the serial board - try Teletype echo from Load - then type here.</div>
+              <pre id="tty-text"></pre>
+            </div>
+            <input id="tty-input" class="tty-hidden-input" type="text"
+                   autocapitalize="characters" autocomplete="off"
+                   autocorrect="off" spellcheck="false" aria-label="Teletype">
           </div>
-        </div>
 
-        <div class="subheader-bar mt-8">
-          <div id="debug-load-data-title" class="l10n">Load Your Own</div>
-        </div>
-        <div class="h-box justify-start mt-8 align-items-center">
-          <input id="debug-data-input" class="flex-grow-1 mr-8" type="text">
-          <div id="debug-load-data" class="button l10n">Load Data</div>
-          <div id="load-binary" class="button m-8 l10n">Load Binary File</div>
-          <input id="binary-file" type="file" hidden>
-        </div>
-
-        <div class="subheader-bar mt-8">
-          <div id="debug-cpu-dump-title" class="l10n">8080 CPU Status Dump</div>
-        </div>
-        <div id="cpu-dump" class="mt-8"></div>
-
-        <div class="subheader-bar mt-8">
-          <div id="debug-memory-title" class="l10n">Installed Memory</div>
-        </div>
-        <div class="h-box justify-start mt-8 align-items-center">
-          <div id="mem-size-256" class="button m-8 mem-size l10n">256 B · as it shipped</div>
-          <div id="mem-size-4096" class="button m-8 mem-size l10n">4 KB · one 88-4MCS</div>
-          <div id="mem-size-8192" class="button m-8 mem-size l10n">8 KB · two 88-4MCS</div>
-        </div>
-
-        <div class="subheader-bar mt-8">
-          <div id="debug-mem-dump-title" class="l10n">Memory Dump</div>
-        </div>
-        <div class="h-box justify-start mt-8 align-items-center">
-          <div id="mem-window-label" class="comments"></div>
-          <div id="mem-window-nav" class="h-box align-items-center">
-            <div id="mem-page-prev" class="button m-8" role="button">&#9664;</div>
-            <div id="mem-page-next" class="button m-8" role="button">&#9654;</div>
-            <div id="mem-follow-pc" class="button m-8 l10n">Follow PC</div>
+          <div id="tab-debug" class="dock-pane" role="tabpanel">
+            <!-- The CPU across the top, its state and where it is, side
+                 by side; memory under them, the whole width. -->
+            <div class="debug-top">
+              <div class="debug-box">
+                <div id="debug-cpu-dump-title" class="section-label l10n">8080 CPU Status Dump</div>
+                <div id="cpu-dump"></div>
+              </div>
+              <div class="debug-box">
+                <div id="instr-title" class="section-label l10n">Next Instruction</div>
+                <div id="instr-pane"></div>
+              </div>
+            </div>
+            <div class="mem-toolbar">
+              <div id="debug-mem-dump-title" class="section-label l10n">Memory Dump</div>
+              <div id="mem-window-label"></div>
+              <div id="mem-page-prev" class="button" role="button">&#9664;</div>
+              <div id="mem-page-next" class="button" role="button">&#9654;</div>
+              <div id="mem-follow-pc" class="button l10n">Follow PC</div>
+              <div class="toolbar-spacer"></div>
+              <div id="debug-fill-zero" class="button l10n">Zero All Memory</div>
+            </div>
+            <div id="mem-map" class="mem-map" hidden></div>
+            <div id="mem-dump" class="mt-8"></div>
           </div>
-          <div id="debug-fill-zero" class="button m-8 l10n">Zero All Memory</div>
-        </div>
-        <div id="mem-map" class="mem-map" hidden></div>
-        <div id="mem-dump" class="mt-8"></div>
-      </div>
 
-      <div id="tab-ref">
+          <div id="tab-ref" class="dock-pane" role="tabpanel">
         <div class="subheader-bar">
           <div id="tutorial-title" class="l10n">Quick Tutorial</div>
         </div>
@@ -245,12 +245,12 @@ JMP 0000H  ; 11 000 011
         <div class="tutorial">
           <p id="basic-desc" class="tutorial-lead l10n">The Altair's first piece of software, and Microsoft's: Altair BASIC 3.2, written in 1975 by Bill Gates, Paul Allen and Monte Davidoff. How to start it:</p>
           <ol class="steps">
-            <li><span id="basic-1" class="l10n">Go to the Debugger tab and choose 4 KB (or 8 KB, for room to write longer programs) under Installed Memory. Installing memory switches the machine off, which is what opening the case would have done.</span></li>
-            <li><span id="basic-2" class="l10n">Click Load 4K BASIC. The machine powers up, the tape is read for you, and RESET is pressed.</span></li>
+            <li><span id="basic-1" class="l10n">In the Memory menu, choose 4 KB (or 8 KB, for room to write longer programs). Installing memory switches the machine off, which is what opening the case would have done.</span></li>
+            <li><span id="basic-2" class="l10n">In the Load menu, choose Microsoft 4K BASIC. The machine powers up, the tape is read for you, RESET is pressed, and the Debugger opens to show what arrived.</span></li>
             <li><span id="basic-3" class="l10n">Before going any further, look at the memory map above the dump. Fifteen of the sixteen pages of a 4 KB machine are full: that is BASIC, and the one page left over is all the room you have for a program. This is what "4K BASIC" means.</span></li>
             <li><span id="basic-4" class="l10n">The address switches A15-A8 tell BASIC which terminal board to use: all down is the 88-SIO at ports 00H and 01H, switch A11 up is the 88-2SIO at 10H and 11H. The teletype here is wired to both slots, so either setting works - a real Altair would have had only one of the two boards fitted, and the wrong setting left it silent.</span></li>
-            <li><span id="basic-5" class="l10n">Go to the Simulator tab and click RUN.</span></li>
-            <li><span id="basic-6" class="l10n">Go to the Teletype tab. BASIC asks MEMORY SIZE? - press Enter to take everything it found. Press Enter again for TERMINAL WIDTH?, then Y for WANT SIN? to keep the maths functions.</span></li>
+            <li><span id="basic-5" class="l10n">Click RUN on the front panel.</span></li>
+            <li><span id="basic-6" class="l10n">Open the Teletype, under the panel. BASIC asks MEMORY SIZE? - press Enter to take everything it found. Press Enter again for TERMINAL WIDTH?, then Y for WANT SIN? to keep the maths functions.</span></li>
             <li><span id="basic-7" class="l10n">It prints how many bytes are free, then OK. Try PRINT 22/7 for an answer straight away. To enter a program, type these lines one at a time, pressing Enter after each:</span>
               <pre class="tutorial-code">10 FOR I=1 TO 10
 20 PRINT I,I*I
@@ -259,18 +259,22 @@ RUN</pre>
             </li>
             <li><span id="basic-8" class="l10n">The keyboard is upper case only. Underscore rubs out the last character, at-sign throws away the line, and Ctrl-C stops a running program.</span></li>
           </ol>
-          <p id="basic-note" class="tutorial-note l10n">What Load 4K BASIC skips: on a real Altair you first toggled a 28 byte boot loader in through the front panel, one byte at a time, then started the paper tape reader and waited about seven minutes while BASIC clattered in. Get one switch wrong and you did it again.</p>
+          <p id="basic-note" class="tutorial-note l10n">What loading 4K BASIC skips: on a real Altair you first toggled a 28 byte boot loader in through the front panel, one byte at a time, then started the paper tape reader and waited about seven minutes while BASIC clattered in. Get one switch wrong and you did it again.</p>
         </div>
+          </div>
 
+          <!-- The source and the further reading, a tab of their own so
+               that About's References button opens straight onto them. -->
+          <div id="tab-links" class="dock-pane" role="tabpanel">
         <div class="subheader-bar">
-          <div id="source-code" class="l10n">Source code</div>
+          <div id="source-code" class="l10n">Source Code</div>
         </div>
         <ul class="link-list">
           <li><a href="https://github.com/wixette/8800-simulator" target="_blank" rel="noopener">github.com/wixette/8800-simulator</a></li>
         </ul>
 
         <div class="subheader-bar">
-          <div id="reference-title" class="l10n">References</div>
+          <div id="reference-title" class="l10n">Further Reading</div>
         </div>
         <ul class="link-list">
           <li><a href="https://en.wikipedia.org/wiki/Altair_8800" target="_blank" rel="noopener"><span id="ref-wikipedia-altair" class="l10n">Wikipedia: Altair 8800</span></a></li>
@@ -286,18 +290,96 @@ RUN</pre>
           <li><a href="http://altairbasic.org" target="_blank" rel="noopener"><span id="ref-basic-disassembly" class="l10n">Altair BASIC 3.2 (4K) - an annotated disassembly of the exact program this simulator runs</span></a></li>
           <li><a href="https://s2js.com/altair/" target="_blank" rel="noopener"><span id="ref-altair-simulator" class="l10n">MITS Altair Simulator - another JavaScript simulator, running Microsoft BASIC on a simulated teletype</span></a></li>
         </ul>
+          </div>
+        </div>
+      </section>
 
-      </div>
-      <div id="status-bar">
+      <footer id="status-bar" role="status" aria-live="polite">
         <span id="status-text"></span>
-      </div>
-    </main>
+      </footer>
+    </div>
 
-    <footer>
-      <p>&copy; 2020-2026 wixette
-        <a href="https://github.com/wixette/8800-simulator" target="_blank" rel="noopener"><span id="back-home" class="l10n">Source Code</span></a>
-      </p>
-    </footer>
+
+    <!-- Dialogs: for what needs more than a choice from a menu. -->
+    <dialog id="hex-dialog" class="dialog" aria-labelledby="hex-dialog-title">
+      <div class="dialog-head">
+        <h2 id="hex-dialog-title" class="dialog-title l10n">Load Hex Bytes</h2>
+        <button class="icon-button dialog-close" type="button" data-close><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+      </div>
+      <div class="dialog-body">
+        <p id="hex-dialog-desc" class="dialog-text l10n">Bytes in hex, put into memory from 0000H. Spaces, commas and line breaks may separate them.</p>
+        <textarea id="debug-data-input" rows="6" spellcheck="false" autofocus
+                  autocapitalize="off" autocomplete="off"></textarea>
+        <p id="hex-dialog-error" class="dialog-error" hidden></p>
+        <div class="dialog-actions">
+          <button id="hex-cancel" class="dialog-button l10n" type="button" data-close>Cancel</button>
+          <button id="debug-load-data" class="dialog-button primary l10n" type="button">Load Data</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="share-dialog" class="dialog" aria-labelledby="share-title">
+      <div class="dialog-head">
+        <h2 id="share-title" class="dialog-title l10n">Share a Link</h2>
+        <button class="icon-button dialog-close" type="button" data-close><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+      </div>
+      <div class="dialog-body">
+        <p id="share-off" class="dialog-text" hidden></p>
+        <div id="share-choices">
+          <p id="share-question" class="dialog-text l10n">What should the link open?</p>
+          <label class="dialog-option">
+            <input id="share-program" type="radio" name="share-what" checked>
+            <span class="dialog-option-text">
+              <span id="share-program-label" class="dialog-option-title l10n">The program, at RESET</span>
+              <span id="share-program-desc" class="dialog-option-desc l10n">Ready to RUN, as a fresh machine would be.</span>
+            </span>
+          </label>
+          <label class="dialog-option">
+            <input id="copy-link-state" type="radio" name="share-what">
+            <span class="dialog-option-text">
+              <span id="share-state-label" class="dialog-option-title l10n">The machine as it is now</span>
+              <span id="share-state-desc" class="dialog-option-desc"></span>
+            </span>
+          </label>
+          <input id="share-link" class="dialog-field" type="text" readonly
+                 aria-labelledby="share-title">
+        </div>
+        <div class="dialog-actions">
+          <button id="copy-link" class="dialog-button primary l10n" type="button" autofocus>Copy Link</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="about-dialog" class="dialog" aria-labelledby="about-title">
+      <div class="dialog-head">
+        <h2 id="about-title" class="dialog-title l10n">Altair 8800 Simulator</h2>
+        <button class="icon-button dialog-close" type="button" data-close><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+      </div>
+      <div class="dialog-body">
+        <p class="dialog-text about-version"><span id="about-version" class="l10n">Version</span> <span id="app-version"></span></p>
+        <p id="about-desc" class="dialog-text l10n">An Altair 8800 you can switch on in a web page: its front panel, a teletype running Microsoft's 4K BASIC, and a debugger the real one never had.</p>
+        <ul class="about-links">
+          <li><a href="https://github.com/wixette/8800-simulator" target="_blank" rel="noopener"><span id="about-source" class="l10n">Source code on GitHub</span></a></li>
+          <li><a href="https://github.com/wixette/8800-simulator/issues" target="_blank" rel="noopener"><span id="about-issues" class="l10n">Report a problem</span></a></li>
+          <li><a href="https://github.com/wixette/8800-simulator/graphs/contributors" target="_blank" rel="noopener"><span id="about-contributors" class="l10n">Contributors</span></a></li>
+        </ul>
+        <h3 id="about-licences" class="dialog-subtitle l10n">Licences</h3>
+        <ul class="about-licences">
+          <li><span id="about-license-app" class="l10n">The simulator:</span>
+            <a href="https://github.com/wixette/8800-simulator/blob/master/LICENSE" target="_blank" rel="noopener">Apache License 2.0</a></li>
+          <li><span id="about-license-rom" class="l10n">The 4K BASIC tape is Microsoft's, and not covered by that licence:</span>
+            <a href="https://github.com/wixette/8800-simulator/blob/master/roms/NOTICE" target="_blank" rel="noopener">roms/NOTICE</a></li>
+          <li><span id="about-license-cpu" class="l10n">The 8080 CPU core is 8080js by Martin Maly, under a BSD licence:</span>
+            <a href="https://github.com/maly/8080js" target="_blank" rel="noopener">github.com/maly/8080js</a></li>
+          <li><span id="about-license-icons" class="l10n">The icons are Google's Material Icons:</span>
+            <a href="https://github.com/google/material-design-icons" target="_blank" rel="noopener">Apache License 2.0</a></li>
+        </ul>
+        <div class="dialog-actions">
+          <button id="about-references" class="dialog-button l10n" type="button">References</button>
+          <button id="about-ok" class="dialog-button primary l10n" type="button" data-close autofocus>Close</button>
+        </div>
+      </div>
+    </dialog>
 
     <audio id="sound-beepbeep" src="audio/beepbeep.mp3"></audio>
     <audio id="sound-switch" src="audio/switch.mp3"></audio>
@@ -307,7 +389,9 @@ RUN</pre>
     <script src="js/8080.js"></script>
     <script src="js/sim8800.js"></script>
     <script src="js/dropdown.js"></script>
+    <script src="js/dialog.js"></script>
     <script src="js/listing.js"></script>
+    <script src="js/link.js"></script>
     <script src="js/sio.js"></script>
     <script src="js/teletype.js"></script>
     <script src="js/panel.js"></script>

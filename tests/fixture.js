@@ -38,6 +38,7 @@ function createSim(memSize = 256, clockRate = 1000000) {
         cpuDump: null,
         memDump: null,       // The <pre> of hex.
         memMap: undefined,   // The map strip, as data. Null when none.
+        instr: undefined,    // The instruction at PC, decoded.
     };
     const sim = new Sim8800(
         memSize, clockRate,
@@ -47,7 +48,11 @@ function createSim(memSize = 256, clockRate = 1000000) {
         (isPoweredOn) => { state.statusLedsArg = isPoweredOn; },
         () => state.inputWord,
         (html) => { state.cpuDump = html; },
-        (html, pages) => { state.memDump = html; state.memMap = pages; });
+        (html, pages, instr) => {
+            state.memDump = html;
+            state.memMap = pages;
+            state.instr = instr;
+        });
     return {sim: sim, state: state};
 }
 
