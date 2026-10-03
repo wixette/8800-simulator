@@ -17,7 +17,7 @@ principle here first, with its reason.**
 [U1](#u1--the-front-panel-and-a-dock-replace-the-four-tabs) replaced
 the four tabs, [U2](#u2--where-10s-features-go) put #10's features
 in their places, and U3 to U5 came of the first review of both, which
-also gave P10. The questions U1 left open were settled as listed in
+also gave P10. U6 came of @cj0ne5's review of #11. The questions U1 left open were settled as listed in
 [Part 4](#part-4--open-questions), and remain open to revision once the
 layout has been used for a while.
 
@@ -183,7 +183,7 @@ knows how all of them behave.
 │         [OFF/ON] [STOP|RUN] [SINGLE STEP] [EXAMINE|NEXT] [DEPOSIT|NEXT] [RESET]        │
 │       [A15] [A14 A13 A12] [A11 A10 A09] [A08] │ [A07 A06] [A05 A04 A03] [A02 A01 A00]  │
 ├─────────────────────────────────── ═══ drag ═══ ──────────────────────────────────────┤
-│ Teletype •   Debugger   Tutorial                                                  ▾   │
+│ Teletype •   Debugger   Tutorial   References                                     ▾   │
 │ ┌ 8080 CPU Status Dump ─────────────┐  ┌ Next Instruction ────────────────────────┐   │
 │ │ PC = 0004  SP = 0000 … FLAGS S Z… │  │ 0004  3A 81 00  LDA a16                   │   │
 │ └───────────────────────────────────┘  └───────────────────────────────────────────┘   │
@@ -196,7 +196,7 @@ knows how all of them behave.
 
 Where the pieces of the four tabs went. Share and the instruction
 pane's place are U2's; the menus, dialogs and icons U3's; the switch
-strip U4's; the tools' layouts U5's.
+strip U4's; the tools' layouts U5's; the References tab U6's.
 
 | Before | Now | By |
 | --- | --- | --- |
@@ -212,6 +212,7 @@ strip U4's; the tools' layouts U5's.
 | Debugger: run buttons (D27) | Removed: the panel is in view | P2 |
 | Debugger: Copy Link | Toolbar: Share, a dialog (U2, U3) | P4 |
 | Tutorial tab | Dock: Tutorial | P3 |
+| Tutorial tab: source code and references | Dock: References, opened by About's References button (U6) | P3 |
 | Status line (D15) | Foot of the page, never hidden; the credit line moved to About (U3) | P7 |
 
 *Why the dock sits below the panel:* the panel is wide and short
@@ -384,6 +385,24 @@ voice (P5).
   dock - and memory under them, the whole width, with its toolbar on
   one line and Zero All Memory kept apart at the far right. The flags
   are shown by letter, S Z AC P CY, each lit when set.
+
+### U6 — The references are a tab of their own
+
+Suggested by @cj0ne5 in their review of #11. The source code and the
+reading list had sat at the foot of the Tutorial since before U1, so
+About's *Further Reading* could only open the Tutorial and scroll to
+its bottom.
+
+- **A fourth tab, References**, after the Tutorial: the Tutorial is a
+  lesson, read in order; the references are looked up. The tab holds
+  *Source Code* and *Further Reading*, the list as it was.
+- **About's button is named for where it goes**, *References*, and
+  opens the tab at its top. The tabs share one scrolling body, so the
+  scroll is reset rather than left where the last tab was read to.
+- **On a phone** four tabs and the fold button are a squeeze. The tabs
+  close up, and in the languages whose names are longer still the row
+  scrolls under the fold button, which stays pinned at the right; the
+  chosen tab is scrolled into view.
 
 ---
 

@@ -1113,16 +1113,15 @@ panel.showVersion = function() {
 };
 
 /**
- * When Further Reading is pressed in the About dialog: the Tutorial,
- * at its references.
+ * When References is pressed in the About dialog: the References tab,
+ * from its top.
  */
 panel.onAboutReferences = function() {
     panel.aboutDialog.close();
-    panel.showTab('ref');
-    var heading = document.getElementById('reference-title');
-    if (heading) {
-        heading.scrollIntoView({block: 'start'});
-    }
+    panel.showTab('links');
+    // The tabs share one scrolling body, so it may still be scrolled
+    // to wherever the last tab was read to.
+    document.getElementById('dock-body').scrollTop = 0;
 };
 
 /**
@@ -2283,7 +2282,7 @@ panel.playSwitch = function() {
  * carries over).
  * @type {Array<string>}
  */
-panel.TABS = ['tty', 'debug', 'ref'];
+panel.TABS = ['tty', 'debug', 'ref', 'links'];
 
 /**
  * The tab a first visit opens on: the Tutorial, which says what to do
@@ -2485,6 +2484,10 @@ panel.applyDock = function() {
         let nav = document.getElementById('nav-' + tab);
         nav.classList.toggle('selected', shown);
         nav.setAttribute('aria-selected', shown ? 'true' : 'false');
+        // On a phone the tabs can be wider than the screen.
+        if (shown) {
+            nav.scrollIntoView({block: 'nearest', inline: 'nearest'});
+        }
     }
     panel.refreshDockToggle();
     panel.saveDock();

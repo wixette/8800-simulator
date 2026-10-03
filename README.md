@@ -128,8 +128,9 @@ tools below it, and a status line along the foot.
   one or two 88-4MCS boards. Fitting a board meant opening the case, so
   this switches the machine off. On the right are *Share*, the
   language (nine of them), and *About*.
-- **The dock** holds three tools, one at a time: the **Teletype**, the
-  **Debugger** and the **Tutorial**. Click a tab to open it, click it
+- **The dock** holds four tabs, one at a time: the **Teletype**, the
+  **Debugger**, the **Tutorial**, and the **References** (the source
+  code and further reading). Click a tab to open it, click it
   again (or ▾) to fold the dock away, and drag the handle above it to
   share the height with the panel. Whatever you load, the dock opens
   on the Debugger to show it arriving.

@@ -607,15 +607,15 @@ l10n.MESSAGES = {
     },
 
     'about-references': {
-        'en': 'Further Reading',
-        'es': 'Para Saber Más',
-        'fr': 'Pour Aller Plus Loin',
-        'de': 'Weiterlesen',
-        'it': 'Per Approfondire',
-        'zh': '延伸阅读',
-        'zh-TW': '延伸閱讀',
+        'en': 'References',
+        'es': 'Referencias',
+        'fr': 'Références',
+        'de': 'Referenzen',
+        'it': 'Riferimenti',
+        'zh': '参考资料',
+        'zh-TW': '參考資料',
         'ja': '参考資料',
-        'ko': '더 읽을거리',
+        'ko': '참고 자료',
     },
 
     'strip-hide': {
@@ -750,12 +750,24 @@ l10n.MESSAGES = {
         'ko': '튜토리얼',
     },
 
+    'nav-links': {
+        'en': 'References',
+        'es': 'Referencias',
+        'fr': 'Références',
+        'de': 'Referenzen',
+        'it': 'Riferimenti',
+        'zh': '参考资料',
+        'zh-TW': '參考資料',
+        'ja': '参考資料',
+        'ko': '참고 자료',
+    },
+
     'source-code': {
-        'en': 'Source code',
-        'es': 'Código fuente',
-        'fr': 'Code source',
+        'en': 'Source Code',
+        'es': 'Código Fuente',
+        'fr': 'Code Source',
         'de': 'Quellcode',
-        'it': 'Codice sorgente',
+        'it': 'Codice Sorgente',
         'zh': '源代码',
         'zh-TW': '原始碼',
         'ja': 'ソースコード',
@@ -1798,15 +1810,15 @@ l10n.MESSAGES = {
     },
 
     'reference-title': {
-        'en': 'References',
-        'es': 'Referencias',
-        'fr': 'Références',
-        'de': 'Referenzen',
-        'it': 'Riferimenti',
-        'zh': '参考资料',
-        'zh-TW': '參考資料',
-        'ja': '参考資料',
-        'ko': '참고 자료',
+        'en': 'Further Reading',
+        'es': 'Para Saber Más',
+        'fr': 'Pour Aller Plus Loin',
+        'de': 'Weiterlesen',
+        'it': 'Per Approfondire',
+        'zh': '延伸阅读',
+        'zh-TW': '延伸閱讀',
+        'ja': 'さらに詳しく',
+        'ko': '더 읽을거리',
     },
 
     'ref-wikipedia-altair': {

@@ -911,11 +911,10 @@ a {
     padding: 10px 16px;
 }
 
-/* Source code and references, on the dark ground. */
-/* The Tutorial's source code and references: a compact list, as a
-   reference list is, with each entry's wrapped lines hanging under its
-   first. Underlined only under the pointer, so that the column reads as
-   titles rather than as a wall of underscores. */
+/* The References tab's source code and further reading: a compact
+   list, as a reference list is, with each entry's wrapped lines hanging
+   under its first. Underlined only under the pointer, so that the
+   column reads as titles rather than as a wall of underscores. */
 .link-list {
     font-size: 14px;
     line-height: 1.45;
@@ -1250,6 +1249,31 @@ a {
 
     .dock-closed #dock {
         flex: none;
+    }
+
+    /* Four tabs and the fold button across a phone: the tabs closer
+       together, and where a language's names are longer still, the row
+       scrolls under the fold button rather than pushing it off. */
+    #dock-tabs {
+        overflow-x: auto;
+        /* So a tab scrolled to is not left under the fold button. */
+        scroll-padding-right: 36px;
+        scrollbar-width: none;
+    }
+
+    #dock-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .dock-tab {
+        font-size: 13px;
+        padding: 0 9px;
+    }
+
+    #dock-toggle {
+        background-color: #2b2b2b;
+        position: sticky;
+        right: 0;
     }
 
     /* The labels go, the icons and the installed size stay. */

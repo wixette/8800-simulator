@@ -136,8 +136,8 @@ test('every Debugger control that can be unavailable can say why', () => {
  * @type {Array<string>}
  */
 const REGIONS = ['toolbar', 'stage', 'dock', 'tab-tty', 'tab-debug',
-                 'tab-ref', 'status-bar', 'hex-dialog', 'share-dialog',
-                 'about-dialog'];
+                 'tab-ref', 'tab-links', 'status-bar', 'hex-dialog',
+                 'share-dialog', 'about-dialog'];
 
 /**
  * The part of index.html one region takes up.
@@ -287,6 +287,22 @@ test('Share and the next instruction are where U2 put them', () => {
     assert.ok(at('instr-pane') > at('cpu-dump') &&
               at('instr-pane') < at('mem-dump'),
               'the next instruction is beside the registers');
+});
+
+test('the references have a tab of their own, which About opens', () => {
+    // The Tutorial is a lesson; the source and further reading are
+    // looked up, so they get the dock's last tab rather than its foot.
+    assert.deepStrictEqual(panel.TABS, ['tty', 'debug', 'ref', 'links']);
+    assert.ok(!regionOf('tab-ref').includes('<a '),
+              'the Tutorial keeps no links');
+    const links = regionOf('tab-links');
+    assert.ok(links.includes('id="reference-title"') &&
+              links.includes('github.com/wixette/8800-simulator'),
+              'the References tab has the source and the reading');
+    const handler = sourceOf('js/panel.js').match(
+        /panel\.onAboutReferences = function\(\) \{[\s\S]*?\n\};/)[0];
+    assert.ok(handler.includes("panel.showTab('links')"),
+              "About's References button opens the References tab");
 });
 
 test('a first visit opens the dock on the Tutorial', () => {

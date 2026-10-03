@@ -142,6 +142,7 @@
           <div id="nav-tty" class="dock-tab l10n" role="tab" tabindex="0" aria-controls="tab-tty">Teletype</div>
           <div id="nav-debug" class="dock-tab l10n" role="tab" tabindex="0" aria-controls="tab-debug">Debugger</div>
           <div id="nav-ref" class="dock-tab l10n" role="tab" tabindex="0" aria-controls="tab-ref">Tutorial</div>
+          <div id="nav-links" class="dock-tab l10n" role="tab" tabindex="0" aria-controls="tab-links">References</div>
           <div class="toolbar-spacer"></div>
           <div id="dock-toggle" class="dock-tool" role="button" tabindex="0"></div>
         </div>
@@ -260,16 +261,20 @@ RUN</pre>
           </ol>
           <p id="basic-note" class="tutorial-note l10n">What loading 4K BASIC skips: on a real Altair you first toggled a 28 byte boot loader in through the front panel, one byte at a time, then started the paper tape reader and waited about seven minutes while BASIC clattered in. Get one switch wrong and you did it again.</p>
         </div>
+          </div>
 
+          <!-- The source and the further reading, a tab of their own so
+               that About's References button opens straight onto them. -->
+          <div id="tab-links" class="dock-pane" role="tabpanel">
         <div class="subheader-bar">
-          <div id="source-code" class="l10n">Source code</div>
+          <div id="source-code" class="l10n">Source Code</div>
         </div>
         <ul class="link-list">
           <li><a href="https://github.com/wixette/8800-simulator" target="_blank" rel="noopener">github.com/wixette/8800-simulator</a></li>
         </ul>
 
         <div class="subheader-bar">
-          <div id="reference-title" class="l10n">References</div>
+          <div id="reference-title" class="l10n">Further Reading</div>
         </div>
         <ul class="link-list">
           <li><a href="https://en.wikipedia.org/wiki/Altair_8800" target="_blank" rel="noopener"><span id="ref-wikipedia-altair" class="l10n">Wikipedia: Altair 8800</span></a></li>
@@ -285,7 +290,6 @@ RUN</pre>
           <li><a href="http://altairbasic.org" target="_blank" rel="noopener"><span id="ref-basic-disassembly" class="l10n">Altair BASIC 3.2 (4K) - an annotated disassembly of the exact program this simulator runs</span></a></li>
           <li><a href="https://s2js.com/altair/" target="_blank" rel="noopener"><span id="ref-altair-simulator" class="l10n">MITS Altair Simulator - another JavaScript simulator, running Microsoft BASIC on a simulated teletype</span></a></li>
         </ul>
-
           </div>
         </div>
       </section>
@@ -371,7 +375,7 @@ RUN</pre>
             <a href="https://github.com/google/material-design-icons" target="_blank" rel="noopener">Apache License 2.0</a></li>
         </ul>
         <div class="dialog-actions">
-          <button id="about-references" class="dialog-button l10n" type="button">Further Reading</button>
+          <button id="about-references" class="dialog-button l10n" type="button">References</button>
           <button id="about-ok" class="dialog-button primary l10n" type="button" data-close autofocus>Close</button>
         </div>
       </div>
