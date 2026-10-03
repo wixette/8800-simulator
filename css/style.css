@@ -621,6 +621,15 @@ a {
     padding: 2px 4px;
 }
 
+/* Between A08 and A07: the line the panel draws between the high byte
+   and the low. */
+.byte-divider {
+    align-self: stretch;
+    background-color: #666;
+    flex: none;
+    width: 2px;
+}
+
 /* A window too narrow for the rows lets them wrap. */
 @media (max-width: 900px) {
     .strip-row {
@@ -921,6 +930,14 @@ a {
     -moz-user-select: none;
     -ms-user-select: none;
     -webkit-user-select: none;
+}
+
+/* Every light button answers the pointer, as the toolbar, the dock and
+   the dialogs do. A shade darker rather than a fixed colour, so that a
+   raised switch's orange, a live OFF/ON's green and a greyed button
+   each keep their own colour under it. */
+.button:hover {
+    filter: brightness(0.88);
 }
 
 /* The hidden attribute has to beat author rules such as .mem-map's
@@ -1241,6 +1258,11 @@ a {
 
     .strip-address .octal {
         display: contents;
+    }
+
+    /* Eight to a row already puts the high byte above the low. */
+    .strip-address .byte-divider {
+        display: none;
     }
 
     .strip-address .button {

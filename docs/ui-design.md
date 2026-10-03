@@ -181,7 +181,7 @@ knows how all of them behave.
 │                         FRONT PANEL (the SVG artwork)                                 │
 │                                    [˅]                                                │
 │         [OFF/ON] [STOP|RUN] [SINGLE STEP] [EXAMINE|NEXT] [DEPOSIT|NEXT] [RESET]        │
-│         [A15] [A14 A13 A12] [A11 A10 A09] [A08 A07 A06] [A05 A04 A03] [A02 A01 A00]    │
+│       [A15] [A14 A13 A12] [A11 A10 A09] [A08] │ [A07 A06] [A05 A04 A03] [A02 A01 A00]  │
 ├─────────────────────────────────── ═══ drag ═══ ──────────────────────────────────────┤
 │ Teletype •   Debugger   Tutorial                                                  ▾   │
 │ ┌ 8080 CPU Status Dump ─────────────┐  ┌ Next Instruction ────────────────────────┐   │
@@ -360,8 +360,11 @@ is the familiar sign for folding.
 It is laid out as the panel lays the switches out, so that it reads as
 part of the machine: the command switches by lever in panel order, a
 two-way lever (STOP and RUN, EXAMINE and EXAMINE NEXT) drawn as one
-control with two halves; the address switches in the octal threes of
-the silkscreen. Its rows stay on one line where the window has room,
+control with two halves; the address switches in the octal groups of
+the silkscreen, parted - as the panel parts them, with A8 alone and a
+line before A7 - between the high byte and the low, which programs so
+often use apart: the sense switches above, a byte to deposit below. Its
+rows stay on one line where the window has room,
 so it is always two rows high, and it widens to the panel's artwork;
 on a phone the address switches go eight to a row. It keeps the panel's
 voice (P5).

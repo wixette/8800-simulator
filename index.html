@@ -94,7 +94,8 @@
         <!-- The Switch Board Helper: the panel's switches again, large
              enough for a thumb, and laid out as the panel lays them out -
              the command switches by lever, the address switches in the
-             octal threes of the silkscreen. Shown unless folded away,
+             octal groups of the silkscreen, parted between the high
+             byte and the low as the panel parts them. Shown unless folded away,
              from the tab on its own top edge. -->
         <div id="switch-strip">
           <div id="strip-tab" class="strip-tab" role="button" tabindex="0"
@@ -114,7 +115,11 @@
               <div class="octal"><div id="s-s15" class="button">A15</div></div>
               <div class="octal"><div id="s-s14" class="button">A14</div><div id="s-s13" class="button">A13</div><div id="s-s12" class="button">A12</div></div>
               <div class="octal"><div id="s-s11" class="button">A11</div><div id="s-s10" class="button">A10</div><div id="s-s9" class="button">A09</div></div>
-              <div class="octal"><div id="s-s8" class="button">A08</div><div id="s-s7" class="button">A07</div><div id="s-s6" class="button">A06</div></div>
+              <div class="octal"><div id="s-s8" class="button">A08</div></div>
+              <!-- The high byte and the low byte, parted as the panel
+                   parts them: A8 alone, a line, then A7 and A6. -->
+              <div class="byte-divider" aria-hidden="true"></div>
+              <div class="octal"><div id="s-s7" class="button">A07</div><div id="s-s6" class="button">A06</div></div>
               <div class="octal"><div id="s-s5" class="button">A05</div><div id="s-s4" class="button">A04</div><div id="s-s3" class="button">A03</div></div>
               <div class="octal"><div id="s-s2" class="button">A02</div><div id="s-s1" class="button">A01</div><div id="s-s0" class="button">A00</div></div>
             </div>
