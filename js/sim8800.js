@@ -36,10 +36,12 @@ class Sim8800 {
      *     callback to get the input word from address/data switches.
      * @param {function(string)?} dumpCpuCallback The callback to receive
      *     CPU status dump, in HTML string.
-     * @param {function(string, ?Array<Object>)?} dumpMemCallback The
-     *     callback to receive the memory dump as an HTML string, and
+     * @param {function(string, ?Array<Object>, Object=)?} dumpMemCallback
+     *     The callback to receive the memory dump as an HTML string,
      *     the memory map as data - see getMemMap() - or null on a
-     *     machine small enough not to need a map.
+     *     machine small enough not to need a map, and the instruction
+     *     at the program counter - see getInstructionAtPc() - which is
+     *     left out when the machine is off.
      */
     constructor(memSize, clockRate,
                 setAddressLedsCallback, setDataLedsCallback,
@@ -123,6 +125,60 @@ class Sim8800 {
      */
     static toHex(n, len) {
         return n.toString(16).toUpperCase().padStart(len, '0').slice(-len);
+    }
+
+    /**
+     * Decodes one instruction, for the pane under the memory dump.
+     *
+     * The operand is named the way instruction tables name it - a16 for
+     * an address, d16 and d8 for data - so that LHLD at 2A reads as
+     * "LHLD a16", with the value it takes this time given separately.
+     *
+     * The 8080 has twelve opcodes Intel never documented. The CPU core
+     * runs each as the documented instruction it duplicates, so that is
+     * what they decode as, marked undocumented. The disassembler's own
+     * table names two of them after the 8085's RIM and SIM, which this
+     * CPU does not have.
+     *
+     * @param {number} opcode The byte at the program counter.
+     * @param {number} lo The byte after it.
+     * @param {number} hi The byte after that.
+     * @return {{mnemonic: string, operand: ?string, operandName: ?string,
+     *     length: number, undocumented: boolean}} The operand is the
+     *     value in hex and operandName its placeholder in the mnemonic
+     *     (a16, d16 or d8), both null when the instruction has none.
+     */
+    static decodeInstruction(opcode, lo, hi) {
+        var undocumented = Sim8800.UNDOCUMENTED_OPCODES[opcode];
+        var real = undocumented !== undefined ? undocumented : opcode;
+        // The same file defines both under one name in Node.js, and
+        // under two in the browser.
+        var cpud = typeof CPUD8080 !== 'undefined' ? CPUD8080 : CPU8080;
+        var decoded = cpud.disasm(real, lo, hi);
+        var length = decoded[1];
+        // "MVI B, $8C" and "MVI C,$8C" are both in the table.
+        var text = decoded[0].replace(/,\s*/, ',');
+        var operand = null;
+        var operandName = null;
+        var mnemonic = text;
+        if (length == 3) {
+            operand = Sim8800.toHex((hi << 8) | lo, 4) + 'H';
+            // LXI loads a register pair; everything else that takes two
+            // bytes takes an address.
+            operandName = text.startsWith('LXI') ? 'd16' : 'a16';
+            mnemonic = text.replace(/\$[0-9A-F]{4}/, operandName);
+        } else if (length == 2) {
+            operand = Sim8800.toHex(lo, 2) + 'H';
+            operandName = 'd8';
+            mnemonic = text.replace(/\$[0-9A-F]{2}/, operandName);
+        }
+        return {
+            mnemonic: mnemonic,
+            operand: operand,
+            operandName: operandName,
+            length: length,
+            undocumented: undocumented !== undefined,
+        };
     }
 
     /**
@@ -303,6 +359,7 @@ class Sim8800 {
         // No strip on a machine whose memory is all on screen already.
         var map = this.mem.length > Sim8800.DUMP_WINDOW_SIZE ?
             this.getMemMap(window, cpu) : null;
+        var instr = this.getInstructionAtPc(cpu.pc);
         var sb = [];
         sb.push('<pre>\n');
         for (let i = window.start; i < window.end; i += 16) {
@@ -310,8 +367,13 @@ class Sim8800 {
             sb.push('  ');
             for (let j = i; j < Math.min(window.end, i + 16); j++) {
                 let byte = Sim8800.toHex(this.mem[j], 2);
-                if (j == cpu.pc) {
+                // How far past the opcode this byte is, wrapping at the
+                // top of the address space as the CPU does.
+                let offset = (j - cpu.pc) & 0xffff;
+                if (offset == 0) {
                     byte = '<span class="at-pc">' + byte + '</span>';
+                } else if (offset < instr.length) {
+                    byte = '<span class="at-operand">' + byte + '</span>';
                 } else if (j == cpu.sp) {
                     byte = '<span class="at-sp">' + byte + '</span>';
                 }
@@ -321,7 +383,21 @@ class Sim8800 {
             sb.push('\n');
         }
         sb.push('</pre>\n');
-        this.dumpMemCallback(sb.join(''), map);
+        this.dumpMemCallback(sb.join(''), map, instr);
+    }
+
+    /**
+     * The instruction the CPU will run next, decoded.
+     * @param {number} pc The program counter.
+     * @return {Object} What decodeInstruction() gives, plus the address
+     *     and the bytes the instruction takes up.
+     */
+    getInstructionAtPc(pc) {
+        var bytes = [0, 1, 2].map((i) => this.readByte((pc + i) & 0xffff));
+        var instr = Sim8800.decodeInstruction(bytes[0], bytes[1], bytes[2]);
+        instr.address = pc;
+        instr.bytes = bytes.slice(0, instr.length);
+        return instr;
     }
 
     /**
@@ -357,14 +433,16 @@ class Sim8800 {
         sb.push('F = ' + Sim8800.toHex(cpu.f, 2) + '  ');
         sb.push('H = ' + Sim8800.toHex(cpu.h, 2) + '  ');
         sb.push('L = ' + Sim8800.toHex(cpu.l, 2) + '\n');
+        // Every flag, by the letter 8080 references give it, lit when
+        // set: a flag that is clear is as much a fact as one that is set.
         var flags = this.decodeFlags(cpu.f);
-        sb.push('FLAGS: ');
-        if (flags.sign) sb.push('SIGN ');
-        if (flags.zero) sb.push('ZERO ');
-        if (flags.auxiliaryCarry) sb.push('AC ');
-        if (flags.parity) sb.push('PARITY ');
-        if (flags.carry) sb.push('CARRY ');
-        sb.push('</pre>\n');
+        sb.push('FLAGS');
+        [['S', flags.sign], ['Z', flags.zero], ['AC', flags.auxiliaryCarry],
+         ['P', flags.parity], ['CY', flags.carry]].forEach(function(flag) {
+            sb.push(' <span class="flag' + (flag[1] ? ' flag-set' : '') +
+                    '">' + flag[0] + '</span>');
+        });
+        sb.push('\n</pre>\n');
         this.dumpCpuCallback(sb.join(''));
     }
 
@@ -590,6 +668,11 @@ class Sim8800 {
             this.dumpMemCallback('', null);
         }
         this.isPoweredOn = false;
+        // A machine switched off mid-run is not running any more. Left
+        // set, the clock goes on ticking every millisecond, stepping a
+        // CPU that has no power, until the next power-on clears it.
+        this.isRunning = false;
+        this.halted = false;
     }
 
     /**
@@ -852,6 +935,19 @@ Sim8800.FRONT_PANEL_PORT = 0xff;
  * @type {number}
  */
 Sim8800.DUMP_WINDOW_SIZE = 256;
+
+/**
+ * The undocumented opcodes, and the documented instruction the CPU core
+ * runs each one as. See decodeInstruction().
+ * @type {Object<number, number>}
+ */
+Sim8800.UNDOCUMENTED_OPCODES = {
+    0x08: 0x00, 0x10: 0x00, 0x18: 0x00, 0x20: 0x00,  // NOP
+    0x28: 0x00, 0x30: 0x00, 0x38: 0x00,
+    0xcb: 0xc3,  // JMP
+    0xd9: 0xc9,  // RET
+    0xdd: 0xcd, 0xed: 0xcd, 0xfd: 0xcd,  // CALL
+};
 
 // Exports the class for unit tests when running in Node.js. This has
 // no effect when the script is loaded in a browser.

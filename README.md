@@ -4,128 +4,78 @@
 
 The 1975 computer that started the personal computer revolution, in
 your browser. Toggle 8080 machine code in through a working front
-panel, watch it run on the LEDs, then install a memory board and boot
+panel, watch it run on the lamps, then install a memory board and boot
 Microsoft's original 4K BASIC on a simulated Teletype.
 
-**[Try it online](https://wixette.github.io/8800-simulator/)**
+**[▶ Try it online](https://wixette.github.io/8800-simulator/)**, with
+nothing to install.
 
-- **A working front panel.** The Altair 8800's address and data lamps
-  and its switches - EXAMINE, DEPOSIT, SINGLE STEP, RUN, RESET and the
-  sense switches - on an Intel 8080 clocked at the machine's own 2 MHz.
-- **Microsoft Altair BASIC 3.2.** The 4K edition Bill Gates, Paul Allen
-  and Monte Davidoff wrote in 1975, running unmodified.
-- **The hardware it needs.** A Teletype ASR-33 on MITS 88-SIO and
-  88-2SIO serial boards, and 256 B, 4 KB or 8 KB of memory, installed
-  the way you installed a board.
-- **A debugger the Altair never had.** Live CPU registers, a paged
-  memory dump, and a map of what fills each page of memory.
-- **Ten example programs**, from a seven byte switch echo to a guessing
-  game on the teletype, each a checked listing you load with one click.
-- **Nine languages**, no build step and no dependencies.
+![The simulator: the Altair 8800 front panel with its switch strip, Microsoft 4K BASIC answering on the Teletype in the dock below, and the toolbar above](./screenshots/app.png)
 
-![The Simulator tab: the Altair 8800 front panel, switched on, with the Switch Board Helper below it](./screenshots/panel.png)
+**The route through it:**
+[1. Try it](#1-try-it-in-a-minute) →
+[2. The front panel](#2-meet-the-front-panel) →
+[3. A program by hand](#3-your-first-program-by-hand) →
+[4. Around the simulator](#4-around-the-simulator) →
+[5. The Teletype](#5-the-teletype) →
+[6. 4K BASIC](#6-microsoft-4k-basic) →
+[7. More programs](#7-more-programs) →
+[8. For developers](#8-for-developers)
 
-## Usage
+## 1. Try it in a minute
 
-Serve the directory over HTTP and open it. Anything will do; with no
-web server installed, Python has one built in:
+1. Open the simulator, [online](https://wixette.github.io/8800-simulator/)
+   or [on your own machine](#run-it-locally).
+2. Open **Load**, and choose **Pattern shift** under *Front Panel
+   Examples*.
+3. Click **RUN**, on the strip of buttons under the panel or on the
+   panel's own RUN switch.
 
-```
-python3 -m http.server 8000
-```
+A pattern now walks across the data lamps, D7–D0. That is a real
+program: eight bytes of 8080 machine code, running at the Altair's
+own 2 MHz. Click **STOP** to stop it.
 
-then open <http://localhost:8000/>. To deploy, copy the whole directory
-to your web server's root — there is nothing to build.
+## 2. Meet the front panel
 
-Opening `index.html` straight off the disk mostly works: the front
-panel, the teletype and the debugger are all in the page itself. Two
-things are not — the example programs and the 4K BASIC tape, which the
-page reads from `examples/` and `roms/` when you ask for them. A
-browser treats every `file://` page as a different site from the files
-beside it and blocks the read, so those two controls grey out and say
-so. Serving the directory is what fixes it.
+The Altair 8800 had no screen and no keyboard. This panel was the
+whole of the way in and out.
 
-The simulator has four tabs.
+![The Altair 8800 front panel, with A7 and A1 lit on the address lamps and D1 and D0 on the data lamps: the answer to the program in section 3](./screenshots/front-panel.png)
 
-**Simulator** is the front panel. In a desktop browser you can click
-the switches on the panel directly. On a phone a single switch is hard
-to touch, so the *Switch Board Helper* buttons below the panel do the
-same job, and show which switches are up.
+**The lamps** show the machine as it is:
 
-**Teletype** holds a simulated ASR-33: the paper, its keyboard, and a
-repeat of the address and data LEDs so a program that prints and
-lights lamps at once can be watched on one screen. The machine talks
-to it through an 88-SIO serial board on ports 00H and 01H (and an
-88-2SIO on 10H and 11H), so a program has to be running and reading
-that board before anything appears — nothing echoes by itself.
+| Lamps | Show |
+| --- | --- |
+| A15–A0 | The address bus: the memory address the CPU is at |
+| D7–D0 | The data bus: the byte at that address |
+| STATUS, WAIT | What the CPU is doing. WAIT is lit while it is stopped |
 
-![The Teletype tab running 4K BASIC: MEMORY SIZE?, 727 BYTES FREE, then PRINT 3.14 * 9 answered with 28.26](./screenshots/teletype.png)
+**The switches** are how you talk to it:
 
-**Debugger** shows the internal state of the simulated 8080 CPU and
-the contents of memory, and is where programs are loaded:
+| Switch | What it does |
+| --- | --- |
+| OFF/ON | Power. Memory comes up full of random bytes, as on the real one |
+| A15–A0 | An address, up for 1 and down for 0. A7–A0 is also the byte to store. Programs can read A15–A8 as the *sense switches* |
+| EXAMINE · EXAMINE NEXT | Show the byte at the address on the switches · at the next address |
+| DEPOSIT · DEPOSIT NEXT | Store A7–A0 at the address shown · at the next address |
+| RESET | Send the CPU back to 0000H |
+| RUN · STOP | Run the program from where the CPU is · stop it |
+| SINGLE STEP | Run one instruction |
 
-- *Load a Program* has **Load 4K BASIC** and the **Example Programs**
-  menu, which lists every program in [examples/](./examples/). Pick one
-  and it is loaded at 0000H with RESET pressed, ready to RUN. The menu
-  reads the listing files themselves, so there is no assembled copy of
-  a program anywhere to fall out of step with its source.
-- *Load Your Own* takes a hex string (**Load Data**) or a binary file
-  from disk (**Load Binary File**).
-- *Installed Memory* chooses 256 bytes, as the Altair 8800 shipped, or
-  4 KB / 8 KB as if you had plugged in one or two 88-4MCS memory boards.
-  Memory boards are not something you add to a running machine, so
-  changing the size switches the simulator off.
-- *Memory Dump* shows one 256-byte page at a time. Above 256 bytes a
-  map strip sits over it — one cell per page, shaded by how much of
-  that page is in use, and marked where the program counter and the
-  stack pointer are. Click a cell to jump there, or use **Follow PC** to
-  track the running program.
+PROTECT, CLR and the two AUX switches are on the panel, but are not
+wired up in the simulator.
 
-![The Debugger tab: the loaders, the CPU registers, installed memory and the memory dump](./screenshots/debugger.png)
+The switches come in groups of three because 8080 programmers wrote
+bytes in octal: `00 111 010` is 072 octal, or 3AH. Click the panel's
+own switches, or the large buttons on the strip under it, which are
+easier to hit and show which switches are up. The small arrow on the
+strip's top edge folds it away.
 
-**Tutorial** walks through toggling in a first program by hand and
-starting BASIC, with references for going further.
+## 3. Your first program, by hand
 
-## Teletype programs
-
-[tty-leds](./examples/tty-leds.asm) is the one to start with: eighteen bytes, and pressing A lights `01000001` on the data LEDs while printing the letter on the paper.
-
-For something to actually play, [guess-letter](./examples/guess-letter.asm) is a game in 218 bytes — it thinks of a letter and tells you whether yours is higher or lower, and counts your guesses. Twenty-six letters fall to five tries if you halve the alphabet each time.
-
-```
-GUESS MY LETTER A-Z. ANY KEY STARTS.
-
-? M HIGHER
-? T HIGHER
-? W LOWER
-? U HIGHER
-? V GOT IT IN 5 TRIES.
-```
-
-## Microsoft BASIC
-
-The simulator runs the Altair's first piece of software, and Microsoft's: [Altair BASIC 3.2](http://altairbasic.org), written in 1975 by Bill Gates, Paul Allen and Monte Davidoff. Choose 4 KB or 8 KB under *Installed Memory* in the Debugger tab, click **Load 4K BASIC**, then RUN from the front panel and type at the Teletype tab.
-
-```
-MEMORY SIZE?
-TERMINAL WIDTH?
-WANT SIN? Y
-
-727 BYTES FREE
-
-BASIC VERSION 3.2
-[4K VERSION]
-
-OK
-```
-
-On a 4 KB machine that leaves 727 bytes for your program, which is exactly what the name means — load it and look at the memory map before pressing RUN, and you can see BASIC filling fifteen of the machine's sixteen pages. The Tutorial tab walks through it, including what Load 4K BASIC quietly skips: toggling in a 28 byte boot loader by hand and then waiting seven minutes for the paper tape.
-
-The ROM is in [roms/](./roms/), and [roms/NOTICE](./roms/NOTICE) explains what it is and why it is not under this repository's licence. It is optional; **Load Binary File** will load an image of your own instead.
-
-## A Quick Tutorial
-
-How to input and run the following program to calculate 1 + 2 = 3, by hand, on the front panel. The same steps are in the simulator's Tutorial tab.
+This is how an Altair owner put in a program in 1975: one byte at a
+time, on the switches. It adds 1 and 2. The same steps are in the
+simulator's **Tutorial**, under the panel, to follow as you go.
 
 ```
         LDA 0080H  ; 00 111 010
@@ -164,26 +114,209 @@ How to input and run the following program to calculate 1 + 2 = 3, by hand, on t
  1. The LEDs D7-D0 show the result 00 000 011 (3 in decimal).
  1. Turn off Altair 8800.
 
-## Example programs
+At step 18 the panel looks like the picture in
+[section 2](#2-meet-the-front-panel): A7 and A1 lit for the address
+0082H, and D1 and D0 for the answer.
 
-Ten small 8080 programs to try on the simulator — five on the front
-panel, from a pattern walking across the LEDs to the 1975 game *Kill
-the Bit*, and five on the teletype, from `HELLO, WORLD!` to a guessing
-game — are in [examples/](examples/), each with a listing and
-instructions for loading it. They double as the golden set the tests
-run against.
+## 4. Around the simulator
 
-## Tests
+Everything is on one screen: the panel, a toolbar above it, a dock of
+tools below it, and a status line along the foot.
+
+- **The toolbar.** *Load* puts a program in. *Memory* installs 256
+  bytes, as the Altair shipped, or 4 KB or 8 KB, as if you had fitted
+  one or two 88-4MCS boards. Fitting a board meant opening the case, so
+  this switches the machine off. On the right are *Share*, the
+  language (nine of them), and *About*.
+- **The dock** holds four tabs, one at a time: the **Teletype**, the
+  **Debugger**, the **Tutorial**, and the **References** (the source
+  code and further reading). Click a tab to open it, click it
+  again (or ▾) to fold the dock away, and drag the handle above it to
+  share the height with the panel. Whatever you load, the dock opens
+  on the Debugger to show it arriving.
+- **The status line** says what just happened, and why a greyed-out
+  control is greyed out.
+
+The **Debugger** is a view the real Altair never had. Step through a
+program with SINGLE STEP and watch it work:
+
+![The Debugger, part way through the adder: the registers beside the next instruction, LDA a16 with a16 = 0081H, and the memory dump marking that instruction's three bytes](./screenshots/debugger.png)
+
+- **The registers**, with the flags S Z AC P CY lit when set.
+- **The next instruction**: its address, its bytes, its mnemonic with
+  the operand named as instruction tables name it (`LDA a16`,
+  `MVI B,d8`), and the operand's value this time.
+- **The memory dump**, one 256-byte page at a time, with the
+  instruction at the program counter marked. With more than 256 bytes
+  installed, a map strip above it shows every page, shaded by how full
+  it is. Click a page to see it, or use **Follow PC**.
+
+## 5. The Teletype
+
+The Altair's terminal was a Teletype ASR-33: a keyboard and a printer
+on paper, upper case only. Here it sits on an 88-SIO serial board, at
+ports 00H and 01H (and an 88-2SIO at 10H and 11H). Nothing echoes by
+itself: a program has to be running and reading the board.
+
+![The Teletype, playing Guess my letter: M LOWER, F LOWER, C GOT IT IN 3 TRIES](./screenshots/teletype.png)
+
+Try the *Teletype Examples* from the Load menu, in this order:
+
+1. **Teletype hello** prints `HELLO, WORLD!` and stops.
+2. **Teletype echo** prints whatever you type.
+3. **Teletype echo with LEDs** does the same, and shows each key's
+   ASCII code on the data lamps: press A and `01000001` lights up.
+4. **Guess my letter** is a game. It thinks of a letter and says
+   HIGHER or LOWER. Halve the alphabet each time and 26 letters fall to
+   five tries.
+
+The keys a PC keyboard lacks, such as BREAK, RUBOUT and LINE FEED, are
+along the top of the paper.
+
+## 6. Microsoft 4K BASIC
+
+The Altair's first piece of software was Microsoft's first product:
+[Altair BASIC 3.2](http://altairbasic.org), written in 1975 by Bill
+Gates, Paul Allen and Monte Davidoff. It runs here, unmodified.
+
+1. In **Memory**, choose 4 KB (or 8 KB, for more room).
+2. In **Load**, choose **Microsoft 4K BASIC**.
+3. Click **RUN**, and open the **Teletype**.
+4. Answer BASIC's questions: Enter, Enter, then Y.
+
+```
+MEMORY SIZE?
+TERMINAL WIDTH?
+WANT SIN? Y
+
+727 BYTES FREE
+
+BASIC VERSION 3.2
+[4K VERSION]
+
+OK
+PRINT 3.14 * 9
+ 28.26
+
+OK
+```
+
+727 bytes is all a 4 KB machine leaves you, which is exactly what the
+name means. Load it and look at the memory map in the Debugger before
+pressing RUN, and you can see BASIC filling fifteen of the sixteen
+pages. The Tutorial walks through it, including what loading it here
+skips: toggling in a 28 byte boot loader by hand, then waiting seven
+minutes for the paper tape.
+
+The BASIC tape is in [roms/](./roms/), and [roms/NOTICE](./roms/NOTICE)
+explains what it is and why it is not under this repository's licence.
+**Binary File…** in the Load menu loads an image of your own instead.
+
+## 7. More programs
+
+- **[Kill the Bit](examples/kill-the-bit.md)**, the 1975 front-panel
+  game by Dean McDaniel: a lit bit runs across the upper address lamps,
+  and you kill it by flipping the sense switch under it at the right
+  moment.
+- **Ten example programs** in all, each a listing with its bytes and
+  its source: see [examples/](examples/README.md).
+- **Your own**: paste bytes in hex with **Load › Hex Bytes…**, or read
+  a binary with **Load › Binary File…**.
+- **Share one as a link**: **Share** copies a link that opens the
+  simulator with your program loaded, or with the whole machine as it
+  is now. A link can be written by hand too, and put in a document
+  next to the program's listing:
+
+  ```markdown
+  [Run it](https://wixette.github.io/8800-simulator/?hex=3E8CD3FF76)
+  ```
+
+## 8. For developers
+
+### Run it locally
+
+Serve the directory over HTTP and open it. With no web server
+installed, Python has one built in:
+
+```
+python3 -m http.server 8000
+```
+
+Then open <http://localhost:8000/>. To deploy, copy the whole
+directory to a web server; there is nothing to build, and no
+dependencies.
+
+Opening `index.html` straight off the disk mostly works, but a browser
+will not let a `file://` page read the files beside it. So the example
+programs and the BASIC tape, which the page reads from `examples/` and
+`roms/`, grey out and say why.
+
+### How it is built
+
+| File | What it is |
+| --- | --- |
+| [index.html](index.html), [css/style.css](css/style.css) | The page: toolbar, panel, dock, dialogs |
+| [js/8080.js](js/8080.js) | The Intel 8080 CPU core, [maly/8080js](https://github.com/maly/8080js) |
+| [js/sim8800.js](js/sim8800.js) | The machine: memory, the front panel's logic, the ports |
+| [js/sio.js](js/sio.js), [js/teletype.js](js/teletype.js) | The serial boards, and the Teletype's paper |
+| [js/panel.js](js/panel.js) | The page's own logic: panel drawing, menus, dock, debugger |
+| [js/link.js](js/link.js) | The program link format |
+| [js/listing.js](js/listing.js) | Reads the example listings |
+| [js/dropdown.js](js/dropdown.js), [js/dialog.js](js/dialog.js) | The menus and the dialogs |
+| [js/l10n.js](js/l10n.js) | Every message, in nine languages |
+
+The design notes say why things are the way they are:
+[docs/ui-design.md](docs/ui-design.md) for the layout and its
+principles, [docs/ms-basic-4k.md](docs/ms-basic-4k.md) for the
+memory, the serial boards, the Teletype and BASIC, and
+[docs/kill-the-bit.md](docs/kill-the-bit.md) for the address-bus trick
+Kill the Bit relies on.
+
+### Tests
 
 ```
 npm test
 ```
 
-Node.js 24, no dependencies to install. The suite covers the 8080 CPU,
-the front panel, the serial boards and the teletype, the page's own
-logic and translations, every program in [examples/](examples/), and
-4K BASIC booting and running end to end. It runs on each push and pull
-request.
+Node.js 24, nothing to install. The suite covers the 8080 CPU, the
+front panel, the serial boards and the Teletype, the page's own logic
+and translations, the link format, every program in
+[examples/](examples/), and 4K BASIC booting and running end to end. It
+runs on each push and pull request.
+
+### The link format
+
+A link opens the simulator with a program loaded at 0000H, ready to
+RUN. The fields go after `?` or `#`:
+
+```
+https://wixette.github.io/8800-simulator/?hex=3E8CD3FF76
+```
+
+The bytes of `hex` can run together, or be separated by `+` or `%20`.
+Memory is installed to fit, and zeros at the end do not count.
+
+**Share** writes its links after `#`, which is never sent to the web
+server, so a long one is not turned away (GitHub Pages refuses a link
+of 16,000 characters). It leaves out whatever a machine just switched
+on would have anyway. Memory in use that fits in 256 bytes is written
+as hex, so it can be read in the link; past that it is compressed under
+`zip`, and 4K BASIC comes to about 4,500 characters instead of 8,300.
+Every field is optional:
+
+| Field | Holds |
+|---|---|
+| `hex` | Memory from 0000H up, in hex |
+| `zip` | The same memory, deflated and in URL-safe base64, in place of `hex` |
+| `mem` | Installed memory: `256`, `4096` or `8192` (decimal) |
+| `pc`, `sp` | The 16-bit registers, in hex |
+| `a`, `b`, `c`, `d`, `e`, `h`, `l`, `f` | The 8-bit registers, in hex, `f` being the flags |
+| `sw` | The address switches, A15-A0, as a 16-bit hex word |
+
+A linked machine always opens stopped. The Teletype's paper and the
+interrupt enable are not in the link. The format is a promise to
+everyone who has put a link in a document: fields may be added, but
+never renamed or read differently ([js/link.js](js/link.js)).
 
 ## References
 
@@ -204,6 +337,6 @@ request.
 
 The Intel 8080 CPU core is [maly/8080js](https://github.com/maly/8080js).
 
-The Quick Tutorial in the simulator UI uses an example program from the original [Altair 8800 Operator's Manual](https://altairclone.com/downloads/manuals/Altair%208800%20Operator's%20Manual.pdf).
+The Quick Tutorial in the simulator uses an example program from the original [Altair 8800 Operator's Manual](https://altairclone.com/downloads/manuals/Altair%208800%20Operator's%20Manual.pdf).
 
 The interaction design took [another Altair 8800 simulator](https://s2js.com/altair/) as a reference.

@@ -33,62 +33,6 @@ function loadScript(name) {
 
 const panel = loadScript('panel');
 
-test('a plain list of bytes reads as itself', () => {
-    assert.deepStrictEqual(panel.parseBytes('3e 8c d3 ff 76').bytes,
-                           [0x3e, 0x8c, 0xd3, 0xff, 0x76]);
-});
-
-test('one hex digit is a byte, and case does not matter', () => {
-    assert.deepStrictEqual(panel.parseBytes('0 F a 3E').bytes,
-                           [0x00, 0x0f, 0x0a, 0x3e]);
-});
-
-test('commas, tabs and runs of spaces all separate bytes', () => {
-    assert.deepStrictEqual(panel.parseBytes('3e,8c,\td3   ff').bytes,
-                           [0x3e, 0x8c, 0xd3, 0xff]);
-});
-
-test('leading and trailing space is not a byte', () => {
-    assert.deepStrictEqual(panel.parseBytes('   76  ').bytes, [0x76]);
-});
-
-test('a pasted listing whose newlines the input box dropped still loads', () => {
-    // A one line <input> strips newlines out of a paste, so the two
-    // bytes either side of a line break arrive stuck together. Reading
-    // a run of hex digits as consecutive bytes is what makes copying a
-    // program out of the documentation work.
-    const pasted = ['3e 8c', 'd3 ff', '76'].join('\n');
-    const throughTheBox = pasted.replace(/\n/g, '');
-    assert.strictEqual(throughTheBox, '3e 8cd3 ff76');
-    assert.deepStrictEqual(panel.parseBytes(throughTheBox).bytes,
-                           [0x3e, 0x8c, 0xd3, 0xff, 0x76]);
-    assert.deepStrictEqual(panel.parseBytes(pasted).bytes,
-                           [0x3e, 0x8c, 0xd3, 0xff, 0x76]);
-});
-
-test('a run of hex digits is read two at a time', () => {
-    assert.deepStrictEqual(panel.parseBytes('3e8cd3ff76').bytes,
-                           [0x3e, 0x8c, 0xd3, 0xff, 0x76]);
-});
-
-test('something that is not hex is reported, not silently zeroed', () => {
-    const parsed = panel.parseBytes('3e hello d3');
-    assert.strictEqual(parsed.error, 'load-data-bad');
-    assert.strictEqual(parsed.params.text, 'hello');
-    assert.strictEqual(parsed.bytes, undefined);
-});
-
-test('the reported token is the one that is wrong', () => {
-    assert.strictEqual(panel.parseBytes('3e 8c zz').params.text, 'zz');
-    assert.strictEqual(panel.parseBytes('0x3e').params.text, '0x3e');
-});
-
-test('a run of hex digits that is not whole bytes is reported', () => {
-    const parsed = panel.parseBytes('3e 8cd3f');
-    assert.strictEqual(parsed.error, 'load-data-odd');
-    assert.strictEqual(parsed.params.text, '8cd3f');
-});
-
 /** Every message id, with the locales it is translated into. */
 function messages() {
     return loadScript('l10n').MESSAGES;
@@ -133,11 +77,24 @@ test('every message the panel asks for by name exists', () => {
     // which shows up in the app as a control that says nothing at all.
     const panelSource = sourceOf('js/panel.js');
     const asked = new Set();
+    // What goes wrong with a link or with typed hex comes back from
+    // js/link.js as an id, for the panel to put on the status line.
+    for (const m of sourceOf('js/link.js').matchAll(/error:\s*'([^']+)'/g)) {
+        asked.add(m[1]);
+    }
     for (const m of panelSource.matchAll(/setStatus\(\s*'([^']+)'/g)) {
         asked.add(m[1]);
     }
-    for (const m of panelSource.matchAll(/getMessage\(\s*'([^']+)'/g)) {
+    // A whole id, not the front of one being built with +.
+    for (const m of panelSource.matchAll(/(?:getMessage|msg)\(\s*'([^']+)'\s*\)/g)) {
         asked.add(m[1]);
+    }
+    // Ids kept in tables rather than written at a call.
+    Object.values(panel.SHORT_REASONS).forEach((id) => asked.add(id));
+    Object.values(panel.TOOLTIPS).forEach((id) => asked.add(id));
+    Object.values(panel.LIST_LABELS).forEach((id) => asked.add(id));
+    for (const size of panel.MEM_SIZES) {
+        asked.add('mem-size-' + size);
     }
     // The reasons a control gives for being unavailable.
     for (const m of panelSource.matchAll(/\{id:\s*'([^']+)',\s*params:/g)) {
@@ -161,7 +118,9 @@ test('every Debugger control that can be unavailable can say why', () => {
     assert.ok(controls.length >= 7, 'expected every control listed');
     const html = sourceOf('index.html');
     for (const id of new Set(controls)) {
-        assert.ok(html.includes('id="' + id + '"'),
+        // An item of the Load menu is built as the menu opens.
+        assert.ok(html.includes('id="' + id + '"') ||
+                  panel.MENU_CONTROLS.includes(id),
                   id + ' is given a reason but is not on the page');
     }
     const all = messages();
@@ -171,16 +130,53 @@ test('every Debugger control that can be unavailable can say why', () => {
 });
 
 /**
- * The text of every button in one tab of index.html.
- * @param {string} tabId The tab's element id.
+ * The regions of index.html, in the order the page declares them: the
+ * toolbar and its menus, the stage with the front panel, the dock, its
+ * three tools, and the status line.
+ * @type {Array<string>}
+ */
+const REGIONS = ['toolbar', 'stage', 'dock', 'tab-tty', 'tab-debug',
+                 'tab-ref', 'tab-links', 'status-bar', 'hex-dialog',
+                 'share-dialog', 'about-dialog'];
+
+/**
+ * The part of index.html one region takes up.
+ * @param {string} regionId One of REGIONS.
+ * @return {string} Its markup.
+ */
+function regionOf(regionId) {
+    const html = sourceOf('index.html');
+    const start = html.indexOf('id="' + regionId + '"');
+    assert.ok(start > 0, regionId + ' is not in the page');
+    const rest = REGIONS
+          .map((id) => html.indexOf('id="' + id + '"'))
+          .filter((at) => at > start);
+    return html.slice(start, rest.length ? Math.min(...rest) : html.length);
+}
+
+/**
+ * The translated labels in one region: the ids of its elements marked
+ * l10n.
+ * @param {string} regionId One of REGIONS.
+ * @return {Array<string>}
+ */
+function labelsIn(regionId) {
+    const tags = regionOf(regionId).match(
+        /<[^>]*\bclass="[^"]*\bl10n\b[^"]*"[^>]*>/g) || [];
+    return tags.map((tag) => tag.match(/\bid="([^"]+)"/)[1]);
+}
+
+/**
+ * The text of every button in one region of index.html.
+ * @param {string} regionId The region's element id, one of REGIONS.
  * @return {Array<{id: string, text: string, translated: boolean}>}
  */
-function buttonsIn(tabId) {
+function buttonsIn(regionId) {
     const html = sourceOf('index.html');
-    const start = html.indexOf('id="' + tabId + '"');
-    assert.ok(start > 0, tabId + ' is not in the page');
-    // Up to whichever tab is declared next.
-    const rest = ['tab-sim', 'tab-tty', 'tab-debug', 'tab-ref']
+    const start = html.indexOf('id="' + regionId + '"');
+    assert.ok(start > 0, regionId + ' is not in the page');
+    // Up to whichever region is declared next.
+    const rest = REGIONS
           .map((id) => html.indexOf('id="' + id + '"'))
           .filter((at) => at > start);
     const end = rest.length ? Math.min(...rest) : html.length;
@@ -199,10 +195,10 @@ function buttonsIn(tabId) {
     return found;
 }
 
-test('the Simulator tab wears the panel silkscreen: caps, untranslated', () => {
+test('the stage wears the panel silkscreen: caps, untranslated', () => {
     // These stand for switches that exist on the metal. A photograph of
     // the real panel does not change language, so neither do they.
-    const buttons = buttonsIn('tab-sim');
+    const buttons = buttonsIn('stage');
     assert.ok(buttons.length >= 25, 'expected the whole switch board');
     for (const b of buttons) {
         assert.strictEqual(b.text, b.text.toUpperCase(),
@@ -212,7 +208,7 @@ test('the Simulator tab wears the panel silkscreen: caps, untranslated', () => {
     }
 });
 
-test('the Teletype tab speaks in capitals, because the ASR-33 had no others', () => {
+test('the Teletype speaks in capitals, because the ASR-33 had no others', () => {
     // 64 characters, capitals only. The paper above these buttons
     // cannot hold a lowercase letter, so neither do they. Unlike the
     // panel legends they are translated: "CLEAR PAPER" tells you what
@@ -229,15 +225,22 @@ test('the Teletype tab speaks in capitals, because the ASR-33 had no others', ()
     }
 });
 
-test('the Debugger tab reads as software, not as a machine', () => {
+test('the toolbar, the Debugger and the dialogs read as software', () => {
     // Tooling the Altair never had, so it follows software convention:
     // Title Case, like the headings it sits under. Shouting here would
-    // borrow the machine's voice for something that is not the machine.
-    const buttons = buttonsIn('tab-debug');
-    assert.ok(buttons.length >= 7, 'expected the loaders and dump controls');
+    // borrow the machine's voice for something that is not the machine
+    // (P5 in docs/ui-design.md).
+    const labels = ['toolbar', 'tab-debug', 'hex-dialog', 'share-dialog',
+                    'about-dialog'].flatMap(labelsIn);
+    assert.ok(labels.length >= 20, 'expected the menus, dialogs and dump');
     const all = messages();
-    for (const b of buttons) {
+    const debugButtons = buttonsIn('tab-debug');
+    assert.ok(debugButtons.length >= 2, 'expected Follow PC and Zero All Memory');
+    for (const b of debugButtons) {
         assert.strictEqual(b.translated, true, b.id + ' should translate');
+    }
+    for (const id of labels) {
+        const b = {id: id};
         const english = all[b.id]['en'];
         // "4 KB", "Load 4K BASIC" and "Follow PC" keep their initialisms,
         // so the test is that the label is not uppercase throughout.
@@ -248,21 +251,103 @@ test('the Debugger tab reads as software, not as a machine', () => {
     }
 });
 
+test('a switch on the panel has one home', () => {
+    // P2: the front panel is always in view, so nothing outside it may
+    // offer its switches again. The helper under the panel is the one
+    // exception, being another way to reach them rather than a copy.
+    const switches = ['OFF/ON', 'STOP', 'RUN', 'SINGLE STEP', 'EXAMINE',
+                      'EXAMINE NEXT', 'DEPOSIT', 'DEPOSIT NEXT', 'RESET',
+                      'POWER'];
+    const normal = (text) => text.toUpperCase().replace(/-/g, ' ').trim();
+    const all = messages();
+    let checked = 0;
+    for (const region of REGIONS.filter((id) => id != 'stage')) {
+        // Buttons by their text, and every translated label by its
+        // English, so that a <button> or a tab counts as much as a div.
+        const texts = buttonsIn(region).map((b) => [b.id, b.text])
+              .concat(labelsIn(region).map((id) => [id, all[id]['en']]));
+        for (const [id, text] of texts) {
+            checked++;
+            assert.ok(!switches.includes(normal(text)),
+                      id + ' in ' + region + ' repeats a panel switch');
+        }
+    }
+    assert.ok(checked > 60, 'expected every region to be read: ' + checked);
+});
+
+test('Share and the next instruction are where U2 put them', () => {
+    // Copying a link is done once in a while, so it is reached from the
+    // toolbar (P4); the instruction at PC says where the CPU is, so it sits
+    // with the registers rather than under the memory dump.
+    const html = sourceOf('index.html');
+    const at = (id) => html.indexOf('id="' + id + '"');
+    assert.ok(at('copy-link') > at('share-dialog') &&
+              at('copy-link') < at('about-dialog'),
+              'Copy Link is in the Share dialog');
+    assert.ok(at('instr-pane') > at('cpu-dump') &&
+              at('instr-pane') < at('mem-dump'),
+              'the next instruction is beside the registers');
+});
+
+test('the references have a tab of their own, which About opens', () => {
+    // The Tutorial is a lesson; the source and further reading are
+    // looked up, so they get the dock's last tab rather than its foot.
+    assert.deepStrictEqual(panel.TABS, ['tty', 'debug', 'ref', 'links']);
+    assert.ok(!regionOf('tab-ref').includes('<a '),
+              'the Tutorial keeps no links');
+    const links = regionOf('tab-links');
+    assert.ok(links.includes('id="reference-title"') &&
+              links.includes('github.com/wixette/8800-simulator'),
+              'the References tab has the source and the reading');
+    const handler = sourceOf('js/panel.js').match(
+        /panel\.onAboutReferences = function\(\) \{[\s\S]*?\n\};/)[0];
+    assert.ok(handler.includes("panel.showTab('links')"),
+              "About's References button opens the References tab");
+});
+
+test('a first visit opens the dock on the Tutorial', () => {
+    // No storage at all - as in a private window, or here in Node -
+    // is a first visit.
+    assert.strictEqual(panel.readSavedTab(), 'ref');
+    assert.deepStrictEqual(panel.readSavedDock(), {open: true, height: null});
+});
+
+test('the dock comes back as it was left, and forgets old tabs', (t) => {
+    const stored = {};
+    const savedStorage = global.localStorage;
+    global.localStorage = {
+        getItem: (key) => (key in stored ? stored[key] : null),
+        setItem: (key, value) => { stored[key] = String(value); },
+    };
+    t.after(() => { global.localStorage = savedStorage; });
+    stored[panel.tabStorageKey] = 'tty';
+    stored[panel.dockStorageKey] = JSON.stringify({open: false, height: 250});
+    assert.strictEqual(panel.readSavedTab(), 'tty');
+    assert.deepStrictEqual(panel.readSavedDock(), {open: false, height: 250});
+    // The front panel was a tab once. It is always on screen now.
+    stored[panel.tabStorageKey] = 'sim';
+    assert.strictEqual(panel.readSavedTab(), 'ref');
+    stored[panel.dockStorageKey] = 'not json';
+    assert.deepStrictEqual(panel.readSavedDock(), {open: true, height: null});
+});
+
 test('every shape of control the page can grey out is actually styled', () => {
-    // The controls are mostly .button divs, but the example menu is a
-    // real <button> inside a .dropdown. It carried the disabled class
-    // and looked completely available, because the rule named only
-    // .button. Nothing else in the suite can see a computed style, so
-    // this checks the selectors themselves.
+    // The controls are .button divs, items in a menu, and buttons in a
+    // dialog. The example menu's own button once carried the disabled
+    // class and looked completely available, because the rule named
+    // only .button. Nothing else in the suite can see a computed style,
+    // so this checks the selectors themselves.
     const css = sourceOf('css/style.css');
-    const rule = css.match(/([^}]*)\{[^}]*\}/g)
-          .find((block) => /\.disabled[^{]*\{/.test(block));
-    assert.ok(rule, 'style.css should have a rule for .disabled');
-    const selectors = rule.split('{')[0];
+    const rules = css.match(/([^}]*)\{[^}]*\}/g)
+          .filter((block) => /\.disabled[^{]*\{/.test(block));
+    assert.ok(rules.length, 'style.css should have a rule for .disabled');
+    const selectors = rules.map((rule) => rule.split('{')[0]).join(',');
     assert.match(selectors, /\.button\.disabled/,
                  'the .button controls must grey out');
-    assert.match(selectors, /\.dropdown\s*>?\s*button\.disabled/,
-                 'the example menu button must grey out too');
+    assert.match(selectors, /\.dropdown li\.disabled/,
+                 'and so must an item inside a menu');
+    assert.match(selectors, /\.dialog-button\.disabled/,
+                 'and a button in a dialog');
 });
 
 test('the beep belongs to the OFF/ON switch, not to every power-up', () => {
@@ -301,13 +386,36 @@ test('every way of loading tells the status line whether it did that', () => {
     // own up to it (D23), or the note is back to appearing for reasons
     // the student cannot see. These functions want a document, so this
     // reads them rather than running them.
-    const ways = ['buildExampleMenu', 'onLoadBasic', 'onBinaryFileChosen',
+    const ways = ['loadExample', 'onLoadBasic', 'onBinaryFileChosen',
                   'debugLoadData'];
     for (const name of ways) {
         assert.match(panel[name].toString(), /poweredOn/,
                      name + ' loads without saying if it switched the '
                      + 'machine on');
     }
+});
+
+test('a switch thrown on a dead machine does nothing, and says the machine is off', (t) => {
+    // RUN on a machine that was off said "Running." while nothing ran.
+    const said = [];
+    const done = [];
+    const savedSim = panel.sim;
+    const savedOn = panel.isPoweredOn;
+    panel.sim = new Proxy({}, {get: (target, name) => () => done.push(name)});
+    t.after(() => { panel.sim = savedSim; panel.isPoweredOn = savedOn; });
+    t.mock.method(panel, 'setStatus', (id) => said.push(id));
+    const switches = ['onRun', 'onStop', 'onSingle', 'onExamine',
+                      'onExamineNext', 'onDeposit', 'onDepositNext', 'onReset'];
+    panel.isPoweredOn = false;
+    switches.forEach((name) => panel[name]());
+    assert.deepStrictEqual(done, [], 'nothing reached the machine');
+    assert.deepStrictEqual(said, switches.map(() => 'status-off'));
+    // Switched on, each goes through.
+    said.length = 0;
+    panel.isPoweredOn = true;
+    switches.forEach((name) => panel[name]());
+    assert.strictEqual(done.length, switches.length);
+    assert.ok(!said.includes('status-off'));
 });
 
 test('a machine that is off receives nothing from the teletype keyboard', () => {
@@ -335,6 +443,61 @@ test('a machine that is off receives nothing from the teletype keyboard', () => 
     }
 });
 
+test('the teletype has the keyboard while nothing else needs it', (t) => {
+    // A focused control keeps the keys it acts on: Space on the switch
+    // strip's tab once folded the strip and typed a space at the machine
+    // too, and Tab out of the language menu sent a TAB. But a button left
+    // focused after a menu or a dialog must not swallow the reader's
+    // typing either.
+    const body = {};
+    const saved = {document: global.document, Dialog: global.Dialog,
+                   Teletype: global.Teletype, send: panel.ttySend,
+                   visible: panel.isTtyTabVisible};
+    global.document = {body: body, querySelector: () => null};
+    global.Dialog = {anyOpen: () => false};
+    global.Teletype = require('../js/teletype.js');
+    const sent = [];
+    panel.ttySend = (byte) => sent.push(byte);
+    panel.isTtyTabVisible = true;
+    t.after(() => {
+        global.document = saved.document;
+        global.Dialog = saved.Dialog;
+        global.Teletype = saved.Teletype;
+        panel.ttySend = saved.send;
+        panel.isTtyTabVisible = saved.visible;
+    });
+    const control = (id, tagName, role) =>
+        ({id: id, tagName: tagName, getAttribute: () => role || null});
+    const press = (key, target) => panel.onTtyKeyDown(
+        {key: key, target: target, preventDefault: () => {}});
+    press('A', body);
+    press('B', {id: 'tty-input'});
+    assert.deepStrictEqual(sent, [0x41, 0x42], 'the page, or the paper\'s box');
+    const stripTab = control('strip-tab', 'DIV', 'button');
+    const language = control('switch-locale', 'BUTTON');
+    press(' ', stripTab);
+    press('Enter', stripTab);
+    press('Tab', language);
+    assert.deepStrictEqual(sent, [0x41, 0x42], 'not the keys a control acts on');
+    press('C', language);
+    press('D', control('nav-tty', 'DIV', 'tab'));
+    assert.deepStrictEqual(sent, [0x41, 0x42, 0x43, 0x44],
+                           'but typing past a focused button or tab');
+    press('E', control('debug-data-input', 'TEXTAREA'));
+    press('F', control('', 'LI', 'option'));
+    assert.strictEqual(sent.length, 4, 'not a text box\'s, nor a menu item\'s');
+    global.Dialog = {anyOpen: () => true};
+    press('G', body);
+    assert.strictEqual(sent.length, 4, 'nor while a dialog is open');
+});
+
+test('the greyed Loading item answers, as every greyed item does', (t) => {
+    const said = [];
+    t.mock.method(panel, 'setStatus', (id) => said.push(id));
+    panel.onLoadMenu('examples-loading');
+    assert.deepStrictEqual(said, ['examples-still-loading']);
+});
+
 test('both of the paper mechanisms can be driven by hand', () => {
     // An ASR-33 returns the carriage and advances the paper with two
     // separate keys (D25). RETURN is on every keyboard; LINE FEED is
@@ -346,4 +509,86 @@ test('both of the paper mechanisms can be driven by hand', () => {
                  'the helper row needs a LINE FEED key');
     assert.match(panel.initTeletypeUi.toString(), /ttySend\(Teletype\.LF\)/,
                  'which sends LF to the machine, like any other key');
+});
+
+// The page has these as globals; its link handling reaches for both.
+global.Link = require('../js/link.js');
+global.Sim8800 = require('../js/sim8800.js');
+
+/**
+ * Stands in for the parts of the page that applyLinkState() drives, and
+ * records what it asks of them, in order. Everything is put back when
+ * the test ends.
+ * @param {!Object} t The test context.
+ * @return {!Array<!Array>} The calls: ['mem', size], ['load', length]
+ *     and ['status', ...the arguments to setStatus].
+ */
+function stubLinkLoader(t) {
+    const calls = [];
+    const regs = {pc: 0};
+    const saved = {cpu: global.CPU8080, panelSim: panel.sim};
+    global.CPU8080 = {
+        set: (name, value) => { regs[name.toLowerCase()] = value; },
+        status: () => ({...regs}),
+    };
+    panel.sim = {flushDump() {}};
+    t.after(() => {
+        global.CPU8080 = saved.cpu;
+        panel.sim = saved.panelSim;
+    });
+    t.mock.method(panel, 'onSetMemSize', (size) => calls.push(['mem', size]));
+    t.mock.method(panel, 'loadImage', (bytes) => {
+        calls.push(['load', bytes.length]);
+        return {bytes: bytes.length, poweredOn: true};
+    });
+    t.mock.method(panel, 'setAddressSwitches', () => {});
+    t.mock.method(panel, 'setStatus', (...args) => calls.push(['status', ...args]));
+    return calls;
+}
+
+test('a link with registers but no PC still says where it stopped', (t) => {
+    // Copy Link leaves out a PC of 0000H, so a link taken at RESET with
+    // a value in A, or with switches raised, has no pc= at all.
+    const calls = stubLinkLoader(t);
+    panel.applyLinkState({memSize: 256, bytes: [0x76], cpu: {a: 0x41},
+                          switches: 0});
+    panel.applyLinkState({memSize: 256, bytes: [0x76], cpu: {},
+                          switches: 0x8001});
+    const said = calls.filter((c) => c[0] == 'status');
+    assert.strictEqual(said.length, 2);
+    for (const status of said) {
+        assert.strictEqual(status[1], 'link-state-loaded');
+        assert.deepStrictEqual(status[2], {size: '256 B', pc: '0000'});
+    }
+});
+
+test('a link says so when it had to switch the machine on', (t) => {
+    const calls = stubLinkLoader(t);
+    panel.applyLinkState({memSize: 256, bytes: [0x76], cpu: {}, switches: 0});
+    const status = calls.find((c) => c[0] == 'status');
+    assert.strictEqual(status[1], 'link-loaded');
+    assert.strictEqual(status[4], true, 'the note D23 puts first');
+});
+
+test('a link installs its memory the way the memory buttons do', (t) => {
+    // The panel has to hear that installing memory switched the machine
+    // off, or the load that follows goes into a machine it thinks is on.
+    const calls = stubLinkLoader(t);
+    panel.applyLinkState({memSize: 4096, bytes: [0x76], cpu: {}, switches: 0});
+    assert.deepStrictEqual(calls.slice(0, 2), [['mem', 4096], ['load', 1]]);
+});
+
+test('a link pasted into an open page reads only the fragment', async (t) => {
+    const savedWindow = global.window;
+    global.window = {location: {hash: '', search: '?hex=76'}};
+    t.after(() => { global.window = savedWindow; });
+    const seen = [];
+    t.mock.method(panel, 'applyLinkState', (state) => seen.push(state));
+    // The fragment emptied: the query string the page was opened with
+    // is not loaded again over the machine as it stands.
+    await panel.onHashChange();
+    assert.deepStrictEqual(seen, [null]);
+    window.location.hash = '#hex=3E';
+    await panel.onHashChange();
+    assert.deepStrictEqual(seen[1].bytes, [0x3e]);
 });

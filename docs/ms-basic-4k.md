@@ -10,6 +10,12 @@ program and runs it, in the browser and in the test suite. The document exists s
 not have to rediscover any of it, and so that the reasoning stays
 visible if we later change our minds.
 
+**UI decisions have their own document now.** The principles the page
+is laid out by, and every UI decision after D28, are in
+[ui-design.md](ui-design.md). The UI decisions below stay where they
+are, because the code cites them by number. Those that the panel +
+dock layout (U1) changed say so at the top.
+
 Everything in [Part 1](#part-1--what-was-verified) was verified by
 running the real ROM against this repository's own CPU core, not read
 off a web page. The commands are reproducible; the numbers are from
@@ -278,7 +284,9 @@ Sim tab as it stands today                       875 px
 a merged Panel+Teletype tab                     1609 px
 ```
 
-These numbers decide [D8](#d8--the-teletype-is-its-own-tab).
+These numbers decide [D8](#d8--the-teletype-is-its-own-tab). They
+describe a page that scrolls. Since [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs) it does not: the panel
+scales to the height the dock leaves it.
 
 ---
 
@@ -495,6 +503,11 @@ tutorial says as much rather than pretending otherwise.
 
 ### D8 — The Teletype is its own tab
 
+> **Superseded** by [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs): the front panel always in view, and
+> the Teletype, Debugger and Tutorial in a dock under it. The dock is
+> option E below, applied to every tool. What follows is kept for the
+> reasoning, and describes the page as it was.
+
 Tab order: **Simulator | Teletype | Debugger | Tutorial.**
 
 *Why second, not last:*
@@ -548,6 +561,10 @@ meaningless flicker through ROM. The tab switch *is* the head-turn.
 
 ### D9 — An LED repeater strip on the Teletype tab
 
+> **Withdrawn** by [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs): with the panel always in view, there
+> is nothing left for the strip to repeat
+> ([P2](ui-design.md#p2--a-control-has-one-home)).
+
 A compact row on the Teletype tab: the 16 address LEDs, the 8 data
 LEDs, and WAIT/HLT, reusing the existing LED sprites at small size.
 About **40 px**.
@@ -561,6 +578,9 @@ it makes `tty-leds` self-contained on one screen — *better* than a
 merged tab, where the LEDs would sit 900 px above the paper.
 
 ### D10 — An activity indicator on the Teletype nav item
+
+> **Carried over** by [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs): the dot is on the dock's Teletype
+> tab.
 
 When the SIO emits output while another tab is showing, mark the
 Teletype nav item (a dot, or a brief pulse).
@@ -576,9 +596,15 @@ DOM, and nothing in `js/sio.js` touches `document`.
 
 *Why:* besides being correct, it makes [D8](#d8--the-teletype-is-its-own-tab)
 purely presentational. Moving later from design F to design E becomes a
-markup-and-CSS change with no core impact.
+markup-and-CSS change with no core impact. That move was made, as
+[U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs), and touched no device.
 
 ### D14 — Loading stops short of running
+
+> **Still holds under** [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs). The loaders moved from the
+> Debugger tab to the toolbar's Load menu, and every load now opens the
+> dock on the Debugger, so the memory map is in view as the program
+> arrives ([settled](ui-design.md#settled-with-u1)).
 
 `panel.loadImage` powers the machine up if needed, zeroes memory, puts
 the image at `0000H` and presses RESET — and stops there. It does not
@@ -594,6 +620,10 @@ runs and writes over every page. Auto-running would hide exactly the
 picture worth seeing.
 
 ### D15 — One status line, at the foot of the machine
+
+> **Still holds**, and got stronger under
+> [P7](ui-design.md#p7--one-status-line-always-visible): the line sits at
+> the foot of the page and no longer hides for the Tutorial.
 
 Everything the simulator wants to say — the power went off, a board
 was installed, a tape was loaded, something will not work — says it in
@@ -662,7 +692,9 @@ are the legend printed on the metal, and a photograph of the real
 panel does not change language. They are never hidden and never
 disabled, because a physical switch is always there to be thrown —
 throwing one on a dead machine simply does nothing, which is also true
-here.
+here. The status line says why, though - *the machine is off* - rather
+than reporting a RUN or a RESET that did not happen; it once said
+"Running." for a RUN that never started.
 
 **The teletype.** The Teletype tab is uppercase too, but for a
 different reason, and this one matters: the ASR-33 had **no
@@ -701,12 +733,21 @@ set shout in uppercase, as `LOAD 4K BASIC`, `FOLLOW PC` and
 the machine never had, and left the tab reading in three different
 cases at once next to `Load Data` and `Example programs...`.
 
-*As it stands, audited:*
+*Under the panel + dock layout*
+([P5](ui-design.md#p5--each-surface-keeps-its-voice)), the rule is
+unchanged and the unit is still the surface: the toolbar and the dock
+speak with the instrument's voice, and the dock's Teletype keeps its
+capitals. The tests check it by region of the page rather than by
+tab.
+
+*As it stood, audited, by tab. Since [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs) the same voices hold by
+region - the stage, the Teletype, and the toolbar, Debugger and
+dialogs - and the tests check them that way:*
 
 | Tab | Case | Translated | Why |
 | --- | --- | --- | --- |
 | Simulator | UPPERCASE | no (25 of 25) | silkscreen on the panel |
-| Teletype | UPPERCASE | yes (4 of 4) | the ASR-33 had no lowercase |
+| Teletype | UPPERCASE | yes (5 of 5, with LINE FEED) | the ASR-33 had no lowercase |
 | Debugger | Title Case | yes | software the machine never had |
 
 ### D21 — The map strip is edited, not rebuilt
@@ -790,6 +831,9 @@ than not opening would have.
 
 ### D18 — Nothing in the Debugger is hidden; it greys out instead
 
+> **Applies everywhere** now, menus included:
+> [P6](ui-design.md#p6--unavailable-is-greyed-and-explained-never-hidden).
+
 The memory paging controls used to disappear entirely on the 256 byte
 machine, on the grounds that a single page cannot be paged. Now they
 stay and grey out.
@@ -811,7 +855,7 @@ with the reason it is grey:
 
 | Control | Grey when | Says |
 | --- | --- | --- |
-| Load 4K BASIC | less than 4 KB installed | *4K BASIC needs at least 4 KB installed. Choose 4 KB or 8 KB under Installed Memory.* |
+| Microsoft 4K BASIC, in the Load menu | less than 4 KB installed | *4K BASIC needs at least 4 KB installed. Choose 4 KB or 8 KB in the Memory menu.* The menu item says *needs 4 KB* beside itself, too. |
 | ◀ ▶ Follow PC | machine off | *The machine is off, so there is no memory dump to move around in.* |
 | ◀ ▶ Follow PC | all memory fits one page | *All 256 B is on screen at once. Install 4 KB or 8 KB and the dump gets a window to move.* |
 | Zero All Memory | machine off | *The machine is off, so there is no memory to zero.* |
@@ -841,9 +885,9 @@ bytes would go nowhere*.
 dead end that costs a trip to the other tab and teaches only that the
 button was in the wrong mood. The machine coming up is not hidden —
 the OFF/ON button turns green and memory fills with the random bytes a
-real one powers up with, which is worth seeing. It is on the other
-tab, though, which is what [D23](#d23--the-beep-belongs-to-the-switch)
-is for.
+real one powers up with, which is worth seeing. It was on another tab
+then, though, which is what [D23](#d23--the-beep-belongs-to-the-switch)
+was for; since [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs) the panel is always in view.
 
 *The one distinction kept:* the three that load an *image* clear
 memory first and press RESET, because a tape is a fresh start.
@@ -951,9 +995,63 @@ its own printer. Press RETURN then LINE FEED under `tty-echo` and the
 two halves of a newline come apart in front of you, which is why MITS
 BASIC sends CR CR LF.
 
+### D27 — The run switches, repeated beside the memory dump
+
+> **Withdrawn before release.** The copies were needed only because
+> the panel and the dump could not be seen together, and
+> [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs)
+> fixes that ([P2](ui-design.md#p2--a-control-has-one-home)). They were
+> taken out on the branch that brings in U1, so they never shipped. The
+> record stays for the reasoning.
+
+Debugging a program meant stepping on the Simulator tab and reading
+the dump on the Debugger tab, a round trip per instruction. The
+Debugger now has **Power**, **Stop**, **Run**, **Single Step** and
+**Reset** next to Zero All Memory, and they call the same handlers as
+the panel switches. Power is lit the way the helper board's OFF/ON is,
+so the one thing that has to be done first is visible on this tab too.
+
+They follow the Debugger's rules rather than the panel's. They are in
+Title Case and translated ([D17](#d17--three-surfaces-three-voices)),
+because the surface decides. The run switches grey out and explain themselves
+([D19](#d19--a-greyed-control-still-answers)), where a panel switch
+thrown on a dead machine simply does nothing. They make no switch
+sound, because that belongs to touching the panel
+([D23](#d23--the-beep-belongs-to-the-switch)). Single Step is also grey
+while the machine runs: the next instruction is gone before the dump
+can show it.
+
+### D28 — The instruction at PC, decoded under the dump
+
+> **Kept, and moved** by [U2](ui-design.md#u2--where-10s-features-go): it is beside the registers
+> in the dock's Debugger, headed *Next Instruction*, and set out a line
+> each - the instruction, the operand's value, the undocumented note -
+> to fit its box. The operand highlighting in the dump is as it was.
+
+A pane under the memory dump names the instruction the CPU will run
+next: its address, its bytes, the mnemonic with the operand named as
+instruction tables name it (`LHLD a16`, `MVI B,d8`, `LXI H,d16`), and
+the operand's value this time. The dump marks the operand bytes in a
+paler green than the opcode, so an instruction reads as one piece
+rather than as a lone highlighted byte followed by two that look like
+the next instructions.
+
+*The twelve undocumented opcodes* decode as whatever the CPU core runs
+them as — `NOP`, `JMP`, `RET` or `CALL` — and say so. The
+disassembler's table in `js/8080.js` names `20h` and `30h` after the
+8085's RIM and SIM, which this CPU does not have, and leaves the rest
+without a name or a length. `Sim8800.UNDOCUMENTED_OPCODES` corrects
+that without touching the vendored core.
+
 ---
 
 ## Part 3 — The Teletype tab
+
+> Since [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs) this is the dock's Teletype tab. The paper and the key
+> mapping carried over unchanged. The LED row (D9) went, and the
+> headings with the tab. Since [U5](ui-design.md#u5--each-tool-laid-out-as-a-tool), the helper row is the
+> paper's toolbar, above it, and the hint is the empty paper's own
+> explanation rather than a line under it.
 
 Minimalist, and consistent with the visual language already in
 `css/style.css`: `#ccc` rounded panels with `#222` monospace text,
@@ -1022,6 +1120,10 @@ The keyboard only reaches the machine while it is on
 Per [D4](#d4--the-memory-dump-is-windowed-never-grown). At 256 B
 nothing changes at all — the window is the whole machine, which is the
 point.
+
+Since [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs), *Installed Memory* is the toolbar's Memory menu
+([P4](ui-design.md#p4--occasional-actions-go-in-menus-and-dialogs)), and the dump
+and its map strip are in the dock's Debugger. D4 itself is unchanged.
 
 ```
  ┌────────────────────────────────────────────────┐
@@ -1104,9 +1206,12 @@ happens on the lamps. Each listing declares its own face in a
 `;;; device:` header, so the page reads it from the same file it reads
 the bytes from, and a test refuses a listing that does not say.
 
-The menu draws a rule at the seam. A rule and not a heading: a heading
-is one more thing the arrow keys have to step over, and ten entries
-need a seam rather than titles.
+The menu drew a rule at the seam, at first: a rule and not a heading,
+because a heading is one more thing the arrow keys have to step over.
+Since [U3](ui-design.md#u3--the-top-bar-is-menus-dialogs-and-icons) each group has a heading instead - *Front Panel
+Examples*, *Teletype Examples* - which the arrow keys step over by
+themselves. In a menu that also holds the ways to load your own
+program, the groups needed names, not only a seam.
 
 **Then, within each group, by how much you have to know.**
 
@@ -1128,7 +1233,7 @@ is 24 bytes and the hardest thing here to follow; `guess-letter` is
 
 *What the reader is told after loading:* the status line names the tab
 to watch, which differs by device — the panel ones end at "click RUN",
-the teletype ones go on to "then watch the Teletype tab". Without
+the teletype ones go on to "then watch the Teletype". Without
 that, the grouping would only exist in the menu and the first run of
 `tty-hello` would look like a failure.
 
@@ -1201,7 +1306,8 @@ Phase 1 is worth doing whatever we decide about BASIC.
 
 ## Part 7 — Open questions
 
-*None.*
+*None* for BASIC. Open questions about the UI are in
+[ui-design.md](ui-design.md#part-4--open-questions).
 
 ### Closed
 
@@ -1213,13 +1319,15 @@ Phase 1 is worth doing whatever we decide about BASIC.
   dump, under an *Installed Memory* heading. That is the tab memory is
   already discussed on, and where the effect of the choice — the dump
   and the map strip — is visible. The Sim tab stays the machine.
+  *Revisited by [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs):* the toolbar's Memory menu.
 - **Where the ROM loader lives.** The Debugger tab, which has two
   loading sections: *Load a Program* (Load 4K BASIC and the Example
   Programs menu — what ships with the simulator) and *Load Your Own*
   (a hex string with Load Data, or Load Binary File). Landing there
   has a second benefit: the memory map is a few lines below, so
   clicking Load 4K BASIC shows you BASIC filling fifteen of the sixteen
-  pages of a 4 KB machine before anything has run.
+  pages of a 4 KB machine before anything has run. *Revisited by
+  [U1](ui-design.md#u1--the-front-panel-and-a-dock-replace-the-four-tabs):* the toolbar's Load menu.
 - **The clock rate.** Now **2 MHz**, which is what the Altair's 8080
   was clocked at; it had been 1 MHz, so everything ran at half speed.
   Measured consequences: BASIC reaches `OK` in 0.46 s rather than
