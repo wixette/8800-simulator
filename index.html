@@ -194,7 +194,14 @@
               <div id="debug-fill-zero" class="button l10n">Zero All Memory</div>
             </div>
             <div id="mem-map" class="mem-map" hidden></div>
-            <div id="mem-dump" class="mt-8"></div>
+            <!-- The dump's bytes can be picked and typed over (#14). The
+                 input takes the keys, and on a phone raises the keyboard. -->
+            <div class="mem-dump-wrap mt-8">
+              <div id="mem-dump"></div>
+              <input id="mem-input" class="tty-hidden-input" type="text"
+                     autocapitalize="characters" autocomplete="off"
+                     autocorrect="off" spellcheck="false">
+            </div>
           </div>
 
           <div id="tab-ref" class="dock-pane" role="tabpanel">

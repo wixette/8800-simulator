@@ -593,6 +593,147 @@ test('every switch on the panel does something, with its label to click', () => 
     assert.ok(!html.includes('id="s-sw-aux'), 'AUX does nothing worth a button');
 });
 
+/**
+ * Stands in for the simulator and the dump while the byte editor is
+ * exercised: memory, the window shown, and what was written.
+ * @param {!Object} t The test context.
+ * @return {!Object} The fake simulator; its edits are in .edits.
+ */
+function stubMemEditor(t) {
+    const saved = {sim: panel.sim, render: panel.renderMemSelection,
+                   doc: global.document};
+    const sim = {
+        mem: new Array(512).fill(0), isRunning: false, isPoweredOn: true,
+        protectedAt: -1, window: {start: 0, end: 256}, edits: [],
+        followPc: true,
+        editByte(address, value) {
+            if (this.isRunning) return 'running';
+            if (address == this.protectedAt) return 'protected';
+            this.mem[address] = value;
+            this.edits.push([address, value]);
+            return 'ok';
+        },
+        getDumpWindow() { return this.window; },
+        setDumpWindow(address) {
+            this.window = {start: address - address % 256,
+                           end: address - address % 256 + 256};
+        },
+        setFollowPc(on) { this.followPc = on; },
+        readByte(address) { return this.mem[address]; },
+    };
+    panel.sim = sim;
+    panel.renderMemSelection = () => {};
+    global.document = {getElementById: () => ({focus() {}, blur() {}})};
+    t.mock.method(panel, 'updateMemoryControls', () => {});
+    t.after(() => {
+        panel.sim = saved.sim;
+        panel.renderMemSelection = saved.render;
+        global.document = saved.doc;
+        panel.memSelection = null;
+        panel.memPending = null;
+    });
+    return sim;
+}
+
+/** A keydown event as the dump's input receives it. */
+function memKey(key) {
+    return {key: key, defaultPrevented: false, target: {blur() {}},
+            preventDefault() { this.defaultPrevented = true; }};
+}
+
+test('two hex digits write one byte, and the next byte is picked', (t) => {
+    const sim = stubMemEditor(t);
+    const said = [];
+    t.mock.method(panel, 'setStatus', (...args) => said.push(args));
+    panel.selectMemByte(0x10);
+    assert.deepStrictEqual(said.pop(), ['mem-edit-hint']);
+    for (const key of '3e8C') {
+        assert.ok(panel.onMemKey(memKey(key)) === undefined);
+    }
+    assert.deepStrictEqual(sim.edits, [[0x10, 0x3e], [0x11, 0x8c]]);
+    assert.strictEqual(panel.memSelection, 0x12);
+    // One digit is held, not written; Backspace and Escape drop it.
+    panel.onMemKey(memKey('5'));
+    assert.strictEqual(panel.memPending, 5);
+    assert.strictEqual(sim.edits.length, 2, 'nothing written yet');
+    panel.onMemKey(memKey('Backspace'));
+    assert.strictEqual(panel.memPending, null);
+    panel.onMemKey(memKey('7'));
+    panel.onMemKey(memKey('Escape'));
+    assert.strictEqual(panel.memPending, null);
+    assert.strictEqual(panel.memSelection, 0x12, 'the first Escape keeps the byte');
+    panel.onMemKey(memKey('Escape'));
+    assert.strictEqual(panel.memSelection, null, 'the second lets it go');
+    assert.strictEqual(sim.edits.length, 2);
+});
+
+test('the arrows move the pick, turning the page at its edges', (t) => {
+    const sim = stubMemEditor(t);
+    t.mock.method(panel, 'setStatus', () => {});
+    panel.selectMemByte(0x00ff);
+    const right = memKey('ArrowRight');
+    panel.onMemKey(right);
+    assert.strictEqual(right.defaultPrevented, true, 'the page does not scroll');
+    assert.strictEqual(panel.memSelection, 0x0100);
+    assert.deepStrictEqual(sim.window, {start: 0x100, end: 0x200});
+    assert.strictEqual(sim.followPc, false, 'following the PC would turn it back');
+    panel.onMemKey(memKey('ArrowUp'));
+    assert.strictEqual(panel.memSelection, 0x00f0);
+    panel.onMemKey(memKey('ArrowDown'));
+    panel.onMemKey(memKey('ArrowDown'));
+    assert.strictEqual(panel.memSelection, 0x0110);
+    // Held at the ends of memory.
+    panel.memSelection = 0x01ff;
+    panel.onMemKey(memKey('ArrowRight'));
+    assert.strictEqual(panel.memSelection, 0x01ff);
+    panel.memSelection = 0;
+    panel.onMemKey(memKey('ArrowLeft'));
+    assert.strictEqual(panel.memSelection, 0);
+    // Other typing is swallowed; Tab passes, to move the focus on.
+    const letter = memKey('x');
+    panel.onMemKey(letter);
+    assert.strictEqual(letter.defaultPrevented, true);
+    const tab = memKey('Tab');
+    panel.onMemKey(tab);
+    assert.strictEqual(tab.defaultPrevented, false);
+});
+
+test('a byte is edited only on a stopped machine, and not on a protected board', (t) => {
+    const sim = stubMemEditor(t);
+    const said = [];
+    t.mock.method(panel, 'setStatus', (...args) => said.push(args));
+    sim.isRunning = true;
+    panel.selectMemByte(0x20);
+    assert.deepStrictEqual(said.pop(), ['mem-edit-running', {}, 'warn']);
+    assert.strictEqual(panel.memSelection, null);
+    sim.isRunning = false;
+    sim.protectedAt = 0x20;
+    panel.selectMemByte(0x20);
+    panel.typeMemDigit(0xa);
+    panel.typeMemDigit(0xb);
+    assert.deepStrictEqual(said.pop(), ['mem-edit-protected',
+                                        {address: '0020'}, 'warn']);
+    assert.strictEqual(panel.memSelection, 0x20, 'the pick stays put');
+    assert.deepStrictEqual(sim.edits, []);
+    // RUN lets go of the byte.
+    panel.clearMemSelection();
+    panel.selectMemByte(0x21);
+    t.mock.method(panel, 'reportIfOff', () => false);
+    sim.start = () => {};
+    panel.onRun();
+    assert.strictEqual(panel.memSelection, null);
+});
+
+test('a soft keyboard\'s text is typed in as hex digits', (t) => {
+    const sim = stubMemEditor(t);
+    t.mock.method(panel, 'setStatus', () => {});
+    panel.selectMemByte(0x30);
+    const input = {value: 'c3 0g0'};
+    panel.onMemInput({target: input});
+    assert.strictEqual(input.value, '', 'nothing collects in the input');
+    assert.deepStrictEqual(sim.edits, [[0x30, 0xc3], [0x31, 0x00]]);
+});
+
 test('a machine that is off receives nothing from the teletype keyboard', () => {
     // D24: the board that holds a character for the CPU to read is
     // unpowered, so keys typed at a dead machine are gone, not saved

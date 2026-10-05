@@ -506,18 +506,21 @@ class Sim8800 {
             sb.push(Sim8800.toHex(i, 4));
             sb.push('  ');
             for (let j = i; j < Math.min(window.end, i + 16); j++) {
-                let byte = Sim8800.toHex(this.mem[j], 2);
+                // Every byte carries its address, so that the page can
+                // tell which one is pointed at and edit it (#14).
+                let mark = '';
                 // How far past the opcode this byte is, wrapping at the
                 // top of the address space as the CPU does.
                 let offset = (j - cpu.pc) & 0xffff;
                 if (offset == 0) {
-                    byte = '<span class="at-pc">' + byte + '</span>';
+                    mark = ' class="at-pc"';
                 } else if (offset < instr.length) {
-                    byte = '<span class="at-operand">' + byte + '</span>';
+                    mark = ' class="at-operand"';
                 } else if (j == cpu.sp) {
-                    byte = '<span class="at-sp">' + byte + '</span>';
+                    mark = ' class="at-sp"';
                 }
-                sb.push(byte);
+                sb.push('<span data-a="' + j + '"' + mark + '>' +
+                        Sim8800.toHex(this.mem[j], 2) + '</span>');
                 sb.push((j + 1) % 8 == 0 ? '  ' : ' ');
             }
             sb.push('\n');
@@ -1093,6 +1096,36 @@ class Sim8800 {
         this.showAddressAndData();
         this.requestDump();
         return !refused;
+    }
+
+    /**
+     * Changes one byte from the Debugger's memory dump (#14). Tooling the
+     * real machine never had, but it keeps the machine's rules: only a
+     * stopped machine is changed, as DEPOSIT changes only a stopped one;
+     * a protected board refuses; and if the data lamps are showing the
+     * byte - it is at the address on the bus - they show the new one.
+     * Not a write by the program, so it is never counted as one.
+     * @param {number} address The address.
+     * @param {number} value The new byte.
+     * @return {string} 'ok'; or why not: 'off', 'running', 'protected',
+     *     or 'none' where no memory answers.
+     */
+    editByte(address, value) {
+        if (!this.isPoweredOn)
+            return 'off';
+        if (this.isRunning)
+            return 'running';
+        address &= 0xffff;
+        if (address >= this.mem.length)
+            return 'none';
+        if (this.isProtected(address))
+            return 'protected';
+        this.mem[address] = value & 0xff;
+        if (address == this.busAddress && this.setDataLedsCallback) {
+            this.setDataLedsCallback(Sim8800.parseBits(this.mem[address], 8));
+        }
+        this.requestDump();
+        return 'ok';
     }
 
     /**

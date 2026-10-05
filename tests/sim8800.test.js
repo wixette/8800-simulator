@@ -650,10 +650,10 @@ test('the dump marks the bytes at PC and SP, and their pages', () => {
     sim.step(20);
     sim.flushDump(true);
 
-    assert.ok(/<span class="at-pc">[0-9A-F]{2}<\/span>/.test(state.memDump),
-              'the byte at PC is marked');
-    assert.ok(/<span class="at-sp">[0-9A-F]{2}<\/span>/.test(state.memDump),
-              'the byte at SP is marked');
+    assert.ok(/<span data-a="\d+" class="at-pc">[0-9A-F]{2}<\/span>/
+              .test(state.memDump), 'the byte at PC is marked');
+    assert.ok(/<span data-a="128" class="at-sp">[0-9A-F]{2}<\/span>/
+              .test(state.memDump), 'the byte at SP is marked');
     // Both live in page 0 here, so that cell carries both marks.
     assert.strictEqual(state.memMap[0].shown, true);
     assert.strictEqual(state.memMap[0].pc, true);
@@ -706,7 +706,10 @@ test('the dump marks an instruction\'s operand bytes along with its opcode', () 
     sim.loadDataAsHexString(0, '2a 12 00 00');
     sim.flushDump(true);
     assert.match(state.memDump,
-                 /<span class="at-pc">2A<\/span> <span class="at-operand">12<\/span> <span class="at-operand">00<\/span> 00 /);
+                 new RegExp('<span data-a="0" class="at-pc">2A</span> ' +
+                            '<span data-a="1" class="at-operand">12</span> ' +
+                            '<span data-a="2" class="at-operand">00</span> ' +
+                            '<span data-a="3">00</span> '));
     assert.strictEqual(state.instr.mnemonic, 'LHLD a16');
     assert.strictEqual(state.instr.address, 0);
     assert.deepStrictEqual(state.instr.bytes, [0x2a, 0x12, 0x00]);
@@ -1037,4 +1040,43 @@ test('a dead machine lights none of the lamps it reports', () => {
     sim.powerOff();
     assert.deepStrictEqual(state.lamps,
                            {prot: false, hlta: false, m1: false, inte: false});
+});
+
+test('editByte changes a byte as the Debugger asks, by the machine\'s rules', () => {
+    const fixture = protectSim(4096);
+    const {sim, state} = fixture;
+    assert.strictEqual(sim.editByte(0x0123, 0x3e), 'ok');
+    assert.strictEqual(sim.mem[0x0123], 0x3e);
+    assert.strictEqual(sim.blockedWrites, 0);
+    assert.strictEqual(sim.editByte(0x2000, 0x3e), 'none',
+                       'no memory answers above 4 KB');
+    // The data lamps show the byte at the address on the bus.
+    examineAt(fixture, 0x0040);
+    sim.editByte(0x0040, 0xa5);
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0xa5);
+    sim.editByte(0x0041, 0x5a);
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0xa5,
+                       'a byte the lamps are not showing leaves them be');
+    // A protected board refuses, and that is not a program write.
+    sim.protect(true);
+    assert.strictEqual(sim.editByte(0x0041, 0xff), 'protected');
+    assert.strictEqual(sim.mem[0x0041], 0x5a);
+    assert.strictEqual(sim.blockedWrites, 0);
+    sim.protect(false);
+    // Only a stopped machine is edited.
+    sim.start();
+    assert.strictEqual(sim.editByte(0x0041, 0xff), 'running');
+    sim.stop();
+    flushTimers();
+    sim.powerOff();
+    assert.strictEqual(sim.editByte(0x0041, 0xff), 'off');
+});
+
+test('every byte in the dump carries its address', () => {
+    const {sim, state} = poweredOnSim();
+    sim.flushDump(true);
+    const addresses = [...state.memDump.matchAll(/data-a="(\d+)"/g)]
+          .map((m) => Number(m[1]));
+    assert.strictEqual(addresses.length, 256);
+    assert.deepStrictEqual(addresses, [...Array(256).keys()]);
 });

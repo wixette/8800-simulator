@@ -72,6 +72,8 @@ panel.onRun = function() {
     if (panel.reportIfOff()) {
         return;
     }
+    // A running machine is not edited.
+    panel.clearMemSelection();
     panel.sim.start();
     panel.setStatus('status-running');
 };
@@ -581,6 +583,13 @@ panel.refreshPlaceholders = function() {
     if (logo) {
         logo.alt = l10n.getMessage('header-title');
     }
+    // How to edit the dump, for the pointer and for a screen reader.
+    var memDump = document.getElementById('mem-dump');
+    if (memDump) {
+        memDump.title = l10n.getMessage('mem-dump-hint');
+        document.getElementById('mem-input').setAttribute(
+            'aria-label', l10n.getMessage('mem-dump-hint'));
+    }
     var closers = document.querySelectorAll('.dialog-close');
     for (let i = 0; i < closers.length; i++) {
         closers[i].title = l10n.getMessage('dialog-close');
@@ -948,6 +957,225 @@ panel.onMemMapPress = function(event) {
 };
 
 /**
+ * The byte picked in the memory dump for editing, by address, or null.
+ * Bytes are typed over as in a hex editor (#14): two hex digits write
+ * one whole byte, and the next byte is picked.
+ * @type {?number}
+ */
+panel.memSelection = null;
+
+/**
+ * The first hex digit typed over the picked byte, waiting for its
+ * second; memory is not touched until that arrives. Null if none.
+ * @type {?number}
+ */
+panel.memPending = null;
+
+/**
+ * The dump's element that is drawn as picked, to be put back as it was
+ * when the pick moves on.
+ * @type {?Element}
+ */
+panel.memSelectedElem = null;
+
+/**
+ * When the memory dump is clicked: picks the byte under the pointer, if
+ * there is one. A click that ends a text selection is left alone, so
+ * the dump can still be copied.
+ * @param {Event} event The click event.
+ */
+panel.onMemDumpClick = function(event) {
+    var target = event.target && event.target.closest ?
+        event.target.closest('span[data-a]') : null;
+    if (!target) {
+        return;
+    }
+    var selection = window.getSelection ? window.getSelection() : null;
+    if (selection && !selection.isCollapsed) {
+        return;
+    }
+    panel.selectMemByte(parseInt(target.dataset.a, 10));
+};
+
+/**
+ * Picks a byte for editing, and gives the keyboard to the dump. Only a
+ * stopped machine is edited, as on the panel only a stopped machine
+ * takes a DEPOSIT.
+ * @param {number} address The byte's address.
+ */
+panel.selectMemByte = function(address) {
+    if (panel.sim.isRunning) {
+        panel.setStatus('mem-edit-running', {}, 'warn');
+        return;
+    }
+    panel.memSelection = address;
+    panel.memPending = null;
+    panel.renderMemSelection();
+    // preventScroll: the input sits beside the dump, and scrolling it
+    // into view would move the dock's contents.
+    document.getElementById('mem-input').focus({preventScroll: true});
+    panel.setStatus('mem-edit-hint');
+};
+
+/**
+ * Lets go of the picked byte, dropping a digit typed but not finished.
+ */
+panel.clearMemSelection = function() {
+    if (panel.memSelection === null) {
+        return;
+    }
+    panel.memSelection = null;
+    panel.memPending = null;
+    panel.renderMemSelection();
+};
+
+/**
+ * Moves the pick, turning the dump's page when it crosses an edge of
+ * the window shown. Following the PC would turn the page straight back,
+ * so moving the pick stops that, as paging by hand does.
+ * @param {number} delta How many bytes on, or back if negative.
+ */
+panel.moveMemSelection = function(delta) {
+    var top = panel.sim.mem.length - 1;
+    var address = Math.min(Math.max(panel.memSelection + delta, 0), top);
+    panel.memSelection = address;
+    panel.memPending = null;
+    var shown = panel.sim.getDumpWindow();
+    if (address < shown.start || address >= shown.end) {
+        panel.sim.setFollowPc(false);
+        panel.sim.setDumpWindow(address);
+        panel.updateMemoryControls();
+    }
+    panel.renderMemSelection();
+};
+
+/**
+ * Takes one hex digit typed over the picked byte. The first is held;
+ * the second writes the whole byte and picks the next, as DEPOSIT NEXT
+ * moves on. A protected board refuses, and the pick stays put.
+ * @param {number} digit 0 to 15.
+ */
+panel.typeMemDigit = function(digit) {
+    if (panel.memSelection === null) {
+        return;
+    }
+    if (panel.memPending === null) {
+        panel.memPending = digit;
+        panel.renderMemSelection();
+        return;
+    }
+    var address = panel.memSelection;
+    var value = panel.memPending * 16 + digit;
+    panel.memPending = null;
+    var result = panel.sim.editByte(address, value);
+    if (result == 'protected') {
+        panel.setStatus('mem-edit-protected',
+                        {address: Sim8800.toHex(address, 4)}, 'warn');
+        panel.renderMemSelection();
+        return;
+    }
+    if (result != 'ok') {
+        if (result == 'running') {
+            panel.setStatus('mem-edit-running', {}, 'warn');
+        }
+        panel.clearMemSelection();
+        return;
+    }
+    if (address < panel.sim.mem.length - 1) {
+        panel.moveMemSelection(1);
+    } else {
+        panel.renderMemSelection();
+    }
+};
+
+/**
+ * The keys the picked byte answers: hex digits, the arrows, Backspace
+ * and Escape. Every other key that would type something is swallowed,
+ * so that nothing collects in the input; Tab still moves the focus on,
+ * which lets go of the byte.
+ * @param {Event} event The keydown event, from the dump's input.
+ */
+panel.onMemKey = function(event) {
+    if (panel.memSelection === null || event.ctrlKey || event.metaKey ||
+        event.altKey) {
+        return;
+    }
+    var key = event.key;
+    var moves = {ArrowLeft: -1, ArrowRight: 1, ArrowUp: -16, ArrowDown: 16};
+    if (/^[0-9a-fA-F]$/.test(key)) {
+        panel.typeMemDigit(parseInt(key, 16));
+    } else if (moves[key]) {
+        panel.moveMemSelection(moves[key]);
+    } else if (key == 'Backspace') {
+        panel.memPending = null;
+        panel.renderMemSelection();
+    } else if (key == 'Escape') {
+        if (panel.memPending !== null) {
+            panel.memPending = null;
+            panel.renderMemSelection();
+        } else {
+            panel.clearMemSelection();
+            event.target.blur();
+        }
+    } else if (key.length != 1) {
+        return;
+    }
+    event.preventDefault();
+};
+
+/**
+ * Takes text from a soft keyboard, which often reports its keys as
+ * 'Unidentified' and so is not caught by onMemKey.
+ * @param {Event} event The input event.
+ */
+panel.onMemInput = function(event) {
+    var text = event.target.value;
+    event.target.value = '';
+    for (let i = 0; i < text.length; i++) {
+        if (/[0-9a-fA-F]/.test(text[i])) {
+            panel.typeMemDigit(parseInt(text[i], 16));
+        }
+    }
+};
+
+/**
+ * Draws the pick on the dump: the byte ringed, and a digit typed but
+ * not finished shown in place of its first, with a gap for the second.
+ * Called again after every redraw of the dump, which replaces the
+ * bytes; a pick the dump no longer shows - the machine went off, or
+ * less memory is installed - is let go.
+ */
+panel.renderMemSelection = function() {
+    var old = panel.memSelectedElem;
+    if (old) {
+        old.classList.remove('mem-selected', 'mem-pending');
+        old.textContent = Sim8800.toHex(
+            panel.sim.readByte(parseInt(old.dataset.a, 10)), 2);
+        panel.memSelectedElem = null;
+    }
+    if (panel.memSelection === null) {
+        return;
+    }
+    if (!panel.sim.isPoweredOn ||
+        panel.memSelection >= panel.sim.mem.length) {
+        panel.memSelection = null;
+        panel.memPending = null;
+        return;
+    }
+    var elem = document.querySelector(
+        '#mem-dump span[data-a="' + panel.memSelection + '"]');
+    if (!elem) {
+        return;
+    }
+    elem.classList.add('mem-selected');
+    if (panel.memPending !== null) {
+        elem.classList.add('mem-pending');
+        elem.textContent = panel.memPending.toString(16).toUpperCase() + '_';
+    }
+    panel.memSelectedElem = elem;
+};
+
+/**
  * When CPU sets the address LEDs.
  */
 panel.setAddressLedsCallback = function(bits) {
@@ -1061,6 +1289,9 @@ panel.dumpCpuCallback = function(dumpHtml) {
  */
 panel.dumpMemCallback = function(dumpHtml, pages, instr) {
     document.getElementById('mem-dump').innerHTML = dumpHtml;
+    // The bytes were all replaced, the picked one among them.
+    panel.memSelectedElem = null;
+    panel.renderMemSelection();
     panel.renderMemMap(pages);
     panel.lastInstr = instr || null;
     panel.renderInstrPane();
@@ -2085,6 +2316,15 @@ panel.init = function() {
     // cells can come and go when the memory size changes.
     document.getElementById('mem-map').addEventListener(
         'pointerdown', panel.onMemMapPress, false);
+    // The dump's bytes, typed over (#14). Likewise one listener, since
+    // every redraw replaces the bytes. The keys arrive at the input,
+    // and leaving it - a click anywhere else - lets go of the byte.
+    var memInput = document.getElementById('mem-input');
+    document.getElementById('mem-dump').addEventListener(
+        'click', panel.onMemDumpClick, false);
+    memInput.addEventListener('keydown', panel.onMemKey, false);
+    memInput.addEventListener('input', panel.onMemInput, false);
+    memInput.addEventListener('blur', panel.clearMemSelection, false);
     panel.updateMemoryControls();
     // The machine comes up switched off, and the empty dump and dark
     // panel should say why rather than look broken.

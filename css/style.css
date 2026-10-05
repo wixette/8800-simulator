@@ -1176,6 +1176,32 @@ a {
 }
 
 /* Takes the soft keyboard on a phone without showing a text box. */
+.mem-dump-wrap {
+    position: relative;
+}
+
+/* A byte in the memory dump answers the pointer, and the one picked
+   for editing is ringed in the orange that means active. The marks of
+   PC and SP are backgrounds, so these are drawn as outlines. */
+#mem-dump span[data-a] {
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+#mem-dump span[data-a]:hover {
+    outline: 1px solid rgba(0, 0, 0, 0.45);
+}
+
+#mem-dump span.mem-selected {
+    outline: 2px solid #f90;
+}
+
+/* The first digit typed, waiting for its second. */
+#mem-dump span.mem-pending {
+    color: #c60;
+}
+
+/* Also used for the memory dump's input, beside it. */
 .tty-hidden-input {
     border: 0;
     height: 1px;

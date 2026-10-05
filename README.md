@@ -162,6 +162,10 @@ program with SINGLE STEP and watch it work:
   instruction at the program counter marked. With more than 256 bytes
   installed, a map strip above it shows every page, shaded by how full
   it is. Click a page to see it, or use **Follow PC**.
+- **Changing a byte**: with the machine stopped, click a byte in the
+  dump and type two hex digits. The byte changes and the next one is
+  picked, so `3e8cd3ff` fills four in a row; the arrow keys move, and
+  Esc stops. A protected board refuses, as it refuses DEPOSIT.
 
 ## 5. The Teletype
 

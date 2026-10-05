@@ -394,6 +394,15 @@ button at all; the panel's levers answer that on the status line.
   dock - and memory under them, the whole width, with its toolbar on
   one line and Zero All Memory kept apart at the far right. The flags
   are shown by letter, S Z AC P CY, each lit when set.
+- **Editing a byte (#14):** typed over in place, as in a hex editor,
+  rather than in an edit box: click a byte, and two hex digits write
+  it whole and pick the next, the rhythm of DEPOSIT NEXT. The first
+  digit is held, shown as `5_`, until the second arrives; the arrows
+  move the pick, turning the page at its edges; Backspace drops a held
+  digit and Esc the pick. Only a stopped machine is edited, a
+  protected board refuses, and the data lamps follow an edit of the
+  byte they show. The keys go to a hidden input beside the dump, which
+  also raises a phone's keyboard, as the Teletype's does.
 
 ### U6 — The references are a tab of their own
 

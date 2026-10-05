@@ -1631,6 +1631,58 @@ l10n.MESSAGES = {
         'ko': '{size}는 한 화면에 모두 들어갑니다. 4 KB나 8 KB를 설치하면 덤프에 옮길 창이 생깁니다.',
     },
 
+    'mem-dump-hint': {
+        'en': 'Click a byte, then type two hex digits to change it.',
+        'es': 'Haz clic en un byte y escribe dos dígitos hex para cambiarlo.',
+        'fr': 'Cliquez sur un octet, puis tapez deux chiffres hexadécimaux pour le modifier.',
+        'de': 'Klicken Sie auf ein Byte und tippen Sie zwei Hex-Ziffern, um es zu ändern.',
+        'it': 'Fai clic su un byte, poi digita due cifre esadecimali per cambiarlo.',
+        'pt-BR': 'Clique em um byte e digite dois dígitos hex para alterá-lo.',
+        'zh': '点击一个字节，再输入两位十六进制数即可修改它。',
+        'zh-TW': '點擊一個位元組，再輸入兩位十六進位數即可修改它。',
+        'ja': 'バイトをクリックし、16 進数を 2 桁入力すると書き換えられます。',
+        'ko': '바이트를 클릭한 뒤 16진수 두 자리를 입력하면 바뀝니다.',
+    },
+
+    'mem-edit-hint': {
+        'en': 'Type two hex digits to change the selected byte. The arrow keys move between bytes; Esc stops.',
+        'es': 'Escribe dos dígitos hex para cambiar el byte seleccionado. Las flechas mueven entre bytes; Esc termina.',
+        'fr': 'Tapez deux chiffres hexadécimaux pour modifier l’octet choisi. Les flèches passent d’un octet à l’autre ; Échap arrête.',
+        'de': 'Tippen Sie zwei Hex-Ziffern, um das gewählte Byte zu ändern. Die Pfeiltasten wechseln das Byte; Esc beendet.',
+        'it': 'Digita due cifre esadecimali per cambiare il byte scelto. Le frecce passano da un byte all’altro; Esc termina.',
+        'pt-BR': 'Digite dois dígitos hex para alterar o byte selecionado. As setas movem entre os bytes; Esc encerra.',
+        'zh': '输入两位十六进制数即可修改选中的字节。方向键在字节间移动；按 Esc 结束。',
+        'zh-TW': '輸入兩位十六進位數即可修改選取的位元組。方向鍵在位元組間移動；按 Esc 結束。',
+        'ja': '16 進数を 2 桁入力すると、選んだバイトを書き換えます。矢印キーでバイト間を移動し、Esc で終わります。',
+        'ko': '16진수 두 자리를 입력하면 선택한 바이트가 바뀝니다. 화살표 키로 바이트 사이를 이동하고, Esc로 끝냅니다.',
+    },
+
+    'mem-edit-running': {
+        'en': 'Memory can be edited only while the machine is stopped. Click STOP first.',
+        'es': 'La memoria solo se puede editar con la máquina detenida. Pulsa STOP primero.',
+        'fr': 'La mémoire ne se modifie que machine arrêtée. Cliquez d’abord sur STOP.',
+        'de': 'Der Speicher lässt sich nur bei angehaltener Maschine bearbeiten. Klicken Sie zuerst STOP.',
+        'it': 'La memoria si può modificare solo a macchina ferma. Premi prima STOP.',
+        'pt-BR': 'A memória só pode ser editada com a máquina parada. Clique em STOP primeiro.',
+        'zh': '只有机器停止时才能编辑内存。请先点击 STOP。',
+        'zh-TW': '只有機器停止時才能編輯記憶體。請先點擊 STOP。',
+        'ja': 'メモリは機械が止まっているときだけ編集できます。先に STOP をクリックしてください。',
+        'ko': '메모리는 기계가 멈춰 있을 때만 편집할 수 있습니다. 먼저 STOP을 누르세요.',
+    },
+
+    'mem-edit-protected': {
+        'en': '{address}H is protected, so it was not changed. UNPROTECT it first.',
+        'es': '{address}H está protegida, así que no se cambió. Desprotégela primero con UNPROTECT.',
+        'fr': '{address}H est protégée : rien n’a été modifié. Faites d’abord UNPROTECT.',
+        'de': '{address}H ist geschützt und wurde nicht geändert. Geben Sie sie zuerst mit UNPROTECT frei.',
+        'it': '{address}H è protetta, quindi non è stata cambiata. Prima sproteggila con UNPROTECT.',
+        'pt-BR': '{address}H está protegida, então não foi alterada. Desproteja-a primeiro com UNPROTECT.',
+        'zh': '{address}H 受保护，没有被修改。请先按 UNPROTECT。',
+        'zh-TW': '{address}H 受保護，沒有被修改。請先按 UNPROTECT。',
+        'ja': '{address}H は保護されているため、書き換えられませんでした。先に UNPROTECT してください。',
+        'ko': '{address}H는 보호되어 있어 바뀌지 않았습니다. 먼저 UNPROTECT하세요.',
+    },
+
     'debug-cpu-dump-title': {
         'en': '8080 CPU Status Dump',
         'es': 'Estado de la CPU 8080',
