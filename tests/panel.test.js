@@ -558,7 +558,7 @@ test('every way of putting a program in owns up to unprotecting memory', () => {
 
 test('every lamp the simulator reports is drawn on the panel', () => {
     const drawn = panel.LED_INFO.map((info) => info.id);
-    for (const id of ['prot', 'hlta', 'inte']) {
+    for (const id of ['prot', 'hlta', 'mi', 'inte']) {
         assert.ok(drawn.includes(id), id + ' has no lamp on the panel');
     }
 });

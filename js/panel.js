@@ -994,7 +994,7 @@ panel.lampStates = {};
 
 /**
  * When the simulator reports the lamps that show the machine's state:
- * PROT, HLTA and INTE.
+ * PROT, HLTA, M1 and INTE.
  * @param {Object<string, boolean>} lamps Each lamp's id, and whether it
  *     is lit.
  */
@@ -1011,7 +1011,9 @@ panel.setLampsCallback = function(lamps) {
  * When CPU sets the status LEDs.
  */
 panel.setStatusLedsCallback = function(isPoweredOn) {
-    ['memr', 'mi', 'wo'].forEach(function(id) {
+    // M1 is not among them: it goes out in a halt, so the simulator
+    // reports it with HLTA, through setLampsCallback.
+    ['memr', 'wo'].forEach(function(id) {
         panel.setLed(id, isPoweredOn);
     });
 };

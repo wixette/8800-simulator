@@ -375,7 +375,14 @@ class Sim8800 {
      * should show:
      * - PROT, the latch of the memory board at the address on the bus;
      * - HLTA, "a HALT instruction has been executed and acknowledged";
+     * - M1, the first cycle of an instruction;
      * - INTE, the CPU's interrupt enable, which EI sets and DI clears.
+     *
+     * The machine only ever stops between instructions - SINGLE STEP
+     * runs a whole one - so the status lamps show one of two status
+     * words: an instruction fetch (MEMR, M1, WO), or after a HLT the
+     * halt acknowledge (MEMR, HLTA, WO), which has no M1. MEMR and WO
+     * are lit in both, and follow the power (setStatusLedsCallback).
      *
      * Called after every batch of cycles a running program steps
      * through, so the page should only redraw what changed.
@@ -387,6 +394,7 @@ class Sim8800 {
         this.setLampsCallback({
             prot: on && this.isProtected(this.busAddress),
             hlta: on && this.halted,
+            mi: on && !this.halted,
             inte: on && !!CPU8080.status().inte,
         });
     }

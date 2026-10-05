@@ -72,6 +72,17 @@ own switches, or the large buttons on the strip under it, which are
 easier to hit and show which switches are up. The small arrow on the
 strip's top edge folds it away.
 
+**One simplification.** SINGLE STEP here always runs one whole
+instruction, as the Altair's Operator's Manual describes it. The
+circuit itself, MITS's *Theory of Operation* says, stopped after each
+machine cycle, so one instruction could take up to five presses.
+Stopping only between instructions keeps a step about the program
+rather than the bus. It also means the STATUS lamps always show the
+CPU about to fetch its next instruction - MEMR, M1 and WO - or, after
+a HLT, MEMR, HLTA and WO. INP, OUT and STACK belong to cycles inside
+an instruction, so they stay dark; and while a program runs the lamps
+hold still, rather than glowing with every cycle as the real ones did.
+
 ## 3. Your first program, by hand
 
 This is how an Altair owner put in a program in 1975: one byte at a

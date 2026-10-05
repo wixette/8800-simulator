@@ -988,6 +988,24 @@ test('HLTA lights while the CPU is halted, and RESET puts it out', () => {
     flushTimers();
 });
 
+test('a halt shows the halt acknowledge: HLTA lit, M1 out', () => {
+    // The machine stops only between instructions, so the status lamps
+    // show either an instruction fetch - MEMR, M1, WO - or, after a
+    // HLT, the halt acknowledge - MEMR, HLTA, WO - which has no M1.
+    const fixture = protectSim(256);
+    const {sim, state} = fixture;
+    sim.loadDataAsHexString(0, '00 76');
+    assert.strictEqual(state.lamps.mi, true, 'stopped at a fetch');
+    sim.singleStep();
+    assert.strictEqual(state.lamps.mi, true);
+    sim.singleStep();
+    assert.deepStrictEqual([state.lamps.hlta, state.lamps.mi], [true, false]);
+    assert.strictEqual(state.statusLedsArg, true, 'MEMR and WO stay lit');
+    sim.reset();
+    flushTimers();
+    assert.deepStrictEqual([state.lamps.hlta, state.lamps.mi], [false, true]);
+});
+
 test('INTE follows EI and DI, and RESET clears it as the 8080 does', () => {
     const fixture = protectSim(256);
     const {sim, state} = fixture;
@@ -1014,7 +1032,9 @@ test('a dead machine lights none of the lamps it reports', () => {
     fixture.state.inputWord = 0;
     sim.examine();
     sim.protect(true);
-    assert.deepStrictEqual(state.lamps, {prot: true, hlta: true, inte: true});
+    assert.deepStrictEqual(state.lamps,
+                           {prot: true, hlta: true, mi: false, inte: true});
     sim.powerOff();
-    assert.deepStrictEqual(state.lamps, {prot: false, hlta: false, inte: false});
+    assert.deepStrictEqual(state.lamps,
+                           {prot: false, hlta: false, mi: false, inte: false});
 });
