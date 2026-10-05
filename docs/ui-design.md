@@ -396,8 +396,12 @@ button at all; the panel's levers answer that on the status line.
   are shown by letter, S Z AC P CY, each lit when set.
 - **Editing a byte (#14):** typed over in place, as in a hex editor,
   rather than in an edit box: click a byte, and two hex digits write
-  it whole and pick the next, the rhythm of DEPOSIT NEXT. The first
-  digit is held, shown as `5_`, until the second arrives; the arrows
+  it whole and pick the next, the rhythm of DEPOSIT NEXT. The picked
+  byte is filled orange, with a blinking underline cursor - the sign
+  of typing over - under the digit the next key replaces; the first
+  digit typed is held, in bold, and the cursor moves to the second,
+  until that arrives. The pointer is an I-beam over the bytes; the
+  arrows
   move the pick, turning the page at its edges; Backspace drops a held
   digit and Esc the pick. Only a stopped machine is edited, a
   protected board refuses, and the data lamps follow an edit of the

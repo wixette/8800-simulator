@@ -1180,25 +1180,49 @@ a {
     position: relative;
 }
 
-/* A byte in the memory dump answers the pointer, and the one picked
-   for editing is ringed in the orange that means active. The marks of
-   PC and SP are backgrounds, so these are drawn as outlines. */
+/* A byte in the memory dump is text you can type over, as in a hex
+   editor: the I-beam says so, and pointing tints it - with a shadow
+   laid over it, so that the marks of PC and SP show through. */
 #mem-dump span[data-a] {
     border-radius: 3px;
-    cursor: pointer;
+    cursor: text;
 }
 
 #mem-dump span[data-a]:hover {
-    outline: 1px solid rgba(0, 0, 0, 0.45);
+    box-shadow: inset 0 0 0 2em rgba(0, 0, 0, 0.12);
 }
 
-#mem-dump span.mem-selected {
-    outline: 2px solid #f90;
+/* The byte picked for editing: filled with the orange that means
+   active, over the pointer's tint and the marks of PC and SP alike. */
+#mem-dump span.mem-selected,
+#mem-dump span.mem-selected:hover {
+    background-color: #f90;
+    box-shadow: none;
+    color: #222;
 }
 
-/* The first digit typed, waiting for its second. */
-#mem-dump span.mem-pending {
-    color: #c60;
+/* Where the next hex digit goes: an underline cursor, the sign of
+   typing over rather than inserting, blinking as cursors do. */
+#mem-dump .mem-caret {
+    animation: mem-caret-blink 1s steps(1) infinite;
+    box-shadow: inset 0 -2px 0 #222;
+}
+
+@keyframes mem-caret-blink {
+    50% {
+        box-shadow: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #mem-dump .mem-caret {
+        animation: none;
+    }
+}
+
+/* The first digit typed, held until its second arrives. */
+#mem-dump .mem-typed {
+    font-weight: bold;
 }
 
 /* Also used for the memory dump's input, beside it. */

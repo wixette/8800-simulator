@@ -1139,8 +1139,9 @@ panel.onMemInput = function(event) {
 };
 
 /**
- * Draws the pick on the dump: the byte ringed, and a digit typed but
- * not finished shown in place of its first, with a gap for the second.
+ * Draws the pick on the dump: the byte filled, with an underline cursor
+ * under the digit the next key types over - the first, or once one has
+ * been typed, the second, the typed one shown in its place.
  * Called again after every redraw of the dump, which replaces the
  * bytes; a pick the dump no longer shows - the machine went off, or
  * less memory is installed - is let go.
@@ -1148,7 +1149,7 @@ panel.onMemInput = function(event) {
 panel.renderMemSelection = function() {
     var old = panel.memSelectedElem;
     if (old) {
-        old.classList.remove('mem-selected', 'mem-pending');
+        old.classList.remove('mem-selected');
         old.textContent = Sim8800.toHex(
             panel.sim.readByte(parseInt(old.dataset.a, 10)), 2);
         panel.memSelectedElem = null;
@@ -1168,9 +1169,15 @@ panel.renderMemSelection = function() {
         return;
     }
     elem.classList.add('mem-selected');
-    if (panel.memPending !== null) {
-        elem.classList.add('mem-pending');
-        elem.textContent = panel.memPending.toString(16).toUpperCase() + '_';
+    // Hex digits only, so safe to write as markup.
+    var digits = Sim8800.toHex(panel.sim.readByte(panel.memSelection), 2);
+    if (panel.memPending === null) {
+        elem.innerHTML = '<span class="mem-caret">' + digits[0] + '</span>' +
+            digits[1];
+    } else {
+        elem.innerHTML = '<span class="mem-typed">' +
+            panel.memPending.toString(16).toUpperCase() + '</span>' +
+            '<span class="mem-caret">' + digits[1] + '</span>';
     }
     panel.memSelectedElem = elem;
 };
