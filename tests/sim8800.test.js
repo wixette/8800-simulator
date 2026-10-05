@@ -995,15 +995,15 @@ test('a halt shows the halt acknowledge: HLTA lit, M1 out', () => {
     const fixture = protectSim(256);
     const {sim, state} = fixture;
     sim.loadDataAsHexString(0, '00 76');
-    assert.strictEqual(state.lamps.mi, true, 'stopped at a fetch');
+    assert.strictEqual(state.lamps.m1, true, 'stopped at a fetch');
     sim.singleStep();
-    assert.strictEqual(state.lamps.mi, true);
+    assert.strictEqual(state.lamps.m1, true);
     sim.singleStep();
-    assert.deepStrictEqual([state.lamps.hlta, state.lamps.mi], [true, false]);
+    assert.deepStrictEqual([state.lamps.hlta, state.lamps.m1], [true, false]);
     assert.strictEqual(state.statusLedsArg, true, 'MEMR and WO stay lit');
     sim.reset();
     flushTimers();
-    assert.deepStrictEqual([state.lamps.hlta, state.lamps.mi], [false, true]);
+    assert.deepStrictEqual([state.lamps.hlta, state.lamps.m1], [false, true]);
 });
 
 test('INTE follows EI and DI, and RESET clears it as the 8080 does', () => {
@@ -1033,8 +1033,8 @@ test('a dead machine lights none of the lamps it reports', () => {
     sim.examine();
     sim.protect(true);
     assert.deepStrictEqual(state.lamps,
-                           {prot: true, hlta: true, mi: false, inte: true});
+                           {prot: true, hlta: true, m1: false, inte: true});
     sim.powerOff();
     assert.deepStrictEqual(state.lamps,
-                           {prot: false, hlta: false, mi: false, inte: false});
+                           {prot: false, hlta: false, m1: false, inte: false});
 });

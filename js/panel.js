@@ -1682,7 +1682,7 @@ panel.LED_INFO = [
     {id: 'prot', x: 245, y: 120},
     {id: 'memr', x: 296, y: 120},
     {id: 'inp', x: 347, y: 120},
-    {id: 'mi', x: 398, y: 120},
+    {id: 'm1', x: 398, y: 120},
     {id: 'out', x: 449, y: 120},
     {id: 'hlta', x: 500, y: 120},
     {id: 'stack', x: 551, y: 120},

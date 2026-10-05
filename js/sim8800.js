@@ -394,7 +394,7 @@ class Sim8800 {
         this.setLampsCallback({
             prot: on && this.isProtected(this.busAddress),
             hlta: on && this.halted,
-            mi: on && !this.halted,
+            m1: on && !this.halted,
             inte: on && !!CPU8080.status().inte,
         });
     }
