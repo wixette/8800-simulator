@@ -127,7 +127,7 @@ tools below it, and a status line along the foot.
   bytes, as the Altair shipped, or 4 KB or 8 KB, as if you had fitted
   one or two 88-4MCS boards. Fitting a board meant opening the case, so
   this switches the machine off. On the right are *Share*, the
-  language (nine of them), and *About*.
+  language (ten of them), and *About*.
 - **The dock** holds four tabs, one at a time: the **Teletype**, the
   **Debugger**, the **Tutorial**, and the **References** (the source
   code and further reading). Click a tab to open it, click it
@@ -261,7 +261,7 @@ programs and the BASIC tape, which the page reads from `examples/` and
 | [js/link.js](js/link.js) | The program link format |
 | [js/listing.js](js/listing.js) | Reads the example listings |
 | [js/dropdown.js](js/dropdown.js), [js/dialog.js](js/dialog.js) | The menus and the dialogs |
-| [js/l10n.js](js/l10n.js) | Every message, in nine languages |
+| [js/l10n.js](js/l10n.js) | Every message, in ten languages |
 
 The design notes say why things are the way they are:
 [docs/ui-design.md](docs/ui-design.md) for the layout and its

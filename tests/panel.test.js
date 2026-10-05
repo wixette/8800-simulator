@@ -51,11 +51,37 @@ function sourceOf(file) {
 test('every message is translated into every locale', () => {
     const all = messages();
     const expected = locales();
-    assert.ok(expected.length >= 9, 'expected nine locales');
+    assert.ok(expected.length >= 10, 'expected ten locales');
     for (const id of Object.keys(all)) {
         const got = Object.keys(all[id]);
         assert.deepStrictEqual([...got].sort(), [...expected].sort(),
                                id + ' is not translated everywhere');
+    }
+});
+
+test('every translation keeps the placeholders of the English', () => {
+    // {name}, {bytes} and the rest are filled in by panel.setStatus. A
+    // translation that drops or misspells one shows the reader a raw
+    // brace, or leaves out the very number the message is about.
+    const all = messages();
+    const holes = (text) => (text.match(/\{[a-z]+\}/g) || []).sort();
+    let checked = 0;
+    for (const id of Object.keys(all)) {
+        const english = holes(all[id]['en']);
+        for (const locale of locales()) {
+            assert.deepStrictEqual(holes(all[id][locale]), english,
+                                   id + ' in ' + locale + ' has other placeholders');
+            checked += english.length;
+        }
+    }
+    assert.ok(checked > 100, 'expected plenty of placeholders: ' + checked);
+});
+
+test('every locale names itself in the menu and on the button', () => {
+    const l10n = loadScript('l10n');
+    for (const locale of locales()) {
+        assert.ok(l10n.LOCALE_NAMES[locale], locale + ' has no name in the menu');
+        assert.ok(l10n.LOCALE_SHORT[locale], locale + ' has no short label');
     }
 });
 

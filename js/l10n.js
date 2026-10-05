@@ -36,6 +36,7 @@ l10n.LOCALES = [
     'zh-TW',
     'ja',
     'ko',
+    'pt-BR',
 ];
 
 /**
@@ -54,6 +55,7 @@ l10n.LOCALE_NAMES = {
     'zh-TW': '繁體中文',
     'ja': '日本語',
     'ko': '한국어',
+    'pt-BR': 'Português (Brasil)',
 };
 
 /**
@@ -72,6 +74,7 @@ l10n.LOCALE_SHORT = {
     'zh-TW': '繁',
     'ja': '日',
     'ko': '한',
+    'pt-BR': 'PT',
 };
 
 /**
@@ -88,6 +91,7 @@ l10n.MESSAGES = {
         'zh-TW': 'Sim-8800: Altair 8800 模擬器',
         'ja': 'Sim-8800: Altair 8800 シミュレーター',
         'ko': 'Sim-8800: Altair 8800 시뮬레이터',
+        'pt-BR': 'Sim-8800: simulador do Altair 8800',
     },
 
     'header-title': {
@@ -100,6 +104,7 @@ l10n.MESSAGES = {
         'zh-TW': 'Altair 8800 模擬器',
         'ja': 'Altair 8800 シミュレーター',
         'ko': 'Altair 8800 시뮬레이터',
+        'pt-BR': 'Simulador do Altair 8800',
     },
 
     'load-menu': {
@@ -112,6 +117,7 @@ l10n.MESSAGES = {
         'zh-TW': '載入',
         'ja': '読み込み',
         'ko': '불러오기',
+        'pt-BR': 'Carregar',
     },
 
     'memory-menu': {
@@ -124,6 +130,7 @@ l10n.MESSAGES = {
         'zh-TW': '記憶體：',
         'ja': 'メモリ：',
         'ko': '메모리:',
+        'pt-BR': 'Memória:',
     },
 
     'splitter-label': {
@@ -136,6 +143,7 @@ l10n.MESSAGES = {
         'zh-TW': '拖曳以分配面板和工具的高度',
         'ja': 'ドラッグしてパネルとツールの高さを配分',
         'ko': '드래그해 패널과 도구의 높이를 나누세요',
+        'pt-BR': 'Arraste para dividir a altura entre o painel e as ferramentas',
     },
 
     'dock-hide': {
@@ -148,6 +156,7 @@ l10n.MESSAGES = {
         'zh-TW': '收起工具',
         'ja': 'ツールをたたむ',
         'ko': '도구 접기',
+        'pt-BR': 'Recolher as ferramentas',
     },
 
     'dock-show': {
@@ -160,6 +169,7 @@ l10n.MESSAGES = {
         'zh-TW': '展開工具',
         'ja': 'ツールを開く',
         'ko': '도구 열기',
+        'pt-BR': 'Abrir as ferramentas',
     },
 
     'share-menu': {
@@ -172,6 +182,7 @@ l10n.MESSAGES = {
         'zh-TW': '分享',
         'ja': '共有',
         'ko': '공유',
+        'pt-BR': 'Compartilhar',
     },
 
     'load-hex': {
@@ -184,6 +195,7 @@ l10n.MESSAGES = {
         'zh-TW': '十六進位位元組…',
         'ja': '16 進数のバイト…',
         'ko': '16진수 바이트…',
+        'pt-BR': 'Bytes em Hex…',
     },
 
     'load-file': {
@@ -196,6 +208,7 @@ l10n.MESSAGES = {
         'zh-TW': '二進位檔案…',
         'ja': 'バイナリファイル…',
         'ko': '바이너리 파일…',
+        'pt-BR': 'Arquivo Binário…',
     },
 
     'basic-needs-memory': {
@@ -208,6 +221,7 @@ l10n.MESSAGES = {
         'zh-TW': '需要 4 KB',
         'ja': '4 KB が必要',
         'ko': '4 KB 필요',
+        'pt-BR': 'requer 4 KB',
     },
 
     'needs-server-short': {
@@ -220,6 +234,7 @@ l10n.MESSAGES = {
         'zh-TW': '需要 Web 伺服器',
         'ja': 'Web サーバーが必要',
         'ko': '웹 서버 필요',
+        'pt-BR': 'requer um servidor web',
     },
 
     'examples-unreadable-short': {
@@ -232,6 +247,7 @@ l10n.MESSAGES = {
         'zh-TW': '無法讀取',
         'ja': '読み込めません',
         'ko': '읽을 수 없음',
+        'pt-BR': 'não foi possível ler',
     },
 
     'examples-heading': {
@@ -244,6 +260,7 @@ l10n.MESSAGES = {
         'zh-TW': '範例',
         'ja': 'サンプル',
         'ko': '예제',
+        'pt-BR': 'Exemplos',
     },
 
     'examples-still-loading': {
@@ -256,6 +273,7 @@ l10n.MESSAGES = {
         'zh-TW': '範例程式還在讀取中，請稍後再試。',
         'ja': 'サンプルプログラムをまだ読み込んでいます。少し待ってからもう一度どうぞ。',
         'ko': '예제 프로그램을 아직 읽는 중입니다. 잠시 후 다시 시도하세요.',
+        'pt-BR': 'Os programas de exemplo ainda estão sendo lidos. Tente de novo em instantes.',
     },
 
     'examples-loading': {
@@ -268,6 +286,7 @@ l10n.MESSAGES = {
         'zh-TW': '正在載入…',
         'ja': '読み込み中…',
         'ko': '불러오는 중…',
+        'pt-BR': 'Carregando…',
     },
 
     'examples-heading-panel': {
@@ -280,6 +299,7 @@ l10n.MESSAGES = {
         'zh-TW': '前面板範例',
         'ja': 'フロントパネルのサンプル',
         'ko': '앞판 예제',
+        'pt-BR': 'Exemplos do Painel Frontal',
     },
 
     'examples-heading-tty': {
@@ -292,6 +312,7 @@ l10n.MESSAGES = {
         'zh-TW': '電傳打字機範例',
         'ja': 'テレタイプのサンプル',
         'ko': '텔레타이프 예제',
+        'pt-BR': 'Exemplos do Teletipo',
     },
 
     'example-size': {
@@ -304,6 +325,7 @@ l10n.MESSAGES = {
         'zh-TW': '{bytes} 位元組',
         'ja': '{bytes} バイト',
         'ko': '{bytes}바이트',
+        'pt-BR': '{bytes} bytes',
     },
 
     'language-menu': {
@@ -316,6 +338,7 @@ l10n.MESSAGES = {
         'zh-TW': '語言',
         'ja': '言語',
         'ko': '언어',
+        'pt-BR': 'Idioma',
     },
 
     'about-button': {
@@ -328,6 +351,7 @@ l10n.MESSAGES = {
         'zh-TW': '關於',
         'ja': 'このアプリについて',
         'ko': '정보',
+        'pt-BR': 'Sobre',
     },
 
     'dialog-close': {
@@ -340,6 +364,7 @@ l10n.MESSAGES = {
         'zh-TW': '關閉',
         'ja': '閉じる',
         'ko': '닫기',
+        'pt-BR': 'Fechar',
     },
 
     'about-ok': {
@@ -352,6 +377,7 @@ l10n.MESSAGES = {
         'zh-TW': '關閉',
         'ja': '閉じる',
         'ko': '닫기',
+        'pt-BR': 'Fechar',
     },
 
     'hex-cancel': {
@@ -364,6 +390,7 @@ l10n.MESSAGES = {
         'zh-TW': '取消',
         'ja': 'キャンセル',
         'ko': '취소',
+        'pt-BR': 'Cancelar',
     },
 
     'hex-dialog-title': {
@@ -376,6 +403,7 @@ l10n.MESSAGES = {
         'zh-TW': '載入十六進位位元組',
         'ja': '16 進数のバイトを読み込む',
         'ko': '16진수 바이트 불러오기',
+        'pt-BR': 'Carregar Bytes em Hex',
     },
 
     'hex-dialog-desc': {
@@ -388,6 +416,7 @@ l10n.MESSAGES = {
         'zh-TW': '十六進位位元組，從 0000H 起放入記憶體。位元組之間可以用空格、逗號或換行分隔。',
         'ja': '16 進数のバイトを 0000H からメモリに置きます。空白、カンマ、改行で区切ってかまいません。',
         'ko': '16진수 바이트를 0000H부터 메모리에 넣습니다. 공백, 쉼표, 줄바꿈으로 구분해도 됩니다.',
+        'pt-BR': 'Bytes em hexadecimal, gravados na memória a partir de 0000H. Podem ser separados por espaços, vírgulas e quebras de linha.',
     },
 
     'share-title': {
@@ -400,6 +429,7 @@ l10n.MESSAGES = {
         'zh-TW': '分享連結',
         'ja': 'リンクを共有',
         'ko': '링크 공유',
+        'pt-BR': 'Compartilhar um Link',
     },
 
     'share-question': {
@@ -412,6 +442,7 @@ l10n.MESSAGES = {
         'zh-TW': '連結要開啟什麼？',
         'ja': 'リンクで何を開きますか？',
         'ko': '링크로 무엇을 열까요?',
+        'pt-BR': 'O que o link deve abrir?',
     },
 
     'share-program-label': {
@@ -424,6 +455,7 @@ l10n.MESSAGES = {
         'zh-TW': '程式，按下 RESET 後',
         'ja': 'プログラム（RESET 直後）',
         'ko': '프로그램, RESET 직후',
+        'pt-BR': 'O programa, após RESET',
     },
 
     'share-program-desc': {
@@ -436,6 +468,7 @@ l10n.MESSAGES = {
         'zh-TW': '可直接按 RUN，就像剛開機的機器。',
         'ja': '電源を入れたばかりのマシンのように、すぐ RUN できます。',
         'ko': '막 켠 기계처럼 바로 RUN할 수 있습니다.',
+        'pt-BR': 'Pronto para RUN, como uma máquina recém-ligada.',
     },
 
     'share-state-label': {
@@ -448,6 +481,7 @@ l10n.MESSAGES = {
         'zh-TW': '機器現在的樣子',
         'ja': '今のままのマシン',
         'ko': '지금 상태 그대로의 기계',
+        'pt-BR': 'A máquina como está agora',
     },
 
     'share-state-desc': {
@@ -460,6 +494,7 @@ l10n.MESSAGES = {
         'zh-TW': '停在 {pc}H，連同暫存器和開關。',
         'ja': '{pc}H で停止したまま、レジスタとスイッチも含めて。',
         'ko': '{pc}H에서 멈춘 채, 레지스터와 스위치도 함께.',
+        'pt-BR': 'Parada em {pc}H, com seus registradores e chaves.',
     },
 
     'link-copy-blocked': {
@@ -472,6 +507,7 @@ l10n.MESSAGES = {
         'zh-TW': '瀏覽器不允許複製連結，所以已在框中選取它。請從那裡複製。',
         'ja': 'ブラウザーがリンクをコピーさせなかったので、欄の中で選択してあります。そこからコピーしてください。',
         'ko': '브라우저가 링크 복사를 허용하지 않아 상자에서 선택해 두었습니다. 거기서 복사하세요.',
+        'pt-BR': 'O navegador não permitiu copiar o link, então ele foi selecionado na caixa. Copie-o de lá.',
     },
 
     'about-title': {
@@ -484,6 +520,7 @@ l10n.MESSAGES = {
         'zh-TW': 'Altair 8800 模擬器',
         'ja': 'Altair 8800 シミュレーター',
         'ko': 'Altair 8800 시뮬레이터',
+        'pt-BR': 'Simulador do Altair 8800',
     },
 
     'about-version': {
@@ -496,6 +533,7 @@ l10n.MESSAGES = {
         'zh-TW': '版本',
         'ja': 'バージョン',
         'ko': '버전',
+        'pt-BR': 'Versão',
     },
 
     'about-desc': {
@@ -508,6 +546,7 @@ l10n.MESSAGES = {
         'zh-TW': '一台能在網頁裡開機的 Altair 8800：它的前面板、一台執行微軟 4K BASIC 的電傳打字機，以及真機從未有過的除錯器。',
         'ja': 'Web ページの中で電源を入れられる Altair 8800。フロントパネル、Microsoft の 4K BASIC が動くテレタイプ、そして本物にはなかったデバッガーを備えています。',
         'ko': '웹 페이지에서 켤 수 있는 Altair 8800: 앞판, 마이크로소프트 4K BASIC이 돌아가는 텔레타이프, 그리고 진짜에는 없던 디버거.',
+        'pt-BR': 'Um Altair 8800 que você liga numa página web: o painel frontal, um teletipo rodando o 4K BASIC da Microsoft e um depurador que o original nunca teve.',
     },
 
     'about-source': {
@@ -520,6 +559,7 @@ l10n.MESSAGES = {
         'zh-TW': 'GitHub 上的原始碼',
         'ja': 'GitHub のソースコード',
         'ko': 'GitHub의 소스 코드',
+        'pt-BR': 'Código-fonte no GitHub',
     },
 
     'about-issues': {
@@ -532,6 +572,7 @@ l10n.MESSAGES = {
         'zh-TW': '回報問題',
         'ja': '問題を報告',
         'ko': '문제 신고',
+        'pt-BR': 'Relatar um problema',
     },
 
     'about-contributors': {
@@ -544,6 +585,7 @@ l10n.MESSAGES = {
         'zh-TW': '貢獻者',
         'ja': 'コントリビューター',
         'ko': '기여자',
+        'pt-BR': 'Colaboradores',
     },
 
     'about-licences': {
@@ -556,6 +598,7 @@ l10n.MESSAGES = {
         'zh-TW': '授權條款',
         'ja': 'ライセンス',
         'ko': '라이선스',
+        'pt-BR': 'Licenças',
     },
 
     'about-license-app': {
@@ -568,6 +611,7 @@ l10n.MESSAGES = {
         'zh-TW': '本模擬器：',
         'ja': 'このシミュレーター：',
         'ko': '이 시뮬레이터:',
+        'pt-BR': 'O simulador:',
     },
 
     'about-license-rom': {
@@ -580,6 +624,7 @@ l10n.MESSAGES = {
         'zh-TW': '4K BASIC 紙帶歸微軟所有，不在該授權範圍內：',
         'ja': '4K BASIC のテープは Microsoft のもので、このライセンスの対象外です：',
         'ko': '4K BASIC 테이프는 마이크로소프트의 것이며 이 라이선스가 적용되지 않습니다:',
+        'pt-BR': 'A fita do 4K BASIC é da Microsoft e não está coberta por essa licença:',
     },
 
     'about-license-cpu': {
@@ -592,6 +637,7 @@ l10n.MESSAGES = {
         'zh-TW': '8080 CPU 核心是 Martin Maly 的 8080js，採用 BSD 授權：',
         'ja': '8080 CPU コアは Martin Maly による 8080js で、BSD ライセンスです：',
         'ko': '8080 CPU 코어는 Martin Maly의 8080js이며 BSD 라이선스입니다:',
+        'pt-BR': 'O núcleo da CPU 8080 é o 8080js, de Martin Maly, sob uma licença BSD:',
     },
 
     'about-license-icons': {
@@ -604,6 +650,7 @@ l10n.MESSAGES = {
         'zh-TW': '圖示來自 Google 的 Material Icons：',
         'ja': 'アイコンは Google の Material Icons です：',
         'ko': '아이콘은 Google의 Material Icons입니다:',
+        'pt-BR': 'Os ícones são os Material Icons do Google:',
     },
 
     'about-references': {
@@ -616,6 +663,7 @@ l10n.MESSAGES = {
         'zh-TW': '參考資料',
         'ja': '参考資料',
         'ko': '참고 자료',
+        'pt-BR': 'Referências',
     },
 
     'strip-hide': {
@@ -628,6 +676,7 @@ l10n.MESSAGES = {
         'zh-TW': '收起開關',
         'ja': 'スイッチをたたむ',
         'ko': '스위치 접기',
+        'pt-BR': 'Recolher as chaves',
     },
 
     'strip-show': {
@@ -640,6 +689,7 @@ l10n.MESSAGES = {
         'zh-TW': '顯示開關',
         'ja': 'スイッチを表示',
         'ko': '스위치 보이기',
+        'pt-BR': 'Mostrar as chaves',
     },
 
     'nav-tty': {
@@ -652,6 +702,7 @@ l10n.MESSAGES = {
         'zh-TW': '電傳打字機',
         'ja': 'テレタイプ',
         'ko': '텔레타이프',
+        'pt-BR': 'Teletipo',
     },
 
     'tty-break': {
@@ -664,6 +715,7 @@ l10n.MESSAGES = {
         'zh-TW': 'CTRL-C（中斷）',
         'ja': 'CTRL-C（中断）',
         'ko': 'CTRL-C (중단)',
+        'pt-BR': 'CTRL-C (INTERROMPER)',
     },
 
     'tty-rubout': {
@@ -676,6 +728,7 @@ l10n.MESSAGES = {
         'zh-TW': '退格刪除（_）',
         'ja': 'ラブアウト（_）',
         'ko': '지우기 (_)',
+        'pt-BR': 'APAGAR (_)',
     },
 
     'tty-kill': {
@@ -688,6 +741,7 @@ l10n.MESSAGES = {
         'zh-TW': '放棄整行（@）',
         'ja': '行取り消し（@）',
         'ko': '줄 취소 (@)',
+        'pt-BR': 'ANULAR LINHA (@)',
     },
 
     'tty-linefeed': {
@@ -700,6 +754,7 @@ l10n.MESSAGES = {
         'zh-TW': '進紙一行',
         'ja': '紙送り（改行）',
         'ko': '한 줄 이송',
+        'pt-BR': 'AVANÇO DE LINHA',
     },
 
     'tty-clear': {
@@ -712,6 +767,7 @@ l10n.MESSAGES = {
         'zh-TW': '換新紙',
         'ja': '紙を取り替える',
         'ko': '새 용지',
+        'pt-BR': 'PAPEL NOVO',
     },
 
     'tty-hint': {
@@ -724,6 +780,7 @@ l10n.MESSAGES = {
         'zh-TW': '還沒有列印任何內容。先執行一個讀取串列埠板的程式——試試「載入」裡的 Teletype echo——然後在這裡輸入。',
         'ja': 'まだ何も印字されていません。シリアルボードを読むプログラムを動かしてから（「読み込み」の Teletype echo など）、ここで入力してください。',
         'ko': '아직 아무것도 인쇄되지 않았습니다. 직렬 보드를 읽는 프로그램을 실행한 뒤("불러오기"의 Teletype echo 등) 여기에 입력하세요.',
+        'pt-BR': 'Nada foi impresso ainda. Rode um programa que leia a placa serial - experimente Teletype echo, em Carregar - e digite aqui.',
     },
 
     'nav-debug': {
@@ -736,6 +793,7 @@ l10n.MESSAGES = {
         'zh-TW': '除錯器',
         'ja': 'デバッガー',
         'ko': '디버거',
+        'pt-BR': 'Depurador',
     },
 
     'nav-ref': {
@@ -748,6 +806,7 @@ l10n.MESSAGES = {
         'zh-TW': '使用手冊',
         'ja': 'チュートリアル',
         'ko': '튜토리얼',
+        'pt-BR': 'Tutorial',
     },
 
     'nav-links': {
@@ -760,6 +819,7 @@ l10n.MESSAGES = {
         'zh-TW': '參考資料',
         'ja': '参考資料',
         'ko': '참고 자료',
+        'pt-BR': 'Referências',
     },
 
     'source-code': {
@@ -772,6 +832,7 @@ l10n.MESSAGES = {
         'zh-TW': '原始碼',
         'ja': 'ソースコード',
         'ko': '소스 코드',
+        'pt-BR': 'Código-Fonte',
     },
 
     'debug-load-data': {
@@ -784,6 +845,7 @@ l10n.MESSAGES = {
         'zh-TW': '載入資料',
         'ja': 'データを読み込む',
         'ko': '데이터 불러오기',
+        'pt-BR': 'Carregar Dados',
     },
 
     'status-off': {
@@ -796,6 +858,7 @@ l10n.MESSAGES = {
         'zh-TW': '機器已關閉。點擊前面板上的 OFF/ON 開關即可開機。',
         'ja': '電源が切れています。フロントパネルの OFF/ON をクリックすると入ります。',
         'ko': '기계가 꺼져 있습니다. 앞판의 OFF/ON을 눌러 켜세요.',
+        'pt-BR': 'A máquina está desligada. Clique em OFF/ON no painel frontal para ligá-la.',
     },
 
     'status-on': {
@@ -808,6 +871,7 @@ l10n.MESSAGES = {
         'zh-TW': '機器已開機，正在等待。記憶體開機時充滿隨機位元組，和真機一樣。',
         'ja': '電源が入り、待機中です。メモリは実機と同じくランダムなバイトで埋まった状態で立ち上がります。',
         'ko': '기계가 켜져 대기 중입니다. 메모리는 실제 기계처럼 무작위 바이트로 채워진 채 시작됩니다.',
+        'pt-BR': 'A máquina está ligada e esperando. A memória começou cheia de bytes aleatórios, como na máquina real.',
     },
 
     'status-running': {
@@ -820,6 +884,7 @@ l10n.MESSAGES = {
         'zh-TW': '正在執行。',
         'ja': '実行中です。',
         'ko': '실행 중입니다.',
+        'pt-BR': 'Rodando.',
     },
 
     'status-halted': {
@@ -832,6 +897,7 @@ l10n.MESSAGES = {
         'zh-TW': '程式執行到 HLT，機器停下了，WAIT 燈亮起。按 RESET 再按 RUN 可重新開始。',
         'ja': 'プログラムが HLT に達して機械が止まり、WAIT ランプが点灯しました。RESET と RUN で再度動きます。',
         'ko': '프로그램이 HLT에 도달해 기계가 멈추고 WAIT 램프가 켜졌습니다. RESET 후 RUN으로 다시 시작합니다.',
+        'pt-BR': 'O programa chegou a um HLT e a máquina parou, com a lâmpada WAIT acesa. RESET e RUN a iniciam de novo.',
     },
 
     'status-stopped': {
@@ -844,6 +910,7 @@ l10n.MESSAGES = {
         'zh-TW': '已停止。程式計數器停在目前位置；按 RESET 可讓它回到 0000H。',
         'ja': '停止しました。プログラムカウンタは止まった位置のままです。RESET で 0000H に戻ります。',
         'ko': '멈췄습니다. 프로그램 카운터는 멈춘 자리에 있으며, RESET을 누르면 0000H로 돌아갑니다.',
+        'pt-BR': 'Parada. O contador de programa ficou onde ela parou; RESET o leva de volta a 0000H.',
     },
 
     'status-reset': {
@@ -856,6 +923,7 @@ l10n.MESSAGES = {
         'zh-TW': '已 RESET。程式計數器回到 0000H；點擊 RUN 即可從這裡開始執行。',
         'ja': 'RESET しました。プログラムカウンタは 0000H に戻っています。RUN を押すとそこから実行します。',
         'ko': 'RESET 했습니다. 프로그램 카운터가 0000H로 돌아갔습니다. RUN을 누르면 거기서 시작합니다.',
+        'pt-BR': 'RESET. O contador de programa voltou a 0000H; clique em RUN para começar dali.',
     },
 
     'status-mem-installed': {
@@ -868,6 +936,7 @@ l10n.MESSAGES = {
         'zh-TW': '已安裝 {size} 記憶體。插記憶體卡意味著打開機殼，所以機器已關閉——點擊 OFF/ON 重新開機。',
         'ja': 'メモリを {size} 搭載しました。メモリボードを挿すのは筐体を開けることなので電源が切れています。OFF/ON を押して入れ直してください。',
         'ko': '메모리 {size}를 설치했습니다. 메모리 보드를 꽂으려면 케이스를 열어야 하므로 기계가 꺼졌습니다. OFF/ON을 눌러 다시 켜세요.',
+        'pt-BR': '{size} de memória instalados. Instalar uma placa de memória exige abrir o gabinete, então a máquina foi desligada - clique em OFF/ON para ligá-la de novo.',
     },
 
     'status-zeroed': {
@@ -880,6 +949,7 @@ l10n.MESSAGES = {
         'zh-TW': '全部記憶體已清零。',
         'ja': 'メモリをすべてゼロにしました。',
         'ko': '메모리를 모두 0으로 지웠습니다.',
+        'pt-BR': 'Toda a memória foi zerada.',
     },
 
     // Every way of loading switches the machine on if it is off (D20),
@@ -895,6 +965,7 @@ l10n.MESSAGES = {
         'zh-TW': '機器原本是關著的，已先行開機。',
         'ja': '電源が切れていたので、先に入れました。',
         'ko': '기계가 꺼져 있어서 먼저 켰습니다.',
+        'pt-BR': 'A máquina estava desligada, então foi ligada primeiro.',
     },
 
     'example-loaded': {
@@ -907,6 +978,7 @@ l10n.MESSAGES = {
         'zh-TW': '已在 0000H 載入 {name}（{bytes} 位元組）並按下 RESET。請點擊前面板上的 RUN。',
         'ja': '{name}（{bytes} バイト）を 0000H に読み込み、RESET を押しました。フロントパネルの RUN を押してください。',
         'ko': '{name}({bytes}바이트)을 0000H에 불러오고 RESET을 눌렀습니다. 앞판의 RUN을 누르세요.',
+        'pt-BR': '{name} carregado, {bytes} bytes, em 0000H, e RESET pressionado. Clique em RUN no painel frontal.',
     },
 
     'example-loaded-tty': {
@@ -919,6 +991,7 @@ l10n.MESSAGES = {
         'zh-TW': '已在 0000H 載入 {name}（{bytes} 位元組）並按下 RESET。請點擊前面板上的 RUN，然後看「電傳打字機」。',
         'ja': '{name}（{bytes} バイト）を 0000H に読み込み、RESET を押しました。フロントパネルの RUN を押し、テレタイプをご覧ください。',
         'ko': '{name}({bytes}바이트)을 0000H에 불러오고 RESET을 눌렀습니다. 앞판의 RUN을 누른 다음 텔레타이프를 보세요.',
+        'pt-BR': '{name} carregado, {bytes} bytes, em 0000H, e RESET pressionado. Clique em RUN no painel frontal e acompanhe o Teletipo.',
     },
 
     'load-basic': {
@@ -931,6 +1004,7 @@ l10n.MESSAGES = {
         'zh-TW': 'Microsoft 4K BASIC',
         'ja': 'Microsoft 4K BASIC',
         'ko': 'Microsoft 4K BASIC',
+        'pt-BR': 'Microsoft 4K BASIC',
     },
 
     'needs-server': {
@@ -943,6 +1017,7 @@ l10n.MESSAGES = {
         'zh-TW': '這個頁面是直接從磁碟開啟的，瀏覽器不允許它讀取範例程式清單或 BASIC 紙帶。請改用伺服器：在該目錄下執行 "python3 -m http.server 8000"，然後開啟 http://localhost:8000/。',
         'ja': 'このページはディスクから直接開かれているため、ブラウザーはサンプルのリスティングや BASIC の紙テープを読み込ませてくれません。フォルダーを配信してください。その中で "python3 -m http.server 8000" を実行し、http://localhost:8000/ を開きます。',
         'ko': '이 페이지는 디스크에서 바로 열렸기 때문에 브라우저가 예제 리스팅이나 BASIC 종이테이프를 읽지 못하게 합니다. 폴더를 서버로 제공하세요. 그 안에서 "python3 -m http.server 8000"을 실행하고 http://localhost:8000/ 을 여세요.',
+        'pt-BR': 'Esta página foi aberta direto do disco, então o navegador não a deixa ler as listagens de exemplo nem a fita do BASIC. Sirva a pasta: rode "python3 -m http.server 8000" nela e abra http://localhost:8000/.',
     },
 
     'examples-unreadable': {
@@ -955,6 +1030,7 @@ l10n.MESSAGES = {
         'zh-TW': '無法讀取範例程式清單。它們在本頁面旁邊的 examples 目錄裡。',
         'ja': 'サンプルのリスティングを読み込めませんでした。このページと同じ場所の examples フォルダーにあります。',
         'ko': '예제 리스팅을 읽을 수 없습니다. 이 페이지 옆 examples 폴더에 있습니다.',
+        'pt-BR': 'Não foi possível ler as listagens de exemplo. Elas ficam na pasta examples, ao lado desta página.',
     },
 
     'rom-needs-memory': {
@@ -967,6 +1043,7 @@ l10n.MESSAGES = {
         'zh-TW': '4K BASIC 至少需要 4 KB 記憶體。請在「記憶體」選單中選擇 4 KB 或 8 KB。',
         'ja': '4K BASIC には少なくとも 4 KB が必要です。「メモリ」メニューで 4 KB か 8 KB を選んでください。',
         'ko': '4K BASIC에는 최소 4 KB가 필요합니다. "메모리" 메뉴에서 4 KB 또는 8 KB를 선택하세요.',
+        'pt-BR': 'O 4K BASIC requer pelo menos 4 KB instalados. Escolha 4 KB ou 8 KB no menu Memória.',
     },
 
     'rom-loaded': {
@@ -979,6 +1056,7 @@ l10n.MESSAGES = {
         'zh-TW': '已在 0000H 載入 {bytes} 位元組並按下 RESET。請點擊前面板上的 RUN，然後查看「電傳打字機」。',
         'ja': '0000H に {bytes} バイトを読み込み、RESET を押しました。フロントパネルの RUN を押し、テレタイプを見てください。',
         'ko': '0000H에 {bytes}바이트를 불러오고 RESET을 눌렀습니다. 앞판의 RUN을 누른 뒤 텔레타이프를 보세요.',
+        'pt-BR': '{bytes} bytes carregados em 0000H, e RESET pressionado. Clique em RUN no painel frontal e acompanhe o Teletipo.',
     },
 
     'rom-file-loaded': {
@@ -991,6 +1069,7 @@ l10n.MESSAGES = {
         'zh-TW': '已從 {name} 在 0000H 載入 {bytes} 位元組並按下 RESET。',
         'ja': '{name} から 0000H に {bytes} バイトを読み込み、RESET を押しました。',
         'ko': '{name}에서 0000H에 {bytes}바이트를 불러오고 RESET을 눌렀습니다.',
+        'pt-BR': '{bytes} bytes de {name} carregados em 0000H, e RESET pressionado.',
     },
 
     'rom-file-too-big': {
@@ -1003,6 +1082,7 @@ l10n.MESSAGES = {
         'zh-TW': '{name} 有 {bytes} 位元組。8080 最多只能定址 64 KB，所以這不是一個記憶體映像——什麼都沒有載入。',
         'ja': '{name} は {bytes} バイトあります。8080 は 64 KB までしかアドレスできないので、これはメモリイメージではありません。何も読み込みませんでした。',
         'ko': '{name}은(는) {bytes}바이트입니다. 8080은 64 KB까지만 주소를 지정할 수 있으므로 이것은 메모리 이미지가 아닙니다. 아무것도 불러오지 않았습니다.',
+        'pt-BR': '{name} tem {bytes} bytes. O 8080 só endereça 64 KB, então isso não é uma imagem de memória - nada foi carregado.',
     },
 
     'rom-file-truncated': {
@@ -1015,6 +1095,7 @@ l10n.MESSAGES = {
         'zh-TW': '已把 {name} 的前 {bytes} 位元組載入 0000H 並按下 RESET。該檔案共 {size} 位元組，其餘部分裝不進已安裝的記憶體。',
         'ja': '{name} の先頭 {bytes} バイトを 0000H に読み込み、RESET を押しました。ファイルは {size} バイトあり、残りは搭載メモリに入りません。',
         'ko': '{name}의 앞 {bytes}바이트를 0000H에 불러오고 RESET을 눌렀습니다. 파일은 {size}바이트이며, 나머지는 설치된 메모리에 들어가지 않습니다.',
+        'pt-BR': 'Os primeiros {bytes} bytes de {name} foram carregados em 0000H, e RESET pressionado. O arquivo tem {size} bytes; o resto não cabe na memória instalada.',
     },
 
     'rom-file-unreadable': {
@@ -1027,6 +1108,7 @@ l10n.MESSAGES = {
         'zh-TW': '無法讀取 {name}。',
         'ja': '{name} を読み込めませんでした。',
         'ko': '{name}을(를) 읽을 수 없습니다.',
+        'pt-BR': 'Não foi possível ler {name}.',
     },
 
     'rom-missing': {
@@ -1039,6 +1121,7 @@ l10n.MESSAGES = {
         'zh-TW': '無法讀取 roms/4kbas32.bin。它是選用的（見 roms/NOTICE），請用「載入」選單中的「二進位檔案…」載入你自己的映像。',
         'ja': 'roms/4kbas32.bin を読み込めませんでした。これは任意のものなので（roms/NOTICE を参照）、「読み込み」メニューの「バイナリファイル…」で自分のイメージを読み込んでください。',
         'ko': 'roms/4kbas32.bin을 읽을 수 없습니다. 선택 사항이므로(roms/NOTICE 참고) "불러오기" 메뉴의 "바이너리 파일…"로 직접 가진 이미지를 불러오세요.',
+        'pt-BR': 'Não foi possível ler roms/4kbas32.bin. Ele é opcional - veja roms/NOTICE - então forneça sua própria imagem com Arquivo Binário…, no menu Carregar.',
     },
 
     'mem-size-256': {
@@ -1051,6 +1134,7 @@ l10n.MESSAGES = {
         'zh-TW': '256 B · 出廠配置',
         'ja': '256 B · 出荷時のまま',
         'ko': '256 B · 출고 상태',
+        'pt-BR': '256 B · como vinha de fábrica',
     },
 
     'mem-size-4096': {
@@ -1063,6 +1147,7 @@ l10n.MESSAGES = {
         'zh-TW': '4 KB · 一塊 88-4MCS',
         'ja': '4 KB · 88-4MCS 一枚',
         'ko': '4 KB · 88-4MCS 한 장',
+        'pt-BR': '4 KB · uma 88-4MCS',
     },
 
     'mem-size-8192': {
@@ -1075,6 +1160,7 @@ l10n.MESSAGES = {
         'zh-TW': '8 KB · 兩塊 88-4MCS',
         'ja': '8 KB · 88-4MCS 二枚',
         'ko': '8 KB · 88-4MCS 두 장',
+        'pt-BR': '8 KB · duas 88-4MCS',
     },
 
     'debug-data-placeholder': {
@@ -1087,6 +1173,7 @@ l10n.MESSAGES = {
         'zh-TW': '十六進位位元組，例如 c3 00 00',
         'ja': '16 進数のバイト列、例えば c3 00 00',
         'ko': '16진수 바이트, 예: c3 00 00',
+        'pt-BR': 'Bytes em hex, como c3 00 00',
     },
 
     'tty-off': {
@@ -1099,6 +1186,7 @@ l10n.MESSAGES = {
         'zh-TW': '機器已關閉，在這裡打出的字元無處可去。請先開機。',
         'ja': '電源が入っていないので、ここで打ったキーはどこにも届きません。先に電源を入れてください。',
         'ko': '기계가 꺼져 있어 여기서 누른 키는 아무 데도 가지 않습니다. 먼저 전원을 켜세요.',
+        'pt-BR': 'A máquina está desligada, então as teclas digitadas aqui não vão a lugar nenhum. Ligue-a primeiro.',
     },
 
     'zero-mem-off': {
@@ -1111,6 +1199,7 @@ l10n.MESSAGES = {
         'zh-TW': '機器已關閉，沒有記憶體可以清零。請先開機。',
         'ja': '電源が入っていないので、ゼロにするメモリがありません。先に電源を入れてください。',
         'ko': '기계가 꺼져 있어 0으로 만들 메모리가 없습니다. 먼저 전원을 켜세요.',
+        'pt-BR': 'A máquina está desligada, então não há memória para zerar. Ligue-a primeiro.',
     },
 
     'instr-title': {
@@ -1123,6 +1212,7 @@ l10n.MESSAGES = {
         'zh-TW': '下一道指令',
         'ja': '次の命令',
         'ko': '다음 명령',
+        'pt-BR': 'Próxima Instrução',
     },
 
     'instr-undocumented': {
@@ -1135,6 +1225,7 @@ l10n.MESSAGES = {
         'zh-TW': '（未公開的操作碼；8080 依此執行）',
         'ja': '（非公開のオペコード。8080 はこのように実行します）',
         'ko': '(문서화되지 않은 옵코드. 8080은 이렇게 실행합니다)',
+        'pt-BR': '(opcode não documentado; o 8080 o executa como este)',
     },
 
     'copy-link': {
@@ -1147,6 +1238,7 @@ l10n.MESSAGES = {
         'zh-TW': '複製連結',
         'ja': 'リンクをコピー',
         'ko': '링크 복사',
+        'pt-BR': 'Copiar Link',
     },
 
     'copy-link-done': {
@@ -1159,6 +1251,7 @@ l10n.MESSAGES = {
         'zh-TW': '已複製 \u2713',
         'ja': 'コピー済み \u2713',
         'ko': '복사됨 \u2713',
+        'pt-BR': 'Copiado ✓',
     },
 
     'copy-link-off': {
@@ -1171,6 +1264,7 @@ l10n.MESSAGES = {
         'zh-TW': '機器已關閉，沒有可連結的內容。請先載入程式。',
         'ja': 'マシンの電源が切れているため、リンクするものがありません。先にプログラムを読み込んでください。',
         'ko': '기계가 꺼져 있어 링크할 것이 없습니다. 먼저 프로그램을 불러오세요.',
+        'pt-BR': 'A máquina está desligada, então não há nada para compartilhar. Carregue um programa primeiro.',
     },
 
     'link-copied': {
@@ -1183,6 +1277,7 @@ l10n.MESSAGES = {
         'zh-TW': '連結已複製。它會以目前的記憶體、暫存器和開關開啟模擬器，並停在此處。',
         'ja': 'リンクをコピーしました。このメモリ、レジスタ、スイッチの状態で、ここで停止したシミュレーターが開きます。',
         'ko': '링크를 복사했습니다. 현재 메모리, 레지스터, 스위치 상태로 여기서 멈춘 시뮬레이터가 열립니다.',
+        'pt-BR': 'Link copiado. Ele abre o simulador com esta memória, estes registradores e estas chaves, parado aqui.',
     },
 
     'link-copied-program': {
@@ -1195,6 +1290,7 @@ l10n.MESSAGES = {
         'zh-TW': '連結已複製。它會載入目前記憶體並按下 RESET 開啟模擬器，可直接按 RUN。',
         'ja': 'リンクをコピーしました。このメモリを読み込み RESET を押した状態でシミュレーターが開き、すぐに RUN できます。',
         'ko': '링크를 복사했습니다. 현재 메모리를 불러오고 RESET을 누른 상태로 시뮬레이터가 열리며, 바로 RUN할 수 있습니다.',
+        'pt-BR': 'Link copiado. Ele abre o simulador com esta memória carregada e RESET pressionado, pronto para RUN.',
     },
 
     'link-loaded': {
@@ -1207,6 +1303,7 @@ l10n.MESSAGES = {
         'zh-TW': '已從連結在 0000H 載入 {bytes} 位元組。請按 RUN。',
         'ja': 'リンクから 0000H に {bytes} バイトを読み込みました。RUN を押してください。',
         'ko': '링크에서 0000H에 {bytes}바이트를 불러왔습니다. RUN을 누르세요.',
+        'pt-BR': '{bytes} bytes carregados do link em 0000H. Pressione RUN.',
     },
 
     'link-state-loaded': {
@@ -1219,6 +1316,7 @@ l10n.MESSAGES = {
         'zh-TW': '已從連結載入機器：記憶體 {size}，停在 {pc}H。按 RUN 或 SINGLE STEP 繼續。',
         'ja': 'リンクからマシンを読み込みました：メモリ {size}、{pc}H で停止中。RUN か SINGLE STEP で続行します。',
         'ko': '링크에서 기계를 불러왔습니다: 메모리 {size}, {pc}H에서 정지. RUN이나 SINGLE STEP으로 계속하세요.',
+        'pt-BR': 'Máquina carregada do link: {size} de memória, parada em {pc}H. Pressione RUN ou SINGLE STEP para continuar.',
     },
 
     'link-bad-reg': {
@@ -1231,6 +1329,7 @@ l10n.MESSAGES = {
         'zh-TW': '連結將 {name} 設為「{text}」，這不是能放進它的十六進位值。',
         'ja': 'リンクは {name} を「{text}」にしていますが、これは収まる 16 進数値ではありません。',
         'ko': '링크가 {name}을(를) "{text}"(으)로 설정하지만, 들어갈 수 있는 16진수 값이 아닙니다.',
+        'pt-BR': 'O link define {name} como "{text}", que não é um valor hexadecimal que caiba nele.',
     },
 
     'link-bad-zip': {
@@ -1243,6 +1342,7 @@ l10n.MESSAGES = {
         'zh-TW': '連結中的記憶體資料已損壞，可能是複製時被截斷了。請重新複製完整的連結。',
         'ja': 'リンク内のメモリが壊れています。コピーの際に途中で切れたのかもしれません。リンク全体をもう一度コピーしてください。',
         'ko': '링크 안의 메모리가 손상되었습니다. 복사할 때 잘린 것 같습니다. 링크 전체를 다시 복사하세요.',
+        'pt-BR': 'A memória no link está danificada, provavelmente cortada quando foi copiada. Copie o link inteiro de novo.',
     },
 
     'link-bad-mem': {
@@ -1255,6 +1355,7 @@ l10n.MESSAGES = {
         'zh-TW': '連結要求 {text} 位元組記憶體。機器只能有 256、4096 或 8192 位元組。',
         'ja': 'リンクはメモリ {text} バイトを求めています。マシンに載せられるのは 256、4096、8192 のいずれかです。',
         'ko': '링크가 메모리 {text}바이트를 요구합니다. 기계는 256, 4096, 8192 중 하나만 가능합니다.',
+        'pt-BR': 'O link pede {text} bytes de memória. A máquina pode ter 256, 4096 ou 8192.',
     },
 
     'load-data-empty': {
@@ -1267,6 +1368,7 @@ l10n.MESSAGES = {
         'zh-TW': '沒有可載入的內容。請輸入十六進位位元組，例如 c3 00 00。',
         'ja': '読み込むものがありません。16 進数でバイト列を入力してください。例えば c3 00 00。',
         'ko': '불러올 내용이 없습니다. 16진수 바이트를 입력하세요. 예: c3 00 00.',
+        'pt-BR': 'Nada para carregar. Digite alguns bytes em hex, como c3 00 00.',
     },
 
     'load-data-bad': {
@@ -1279,6 +1381,7 @@ l10n.MESSAGES = {
         'zh-TW': '「{text}」不是一個位元組。位元組是一到兩位十六進位數字，例如 c3 或 0f。',
         'ja': '「{text}」はバイトではありません。バイトは 16 進数 1 桁か 2 桁です。例えば c3 や 0f。',
         'ko': '"{text}"은(는) 바이트가 아닙니다. 바이트는 16진수 한두 자리입니다. 예: c3 또는 0f.',
+        'pt-BR': '"{text}" não é um byte. Um byte tem um ou dois dígitos hexadecimais, como c3 ou 0f.',
     },
 
     'load-data-too-long': {
@@ -1291,6 +1394,7 @@ l10n.MESSAGES = {
         'zh-TW': '這是 {bytes} 位元組，而機器只有 {size}。請加裝記憶體，或少載入一些。',
         'ja': '{bytes} バイトありますが、マシンは {size} しかありません。メモリを増やすか、量を減らしてください。',
         'ko': '{bytes}바이트인데 기계에는 {size}뿐입니다. 메모리를 늘리거나 더 적게 불러오세요.',
+        'pt-BR': 'São {bytes} bytes, e a máquina tem {size}. Instale mais memória ou carregue menos.',
     },
 
     'load-data-odd': {
@@ -1303,6 +1407,7 @@ l10n.MESSAGES = {
         'zh-TW': '「{text}」的十六進位位數是奇數，湊不成整數個位元組。',
         'ja': '「{text}」は 16 進数の桁数が奇数なので、バイトの区切りになりません。',
         'ko': '"{text}"은(는) 16진수 자릿수가 홀수여서 온전한 바이트가 되지 않습니다.',
+        'pt-BR': '"{text}" tem um número ímpar de dígitos hexadecimais, então não forma um número inteiro de bytes.',
     },
 
     'load-data-loaded': {
@@ -1315,6 +1420,7 @@ l10n.MESSAGES = {
         'zh-TW': '已在 0000H 載入 {bytes} 位元組。',
         'ja': '0000H に {bytes} バイトを読み込みました。',
         'ko': '0000H에 {bytes}바이트를 불러왔습니다.',
+        'pt-BR': '{bytes} bytes carregados em 0000H.',
     },
 
     'debug-fill-zero': {
@@ -1327,6 +1433,7 @@ l10n.MESSAGES = {
         'zh-TW': '記憶體清零',
         'ja': 'メモリをゼロに',
         'ko': '메모리 0으로',
+        'pt-BR': 'Zerar Toda a Memória',
     },
 
     'mem-page-prev-title': {
@@ -1339,6 +1446,7 @@ l10n.MESSAGES = {
         'zh-TW': '上一頁記憶體',
         'ja': 'メモリの前のページ',
         'ko': '이전 메모리 페이지',
+        'pt-BR': 'Página anterior da memória',
     },
 
     'mem-page-next-title': {
@@ -1351,6 +1459,7 @@ l10n.MESSAGES = {
         'zh-TW': '下一頁記憶體',
         'ja': 'メモリの次のページ',
         'ko': '다음 메모리 페이지',
+        'pt-BR': 'Próxima página da memória',
     },
 
     'mem-nav-off': {
@@ -1363,6 +1472,7 @@ l10n.MESSAGES = {
         'zh-TW': '機器已關閉，沒有記憶體傾印可以瀏覽。請先開機。',
         'ja': '電源が入っていないので、たどるメモリダンプがありません。先に電源を入れてください。',
         'ko': '기계가 꺼져 있어 살펴볼 메모리 덤프가 없습니다. 먼저 전원을 켜세요.',
+        'pt-BR': 'A máquina está desligada, então não há despejo de memória para percorrer. Ligue-a primeiro.',
     },
 
     'mem-nav-fits': {
@@ -1375,6 +1485,7 @@ l10n.MESSAGES = {
         'zh-TW': '{size} 一個畫面就能顯示完。裝上 4 KB 或 8 KB，傾印才會有可移動的視窗。',
         'ja': '{size} は一画面に収まります。4 KB か 8 KB を増設すると、ダンプに動かせる窓ができます。',
         'ko': '{size}는 한 화면에 모두 들어갑니다. 4 KB나 8 KB를 설치하면 덤프에 옮길 창이 생깁니다.',
+        'pt-BR': 'Todos os {size} cabem na tela de uma vez. Instale 4 KB ou 8 KB e o despejo ganha uma janela para percorrer.',
     },
 
     'debug-cpu-dump-title': {
@@ -1387,6 +1498,7 @@ l10n.MESSAGES = {
         'zh-TW': '8080 CPU 的狀態資訊',
         'ja': '8080 CPU のステータス',
         'ko': '8080 CPU 상태',
+        'pt-BR': 'Estado da CPU 8080',
     },
 
     'debug-memory-title': {
@@ -1399,6 +1511,7 @@ l10n.MESSAGES = {
         'zh-TW': '已安裝的記憶體',
         'ja': '搭載メモリ',
         'ko': '설치된 메모리',
+        'pt-BR': 'Memória Instalada',
     },
 
     'mem-follow-pc': {
@@ -1411,6 +1524,7 @@ l10n.MESSAGES = {
         'zh-TW': '跟隨 PC',
         'ja': 'PC を追う',
         'ko': 'PC 따라가기',
+        'pt-BR': 'Seguir o PC',
     },
 
     'debug-mem-dump-title': {
@@ -1423,6 +1537,7 @@ l10n.MESSAGES = {
         'zh-TW': '記憶體內容',
         'ja': 'メモリダンプ',
         'ko': '메모리 덤프',
+        'pt-BR': 'Despejo de Memória',
     },
 
     'tutorial-title': {
@@ -1435,6 +1550,7 @@ l10n.MESSAGES = {
         'zh-TW': '快速教學',
         'ja': 'クイックチュートリアル',
         'ko': '빠른 튜토리얼',
+        'pt-BR': 'Tutorial Rápido',
     },
 
     'tutorial-desc': {
@@ -1447,6 +1563,7 @@ l10n.MESSAGES = {
         'zh-TW': '如何輸入並執行以下加法程式，計算 1 + 2 = 3：',
         'ja': '次のプログラムを入力して実行し、1 + 2 = 3 を計算する手順:',
         'ko': '다음 프로그램을 입력하고 실행하여 1 + 2 = 3을 계산하는 방법:',
+        'pt-BR': 'Como inserir e rodar o programa a seguir, que calcula 1 + 2 = 3:',
     },
 
     'tutorial-1': {
@@ -1459,6 +1576,7 @@ l10n.MESSAGES = {
         'zh-TW': '點擊 OFF/ON 開關，打開 Altair 8800',
         'ja': 'OFF/ON スイッチをクリックして Altair 8800 の電源を入れます',
         'ko': 'OFF/ON 스위치를 클릭해 Altair 8800의 전원을 켭니다',
+        'pt-BR': 'Ligue o Altair 8800 clicando na chave OFF/ON.',
     },
 
     'tutorial-2': {
@@ -1471,6 +1589,7 @@ l10n.MESSAGES = {
         'zh-TW': '將開關 A7-A0 依序設定為 00 111 010（開關朝上為 1，朝下為 0）',
         'ja': 'スイッチ A7-A0 を 00 111 010 に設定します（上が 1、下が 0）',
         'ko': '스위치 A7-A0을 00 111 010(으)로 설정합니다 (위가 1, 아래가 0)',
+        'pt-BR': 'Coloque as chaves A7-A0 em 00 111 010 (para cima é 1, para baixo é 0).',
     },
 
     'tutorial-3': {
@@ -1483,6 +1602,7 @@ l10n.MESSAGES = {
         'zh-TW': '點擊 DEPOSIT',
         'ja': 'DEPOSIT をクリックします',
         'ko': 'DEPOSIT을(를) 클릭합니다',
+        'pt-BR': 'Clique em DEPOSIT.',
     },
 
     'tutorial-4': {
@@ -1495,6 +1615,7 @@ l10n.MESSAGES = {
         'zh-TW': '將開關 A7-A0 依序設定為 10 000 000',
         'ja': 'スイッチ A7-A0 を 10 000 000 に設定します',
         'ko': '스위치 A7-A0을 10 000 000(으)로 설정합니다',
+        'pt-BR': 'Coloque as chaves A7-A0 em 10 000 000.',
     },
 
     'tutorial-5': {
@@ -1507,6 +1628,7 @@ l10n.MESSAGES = {
         'zh-TW': '點擊 DEPOSIT NEXT',
         'ja': 'DEPOSIT NEXT をクリックします',
         'ko': 'DEPOSIT NEXT을(를) 클릭합니다',
+        'pt-BR': 'Clique em DEPOSIT NEXT.',
     },
 
     'tutorial-6': {
@@ -1519,6 +1641,7 @@ l10n.MESSAGES = {
         'zh-TW': '重複步驟 4 到步驟 5，逐一輸入以下位元組：00 000 000, 01 000 111, 00 111 010, 10 000 001, 00 000 000, 10 000 000, 00 110 010, 10 000 010, 00 000 000, 11 000 011, 00 000 000, 00 000 000',
         'ja': '手順 4〜5 を繰り返して、次のバイトを 1 つずつ入力します: 00 000 000, 01 000 111, 00 111 010, 10 000 001, 00 000 000, 10 000 000, 00 110 010, 10 000 010, 00 000 000, 11 000 011, 00 000 000, 00 000 000',
         'ko': '4~5단계를 반복하여 다음 바이트를 하나씩 입력합니다: 00 000 000, 01 000 111, 00 111 010, 10 000 001, 00 000 000, 10 000 000, 00 110 010, 10 000 010, 00 000 000, 11 000 011, 00 000 000, 00 000 000',
+        'pt-BR': 'Repita os passos 4-5 para inserir os bytes a seguir, um a um: 00 000 000, 01 000 111, 00 111 010, 10 000 001, 00 000 000, 10 000 000, 00 110 010, 10 000 010, 00 000 000, 11 000 011, 00 000 000, 00 000 000.',
     },
 
     'tutorial-7': {
@@ -1531,6 +1654,7 @@ l10n.MESSAGES = {
         'zh-TW': '將開關 A7-A0 依序設定為 10 000 000',
         'ja': 'スイッチ A7-A0 を 10 000 000 に設定します',
         'ko': '스위치 A7-A0을 10 000 000(으)로 설정합니다',
+        'pt-BR': 'Coloque as chaves A7-A0 em 10 000 000.',
     },
 
     'tutorial-8': {
@@ -1543,6 +1667,7 @@ l10n.MESSAGES = {
         'zh-TW': '點擊 EXAMINE',
         'ja': 'EXAMINE をクリックします',
         'ko': 'EXAMINE을(를) 클릭합니다',
+        'pt-BR': 'Clique em EXAMINE.',
     },
 
     'tutorial-9': {
@@ -1555,6 +1680,7 @@ l10n.MESSAGES = {
         'zh-TW': '將開關 A7-A0 依序設定為 00 000 001（即第一個加數的值，也就是十進位的 1）',
         'ja': 'スイッチ A7-A0 を 00 000 001 に設定します（最初の加数、10 進数の 1）',
         'ko': '스위치 A7-A0을 00 000 001(으)로 설정합니다 (첫 번째 피가산수, 10진수 1)',
+        'pt-BR': 'Coloque as chaves A7-A0 em 00 000 001 (o primeiro número a somar, ou 1 em decimal).',
     },
 
     'tutorial-10': {
@@ -1567,6 +1693,7 @@ l10n.MESSAGES = {
         'zh-TW': '點擊 DEPOSIT',
         'ja': 'DEPOSIT をクリックします',
         'ko': 'DEPOSIT을(를) 클릭합니다',
+        'pt-BR': 'Clique em DEPOSIT.',
     },
 
     'tutorial-11': {
@@ -1579,6 +1706,7 @@ l10n.MESSAGES = {
         'zh-TW': '將開關 A7-A0 依序設定為 00 000 010（即第二個加數的值，也就是十進位的 2）',
         'ja': 'スイッチ A7-A0 を 00 000 010 に設定します（2 番目の加数、10 進数の 2）',
         'ko': '스위치 A7-A0을 00 000 010(으)로 설정합니다 (두 번째 피가산수, 10진수 2)',
+        'pt-BR': 'Coloque as chaves A7-A0 em 00 000 010 (o segundo número a somar, ou 2 em decimal).',
     },
 
     'tutorial-12': {
@@ -1591,6 +1719,7 @@ l10n.MESSAGES = {
         'zh-TW': '點擊 DEPOSIT NEXT',
         'ja': 'DEPOSIT NEXT をクリックします',
         'ko': 'DEPOSIT NEXT을(를) 클릭합니다',
+        'pt-BR': 'Clique em DEPOSIT NEXT.',
     },
 
     'tutorial-13': {
@@ -1603,6 +1732,7 @@ l10n.MESSAGES = {
         'zh-TW': '點擊 RESET',
         'ja': 'RESET をクリックします',
         'ko': 'RESET을(를) 클릭합니다',
+        'pt-BR': 'Clique em RESET.',
     },
 
     'tutorial-14': {
@@ -1615,6 +1745,7 @@ l10n.MESSAGES = {
         'zh-TW': '點擊 RUN 並等待幾秒鐘',
         'ja': 'RUN をクリックして数秒待ちます',
         'ko': 'RUN을 클릭하고 몇 초 기다립니다',
+        'pt-BR': 'Clique em RUN e espere alguns segundos.',
     },
 
     'tutorial-15': {
@@ -1627,6 +1758,7 @@ l10n.MESSAGES = {
         'zh-TW': '點擊 STOP',
         'ja': 'STOP をクリックします',
         'ko': 'STOP을(를) 클릭합니다',
+        'pt-BR': 'Clique em STOP.',
     },
 
     'tutorial-16': {
@@ -1639,6 +1771,7 @@ l10n.MESSAGES = {
         'zh-TW': '將開關 A7-A0 依序設定為 10 000 010（即儲存計算結果的位址）',
         'ja': 'スイッチ A7-A0 を 10 000 010 に設定します（合計が格納されているアドレス）',
         'ko': '스위치 A7-A0을 10 000 010(으)로 설정합니다 (합이 저장된 주소)',
+        'pt-BR': 'Coloque as chaves A7-A0 em 10 000 010 (o endereço que guarda a soma).',
     },
 
     'tutorial-17': {
@@ -1651,6 +1784,7 @@ l10n.MESSAGES = {
         'zh-TW': '點擊 EXAMINE',
         'ja': 'EXAMINE をクリックします',
         'ko': 'EXAMINE을(를) 클릭합니다',
+        'pt-BR': 'Clique em EXAMINE.',
     },
 
     'tutorial-18': {
@@ -1663,6 +1797,7 @@ l10n.MESSAGES = {
         'zh-TW': 'LED 燈 D7-D0 顯示計算結果 00 000 011（即十進位的 3）',
         'ja': 'LED D7-D0 に結果 00 000 011（10 進数の 3）が表示されます',
         'ko': 'LED D7-D0에 결과 00 000 011 (10진수 3)이 표시됩니다',
+        'pt-BR': 'Os LEDs D7-D0 mostram o resultado 00 000 011 (3 em decimal).',
     },
 
     'tutorial-19': {
@@ -1675,6 +1810,7 @@ l10n.MESSAGES = {
         'zh-TW': '關閉 Altair 8800',
         'ja': 'Altair 8800 の電源を切ります',
         'ko': 'Altair 8800의 전원을 끕니다',
+        'pt-BR': 'Desligue o Altair 8800.',
     },
 
     'basic-title': {
@@ -1687,6 +1823,7 @@ l10n.MESSAGES = {
         'zh-TW': '執行 Microsoft BASIC',
         'ja': 'Microsoft BASIC を動かす',
         'ko': 'Microsoft BASIC 실행하기',
+        'pt-BR': 'Rodando o Microsoft BASIC',
     },
 
     'basic-desc': {
@@ -1699,6 +1836,7 @@ l10n.MESSAGES = {
         'zh-TW': 'Altair 的第一個軟體，也是微軟的第一個產品：Altair BASIC 3.2，1975 年由 Bill Gates、Paul Allen 和 Monte Davidoff 編寫。啟動方法：',
         'ja': 'Altair 最初のソフトウェアであり、マイクロソフト最初の製品でもある Altair BASIC 3.2。1975 年に Bill Gates、Paul Allen、Monte Davidoff が書きました。起動のしかた：',
         'ko': 'Altair의 첫 소프트웨어이자 마이크로소프트의 첫 제품인 Altair BASIC 3.2. 1975년에 Bill Gates, Paul Allen, Monte Davidoff가 만들었습니다. 시작하는 방법:',
+        'pt-BR': 'O primeiro software do Altair, e da Microsoft: o Altair BASIC 3.2, escrito em 1975 por Bill Gates, Paul Allen e Monte Davidoff. Como iniciá-lo:',
     },
 
     'basic-1': {
@@ -1711,6 +1849,7 @@ l10n.MESSAGES = {
         'zh-TW': '在「記憶體」選單中選擇 4 KB（想寫長一點的程式就選 8 KB）。安裝記憶體會關閉機器——當年打開機殼也是如此。',
         'ja': '「メモリ」メニューで 4 KB（長いプログラムを書くなら 8 KB）を選びます。メモリを増設すると電源が切れます。筐体を開けるのですから当然です。',
         'ko': '"메모리" 메뉴에서 4 KB(더 긴 프로그램을 쓰려면 8 KB)를 고르세요. 메모리를 설치하면 기계가 꺼집니다. 케이스를 여는 일이니까요.',
+        'pt-BR': 'No menu Memória, escolha 4 KB (ou 8 KB, para ter espaço para programas mais longos). Instalar memória desliga a máquina, como abrir o gabinete teria feito.',
     },
 
     'basic-2': {
@@ -1723,6 +1862,7 @@ l10n.MESSAGES = {
         'zh-TW': '在「載入」選單中選擇 Microsoft 4K BASIC。機器會開機，紙帶會替你讀入，按下 RESET，並打開除錯器顯示載入的內容。',
         'ja': '「読み込み」メニューで Microsoft 4K BASIC を選びます。電源が入り、テープが代わりに読み込まれ、RESET が押され、デバッガーが開いて読み込んだものを見せます。',
         'ko': '"불러오기" 메뉴에서 Microsoft 4K BASIC을 고르세요. 전원이 켜지고, 테이프가 대신 읽히고, RESET이 눌리고, 디버거가 열려 불러온 내용을 보여 줍니다.',
+        'pt-BR': 'No menu Carregar, escolha Microsoft 4K BASIC. A máquina liga, a fita é lida para você, RESET é pressionado e o Depurador se abre para mostrar o que chegou.',
     },
 
     'basic-3': {
@@ -1735,6 +1875,7 @@ l10n.MESSAGES = {
         'zh-TW': '先別急著往下走，看看記憶體傾印上方的分佈圖。4 KB 機器的十六頁中有十五頁是滿的：那就是 BASIC，剩下的一頁就是你全部的程式空間。這就是「4K BASIC」的含義。',
         'ja': '先に進む前に、ダンプの上のメモリマップを見てください。4 KB マシンの十六ページのうち十五ページが埋まっています。それが BASIC で、残りの一ページがプログラムに使える全部です。これが「4K BASIC」の意味です。',
         'ko': '더 진행하기 전에 덤프 위의 메모리 맵을 보세요. 4 KB 기계의 열여섯 페이지 중 열다섯 페이지가 차 있습니다. 그것이 BASIC이고, 남은 한 페이지가 프로그램에 쓸 수 있는 전부입니다. 이것이 "4K BASIC"의 뜻입니다.',
+        'pt-BR': 'Antes de continuar, olhe o mapa de memória acima do despejo. Quinze das dezesseis páginas de uma máquina de 4 KB estão cheias: isso é o BASIC, e a única página que sobra é todo o espaço que você tem para um programa. É isso que "4K BASIC" quer dizer.',
     },
 
     'basic-4': {
@@ -1747,6 +1888,7 @@ l10n.MESSAGES = {
         'zh-TW': '位址開關 A15-A8 告訴 BASIC 該用哪塊終端卡：全部向下是連接埠 00H 和 01H 上的 88-SIO，A11 向上則是 10H 和 11H 上的 88-2SIO。這裡的電傳打字機同時接在兩個插槽上，所以兩種設定都能用——真正的 Altair 只會裝其中一塊，設錯了機器就啞了。',
         'ja': 'アドレススイッチ A15-A8 は、BASIC がどの端末ボードを使うかを決めます。すべて下ならポート 00H と 01H の 88-SIO、A11 を上げれば 10H と 11H の 88-2SIO です。ここではテレタイプが両方のスロットにつながっているのでどちらの設定でも動きますが、本物の Altair はどちらか一方しか挿さっておらず、設定を間違えると黙り込みました。',
         'ko': '주소 스위치 A15-A8은 BASIC이 어느 터미널 보드를 쓸지 정합니다. 모두 내리면 포트 00H와 01H의 88-SIO, A11을 올리면 10H와 11H의 88-2SIO입니다. 여기서는 텔레타이프가 두 슬롯 모두에 연결되어 있어 어느 쪽으로 설정해도 동작하지만, 실제 Altair에는 둘 중 하나만 꽂혀 있어 설정을 잘못하면 아무 반응이 없었습니다.',
+        'pt-BR': 'As chaves de endereço A15-A8 dizem ao BASIC qual placa de terminal usar: todas para baixo é a 88-SIO, nas portas 00H e 01H; a chave A11 para cima é a 88-2SIO, em 10H e 11H. O teletipo aqui está ligado aos dois slots, então qualquer ajuste funciona - um Altair real teria só uma das duas placas instalada, e o ajuste errado o deixava mudo.',
     },
 
     'basic-5': {
@@ -1759,6 +1901,7 @@ l10n.MESSAGES = {
         'zh-TW': '點擊前面板上的 RUN。',
         'ja': 'フロントパネルの RUN を押します。',
         'ko': '앞판의 RUN을 누르세요.',
+        'pt-BR': 'Clique em RUN no painel frontal.',
     },
 
     'basic-6': {
@@ -1771,6 +1914,7 @@ l10n.MESSAGES = {
         'zh-TW': '打開面板下方的「電傳打字機」。BASIC 會問 MEMORY SIZE?——直接按 Enter 表示全部使用。TERMINAL WIDTH? 再按一次 Enter，WANT SIN? 輸入 Y 以保留數學函式。',
         'ja': 'パネルの下のテレタイプを開きます。BASIC が MEMORY SIZE? と聞くので、Enter で見つかった分を全部使います。TERMINAL WIDTH? でもう一度 Enter、WANT SIN? では Y と答えて数学関数を残します。',
         'ko': '패널 아래의 텔레타이프를 여세요. BASIC이 MEMORY SIZE?라고 물으면 Enter를 눌러 찾은 메모리를 모두 씁니다. TERMINAL WIDTH?에서 다시 Enter, WANT SIN?에서 Y를 눌러 수학 함수를 남깁니다.',
+        'pt-BR': 'Abra o Teletipo, abaixo do painel. O BASIC pergunta MEMORY SIZE? - pressione Enter para usar toda a memória que ele encontrou. Pressione Enter de novo em TERMINAL WIDTH? e depois Y em WANT SIN? para manter as funções matemáticas.',
     },
 
     'basic-7': {
@@ -1783,6 +1927,7 @@ l10n.MESSAGES = {
         'zh-TW': '它會印出剩餘位元組數，然後顯示 OK。輸入 PRINT 22/7 可以立刻得到答案。要輸入程式，請逐行鍵入下面幾行，每行按一次 Enter：',
         'ja': '空きバイト数を表示してから OK が出ます。PRINT 22/7 と打てばすぐ答えが返ります。プログラムを入れるときは、次の行を一行ずつ、それぞれの後で Enter を押しながら打ってください。',
         'ko': '남은 바이트 수를 찍은 뒤 OK가 나옵니다. PRINT 22/7을 치면 곧바로 답이 나옵니다. 프로그램을 입력하려면 아래 줄을 한 줄씩, 각 줄마다 Enter를 누르며 입력하세요:',
+        'pt-BR': 'Ele mostra quantos bytes estão livres e depois OK. Experimente PRINT 22/7 para ter uma resposta na hora. Para digitar um programa, entre estas linhas uma de cada vez, pressionando Enter após cada uma:',
     },
 
     'basic-8': {
@@ -1795,6 +1940,7 @@ l10n.MESSAGES = {
         'zh-TW': '鍵盤只有大寫。底線刪除上一個字元，@ 放棄整行，Ctrl-C 中斷正在執行的程式。',
         'ja': 'キーボードは大文字だけです。アンダースコアで直前の一文字を消し、アットマークで行を捨て、Ctrl-C で実行中のプログラムを止めます。',
         'ko': '키보드는 대문자뿐입니다. 밑줄은 마지막 글자를 지우고, @는 줄 전체를 버리고, Ctrl-C는 실행 중인 프로그램을 멈춥니다.',
+        'pt-BR': 'O teclado só tem maiúsculas. O sublinhado apaga o último caractere, a arroba descarta a linha e Ctrl-C interrompe um programa em execução.',
     },
 
     'basic-note': {
@@ -1807,6 +1953,7 @@ l10n.MESSAGES = {
         'zh-TW': '載入 4K BASIC 替你省掉的事：在真正的 Altair 上，你得先用前面板開關一個位元組一個位元組地輸入 28 位元組的載入程式，然後啟動紙帶閱讀機，聽著 BASIC 嘩啦啦讀上大約七分鐘。有一個開關撥錯，就得從頭再來。',
         'ja': '4K BASIC の読み込みが省いていること。本物の Altair では、まず 28 バイトのブートローダーをフロントパネルのスイッチで一バイトずつ入力し、それから紙テープリーダーを回して、BASIC がガチャガチャと入ってくるのを七分ほど待ちました。スイッチを一つ間違えれば、最初からやり直しです。',
         'ko': '4K BASIC을 불러오면서 건너뛴 것: 진짜 Altair에서는 먼저 28바이트짜리 부트로더를 앞판 스위치로 한 바이트씩 입력하고, 종이 테이프 리더를 돌린 뒤, BASIC이 달그락거리며 들어오는 7분을 기다렸습니다. 스위치 하나만 틀려도 처음부터 다시였습니다.',
+        'pt-BR': 'O que carregar o 4K BASIC poupa: num Altair real, primeiro você inseria pelo painel frontal um carregador de boot de 28 bytes, um byte de cada vez, depois ligava a leitora de fita de papel e esperava uns sete minutos enquanto o BASIC entrava, ruidoso. Errou uma chave, fazia tudo de novo.',
     },
 
     'reference-title': {
@@ -1819,6 +1966,7 @@ l10n.MESSAGES = {
         'zh-TW': '延伸閱讀',
         'ja': 'さらに詳しく',
         'ko': '더 읽을거리',
+        'pt-BR': 'Para Saber Mais',
     },
 
     'ref-wikipedia-altair': {
@@ -1831,6 +1979,7 @@ l10n.MESSAGES = {
         'zh-TW': '維基百科：Altair 8800',
         'ja': 'Wikipedia: Altair 8800',
         'ko': '위키백과: Altair 8800',
+        'pt-BR': 'Wikipédia: Altair 8800',
     },
 
     'ref-wikipedia-8080': {
@@ -1843,6 +1992,7 @@ l10n.MESSAGES = {
         'zh-TW': '維基百科：Intel 8080 CPU',
         'ja': 'Wikipedia: Intel 8080 CPU',
         'ko': '위키백과: Intel 8080 CPU',
+        'pt-BR': 'Wikipédia: CPU Intel 8080',
     },
 
     'ref-instruction-set': {
@@ -1855,6 +2005,7 @@ l10n.MESSAGES = {
         'zh-TW': 'Intel 8080 指令集，操作碼編碼速查表（純文字）',
         'ja': 'Intel 8080 命令セット: オペコード表（テキスト）',
         'ko': 'Intel 8080 명령어 집합: 옵코드 빠른 참조 (텍스트)',
+        'pt-BR': 'Conjunto de instruções do Intel 8080 - referência rápida da codificação dos opcodes (texto)',
     },
 
     'ref-original-manuals': {
@@ -1867,6 +2018,7 @@ l10n.MESSAGES = {
         'zh-TW': 'Altair 8800 原版手冊，altairclone.com 收藏的 PDF 掃描版',
         'ja': 'Altair 8800 のオリジナルマニュアル: altairclone.com に保存されたスキャン PDF',
         'ko': 'Altair 8800 원본 매뉴얼: altairclone.com에 보관된 스캔 PDF',
+        'pt-BR': 'Manuais originais do Altair 8800 - PDFs digitalizados, arquivados em altairclone.com',
     },
 
     'ref-operators-manual': {
@@ -1879,6 +2031,7 @@ l10n.MESSAGES = {
         'zh-TW': 'Altair 8800 操作手冊，原版手冊的 PDF 掃描版',
         'ja': "Altair 8800 Operator's Manual: 原本のスキャン PDF",
         'ko': "Altair 8800 Operator's Manual: 원본 매뉴얼 스캔 PDF",
+        'pt-BR': "Altair 8800 Operator's Manual - o manual original, em PDF digitalizado",
     },
 
     'ref-operators-manual-html': {
@@ -1891,6 +2044,7 @@ l10n.MESSAGES = {
         'zh-TW': 'Altair 8800 操作手冊 v2.0，Kevin Cole 製作的 HTML 版本',
         'ja': "Altair 8800 Operator's Manual v2.0: Kevin Cole による HTML 版",
         'ko': "Altair 8800 Operator's Manual v2.0: Kevin Cole의 HTML 판",
+        'pt-BR': "Altair 8800 Operator's Manual v2.0 - uma edição em HTML de Kevin Cole",
     },
 
     'ref-asm-manual': {
@@ -1903,6 +2057,7 @@ l10n.MESSAGES = {
         'zh-TW': 'Intel 8080 組合語言程式設計手冊，Intel 原版手冊的 PDF 掃描版',
         'ja': 'Intel 8080 Assembly Language Programming Manual: Intel 純正マニュアルのスキャン PDF',
         'ko': 'Intel 8080 Assembly Language Programming Manual: Intel 원본 매뉴얼 스캔 PDF',
+        'pt-BR': 'Intel 8080 Assembly Language Programming Manual - o manual original da Intel, em PDF digitalizado',
     },
 
     'ref-demystifying-computers': {
@@ -1915,6 +2070,7 @@ l10n.MESSAGES = {
         'zh-TW': 'Demystifying Computers（揭開電腦的神秘面紗），Chris Jones 與 Jeff Elkner 撰寫的開源書籍',
         'ja': 'Demystifying Computers: Chris Jones と Jeff Elkner によるオープンソースの書籍',
         'ko': 'Demystifying Computers: Chris Jones와 Jeff Elkner가 쓴 오픈 소스 책',
+        'pt-BR': 'Demystifying Computers - um livro de código aberto de Chris Jones e Jeff Elkner',
     },
 
     'ref-altair-basic': {
@@ -1927,6 +2083,7 @@ l10n.MESSAGES = {
         'zh-TW': '維基百科：Altair BASIC——它是什麼，以及微軟如何由此起家',
         'ja': 'Wikipedia: Altair BASIC — それが何か、そしてマイクロソフトがこれで始まった話',
         'ko': '위키백과: Altair BASIC — 무엇인지, 그리고 마이크로소프트가 여기서 시작한 이야기',
+        'pt-BR': 'Wikipédia: Altair BASIC - o que é, e como a Microsoft começou com ele',
     },
 
     'ref-basic-manual': {
@@ -1939,6 +2096,7 @@ l10n.MESSAGES = {
         'zh-TW': 'MITS Altair BASIC 參考手冊（1975）——語言本身：入門教學、全部語句與函式、附錄 B 的啟動提問，以及附錄 C 的錯誤代碼',
         'ja': 'MITS Altair BASIC リファレンスマニュアル（1975）— 言語そのもの。入門、全ステートメントと関数、付録 B の起動時の質問、付録 C のエラーコード',
         'ko': 'MITS Altair BASIC 참조 매뉴얼(1975) — 언어 자체: 입문, 모든 문과 함수, 부록 B의 시작 질문, 부록 C의 오류 코드',
+        'pt-BR': 'MITS Altair BASIC Reference Manual (1975) - a própria linguagem: um tutorial, cada comando e função, as perguntas de inicialização no Apêndice B e os códigos de erro no Apêndice C',
     },
 
     'ref-basic-disassembly': {
@@ -1951,6 +2109,7 @@ l10n.MESSAGES = {
         'zh-TW': 'Altair BASIC 3.2（4K）——本模擬器所執行的那個程式的帶註解反組譯',
         'ja': 'Altair BASIC 3.2（4K）— このシミュレータが動かしているまさにそのプログラムの注釈付き逆アセンブル',
         'ko': 'Altair BASIC 3.2 (4K) — 이 시뮬레이터가 실행하는 바로 그 프로그램의 주석 달린 역어셈블',
+        'pt-BR': 'Altair BASIC 3.2 (4K) - uma desmontagem comentada exatamente do programa que este simulador roda',
     },
 
     'ref-altair-simulator': {
@@ -1963,6 +2122,7 @@ l10n.MESSAGES = {
         'zh-TW': 'MITS Altair Simulator，另一個 JavaScript 模擬器，在模擬的電傳打字機上執行 Microsoft BASIC',
         'ja': 'MITS Altair Simulator: 別の JavaScript シミュレーター。模擬テレタイプ上で Microsoft BASIC を実行します',
         'ko': 'MITS Altair Simulator: 또 다른 JavaScript 시뮬레이터, 모의 텔레타이프에서 Microsoft BASIC 실행',
+        'pt-BR': 'MITS Altair Simulator - outro simulador em JavaScript, que roda o Microsoft BASIC num teletipo simulado',
     },
 };
 
