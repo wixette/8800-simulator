@@ -994,7 +994,7 @@ panel.lampStates = {};
 
 /**
  * When the simulator reports the lamps that show the machine's state:
- * PROT, for now.
+ * PROT, HLTA and INTE.
  * @param {Object<string, boolean>} lamps Each lamp's id, and whether it
  *     is lit.
  */

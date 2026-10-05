@@ -48,7 +48,8 @@ whole of the way in and out.
 | --- | --- |
 | A15–A0 | The address bus: the memory address the CPU is at |
 | D7–D0 | The data bus: the byte at that address |
-| STATUS, WAIT | What the CPU is doing. WAIT is lit while it is stopped |
+| STATUS, WAIT | What the CPU is doing. WAIT is lit while it is stopped, and HLTA too when a HLT stopped it |
+| INTE | Interrupts are enabled: lit by EI, put out by DI and RESET |
 | PROT | The memory board at the address shown is protected |
 
 **The switches** are how you talk to it:

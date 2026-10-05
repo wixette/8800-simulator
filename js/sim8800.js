@@ -372,8 +372,13 @@ class Sim8800 {
 
     /**
      * Tells the page what the lamps that report the machine's state
-     * should show: PROT, the latch of the board at the address on the
-     * bus.
+     * should show:
+     * - PROT, the latch of the memory board at the address on the bus;
+     * - HLTA, "a HALT instruction has been executed and acknowledged";
+     * - INTE, the CPU's interrupt enable, which EI sets and DI clears.
+     *
+     * Called after every batch of cycles a running program steps
+     * through, so the page should only redraw what changed.
      */
     updateLamps() {
         if (!this.setLampsCallback)
@@ -381,6 +386,8 @@ class Sim8800 {
         var on = this.isPoweredOn;
         this.setLampsCallback({
             prot: on && this.isProtected(this.busAddress),
+            hlta: on && this.halted,
+            inte: on && !!CPU8080.status().inte,
         });
     }
 
@@ -908,6 +915,7 @@ class Sim8800 {
     halt() {
         this.halted = true;
         this.stop();
+        this.updateLamps();
     }
 
     /**

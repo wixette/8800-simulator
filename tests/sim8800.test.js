@@ -966,3 +966,55 @@ test('unprotectAll says whether there was anything to unprotect', () => {
     assert.strictEqual(sim.isProtected(0), false);
     assert.strictEqual(state.lamps.prot, false);
 });
+
+test('HLTA lights while the CPU is halted, and RESET puts it out', () => {
+    // "A HALT instruction has been executed and acknowledged."
+    const fixture = protectSim(256);
+    const {sim, state} = fixture;
+    sim.loadDataAsHexString(0, '00 76');
+    assert.strictEqual(state.lamps.hlta, false);
+    sim.singleStep();
+    assert.strictEqual(state.lamps.hlta, false, 'a NOP is not a halt');
+    sim.singleStep();
+    assert.strictEqual(sim.halted, true);
+    assert.strictEqual(state.lamps.hlta, true);
+    sim.reset();
+    flushTimers();
+    assert.strictEqual(state.lamps.hlta, false);
+    // A free-running program that halts lights it too.
+    sim.start();
+    sim.step(1000);
+    assert.strictEqual(state.lamps.hlta, true);
+    flushTimers();
+});
+
+test('INTE follows EI and DI, and RESET clears it as the 8080 does', () => {
+    const fixture = protectSim(256);
+    const {sim, state} = fixture;
+    sim.loadDataAsHexString(0, 'fb f3 fb 76');
+    assert.strictEqual(state.lamps.inte, false, 'off at power-on');
+    sim.singleStep();
+    assert.strictEqual(state.lamps.inte, true, 'EI');
+    sim.singleStep();
+    assert.strictEqual(state.lamps.inte, false, 'DI');
+    sim.singleStep();
+    assert.strictEqual(state.lamps.inte, true, 'EI again');
+    assert.strictEqual(CPU8080.status().inte, 1, 'the core reports it');
+    sim.reset();
+    flushTimers();
+    assert.strictEqual(state.lamps.inte, false, 'RESET clears it');
+});
+
+test('a dead machine lights none of the lamps it reports', () => {
+    const fixture = protectSim(256);
+    const {sim, state} = fixture;
+    sim.loadDataAsHexString(0, 'fb 76');
+    sim.singleStep();
+    sim.singleStep();
+    fixture.state.inputWord = 0;
+    sim.examine();
+    sim.protect(true);
+    assert.deepStrictEqual(state.lamps, {prot: true, hlta: true, inte: true});
+    sim.powerOff();
+    assert.deepStrictEqual(state.lamps, {prot: false, hlta: false, inte: false});
+});

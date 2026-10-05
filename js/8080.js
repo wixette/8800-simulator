@@ -2382,7 +2382,10 @@ exports["status"] = function() {
       "e":proc.e,
       "f":proc.f,
       "h":proc.h,
-      "l":proc.l
+      "l":proc.l,
+      // Added for the simulator's INTE lamp: the interrupt enable
+      // flip-flop, set by EI and cleared by DI, RESET and an interrupt.
+      "inte":proc.inte
     };
   };
 exports['interrupt'] = function(vector) {
