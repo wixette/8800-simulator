@@ -67,6 +67,50 @@ class Sim8800 {
          */
         this.halted = false;
         this.lastAddress = 0;
+        /**
+         * The address on the bus, as the address lamps show it while
+         * the machine is stopped: the one examined or deposited, or
+         * where the CPU stopped. PROTECT acts on the memory board at
+         * this address, and the PROT lamp shows that board's latch.
+         * @type {number}
+         */
+        this.busAddress = 0;
+        /**
+         * Which memory boards are write protected, by board number. On
+         * the real machine each MITS memory board carried its own
+         * protect flip-flop, set by PROTECT and cleared by UNPROTECT or
+         * by power-on. See protect() and boardOf().
+         * @type {Array<boolean>}
+         */
+        this.protectedBoards = [];
+        /**
+         * Whether any board is protected, so that the write path - run
+         * for every byte the CPU stores - looks no further when none is.
+         * @type {boolean}
+         */
+        this.anyProtected = false;
+        /**
+         * The writes a protected board has refused since the program
+         * last started, and the address of the first. A program can
+         * hammer protected memory thousands of times a second; each
+         * refusal is only counted, and the page is told once, through
+         * onProtectedWrite. See writeByte().
+         * @type {number}
+         */
+        this.blockedWrites = 0;
+        /** @type {?number} */
+        this.firstBlockedAddress = null;
+        /**
+         * Called with the address of the first write refused in a run.
+         * @type {?function(number)}
+         */
+        this.onProtectedWrite = null;
+        /**
+         * Called with what the lamps that report the machine's state
+         * should show. See updateLamps().
+         * @type {?function(Object<string, boolean>)}
+         */
+        this.setLampsCallback = null;
         this.lastTickTime = 0;
         /**
          * I/O devices, keyed by port number. Every port the machine
@@ -257,6 +301,87 @@ class Sim8800 {
         this.initMem();
         this.dumpWindow = 0;
         this.lastAddress = 0;
+        this.busAddress = 0;
+        // Different boards, so none of the old latches carry over.
+        this.protectedBoards = [];
+        this.anyProtected = false;
+    }
+
+    /**
+     * The memory board an address falls on. The base machine's memory
+     * is one board, however little of it is fitted; above that each
+     * 88-4MCS board holds 4 KB.
+     * @param {number} address The address.
+     * @return {number} The board's number, or -1 where no memory
+     *     answers.
+     */
+    boardOf(address) {
+        address &= 0xffff;
+        if (address >= this.mem.length)
+            return -1;
+        return Math.floor(
+            address / Math.min(this.mem.length, Sim8800.BOARD_SIZE));
+    }
+
+    /**
+     * Whether the board an address falls on is protected.
+     * @param {number} address The address.
+     * @return {boolean}
+     */
+    isProtected(address) {
+        var board = this.boardOf(address);
+        return board >= 0 && !!this.protectedBoards[board];
+    }
+
+    /**
+     * PROTECT or UNPROTECT. Latches the memory board at the address on
+     * the bus, as the switch did on the real machine: "examine any
+     * address on the board, and push the PROTECT switch" (the 88-4MCS
+     * manual). A protected board ignores every write, the program's
+     * own included, until UNPROTECT or the next power-on.
+     * @param {boolean} on True to protect, false to unprotect.
+     * @return {?{start: number, end: number}} The addresses the board
+     *     covers, first and last, or null if the machine is off or no
+     *     memory answers at the address on the bus.
+     */
+    protect(on) {
+        if (!this.isPoweredOn)
+            return null;
+        var board = this.boardOf(this.busAddress);
+        if (board < 0)
+            return null;
+        this.protectedBoards[board] = on;
+        this.anyProtected = this.protectedBoards.some(Boolean);
+        this.updateLamps();
+        var size = Math.min(this.mem.length, Sim8800.BOARD_SIZE);
+        return {start: board * size, end: board * size + size - 1};
+    }
+
+    /**
+     * Unprotects every board. The real machine's POWER ON CLEAR did
+     * this; the page also does it before putting a program in.
+     * @return {boolean} Whether any board had been protected.
+     */
+    unprotectAll() {
+        var was = this.anyProtected;
+        this.protectedBoards = [];
+        this.anyProtected = false;
+        this.updateLamps();
+        return was;
+    }
+
+    /**
+     * Tells the page what the lamps that report the machine's state
+     * should show: PROT, the latch of the board at the address on the
+     * bus.
+     */
+    updateLamps() {
+        if (!this.setLampsCallback)
+            return;
+        var on = this.isPoweredOn;
+        this.setLampsCallback({
+            prot: on && this.isProtected(this.busAddress),
+        });
     }
 
     /**
@@ -468,12 +593,27 @@ class Sim8800 {
     /**
      * Writes a byte of memory. Writes above the installed memory go
      * nowhere, as they would on the real machine. See readByte().
+     *
+     * Nor do writes to a protected board: its latch keeps the write
+     * pulse from reaching the memory chips. Each one is counted, and
+     * the first in a run is reported, once. This runs for every byte
+     * the CPU stores, so with no board protected it costs one test.
      * @param {number} address The address to write.
      * @param {number} value The byte to write.
      */
     writeByte(address, value) {
         address &= 0xffff;
         if (address < this.mem.length) {
+            if (this.anyProtected && this.isProtected(address)) {
+                this.blockedWrites++;
+                if (this.blockedWrites == 1) {
+                    this.firstBlockedAddress = address;
+                    if (this.onProtectedWrite) {
+                        this.onProtectedWrite(address);
+                    }
+                }
+                return;
+            }
             this.mem[address] = value;
         }
     }
@@ -633,6 +773,9 @@ class Sim8800 {
     powerOn() {
         this.isPoweredOn = true;
         this.initMem();
+        // POWER ON CLEAR: every memory board comes up unprotected.
+        this.protectedBoards = [];
+        this.anyProtected = false;
         // A cold machine: clear the whole CPU, which reset() below
         // deliberately does not do.
         CPU8080.reset();
@@ -673,6 +816,7 @@ class Sim8800 {
         // CPU that has no power, until the next power-on clears it.
         this.isRunning = false;
         this.halted = false;
+        this.updateLamps();
     }
 
     /**
@@ -703,6 +847,8 @@ class Sim8800 {
         this.halted = false;
         this.stop();
         this.lastAddress = 0;
+        this.busAddress = 0;
+        this.updateLamps();
         if (this.setAddressLedsCallback) {
             this.setAddressLedsCallback(new Array(16).fill(1));
         }
@@ -771,12 +917,22 @@ class Sim8800 {
         if (!this.isPoweredOn)
             return;
         this.endResetFlash();
+        this.clearBlockedWrites();
         this.isRunning = true;
         if (this.setWaitLedCallback) {
             this.setWaitLedCallback(this.isRunning);
         }
         this.lastTickTime = Date.now();
         window.setTimeout(this.getClockTickerCallback(), 1);
+    }
+
+    /**
+     * Forgets the writes refused so far: a new run is counted afresh,
+     * and reported afresh if it writes to protected memory too.
+     */
+    clearBlockedWrites() {
+        this.blockedWrites = 0;
+        this.firstBlockedAddress = null;
     }
 
     /**
@@ -830,10 +986,12 @@ class Sim8800 {
         }
         this.requestDump();
         var address = ldaxAddress != null ? ldaxAddress : CPU8080.status().pc;
+        this.busAddress = address;
         if (this.setAddressLedsCallback) {
             let bits = Sim8800.parseBits(address, 16);
             this.setAddressLedsCallback(bits);
         }
+        this.updateLamps();
         return address;
     }
 
@@ -849,6 +1007,9 @@ class Sim8800 {
     singleStep() {
         if (!this.isPoweredOn)
             return;
+        // Each step is a run of its own, so a write it makes to
+        // protected memory is reported every time.
+        this.clearBlockedWrites();
         var address = this.step(1);
         if (this.setDataLedsCallback) {
             this.setDataLedsCallback(
@@ -862,6 +1023,8 @@ class Sim8800 {
      * memory behind it shows FFh rather than a stray value.
      */
     showAddressAndData() {
+        this.busAddress = this.lastAddress;
+        this.updateLamps();
         if (this.setAddressLedsCallback) {
             let bits = Sim8800.parseBits(this.lastAddress, 16);
             this.setAddressLedsCallback(bits);
@@ -897,27 +1060,34 @@ class Sim8800 {
 
     /**
      * Writes a byte to the given address.
+     * @return {boolean} False if the board there is protected, so the
+     *     byte did not go in.
      */
     deposit() {
         if (!this.isPoweredOn)
-            return;
-        if (this.getInputAddressCallback) {
+            return true;
+        if (!this.getInputAddressCallback)
+            return true;
+        var refused = this.isProtected(this.lastAddress);
+        if (!refused) {
             // Only 8 bits of input is considered.
             var value = this.getInputAddressCallback() & 0xff;
             this.writeByte(this.lastAddress, value);
-            this.showAddressAndData();
-            this.requestDump();
         }
+        this.showAddressAndData();
+        this.requestDump();
+        return !refused;
     }
 
     /**
      * Writes a byte to the next address.
+     * @return {boolean} False if the board there is protected.
      */
     depositNext() {
         if (!this.isPoweredOn)
-            return;
+            return true;
         this.lastAddress = (this.lastAddress + 1) & 0xffff;
-        this.deposit();
+        return this.deposit();
     }
 };
 
@@ -927,6 +1097,13 @@ class Sim8800 {
  * @type {number}
  */
 Sim8800.FRONT_PANEL_PORT = 0xff;
+
+/**
+ * How much memory one 88-4MCS board holds, and so how much one PROTECT
+ * covers. The base machine's single board is smaller: see boardOf().
+ * @type {number}
+ */
+Sim8800.BOARD_SIZE = 4096;
 
 /**
  * How much memory the debugger's memory dump shows at once, and the

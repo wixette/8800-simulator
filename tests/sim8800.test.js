@@ -811,3 +811,158 @@ test('switching off a running machine stops its clock', () => {
     assert.strictEqual(sim.isRunning, false);
     assert.strictEqual(sim.halted, false);
 });
+
+/**
+ * A simulator with the given memory, switched on and zeroed, that
+ * records what it reports through updateLamps().
+ */
+function protectSim(memSize) {
+    const fixture = createSim(memSize);
+    fixture.state.lamps = null;
+    fixture.sim.setLampsCallback = (lamps) => { fixture.state.lamps = lamps; };
+    fixture.sim.powerOn();
+    flushTimers();
+    fixture.sim.initMem(false);
+    return fixture;
+}
+
+/** EXAMINE an address, as the switches and the lever do. */
+function examineAt(fixture, address) {
+    fixture.state.inputWord = address;
+    fixture.sim.examine();
+}
+
+test('PROTECT latches the board on the bus, which then refuses DEPOSIT', () => {
+    // "To protect a 4K block of memory, examine any address on the
+    // board, and push the PROTECT switch" - the 88-4MCS manual.
+    const fixture = protectSim(256);
+    const {sim, state} = fixture;
+    examineAt(fixture, 0x10);
+    assert.deepStrictEqual(sim.protect(true), {start: 0x00, end: 0xff},
+                           'the base machine is one board');
+    assert.strictEqual(state.lamps.prot, true, 'and PROT lights');
+    state.inputWord = 0xab;
+    assert.strictEqual(sim.deposit(), false, 'DEPOSIT is refused');
+    assert.strictEqual(sim.mem[0x10], 0, 'and the byte did not go in');
+    assert.strictEqual(sim.depositNext(), false);
+    assert.strictEqual(sim.mem[0x11], 0);
+    assert.strictEqual(sim.blockedWrites, 0,
+                       'a refused DEPOSIT is not a program write');
+    assert.deepStrictEqual(sim.protect(false), {start: 0x00, end: 0xff});
+    assert.strictEqual(state.lamps.prot, false);
+    assert.strictEqual(sim.deposit(), true);
+    assert.strictEqual(sim.mem[0x11], 0xab, 'UNPROTECT lets it in again');
+});
+
+test('one PROTECT covers one 4 KB board, and each board has its own latch', () => {
+    const fixture = protectSim(8192);
+    const {sim, state} = fixture;
+    examineAt(fixture, 0x1234);
+    assert.deepStrictEqual(sim.protect(true), {start: 0x1000, end: 0x1fff});
+    assert.strictEqual(sim.isProtected(0x0fff), false);
+    assert.strictEqual(sim.isProtected(0x1000), true);
+    assert.strictEqual(sim.isProtected(0x1fff), true);
+    // The PROT lamp follows the board at the address on the bus.
+    examineAt(fixture, 0x0100);
+    assert.strictEqual(state.lamps.prot, false);
+    sim.examineNext();
+    assert.strictEqual(state.lamps.prot, false);
+    examineAt(fixture, 0x1fff);
+    assert.strictEqual(state.lamps.prot, true);
+    // RESET puts the bus back at 0000H, on the other board.
+    sim.reset();
+    flushTimers();
+    assert.strictEqual(state.lamps.prot, false);
+    assert.strictEqual(sim.isProtected(0x1000), true,
+                       'RESET does not touch the latches');
+});
+
+test('where no memory answers there is no board to protect', () => {
+    const fixture = protectSim(256);
+    examineAt(fixture, 0x0400);
+    assert.strictEqual(fixture.sim.protect(true), null);
+    assert.strictEqual(fixture.sim.anyProtected, false);
+    fixture.sim.powerOff();
+    assert.strictEqual(fixture.sim.protect(true), null, 'nor on a dead machine');
+});
+
+test('a protected board refuses the program too, and a run is reported once', () => {
+    // MVI A,55H / loop: STA 0800H / JMP loop - thousands of writes to a
+    // protected board. Each is counted; the page hears of the first.
+    const fixture = protectSim(4096);
+    const {sim} = fixture;
+    sim.loadDataAsHexString(0, '3e 55 32 00 08 c3 02 00');
+    examineAt(fixture, 0x0000);
+    sim.protect(true);
+    const reported = [];
+    sim.onProtectedWrite = (address) => reported.push(address);
+    sim.reset();
+    flushTimers();
+    sim.start();
+    sim.step(100000);
+    sim.stop();
+    assert.ok(sim.blockedWrites > 1000, 'counted: ' + sim.blockedWrites);
+    assert.deepStrictEqual(reported, [0x0800], 'and reported once');
+    assert.strictEqual(sim.firstBlockedAddress, 0x0800);
+    assert.strictEqual(sim.mem[0x0800], 0, 'nothing went in');
+    // The next run is counted, and reported, afresh.
+    sim.start();
+    assert.strictEqual(sim.blockedWrites, 0);
+    sim.step(1000);
+    sim.stop();
+    assert.deepStrictEqual(reported, [0x0800, 0x0800]);
+    // So is each SINGLE STEP that writes there: the loop alternates
+    // STA and JMP, so four steps make two writes.
+    for (let i = 0; i < 4; i++) {
+        sim.singleStep();
+    }
+    assert.strictEqual(reported.length, 4);
+    flushTimers();
+});
+
+test('a write to an unprotected board goes in beside a protected one', () => {
+    const fixture = protectSim(8192);
+    const {sim} = fixture;
+    examineAt(fixture, 0x1000);
+    sim.protect(true);
+    // STA 0800H on the unprotected board, then STA 1800H on the other.
+    sim.loadDataAsHexString(0, '3e 77 32 00 08 32 00 18 76');
+    sim.reset();
+    flushTimers();
+    sim.step(1000);
+    assert.strictEqual(sim.mem[0x0800], 0x77);
+    assert.strictEqual(sim.mem[0x1800], 0);
+    assert.strictEqual(sim.blockedWrites, 1);
+});
+
+test('power-on and a new memory size leave every board unprotected', () => {
+    // "The 4K Static Board is automatically unprotected by POWER ON
+    // CLEAR."
+    const fixture = protectSim(4096);
+    const {sim, state} = fixture;
+    examineAt(fixture, 0x0000);
+    sim.protect(true);
+    sim.powerOff();
+    assert.strictEqual(state.lamps.prot, false, 'a dead machine lights nothing');
+    sim.powerOn();
+    flushTimers();
+    assert.strictEqual(sim.isProtected(0), false);
+    examineAt(fixture, 0x0000);
+    sim.protect(true);
+    sim.setMemSize(8192);
+    sim.powerOn();
+    flushTimers();
+    assert.strictEqual(sim.anyProtected, false);
+    assert.strictEqual(sim.isProtected(0), false);
+});
+
+test('unprotectAll says whether there was anything to unprotect', () => {
+    const fixture = protectSim(4096);
+    const {sim, state} = fixture;
+    assert.strictEqual(sim.unprotectAll(), false);
+    examineAt(fixture, 0x0000);
+    sim.protect(true);
+    assert.strictEqual(sim.unprotectAll(), true);
+    assert.strictEqual(sim.isProtected(0), false);
+    assert.strictEqual(state.lamps.prot, false);
+});

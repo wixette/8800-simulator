@@ -628,6 +628,9 @@ a {
     font-size: 13px;
     min-width: 30px;
     padding: 2px 8px;
+    /* A label never breaks inside its button: a row too narrow for
+       its levers wraps between them instead. */
+    white-space: nowrap;
 }
 
 .strip-address .button {
@@ -643,8 +646,20 @@ a {
     width: 2px;
 }
 
+/* A little narrower, and the levers close up to keep to one line. The
+   address row has room to spare, and keeps its octal groups apart. */
+@media (min-width: 701px) and (max-width: 1100px) {
+    .strip-row:not(.strip-address) {
+        gap: 6px 6px;
+    }
+
+    .strip-row:not(.strip-address) .button {
+        padding: 2px 5px;
+    }
+}
+
 /* A window too narrow for the rows lets them wrap. */
-@media (max-width: 900px) {
+@media (max-width: 940px) {
     .strip-row {
         flex-wrap: wrap;
     }
@@ -1321,6 +1336,12 @@ a {
     .strip-address .button {
         min-width: 0;
         padding: 2px 0;
+    }
+
+    /* PROTECT is for now and then, and the dock needs the height more;
+       the panel's own lever stands apart enough to tap. */
+    .strip-protect {
+        display: none;
     }
 
 }

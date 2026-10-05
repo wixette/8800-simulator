@@ -49,6 +49,7 @@ whole of the way in and out.
 | A15–A0 | The address bus: the memory address the CPU is at |
 | D7–D0 | The data bus: the byte at that address |
 | STATUS, WAIT | What the CPU is doing. WAIT is lit while it is stopped |
+| PROT | The memory board at the address shown is protected |
 
 **The switches** are how you talk to it:
 
@@ -58,12 +59,11 @@ whole of the way in and out.
 | A15–A0 | An address, up for 1 and down for 0. A7–A0 is also the byte to store. Programs can read A15–A8 as the *sense switches* |
 | EXAMINE · EXAMINE NEXT | Show the byte at the address on the switches · at the next address |
 | DEPOSIT · DEPOSIT NEXT | Store A7–A0 at the address shown · at the next address |
-| RESET | Send the CPU back to 0000H |
+| RESET · CLR | Send the CPU back to 0000H · clear the serial boards, dropping keys typed and not yet read |
 | RUN · STOP | Run the program from where the CPU is · stop it |
 | SINGLE STEP | Run one instruction |
-
-PROTECT, CLR and the two AUX switches are on the panel, but are not
-wired up in the simulator.
+| PROTECT · UNPROTECT | Protect the memory board at the address shown (EXAMINE an address on it first), so that neither DEPOSIT nor a program can change it · unprotect it. Each 4 KB board has its own; everything starts unprotected |
+| AUX | Nothing: MITS left both spare, for boards added later |
 
 The switches come in groups of three because 8080 programmers wrote
 bytes in octal: `00 111 010` is 072 octal, or 3AH. Click the panel's

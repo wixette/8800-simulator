@@ -57,6 +57,11 @@ panel.onStop = function() {
         return;
     }
     panel.sim.stop();
+    if (panel.sim.blockedWrites) {
+        panel.setStatus('status-stopped-blocked', panel.blockedParams(),
+                        'warn');
+        return;
+    }
     panel.setStatus('status-stopped');
 };
 
@@ -108,7 +113,9 @@ panel.onDeposit = function() {
     if (panel.reportIfOff()) {
         return;
     }
-    panel.sim.deposit();
+    if (panel.sim.deposit() === false) {
+        panel.reportProtectedDeposit();
+    }
 };
 
 /**
@@ -118,7 +125,19 @@ panel.onDepositNext = function() {
     if (panel.reportIfOff()) {
         return;
     }
-    panel.sim.depositNext();
+    if (panel.sim.depositNext() === false) {
+        panel.reportProtectedDeposit();
+    }
+};
+
+/**
+ * A DEPOSIT into a protected board changes nothing, and the real panel
+ * left you to notice the data lamps had not moved. The status line
+ * says why.
+ */
+panel.reportProtectedDeposit = function() {
+    panel.setStatus('deposit-protected',
+                    {address: Sim8800.toHex(panel.sim.lastAddress, 4)}, 'warn');
 };
 
 /**
@@ -130,6 +149,91 @@ panel.onReset = function() {
     }
     panel.sim.reset();
     panel.setStatus('status-reset');
+};
+
+/**
+ * When CLR is pressed: RESET's lower position, "a CLEAR command for
+ * external input/output equipment". Here that is the serial boards,
+ * which drop whatever was typed and not yet read.
+ */
+panel.onClr = function() {
+    if (panel.reportIfOff()) {
+        return;
+    }
+    if (panel.sio) {
+        // The two boards share one key queue, so this clears both.
+        panel.sio.reset();
+    }
+    panel.setStatus('status-clr');
+};
+
+/**
+ * When PROTECT is pressed.
+ */
+panel.onProtect = function() {
+    panel.setProtection(true);
+};
+
+/**
+ * When UNPROTECT is pressed.
+ */
+panel.onUnprotect = function() {
+    panel.setProtection(false);
+};
+
+/**
+ * PROTECT or UNPROTECT the memory board at the address on the bus. Like
+ * every switch but RESET on the real machine, it works only while the
+ * machine is stopped.
+ * @param {boolean} on True to protect, false to unprotect.
+ */
+panel.setProtection = function(on) {
+    if (panel.reportIfOff()) {
+        return;
+    }
+    if (panel.sim.isRunning) {
+        panel.setStatus('protect-running', {}, 'warn');
+        return;
+    }
+    var range = panel.sim.protect(on);
+    if (!range) {
+        panel.setStatus('protect-no-memory',
+                        {address: Sim8800.toHex(panel.sim.busAddress, 4)},
+                        'warn');
+        return;
+    }
+    panel.setStatus(on ? 'status-protected' : 'status-unprotected',
+                    {start: Sim8800.toHex(range.start, 4),
+                     end: Sim8800.toHex(range.end, 4)});
+};
+
+/**
+ * When either AUX switch is pressed. Connected to nothing, on a new
+ * Altair as here, which is worth saying whether the machine is on or
+ * not.
+ */
+panel.onAux = function() {
+    panel.setStatus('status-aux');
+};
+
+/**
+ * When a running program first writes to protected memory. Called once
+ * a run however often it tries; the rest are counted, for the message
+ * when the machine stops.
+ * @param {number} address Where it tried.
+ */
+panel.onProtectedWrite = function(address) {
+    panel.setStatus('write-protected', {address: Sim8800.toHex(address, 4)},
+                    'warn');
+};
+
+/**
+ * The count of refused writes, and the first address, for a message.
+ * @return {{count: number, address: string}}
+ */
+panel.blockedParams = function() {
+    return {count: panel.sim.blockedWrites,
+            address: Sim8800.toHex(panel.sim.firstBlockedAddress, 4)};
 };
 
 /**
@@ -174,9 +278,11 @@ panel.onFillZero = function() {
     if (panel.reportIfUnavailable('debug-fill-zero')) {
         return;
     }
+    // All of it, as the button says: protection is lifted first.
+    var unprotected = panel.sim.unprotectAll();
     panel.sim.initMem(false);
     panel.sim.requestDump();
-    panel.setStatus('status-zeroed');
+    panel.setStatus('status-zeroed', {}, '', false, unprotected);
 };
 
 /**
@@ -397,7 +503,7 @@ panel.loadExample = function(id) {
     panel.setStatus(program.device == 'teletype' ?
                         'example-loaded-tty' : 'example-loaded',
                     {name: program.name, bytes: loaded.bytes}, '',
-                    loaded.poweredOn);
+                    loaded.poweredOn, loaded.unprotected);
 };
 
 /**
@@ -493,12 +599,16 @@ panel.refreshPlaceholders = function() {
  * @param {string=} severity '', 'warn' or 'error'.
  * @param {boolean=} afterPowerOn Whether the machine had to be
  *     switched on to do this, which the line says first (D23).
+ * @param {boolean=} afterUnprotect Whether protected memory had to be
+ *     unprotected to do this, which the line says first too.
  */
-panel.setStatus = function(id, params, severity = '', afterPowerOn = false) {
+panel.setStatus = function(id, params, severity = '', afterPowerOn = false,
+                           afterUnprotect = false) {
     panel.statusId = id;
     panel.statusParams = params || {};
     panel.statusSeverity = severity;
     panel.statusAfterPowerOn = afterPowerOn;
+    panel.statusAfterUnprotect = afterUnprotect;
     panel.refreshStatus();
 };
 
@@ -521,13 +631,20 @@ panel.refreshStatus = function() {
     for (let key in panel.statusParams) {
         msg = msg.replace('{' + key + '}', panel.statusParams[key]);
     }
+    // First what happened, then what was loaded, then what to do next -
+    // so the notes go in front of the message, not after the
+    // instruction at the end of it. Chinese and Japanese put no space
+    // after their full stop; a space there reads as a hole in the middle
+    // of the line.
+    var notes = [];
     if (panel.statusAfterPowerOn) {
-        // First what happened, then what was loaded, then what to do
-        // next - so the note goes in front of the message, not after
-        // the instruction at the end of it. Chinese and Japanese put
-        // no space after their full stop; a space there reads as a
-        // hole in the middle of the line.
-        var note = l10n.getMessage('powered-on-first');
+        notes.push('powered-on-first');
+    }
+    if (panel.statusAfterUnprotect) {
+        notes.push('unprotected-first');
+    }
+    for (let i = notes.length - 1; i >= 0; i--) {
+        var note = l10n.getMessage(notes[i]);
         msg = note + (/\u3002$/.test(note) ? '' : ' ') + msg;
     }
     text.textContent = msg;
@@ -564,12 +681,16 @@ panel.ensurePoweredOn = function() {
  * what was just loaded before the program writes over it (D14).
  * @param {Array<number>|Uint8Array} bytes The image. Anything longer
  *     than the installed memory is ignored past the top.
- * @return {{bytes: number, poweredOn: boolean}} How many bytes
- *     actually fit in the machine, and whether it had to be switched
- *     on first.
+ * @return {{bytes: number, poweredOn: boolean, unprotected: boolean}}
+ *     How many bytes actually fit in the machine, whether it had to be
+ *     switched on first, and whether protected memory had to be
+ *     unprotected.
  */
 panel.loadImage = function(bytes) {
     var poweredOn = panel.ensurePoweredOn();
+    // A program going in is a fresh start, and one that half went in
+    // around a protected board would be worse than none.
+    var unprotected = panel.sim.unprotectAll();
     panel.sim.initMem(false);
     panel.sim.loadData(0, bytes);
     panel.sim.reset();
@@ -577,7 +698,7 @@ panel.loadImage = function(bytes) {
     panel.updateMemoryControls();
     panel.showLoaded();
     return {bytes: Math.min(bytes.length, panel.sim.mem.length),
-            poweredOn: poweredOn};
+            poweredOn: poweredOn, unprotected: unprotected};
 };
 
 /**
@@ -604,7 +725,7 @@ panel.onLoadBasic = function() {
     }).then(function(buffer) {
         var loaded = panel.loadImage(new Uint8Array(buffer));
         panel.setStatus('rom-loaded', {bytes: loaded.bytes}, '',
-                        loaded.poweredOn);
+                        loaded.poweredOn, loaded.unprotected);
     }).catch(function() {
         panel.setStatus('rom-missing', {}, 'error');
     });
@@ -638,11 +759,11 @@ panel.onBinaryFileChosen = function(event) {
         if (file.size > size) {
             panel.setStatus('rom-file-truncated',
                             {bytes: loaded.bytes, name: file.name,
-                             size: file.size}, 'warn', loaded.poweredOn);
+                             size: file.size}, 'warn', loaded.poweredOn, loaded.unprotected);
         } else {
             panel.setStatus('rom-file-loaded',
                             {bytes: loaded.bytes, name: file.name}, '',
-                            loaded.poweredOn);
+                            loaded.poweredOn, loaded.unprotected);
         }
     };
     reader.onerror = function() {
@@ -854,7 +975,35 @@ panel.setWaitLedCallback = function(isRunning) {
     // everyone else (D26). A stop asked for from the panel writes its
     // own message afterwards.
     if (!isRunning && panel.sim && panel.sim.halted) {
+        if (panel.sim.blockedWrites) {
+            panel.setStatus('status-halted-blocked', panel.blockedParams(),
+                            'warn');
+            return;
+        }
         panel.setStatus('status-halted');
+    }
+};
+
+/**
+ * What each lamp the simulator reports through updateLamps() last
+ * showed, so that a running program, which reports them after every
+ * batch of cycles, only touches the page when one changes.
+ * @type {Object<string, boolean>}
+ */
+panel.lampStates = {};
+
+/**
+ * When the simulator reports the lamps that show the machine's state:
+ * PROT, for now.
+ * @param {Object<string, boolean>} lamps Each lamp's id, and whether it
+ *     is lit.
+ */
+panel.setLampsCallback = function(lamps) {
+    for (let id in lamps) {
+        if (panel.lampStates[id] !== lamps[id]) {
+            panel.lampStates[id] = lamps[id];
+            panel.setLed(id, lamps[id]);
+        }
     }
 };
 
@@ -1045,11 +1194,12 @@ panel.debugLoadData = function() {
     // On, but not wiped: this is a deposit into the machine as it
     // stands, not a fresh tape. loadImage() is the one that clears.
     var poweredOn = panel.ensurePoweredOn();
+    var unprotected = panel.sim.unprotectAll();
     panel.sim.loadData(0, parsed.bytes);
     panel.updateMemoryControls();
     panel.showLoaded();
     panel.setStatus('load-data-loaded', {bytes: parsed.bytes.length}, '',
-                    poweredOn);
+                    poweredOn, unprotected);
     return true;
 };
 
@@ -1208,10 +1358,10 @@ panel.applyLinkState = function(state) {
         panel.setStatus('link-state-loaded',
                         {size: panel.formatMemSize(state.memSize),
                          pc: Sim8800.toHex(CPU8080.status().pc, 4)},
-                        '', loaded.poweredOn);
+                        '', loaded.poweredOn, loaded.unprotected);
     } else {
         panel.setStatus('link-loaded', {bytes: loaded.bytes}, '',
-                        loaded.poweredOn);
+                        loaded.poweredOn, loaded.unprotected);
     }
 };
 
@@ -1688,28 +1838,66 @@ panel.STATELESS_SWITCH_INFO = [
             height: 13.87,
             callback: panel.onReset,
         },
-        lowerCmd: null,
+        lowerCmd: {
+            id: 'sw-clr',
+            x: 749.28,
+            y: 469.85,
+            width: 25.75,
+            height: 13.87,
+            callback: panel.onClr,
+        },
     },
     {
         id: 'protect',
         x: 853,
         y: 439,
-        upperCmd: null,
-        lowerCmd: null,
+        upperCmd: {
+            id: 'sw-protect',
+            x: 833.76,
+            y: 426.75,
+            width: 59.75,
+            height: 13.87,
+            callback: panel.onProtect,
+        },
+        lowerCmd: {
+            id: 'sw-unprotect',
+            x: 824.69,
+            y: 469.85,
+            width: 77.87,
+            height: 13.87,
+            callback: panel.onUnprotect,
+        },
     },
+    // The AUX switches throw both ways, but only the upper position has
+    // a label to click; the lower is reached through the lever. Neither
+    // has a button on the strip, since neither does anything.
     {
         id: 'aux1',
         x: 957,
         y: 439,
-        upperCmd: null,
-        lowerCmd: null,
+        upperCmd: {
+            id: 'sw-aux1',
+            x: 952.91,
+            y: 427.03,
+            width: 27.07,
+            height: 13.87,
+            callback: panel.onAux,
+        },
+        lowerCmd: {id: 'sw-aux1-down', callback: panel.onAux},
     },
     {
         id: 'aux2',
         x: 1060,
         y: 439,
-        upperCmd: null,
-        lowerCmd: null,
+        upperCmd: {
+            id: 'sw-aux2',
+            x: 1055.02,
+            y: 427.03,
+            width: 27.07,
+            height: 13.87,
+            callback: panel.onAux,
+        },
+        lowerCmd: {id: 'sw-aux2-down', callback: panel.onAux},
     },
 ];
 
@@ -1806,6 +1994,8 @@ panel.init = function() {
     panel.sim.dumpFilter = function() {
         return panel.isDebugTabVisible;
     };
+    panel.sim.setLampsCallback = panel.setLampsCallback;
+    panel.sim.onProtectedWrite = panel.onProtectedWrite;
 
     // The teletype. The paper and the serial board are plain objects
     // that keep working whether or not the dock shows them; only the
@@ -2015,8 +2205,11 @@ panel.createCmdLabel = function(cmd, callback) {
     elem.addEventListener('click', callback, false);
     panelElem.appendChild(elem);
 
-    document.getElementById('s-' + cmd.id).addEventListener(
-        'click', callback, false);
+    // Its button on the strip under the panel, if it has one.
+    var helper = document.getElementById('s-' + cmd.id);
+    if (helper) {
+        helper.addEventListener('click', callback, false);
+    }
 };
 
 /**
@@ -2094,10 +2287,11 @@ panel.createSwitch = function(id, type, x, y, upperCmd, lowerCmd) {
             panel.playSwitch();
             lowerCmd.callback();
         };
-        if (upper) {
+        // A position with no label in the artwork has no box to click.
+        if (upper && upperCmd.width) {
             panel.createCmdLabel(upperCmd, upper);
         }
-        if (lower) {
+        if (lower && lowerCmd.width) {
             panel.createCmdLabel(lowerCmd, lower);
         }
         // The lever's top half throws it up and its bottom half down,

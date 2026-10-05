@@ -444,6 +444,148 @@ test('a switch thrown on a dead machine does nothing, and says the machine is of
     assert.ok(!said.includes('status-off'));
 });
 
+test('PROTECT works only on a stopped machine, and names the range it covers', (t) => {
+    // Like every switch but RESET on the real machine (the Theory of
+    // Operation), and the line says which board it latched.
+    const said = [];
+    const protects = [];
+    const savedSim = panel.sim;
+    const savedOn = panel.isPoweredOn;
+    t.after(() => { panel.sim = savedSim; panel.isPoweredOn = savedOn; });
+    t.mock.method(panel, 'setStatus', (...args) => said.push(args));
+    let range = {start: 0x1000, end: 0x1fff};
+    panel.sim = {isRunning: false, busAddress: 0x1234,
+                 protect: (on) => { protects.push(on); return range; }};
+    panel.isPoweredOn = false;
+    panel.onProtect();
+    assert.deepStrictEqual(said.pop(), ['status-off']);
+    panel.isPoweredOn = true;
+    panel.sim.isRunning = true;
+    panel.onProtect();
+    assert.strictEqual(said.pop()[0], 'protect-running');
+    assert.deepStrictEqual(protects, [], 'a running machine is not touched');
+    panel.sim.isRunning = false;
+    panel.onProtect();
+    assert.deepStrictEqual(said.pop(), ['status-protected',
+                                        {start: '1000', end: '1FFF'}]);
+    panel.onUnprotect();
+    assert.strictEqual(said.pop()[0], 'status-unprotected');
+    assert.deepStrictEqual(protects, [true, false]);
+    range = null;
+    panel.onProtect();
+    assert.deepStrictEqual(said.pop(), ['protect-no-memory',
+                                        {address: '1234'}, 'warn']);
+});
+
+test('DEPOSIT into a protected board says why nothing changed', (t) => {
+    const said = [];
+    const savedSim = panel.sim;
+    const savedOn = panel.isPoweredOn;
+    t.after(() => { panel.sim = savedSim; panel.isPoweredOn = savedOn; });
+    t.mock.method(panel, 'setStatus', (...args) => said.push(args));
+    let accepted = false;
+    panel.sim = {lastAddress: 0x0042, deposit: () => accepted,
+                 depositNext: () => accepted};
+    panel.isPoweredOn = true;
+    panel.onDeposit();
+    panel.onDepositNext();
+    assert.deepStrictEqual(said, [
+        ['deposit-protected', {address: '0042'}, 'warn'],
+        ['deposit-protected', {address: '0042'}, 'warn']]);
+    said.length = 0;
+    accepted = true;
+    panel.onDeposit();
+    assert.deepStrictEqual(said, [], 'an ordinary DEPOSIT says nothing');
+});
+
+test('stopping after writes to protected memory says how many were refused', (t) => {
+    const said = [];
+    const savedSim = panel.sim;
+    const savedOn = panel.isPoweredOn;
+    t.after(() => { panel.sim = savedSim; panel.isPoweredOn = savedOn; });
+    t.mock.method(panel, 'setStatus', (...args) => said.push(args));
+    t.mock.method(panel, 'setLed', () => {});
+    panel.sim = {blockedWrites: 3412, firstBlockedAddress: 0x0123,
+                 halted: false, stop() {}};
+    panel.isPoweredOn = true;
+    panel.onProtectedWrite(0x0123);
+    assert.deepStrictEqual(said.pop(), ['write-protected', {address: '0123'},
+                                        'warn']);
+    panel.onStop();
+    assert.deepStrictEqual(said.pop(), ['status-stopped-blocked',
+                                        {count: 3412, address: '0123'},
+                                        'warn']);
+    panel.sim.halted = true;
+    panel.setWaitLedCallback(false);
+    assert.strictEqual(said.pop()[0], 'status-halted-blocked');
+    panel.sim.blockedWrites = 0;
+    panel.setWaitLedCallback(false);
+    assert.deepStrictEqual(said.pop(), ['status-halted']);
+    panel.onStop();
+    assert.deepStrictEqual(said.pop(), ['status-stopped']);
+});
+
+test('CLR clears the serial boards, and AUX always says it is spare', (t) => {
+    const said = [];
+    let clears = 0;
+    const savedSio = panel.sio;
+    const savedOn = panel.isPoweredOn;
+    t.after(() => { panel.sio = savedSio; panel.isPoweredOn = savedOn; });
+    t.mock.method(panel, 'setStatus', (id) => said.push(id));
+    panel.sio = {reset: () => clears++};
+    panel.isPoweredOn = false;
+    panel.onClr();
+    panel.onAux();
+    assert.deepStrictEqual(said, ['status-off', 'status-aux'],
+                           'AUX is spare whether the machine is on or not');
+    assert.strictEqual(clears, 0);
+    panel.isPoweredOn = true;
+    panel.onClr();
+    assert.strictEqual(clears, 1);
+    assert.strictEqual(said.pop(), 'status-clr');
+});
+
+test('every way of putting a program in owns up to unprotecting memory', () => {
+    // A load is a fresh start, so it lifts protection, and when there
+    // was any the status line says so first, as it does for a power-up.
+    const ways = ['loadExample', 'onLoadBasic', 'onBinaryFileChosen',
+                  'debugLoadData', 'applyLinkState', 'onFillZero'];
+    for (const name of ways) {
+        assert.match(panel[name].toString(), /unprotect/i,
+                     name + ' does not say whether it unprotected memory');
+    }
+});
+
+test('the lamps the simulator reports touch the page only when they change', (t) => {
+    // A running program reports them after every batch of cycles.
+    const lit = [];
+    t.mock.method(panel, 'setLed', (id, on) => lit.push([id, on]));
+    panel.lampStates = {};
+    panel.setLampsCallback({prot: false});
+    panel.setLampsCallback({prot: false});
+    panel.setLampsCallback({prot: true});
+    panel.setLampsCallback({prot: true});
+    assert.deepStrictEqual(lit, [['prot', false], ['prot', true]]);
+    panel.lampStates = {};
+});
+
+test('every switch on the panel does something, with its label to click', () => {
+    // PROTECT, CLR and both AUX switches were drawn but did nothing.
+    for (const info of panel.STATELESS_SWITCH_INFO) {
+        assert.ok(info.upperCmd || info.lowerCmd, info.id + ' does nothing');
+        for (const cmd of [info.upperCmd, info.lowerCmd].filter(Boolean)) {
+            assert.strictEqual(typeof cmd.callback, 'function',
+                               cmd.id + ' has no handler');
+        }
+    }
+    const html = sourceOf('index.html');
+    for (const id of ['sw-clr', 'sw-protect', 'sw-unprotect']) {
+        assert.ok(html.includes('id="s-' + id + '"'),
+                  id + ' has no button on the strip');
+    }
+    assert.ok(!html.includes('id="s-sw-aux'), 'AUX does nothing worth a button');
+});
+
 test('a machine that is off receives nothing from the teletype keyboard', () => {
     // D24: the board that holds a character for the CPU to read is
     // unpowered, so keys typed at a dead machine are gone, not saved

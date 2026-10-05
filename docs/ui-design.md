@@ -373,6 +373,15 @@ so it is always two rows high, and it widens to the panel's artwork;
 on a phone the address switches go eight to a row. It keeps the panel's
 voice (P5).
 
+Since #16 every lever on the panel does something, and the strip has
+RESET and CLR as one lever's two halves, and PROTECT and UNPROTECT last
+in the row. A label never breaks inside its button; just below 1100 px
+the levers close up to stay on one line, and below 940 px they wrap
+between levers. On a phone PROTECT stays off the strip: it is for now
+and then, the dock needs the height, and the panel's own lever stands
+apart enough to tap. The AUX switches, connected to nothing, have no
+button at all; the panel's levers answer that on the status line.
+
 ### U5 — Each tool laid out as a tool
 
 - **Teletype:** the keys a PC keyboard lacks are the paper's toolbar,
