@@ -225,11 +225,9 @@ explains what it is and why it is not under this repository's licence.
 - **Share one as a link**: **Share** copies a link that opens the
   simulator with your program loaded, or with the whole machine as it
   is now. A link can be written by hand too, and put in a document
-  next to the program's listing:
-
-  ```markdown
-  [Run it](https://wixette.github.io/8800-simulator/?hex=3E8CD3FF76)
-  ```
+  next to the program's listing, like this one, which lights 10001100
+  on the data lamps and halts:
+  **[Run it](https://wixette.github.io/8800-simulator/?hex=3E8CD3FF76)**.
 
 ## 8. For developers
 
@@ -292,6 +290,10 @@ RUN. The fields go after `?` or `#`:
 ```
 https://wixette.github.io/8800-simulator/?hex=3E8CD3FF76
 ```
+
+[Try it](https://wixette.github.io/8800-simulator/?hex=3E8CD3FF76):
+the bytes are `MVI A,8CH`, `OUT 0FFH` and `HLT`. Click RUN and the
+data lamps show 10001100.
 
 The bytes of `hex` can run together, or be separated by `+` or `%20`.
 Memory is installed to fit, and zeros at the end do not count.
