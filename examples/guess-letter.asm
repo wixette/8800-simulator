@@ -27,10 +27,10 @@
 000e  c2 09 00            JNZ SEED                   ; ...which is the only randomness this machine has
 0011  db 01               IN 001H                    ; eat the key that started us
 0013  78                  MOV A,B
-0014  fe 1a      MOD:     CPI 01AH                   ; B modulo 26, the slow and obvious way
+0014  fe 1a      MOD26:   CPI 01AH                   ; B modulo 26, the slow and obvious way
 0016  da 1e 00            JC MODDONE
 0019  d6 1a               SUI 01AH
-001b  c3 14 00            JMP MOD
+001b  c3 14 00            JMP MOD26
 001e  c6 41      MODDONE: ADI 041H                   ; 'A', so the target is a letter
 0020  47                  MOV B,A                    ; B holds it for the rest of the game
 0021  16 00               MVI D,000H                 ; D counts the guesses
