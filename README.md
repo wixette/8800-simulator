@@ -140,9 +140,10 @@ tools below it, and a status line along the foot.
   one or two 88-4MCS boards. Fitting a board meant opening the case, so
   this switches the machine off. On the right are *Share*, the
   language (ten of them), and *About*.
-- **The dock** holds four tabs, one at a time: the **Teletype**, the
-  **Debugger**, the **Tutorial**, and the **References** (the source
-  code and further reading). Click a tab to open it, click it
+- **The dock** holds five tabs, one at a time: the **Teletype**, the
+  **Assembler**, the **Debugger**, the **Tutorial**, and the
+  **References** (the source code and further reading). On a phone the
+  tabs are icons. Click a tab to open it, click it
   again (or ▾) to fold the dock away, and drag the handle above it to
   share the height with the panel. Whatever you load, the dock opens
   on the Debugger to show it arriving.
@@ -236,8 +237,15 @@ explains what it is and why it is not under this repository's licence.
   moment.
 - **Ten example programs** in all, each a listing with its bytes and
   its source: see [examples/](examples/README.md).
-- **Your own**: paste bytes in hex with **Load › Hex Bytes…**, or read
-  a binary with **Load › Binary File…**.
+- **Your own, in assembly language**: the **Assembler** tab takes the
+  language of Intel's 1975 *8080 Assembly Language Programming
+  Manual*, macros and all. Write a program, or start from one of its
+  **Examples** ([examples/source/](examples/source/README.md)); the
+  listing beside the source shows each line's address and bytes as you
+  type, errors are marked on their lines, and **Assemble** (Ctrl+Enter)
+  puts the program into memory, ready to RUN.
+- **Your own, as bytes**: paste them in hex with **Load › Hex Bytes…**,
+  or read a binary with **Load › Binary File…**.
 - **Share one as a link**: **Share** copies a link that opens the
   simulator with your program loaded, or with the whole machine as it
   is now. A link can be written by hand too, and put in a document
@@ -275,6 +283,7 @@ programs and the BASIC tape, which the page reads from `examples/` and
 | [js/sio.js](js/sio.js), [js/teletype.js](js/teletype.js) | The serial boards, and the Teletype's paper |
 | [js/panel.js](js/panel.js) | The page's own logic: panel drawing, menus, dock, debugger |
 | [js/link.js](js/link.js) | The program link format |
+| [js/asm8080.js](js/asm8080.js), [js/asmtab.js](js/asmtab.js) | The 8080 assembler, and its tab |
 | [js/listing.js](js/listing.js) | Reads the example listings |
 | [js/dropdown.js](js/dropdown.js), [js/dialog.js](js/dialog.js) | The menus and the dialogs |
 | [js/l10n.js](js/l10n.js) | Every message, in ten languages |
@@ -282,9 +291,10 @@ programs and the BASIC tape, which the page reads from `examples/` and
 The design notes say why things are the way they are:
 [docs/ui-design.md](docs/ui-design.md) for the layout and its
 principles, [docs/ms-basic-4k.md](docs/ms-basic-4k.md) for the
-memory, the serial boards, the Teletype and BASIC, and
-[docs/kill-the-bit.md](docs/kill-the-bit.md) for the address-bus trick
-Kill the Bit relies on.
+memory, the serial boards, the Teletype and BASIC,
+[docs/assembler.md](docs/assembler.md) for the assembler and the
+language it takes, and [docs/kill-the-bit.md](docs/kill-the-bit.md)
+for the address-bus trick Kill the Bit relies on.
 
 ### Tests
 
@@ -294,8 +304,9 @@ npm test
 
 Node.js 24, nothing to install. The suite covers the 8080 CPU, the
 front panel, the serial boards and the Teletype, the page's own logic
-and translations, the link format, every program in
-[examples/](examples/), and 4K BASIC booting and running end to end. It
+and translations, the link format, the assembler against Intel's
+manual, every program in [examples/](examples/), and 4K BASIC booting
+and running end to end. It
 runs on each push and pull request.
 
 ### The link format

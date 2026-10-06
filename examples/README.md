@@ -22,6 +22,9 @@ speak through the teletype, each group from the simplest up.
 | [tty-leds.asm](tty-leds.asm) | 18 B | Teletype | Echoes it, and shows its ASCII code on the data LEDs |
 | [guess-letter.asm](guess-letter.asm) | 218 B | Teletype | A guessing game, with HIGHER and LOWER |
 
+Programs written as source only, for the **Assembler** tab, are in
+[source/](source/README.md).
+
 ## Loading a program
 
 The quick way is the *Load* menu: pick one from its examples, which

@@ -161,9 +161,10 @@ test('every Debugger control that can be unavailable can say why', () => {
  * three tools, and the status line.
  * @type {Array<string>}
  */
-const REGIONS = ['toolbar', 'stage', 'dock', 'tab-tty', 'tab-debug',
-                 'tab-ref', 'tab-links', 'status-bar', 'hex-dialog',
-                 'share-dialog', 'about-dialog'];
+const REGIONS = ['toolbar', 'stage', 'dock', 'tab-tty', 'tab-asm',
+                 'tab-debug', 'tab-ref', 'tab-links', 'status-bar',
+                 'hex-dialog', 'asm-replace-dialog', 'share-dialog',
+                 'about-dialog'];
 
 /**
  * The part of index.html one region takes up.
@@ -256,8 +257,9 @@ test('the toolbar, the Debugger and the dialogs read as software', () => {
     // Title Case, like the headings it sits under. Shouting here would
     // borrow the machine's voice for something that is not the machine
     // (P5 in docs/ui-design.md).
-    const labels = ['toolbar', 'tab-debug', 'hex-dialog', 'share-dialog',
-                    'about-dialog'].flatMap(labelsIn);
+    const labels = ['toolbar', 'tab-asm', 'tab-debug', 'hex-dialog',
+                    'asm-replace-dialog', 'share-dialog', 'about-dialog']
+          .flatMap(labelsIn);
     assert.ok(labels.length >= 20, 'expected the menus, dialogs and dump');
     const all = messages();
     const debugButtons = buttonsIn('tab-debug');
@@ -318,7 +320,7 @@ test('Share and the next instruction are where U2 put them', () => {
 test('the references have a tab of their own, which About opens', () => {
     // The Tutorial is a lesson; the source and further reading are
     // looked up, so they get the dock's last tab rather than its foot.
-    assert.deepStrictEqual(panel.TABS, ['tty', 'debug', 'ref', 'links']);
+    assert.deepStrictEqual(panel.TABS, ['tty', 'asm', 'debug', 'ref', 'links']);
     assert.ok(!regionOf('tab-ref').includes('<a '),
               'the Tutorial keeps no links');
     const links = regionOf('tab-links');

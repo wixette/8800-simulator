@@ -583,6 +583,16 @@ panel.refreshPlaceholders = function() {
     if (logo) {
         logo.alt = l10n.getMessage('header-title');
     }
+    // A tab's name is its tooltip too: on a phone only its icon shows.
+    for (let i = 0; i < panel.TABS.length; i++) {
+        let nav = document.getElementById('nav-' + panel.TABS[i]);
+        if (nav) {
+            nav.title = l10n.getMessage('nav-' + panel.TABS[i] + '-name');
+        }
+    }
+    if (typeof asmtab !== 'undefined' && document.getElementById('asm-source')) {
+        asmtab.refreshText();
+    }
     // How to edit the dump, for the pointer and for a screen reader.
     var memDump = document.getElementById('mem-dump');
     if (memDump) {
@@ -2255,6 +2265,7 @@ panel.init = function() {
 
     panel.initSwitchStrip();
     panel.setHelperShown(panel.readHelperShown(), false);
+    asmtab.init();
 
     // The toolbar. Load is built as it opens, since what it offers
     // depends on the moment: 4K BASIC needs 4 KB, the examples a server.
@@ -2722,10 +2733,12 @@ panel.playSwitch = function() {
  * The dock's tabs, in the order they appear. The teletype comes first:
  * it and the front panel are the two things a 1975 owner actually
  * touched (D8 in docs/ms-basic-4k.md, which U1 in docs/ui-design.md
- * carries over).
+ * carries over). The Assembler follows, before the Debugger, in the
+ * order you work: write a program, then watch it run (U1 in
+ * docs/assembler.md).
  * @type {Array<string>}
  */
-panel.TABS = ['tty', 'debug', 'ref', 'links'];
+panel.TABS = ['tty', 'asm', 'debug', 'ref', 'links'];
 
 /**
  * The tab a first visit opens on: the Tutorial, which says what to do

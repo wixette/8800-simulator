@@ -211,6 +211,24 @@ class Asm8080 {
     }
 }
 
+/**
+ * Every error the assembler can report, by id. The page says each in
+ * the reader's language, as the message 'asm-' + id; a test checks
+ * that every one has its message, and that nothing else is reported.
+ * @type {Array<string>}
+ */
+Asm8080.ERRORS = [
+    'bad-character', 'bad-expression', 'bad-number', 'byte-range',
+    'divide-by-zero', 'duplicate', 'empty-operand', 'endif-without-if',
+    'endm-without-macro', 'equ-of-set', 'if-without-endif', 'include',
+    'later', 'macro-arg', 'macro-before-definition', 'macro-depth',
+    'macro-in-macro', 'macro-twice', 'macro-without-endm', 'mov-m-m',
+    'needs-name', 'not-bd', 'not-pair', 'not-pair-psw', 'not-register',
+    'operands', 'overlap', 'reserved', 'rst-range', 'set-of-equ',
+    'string-value', 'too-big', 'undefined', 'unknown-code',
+    'unterminated-string', 'word-range',
+];
+
 /** How many layout passes to try before giving up on a layout. */
 Asm8080.MAX_PASSES = 6;
 

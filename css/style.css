@@ -1225,6 +1225,213 @@ a {
     font-weight: bold;
 }
 
+/* The Assembler tab (U2 in docs/assembler.md): a toolbar, the source
+   with its line numbers and the listing beside it, the errors under. */
+#tab-asm:not([hidden]) {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.asm-toolbar {
+    align-items: center;
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.asm-assemble {
+    background-color: #f90;
+    color: #222;
+    font-weight: bold;
+}
+
+.asm-summary {
+    color: #bbb;
+    font-size: 13px;
+    margin-left: 6px;
+    white-space: nowrap;
+}
+
+.asm-summary.asm-summary-bad {
+    color: #ff8a80;
+}
+
+/* Only a phone needs it. */
+#asm-view-toggle {
+    display: none;
+}
+
+.asm-work {
+    background-color: #ccc;
+    border-radius: 10px;
+    display: flex;
+    flex: 1 1 0;
+    min-height: 120px;
+    overflow: hidden;
+}
+
+/* The source, its line numbers and its listing share one line grid:
+   the same font, size, line height and top padding, and no wrapping,
+   so that a line's number, colours and bytes are always on its row. */
+.asm-editor,
+.asm-listing {
+    --asm-line: 20px;
+    font-size: 14px;
+    line-height: var(--asm-line);
+    tab-size: 8;
+}
+
+.asm-editor {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.asm-gutter,
+.asm-listing,
+.asm-highlight,
+.asm-source {
+    box-sizing: border-box;
+    margin: 0;
+    padding-bottom: 8px;
+    padding-top: 8px;
+}
+
+.asm-gutter {
+    background-color: #bdbdbd;
+    color: #666;
+    flex: none;
+    overflow: hidden;
+    padding-left: 6px;
+    padding-right: 8px;
+    text-align: right;
+    width: 3.6em;
+}
+
+.asm-gutter-line,
+.asm-listing-line,
+.asm-line {
+    display: block;
+    height: var(--asm-line);
+    white-space: pre;
+}
+
+.asm-gutter-error {
+    color: #b00020;
+    font-weight: bold;
+}
+
+/* The text area does the editing, its text transparent; the coloured
+   copy behind it shows through (H1). */
+.asm-code {
+    flex: 1 1 auto;
+    min-width: 0;
+    position: relative;
+}
+
+.asm-highlight,
+.asm-source {
+    border: 0;
+    font-family: inherit;
+    font-size: inherit;
+    height: 100%;
+    inset: 0;
+    letter-spacing: normal;
+    line-height: inherit;
+    overflow: auto;
+    padding-left: 10px;
+    padding-right: 10px;
+    position: absolute;
+    tab-size: inherit;
+    white-space: pre;
+    width: 100%;
+}
+
+.asm-highlight {
+    color: #222;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.asm-source {
+    background: transparent;
+    caret-color: #222;
+    color: transparent;
+    outline: none;
+    resize: none;
+}
+
+.asm-source::selection {
+    background-color: rgba(51, 102, 204, 0.3);
+    color: transparent;
+}
+
+.asm-line-error {
+    background-color: rgba(176, 0, 32, 0.1);
+}
+
+/* The colours (H2), each 4.5:1 or more on the editor's grey. Bold
+   alone is not enough for mnemonics: some monospaced fonts have no
+   bold face, and the browser's stand-in barely shows. */
+.asm-comment { color: #4d4d4d; font-style: italic; }
+.asm-label { color: #0d3c8c; }
+.asm-mnemonic { color: #a0111f; font-weight: bold; }
+.asm-pseudo { color: #6a1b9a; }
+.asm-macro { color: #6a1b9a; font-style: italic; }
+.asm-register { color: #00574b; }
+.asm-number { color: #525200; }
+.asm-string { color: #1b5e20; }
+.asm-operator { color: #6a1b9a; }
+.asm-bad {
+    color: #b00020;
+    text-decoration: underline wavy #b00020;
+}
+
+.asm-listing {
+    background-color: #d6d6d6;
+    border-left: 1px solid #b0b0b0;
+    color: #333;
+    flex: none;
+    overflow: hidden;
+    padding-left: 10px;
+    padding-right: 10px;
+    width: 27ch;
+}
+
+.asm-listing-error {
+    background-color: rgba(176, 0, 32, 0.1);
+}
+
+.asm-errors {
+    flex: none;
+    list-style: none;
+    margin: 6px 0 0 0;
+    max-height: 6.5em;
+    overflow-y: auto;
+    padding: 0;
+}
+
+.asm-error {
+    background: none;
+    border: 0;
+    color: #ff8a80;
+    cursor: pointer;
+    display: block;
+    font-family: inherit;
+    font-size: 13px;
+    padding: 2px 4px;
+    text-align: left;
+    width: 100%;
+}
+
+.asm-error:hover,
+.asm-error:focus-visible {
+    background-color: var(--hover-bg);
+}
+
 /* Also used for the memory dump's input, beside it. */
 .tty-hidden-input {
     border: 0;
@@ -1233,6 +1440,13 @@ a {
     padding: 0;
     position: absolute;
     width: 1px;
+}
+
+/* Each dock tab is an icon and its name (U1 in docs/assembler.md). */
+.dock-tab .icon {
+    height: 18px;
+    margin-right: 6px;
+    width: 18px;
 }
 
 /* Marks the Teletype tab while its machine is printing and you are
@@ -1316,9 +1530,9 @@ a {
         flex: none;
     }
 
-    /* Four tabs and the fold button across a phone: the tabs closer
-       together, and where a language's names are longer still, the row
-       scrolls under the fold button rather than pushing it off. */
+    /* The tabs and the fold button across a phone: should they ever
+       be too many even as icons, the row scrolls under the fold button
+       rather than pushing it off. */
     #dock-tabs {
         overflow-x: auto;
         /* So a tab scrolled to is not left under the fold button. */
@@ -1330,9 +1544,43 @@ a {
         display: none;
     }
 
+    /* Five tabs across a phone: the icons alone. The names stay for
+       screen readers, and as each tab's tooltip. */
     .dock-tab {
         font-size: 13px;
-        padding: 0 9px;
+        padding: 0 14px;
+    }
+
+    .dock-tab .icon {
+        margin-right: 0;
+    }
+
+    .dock-tab-name {
+        clip-path: inset(50%);
+        height: 1px;
+        overflow: hidden;
+        position: absolute;
+        white-space: nowrap;
+        width: 1px;
+    }
+
+    /* The Assembler's source and listing take turns. */
+    #tab-asm .asm-listing {
+        display: none;
+    }
+
+    #tab-asm.show-listing .asm-listing {
+        display: block;
+        flex: 1;
+        width: auto;
+    }
+
+    #tab-asm.show-listing .asm-editor {
+        display: none;
+    }
+
+    #asm-view-toggle {
+        display: block;
     }
 
     #dock-toggle {

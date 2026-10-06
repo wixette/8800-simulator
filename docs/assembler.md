@@ -11,9 +11,13 @@ Hopper Center, which is the text this document cites. Chapters 2 and 3
 are the specification: everything they describe is in scope, macros
 included.
 
-**Status.** Design, for review before any code. Decisions are numbered
-so that the code can cite them: **L** for the language, **U** for the
-tab, **H** for highlighting and **T** for tests and examples.
+**Status.** Built, on branch `assembler`, for review before it is
+merged into `v1.6.0`: the language (Parts 2 and 3) in `js/asm8080.js`,
+the tab (Parts 4 and 5) in `js/asmtab.js`, and the examples and tests
+of Part 6. Where building changed a decision, the decision says so.
+Decisions are numbered so that the code can cite them: **L** for the
+language, **U** for the tab, **H** for highlighting and **T** for tests
+and examples.
 
 ---
 
@@ -396,10 +400,16 @@ phone's width, so, as agreed in #12:
   highlighting (Part 5), lines with errors marked in the gutter and
   tinted.
 - **The listing** on the right: for each source line, on the same row,
-  its address and the bytes it made, in hex. The two scroll together,
-  so a line's bytes are always beside it. Expanded macro lines appear
-  under the line that used them (L22), with the source pushed down to
-  match, as the manual's own listings do.
+  its address and the bytes it made, in hex; for an `EQU` or `SET`,
+  its value. The two scroll together, so a line's bytes are always
+  beside it. A row shows up to six bytes, then `…`.
+- **A macro's expansion** is listed on the row of the line that used
+  it: the address and the bytes it made. Its tooltip gives the whole
+  expansion, a line each with its address and bytes (L22). *As built:*
+  the design first had the expansion's lines below the use, with the
+  source pushed down to match, as the manual's printed listings have
+  it; a text area cannot push its own lines apart, so the tooltip
+  carries them instead, and a long `DB` the same way.
 - **Errors** below the editor, as a list: line number and message.
   Clicking one puts the cursor on its line.
 - **On a phone** the listing is hidden, and the source takes the
@@ -421,6 +431,8 @@ dependencies, and keeps it that way.
 
 ### U4 — Assembling
 
+The source is assembled again whenever typing pauses, for the listing,
+the error marks and the summary; that touches nothing in the machine.
 **Assemble** reads the whole source and, if there is no error:
 
 1. Switches the machine on, if it was off, and says so.
@@ -439,10 +451,13 @@ the machine is untouched, and the status line says how many there are.
 
 ### U5 — Examples in the tab
 
-**Examples ▾** lists the assembler's example sources (T3). Choosing
-one replaces the editor's text. If the editor holds anything that is
-not an unchanged example, a dialog asks first, since that text is
-otherwise lost.
+**Examples ▾** lists the assembler's example sources (T3), grouped as
+the Load menu groups its examples: the front panel's, then the
+Teletype's. They are read from `examples/source/` when the menu first
+opens, so like the Load menu's they need the page served, not opened
+from the disk. Choosing one replaces the editor's text. If the editor
+holds anything that is not an unchanged example, a dialog asks first,
+since that text is otherwise lost.
 
 ### U6 — Words
 
@@ -482,10 +497,10 @@ always agree with what the assembler accepts:
 | --- | --- | --- |
 | Comment | `; rotate` | grey, italic |
 | Label, name | `LOOP:`, `PORT` | dark blue |
-| Mnemonic | `MVI`, `JMP` | bold |
+| Mnemonic | `MVI`, `JMP` | crimson, bold |
 | Pseudo-instruction | `ORG`, `DB`, `MACRO` | purple |
 | Register | `A`, `M`, `SP` | dark teal |
-| Number, `$` | `0FFH`, `$` | dark orange |
+| Number, `$` | `0FFH`, `$` | dark olive |
 | String | `'HELLO'` | green |
 | Macro name, where used | `SHRT` | purple, italic |
 | Unknown word | `MVX` | red, wavy underline |
@@ -514,7 +529,9 @@ under a millisecond. Nothing is done while the tab is hidden.
   by a test against the CPU core's disassembler (T2).
 - **`js/asmtab.js`**: the tab: editor, highlighting, listing, errors,
   examples. It talks to the machine only through what `js/panel.js`
-  already uses to load a program.
+  already uses to load a program. Its logic that needs no page - the
+  highlighting, the listing's cells, the errors as sentences - is
+  tested in `tests/asmtab.test.js`.
 - **`js/l10n.js`**: the tab's words and the error messages.
 
 ### T2 — Tests
@@ -561,16 +578,16 @@ under the repository's licence.
 
 On branch `assembler`, merged into `v1.6.0` when done:
 
-1. **The language core:** tokenizer, expressions, every instruction,
+1. ✅ **The language core:** tokenizer, expressions, every instruction,
    the pseudo-instructions, two passes, errors (L1 to L15), with the
    opcode, manual and examples tests (T2).
-2. **Macros:** L16 to L22, with the manual's macro examples.
-3. **The tab:** dock icons (U1), the editor and listing (U2 to U4),
+2. ✅ **Macros:** L16 to L22, with the manual's macro examples.
+3. ✅ **The tab:** dock icons (U1), the editor and listing (U2 to U4),
    errors, persistence.
-4. **Highlighting:** H1 to H3.
-5. **Examples and translations:** T3, and every message in ten
+4. ✅ **Highlighting:** H1 to H3.
+5. ✅ **Examples and translations:** T3, and every message in ten
    languages.
-6. **Docs:** the README, and a summary on #12.
+6. ✅ **Docs:** the README; a summary on #12 once reviewed.
 
 Each step is a commit or a few, tested before the next.
 

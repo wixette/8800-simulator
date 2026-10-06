@@ -30,6 +30,9 @@ function hexOf(source, options) {
 function errorsOf(source, options) {
     const r = Asm8080.assemble(source, options);
     assert.strictEqual(r.ok, false, 'no error in:\n' + source);
+    for (const e of r.errors) {
+        assert.ok(Asm8080.ERRORS.includes(e.id), e.id + ' is not in ERRORS');
+    }
     return r.errors.map((e) => e.id);
 }
 
@@ -458,4 +461,33 @@ test('the tokens give the line back, and say what each piece is', () => {
     assert.deepStrictEqual([...Asm8080.macroNames('SHRT MACRO\n RRC\n ENDM\n' +
                                                   'x: macro p\n endm')],
                            ['SHRT', 'X']);
+});
+
+test('every error the assembler can report has its message', () => {
+    // The page says each error as the message 'asm-' + its id (L14).
+    const fs = require('node:fs');
+    const vm = require('node:vm');
+    vm.runInThisContext(fs.readFileSync(
+        require.resolve('../js/l10n.js'), 'utf8'), {filename: 'l10n.js'});
+    const l10n = globalThis.l10n;
+    for (const id of Asm8080.ERRORS) {
+        assert.ok(l10n.MESSAGES['asm-' + id], 'no message for ' + id);
+    }
+    // And every id the code can raise is in the list: the first id
+    // after error: or id:, and in an error() or fail() call each quoted
+    // word that is not the far side of a comparison.
+    const code = fs.readFileSync(require.resolve('../js/asm8080.js'), 'utf8');
+    const raised = new Set();
+    for (const m of code.matchAll(/(?:error|id): '([a-z][a-z0-9-]+)'/g)) {
+        raised.add(m[1]);
+    }
+    for (const m of code.matchAll(/(?:this\.error|fail)\(([^{;]*)/g)) {
+        for (const q of m[1].matchAll(/(==\s*)?'([a-z][a-z0-9-]+)'/g)) {
+            if (!q[1]) raised.add(q[2]);
+        }
+    }
+    for (const id of raised) {
+        assert.ok(Asm8080.ERRORS.includes(id), id + ' is raised but not listed');
+    }
+    assert.ok(raised.size >= 30, 'expected to find the raises: ' + raised.size);
 });
