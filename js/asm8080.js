@@ -917,7 +917,9 @@ Asm8080.Pass = class {
                     return;
                 }
                 if (v.known) {
-                    args.push(v.pair || String(v.value));
+                    // A register by its name, anything else in hex, so
+                    // that the listing reads as it was written.
+                    args.push(v.pair || Asm8080.literal(v.value));
                 } else {
                     // Not known yet in this pass: the text stands in,
                     // which a later pass replaces with its value.
@@ -1106,6 +1108,17 @@ Asm8080.Pass = class {
             symbols: symbols,
         };
     }
+};
+
+/**
+ * Writes a value as the language writes a hexadecimal number: 0FFH,
+ * 3000H, 05H.
+ * @param {number} value 0 to FFFFH.
+ * @return {string}
+ */
+Asm8080.literal = function(value) {
+    var digits = Asm8080.hex(value, value > 0xff ? 4 : 2);
+    return (/^[A-F]/.test(digits) ? '0' : '') + digits + 'H';
 };
 
 /**
