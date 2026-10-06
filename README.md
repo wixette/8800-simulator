@@ -244,6 +244,8 @@ explains what it is and why it is not under this repository's licence.
   listing beside the source shows each line's address and bytes as you
   type, errors are marked on their lines, and **Assemble** (Ctrl+Enter)
   puts the program into memory, ready to RUN.
+
+  ![The Assembler tab holding the Macros example: highlighted source with line numbers on the left, and on the right each line's address and bytes, a macro's use showing the bytes of its expansion](./screenshots/assembler.png)
 - **Your own, as bytes**: paste them in hex with **Load › Hex Bytes…**,
   or read a binary with **Load › Binary File…**.
 - **Share one as a link**: **Share** copies a link that opens the
