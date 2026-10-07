@@ -5,7 +5,9 @@
 The 1975 computer that started the personal computer revolution, in
 your browser. Toggle 8080 machine code in through a working front
 panel, watch it run on the lamps, then install a memory board and boot
-Microsoft's original 4K BASIC on a simulated Teletype.
+Microsoft's original 4K BASIC on a simulated Teletype - or write your
+own programs in Intel's 8080 assembly language, and assemble them
+straight into memory.
 
 **[▶ Try it online](https://wixette.github.io/8800-simulator/)**, with
 nothing to install.
@@ -19,8 +21,9 @@ nothing to install.
 [4. Around the simulator](#4-around-the-simulator) →
 [5. The Teletype](#5-the-teletype) →
 [6. 4K BASIC](#6-microsoft-4k-basic) →
-[7. More programs](#7-more-programs) →
-[8. For developers](#8-for-developers)
+[7. Assembly](#7-write-it-in-assembly) →
+[8. More programs](#8-more-programs) →
+[9. For developers](#9-for-developers)
 
 ## 1. Try it in a minute
 
@@ -229,7 +232,51 @@ The BASIC tape is in [roms/](./roms/), and [roms/NOTICE](./roms/NOTICE)
 explains what it is and why it is not under this repository's licence.
 **Binary File…** in the Load menu loads an image of your own instead.
 
-## 7. More programs
+## 7. Write it in assembly
+
+Section 3 put a program in byte by byte, the way an owner did in 1975.
+Intel's answer, the same year, was assembly language: you write
+`ADD B`, and an assembler works out that it is `80`. The **Assembler**
+tab, under the panel, takes the language exactly as Intel's *8080
+Assembly Language Programming Manual* defines it, macros and all.
+
+![The Assembler tab holding the Macros example: highlighted source with line numbers on the left, and on the right each line's address and bytes, a macro's use showing the bytes of its expansion](./screenshots/assembler.png)
+
+Here is section 3's program again, with names for its addresses
+instead of the numbers. It makes exactly the bytes you toggled in:
+
+```
+FIRST   EQU     80H             ; the first number
+SECOND  EQU     FIRST+1         ; the second, the byte after it
+SUM     EQU     FIRST+2         ; and where the sum goes
+
+START:  LDA     FIRST           ; A = the first number
+        MOV     B,A             ; keep it in B
+        LDA     SECOND          ; A = the second
+        ADD     B               ; A = A + B
+        STA     SUM             ; store the sum
+        JMP     START           ; and do it all again
+```
+
+1. Open the **Assembler** tab and type it in, or choose
+   **Examples › Add two numbers**.
+2. Beside each line, the listing shows its address and the bytes it
+   makes, as you type. A mistake is marked on its line, with what is
+   wrong under the source.
+3. Click **Assemble** (or press Ctrl+Enter). The program goes into
+   memory and RESET is pressed.
+4. DEPOSIT 1 at 0080H and 2 at 0081H, as in section 3, then RUN, STOP
+   and EXAMINE 0082H: 00 000 011.
+
+What it takes is the whole of the manual's language: every
+instruction, labels, `EQU` and `SET`, `DB`, `DW` and `DS`, expressions
+and `$`, `IF` and `ENDIF`, and macros, whose labels are local to each
+use as Intel specified. Its **Examples** menu has seven programs, from
+switches to lamps to macros ([examples/source/](examples/source/README.md)),
+and **Copy** in the editor's corner takes the source with you. The
+design and its decisions are in [docs/assembler.md](docs/assembler.md).
+
+## 8. More programs
 
 - **[Kill the Bit](examples/kill-the-bit.md)**, the 1975 front-panel
   game by Dean McDaniel: a lit bit runs across the upper address lamps,
@@ -237,15 +284,8 @@ explains what it is and why it is not under this repository's licence.
   moment.
 - **Ten example programs** in all, each a listing with its bytes and
   its source: see [examples/](examples/README.md).
-- **Your own, in assembly language**: the **Assembler** tab takes the
-  language of Intel's 1975 *8080 Assembly Language Programming
-  Manual*, macros and all. Write a program, or start from one of its
-  **Examples** ([examples/source/](examples/source/README.md)); the
-  listing beside the source shows each line's address and bytes as you
-  type, errors are marked on their lines, and **Assemble** (Ctrl+Enter)
-  puts the program into memory, ready to RUN.
-
-  ![The Assembler tab holding the Macros example: highlighted source with line numbers on the left, and on the right each line's address and bytes, a macro's use showing the bytes of its expansion](./screenshots/assembler.png)
+- **Your own, in assembly language**: in the **Assembler** tab
+  ([section 7](#7-write-it-in-assembly)).
 - **Your own, as bytes**: paste them in hex with **Load › Hex Bytes…**,
   or read a binary with **Load › Binary File…**.
 - **Share one as a link**: **Share** copies a link that opens the
@@ -255,7 +295,7 @@ explains what it is and why it is not under this repository's licence.
   on the data lamps and halts:
   **[Run it](https://wixette.github.io/8800-simulator/?hex=3E8CD3FF76)**.
 
-## 8. For developers
+## 9. For developers
 
 ### Run it locally
 
@@ -358,6 +398,7 @@ never renamed or read differently ([js/link.js](js/link.js)).
 - [Altair 8800 Operator's Manual - the original manual as a scanned PDF](https://altairclone.com/downloads/manuals/Altair%208800%20Operator's%20Manual.pdf)
 - [Altair 8800 Operator's Manual v2.0 - an HTML edition by Kevin Cole](https://ubuntourist.codeberg.page/Altair-8800/)
 - [Intel 8080 Assembly Language Programming Manual - Intel's original manual as a scanned PDF](http://www.classiccmp.org/dunfield/r/8080asm.pdf)
+- [Intel 8080 Assembly Language Programming Manual - an HTML edition by the Grace Hopper Center](https://gracehoppercenter.codeberg.page/8080-assembly/)
 - [Demystifying Computers - an open source book by Chris Jones and Jeff Elkner](https://www.openbookproject.net/books/demystcomp/index.html)
 - [Wikipedia: Altair BASIC - what it is, and how Microsoft started with it](https://en.wikipedia.org/wiki/Altair_BASIC)
 - [MITS Altair BASIC Reference Manual (1975) - the language itself, the startup questions and the error codes](https://altairclone.com/downloads/manuals/BASIC%20Manual%2075.pdf)

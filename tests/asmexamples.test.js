@@ -144,3 +144,17 @@ test('macros: a lamp walks right, one place per delay', () => {
     assert.strictEqual(result.symbols.LOOP, undefined,
                        'LOOP is local to each expansion');
 });
+
+test('the README\'s assembly program makes exactly section 3\'s bytes', () => {
+    // Section 7 says so of the program it shows.
+    const readme = fs.readFileSync(path.join(__dirname, '..', 'README.md'), 'utf8');
+    const section = readme.slice(readme.indexOf('## 7. Write it in assembly'));
+    const code = section.match(/```\n([\s\S]*?)```/)[1];
+    const r = Asm8080.assemble(code);
+    assert.deepStrictEqual(r.errors, []);
+    const bytes = [];
+    for (let a = r.start; a <= r.end; a++) bytes.push(r.memory.get(a));
+    assert.deepStrictEqual(bytes, loadExample('adder').bytes);
+    assert.match(section, /`ADD B`, and an assembler works out that it is `80`/);
+    assert.strictEqual(Asm8080.assemble(' ADD B').memory.get(0), 0x80);
+});
