@@ -143,8 +143,8 @@ tools below it, and a status line along the foot.
 - **The dock** holds five tabs, one at a time: the **Teletype**, the
   **Assembler**, the **Debugger**, the **Tutorial**, and the
   **References** (the source code and further reading). On a phone the
-  tabs are icons. Click a tab to open it, click it
-  again (or ▾) to fold the dock away, and drag the handle above it to
+  tabs are icons. Click a tab to open it, ▾ to fold the dock away,
+  and drag the handle above it to
   share the height with the panel. Whatever you load, the dock opens
   on the Debugger to show it arriving.
 - **The status line** says what just happened, and why a greyed-out

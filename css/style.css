@@ -312,10 +312,12 @@ a {
     background-color: #474747;
 }
 
+/* The orange says enough: an action button keeps the ordinary weight,
+   like every other button. (A button holding a state - Follow PC, a
+   raised switch - is bold as well, to mark the state.) */
 .dialog-button.primary {
     background-color: #f90;
     color: #222;
-    font-weight: bold;
 }
 
 .dialog-button.primary:hover {
@@ -1245,7 +1247,6 @@ a {
 .asm-assemble {
     background-color: #f90;
     color: #222;
-    font-weight: bold;
 }
 
 .asm-summary {
@@ -1278,8 +1279,8 @@ a {
    so that a line's number, colours and bytes are always on its row. */
 .asm-editor,
 .asm-listing {
-    --asm-line: 20px;
-    font-size: 14px;
+    --asm-line: 26px;
+    font-size: 16px;
     line-height: var(--asm-line);
     tab-size: 8;
 }

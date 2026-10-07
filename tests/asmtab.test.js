@@ -97,3 +97,14 @@ test('the tab offers every example source, and only those', () => {
     assert.strictEqual(header.name, 'Macros');
     assert.strictEqual(header.device, 'panel');
 });
+
+test('Tab inserts spaces to the next eight-column stop', () => {
+    assert.strictEqual(asmtab.spacesToStop('', 0), '        ');
+    assert.strictEqual(asmtab.spacesToStop('LOOP:', 5), '   ');
+    assert.strictEqual(asmtab.spacesToStop('START:  MVI', 11), '     ');
+    assert.strictEqual(asmtab.spacesToStop('ABCDEFGH', 8), '        ');
+    // On a later line, and after a tab already in the text.
+    assert.strictEqual(asmtab.spacesToStop('NOP\nX:', 6), '      ');
+    assert.strictEqual(asmtab.spacesToStop('\tMVI', 4), '     ');
+    assert.strictEqual(asmtab.columnOf('\tA\tB'), 17);
+});

@@ -333,6 +333,25 @@ test('the references have a tab of their own, which About opens', () => {
               "About's References button opens the References tab");
 });
 
+test('the open tab, pressed again, does nothing', (t) => {
+    // With five tabs it is too easily pressed by mistake; folding the
+    // dock is the fold button's job.
+    const calls = [];
+    t.mock.method(panel, 'setDockOpen', (open) => calls.push(['fold', open]));
+    t.mock.method(panel, 'showTab', (name) => calls.push(['show', name]));
+    const saved = panel.dock;
+    t.after(() => { panel.dock = saved; });
+    panel.dock = {tab: 'asm', open: true, height: null};
+    panel.onDockTab('asm', false);
+    assert.deepStrictEqual(calls, []);
+    panel.onDockTab('debug', false);
+    assert.deepStrictEqual(calls, [['show', 'debug']]);
+    // A folded dock still opens on the tab pressed.
+    panel.dock = {tab: 'asm', open: false, height: null};
+    panel.onDockTab('asm', false);
+    assert.deepStrictEqual(calls.pop(), ['show', 'asm']);
+});
+
 test('a first visit opens the dock on the Tutorial', () => {
     // No storage at all - as in a private window, or here in Node -
     // is a first visit.

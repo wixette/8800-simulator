@@ -445,7 +445,7 @@ asmtab.goToLine = function(line) {
     }
     source.focus({preventScroll: true});
     source.setSelectionRange(at, at + (lines[line - 1] || '').length);
-    var lineHeight = parseFloat(getComputedStyle(source).lineHeight) || 20;
+    var lineHeight = parseFloat(getComputedStyle(source).lineHeight) || 26;
     var top = (line - 1) * lineHeight;
     if (top < source.scrollTop ||
         top > source.scrollTop + source.clientHeight - 2 * lineHeight) {
@@ -454,9 +454,41 @@ asmtab.goToLine = function(line) {
 };
 
 /**
- * The editor's keys: Tab inserts a tab, as code editors do, unless
- * Escape came just before, so the keyboard is never trapped; Ctrl+Enter
- * (Cmd+Enter on a Mac) assembles (U3).
+ * The spaces Tab inserts: up to the next stop, every eight columns, the
+ * field layout of the manual's listings. A tab already in the text
+ * counts as reaching its own stop.
+ * @param {string} text The source.
+ * @param {number} at Where the cursor is.
+ * @return {string} One to eight spaces.
+ */
+asmtab.spacesToStop = function(text, at) {
+    var start = text.lastIndexOf('\n', at - 1) + 1;
+    var column = asmtab.columnOf(text.slice(start, at));
+    return ' '.repeat(asmtab.TAB_STOP - column % asmtab.TAB_STOP);
+};
+
+/**
+ * How many columns the start of a line takes on screen, its tabs
+ * expanded to their stops.
+ * @param {string} text Part of one line, from its start.
+ * @return {number}
+ */
+asmtab.columnOf = function(text) {
+    var column = 0;
+    for (let i = 0; i < text.length; i++) {
+        column = text[i] == '\t' ?
+            column + asmtab.TAB_STOP - column % asmtab.TAB_STOP : column + 1;
+    }
+    return column;
+};
+
+/** Columns between tab stops, in the editor. @type {number} */
+asmtab.TAB_STOP = 8;
+
+/**
+ * The editor's keys: Tab inserts spaces to the next stop, as editors
+ * do, unless Escape came just before, so the keyboard is never trapped;
+ * Ctrl+Enter (Cmd+Enter on a Mac) assembles (U3).
  * @param {Event} event The keydown event.
  */
 asmtab.onKey = function(event) {
@@ -473,8 +505,9 @@ asmtab.onKey = function(event) {
         !event.ctrlKey && !event.metaKey && !asmtab.tabLeaves) {
         event.preventDefault();
         var source = event.target;
-        source.setRangeText('\t', source.selectionStart, source.selectionEnd,
-                            'end');
+        source.setRangeText(asmtab.spacesToStop(source.value,
+                                                source.selectionStart),
+                            source.selectionStart, source.selectionEnd, 'end');
         asmtab.onEdit();
         return;
     }

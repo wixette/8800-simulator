@@ -421,9 +421,13 @@ The editor is a plain text area, with highlighting drawn behind it
 (Part 5), not a code-editor library: the page has no build step and no
 dependencies, and keeps it that way.
 
-- **Tab** inserts a tab, as code editors do, since assembly is written
-  in columns. **Esc, then Tab** moves the focus on, so the keyboard is
-  never trapped.
+- **Tab** inserts spaces up to the next stop, every eight columns, as
+  editors do, since assembly is written in columns; there is no option
+  for a tab character. A tab already in pasted text shows at the same
+  stops. **Esc, then Tab** moves the focus on, so the keyboard is never
+  trapped.
+- **The type** is the Teletype paper's, 16 px on 26 px lines, for the
+  source, its line numbers and the listing alike.
 - **The source is remembered** in this browser, as you type, and comes
   back with the page. It is never sent anywhere.
 - **Assembling does not change the source**: the listing is beside

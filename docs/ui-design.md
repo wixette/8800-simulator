@@ -465,6 +465,11 @@ its bottom.
   rather than tabs to go to. So were `README.md`, `examples/README.md`
   and `examples/kill-the-bit.md`.
 
+- **Pressing the open tab** does nothing. It used to fold the dock
+  away; with five tabs (the Assembler's, in
+  [assembler.md](assembler.md)) the open one was too easily pressed by
+  mistake, and folding is the job of the fold button and the handle.
+
 ### Still open
 
 - **A dock on the right**, for tall or very wide screens. Left out of

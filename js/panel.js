@@ -2835,8 +2835,10 @@ panel.readSavedDock = function() {
  * @param {boolean=} byKey Whether it was pressed from the keyboard.
  */
 panel.onDockTab = function(name, byKey) {
+    // The open tab, pressed again, does nothing: with five tabs it is
+    // too easily pressed by mistake, and folding the dock away is the
+    // fold button's job, and the handle's.
     if (name == panel.dock.tab && panel.dock.open) {
-        panel.setDockOpen(false);
         return;
     }
     panel.showTab(name);
