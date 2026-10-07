@@ -1414,9 +1414,12 @@ a {
     z-index: 2;
 }
 
+/* On the editor's light grey, pointing darkens the icon - not the
+   white the dark toolbar's icon buttons turn. */
 .asm-copy:hover,
 .asm-copy:focus-visible {
     background-color: rgba(255, 255, 255, 0.85);
+    color: #000;
     opacity: 1;
 }
 
