@@ -108,3 +108,17 @@ test('Tab inserts spaces to the next eight-column stop', () => {
     assert.strictEqual(asmtab.spacesToStop('\tMVI', 4), '     ');
     assert.strictEqual(asmtab.columnOf('\tA\tB'), 17);
 });
+
+test('the Tutorial\'s program assembles to what the Tutorial says', () => {
+    // "IN 0FFH is DB FF, at 0000H" - and the rest of it runs.
+    const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+    const step = html.slice(html.indexOf('id="asm-tutorial-1"'));
+    const code = step.match(/<pre class="tutorial-code">([\s\S]*?)<\/pre>/)[1];
+    const r = Asm8080.assemble(code);
+    assert.deepStrictEqual(r.errors, []);
+    const bytes = [];
+    for (let a = r.start; a <= r.end; a++) bytes.push(r.memory.get(a));
+    assert.deepStrictEqual(bytes, [0xdb, 0xff, 0xd3, 0xff, 0xc3, 0x00, 0x00]);
+    assert.strictEqual(r.start, 0);
+    assert.match(l10n.MESSAGES['asm-tutorial-2'].en, /IN 0FFH is DB FF, at 0000H/);
+});

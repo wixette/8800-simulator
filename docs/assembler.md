@@ -428,6 +428,16 @@ dependencies, and keeps it that way.
   trapped.
 - **The type** is the Teletype paper's, 16 px on 26 px lines, for the
   source, its line numbers and the listing alike.
+- **The caret is a block**, as the Teletype's carriage is: dark, the
+  character under it light, blinking at the carriage's rate, and still
+  while it moves or for readers who ask for less motion. A text area
+  cannot draw one, so it is drawn in the highlighting's layer, sized
+  to a character's box measured in the editor's own type, and the text
+  area's caret is hidden. It hides while text is selected.
+- **Copy**, an icon in the editor's corner as on code boxes across the
+  web, puts the whole source on the clipboard, and shows a tick; where
+  the browser will not allow it, the source is selected to copy by
+  hand.
 - **The source is remembered** in this browser, as you type, and comes
   back with the page. It is never sent anywhere.
 - **Assembling does not change the source**: the listing is beside

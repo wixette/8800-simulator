@@ -81,6 +81,17 @@ asmtab.init = function() {
     source.addEventListener('input', asmtab.onEdit, false);
     source.addEventListener('scroll', asmtab.syncScroll, false);
     source.addEventListener('keydown', asmtab.onKey, false);
+    // The block caret follows the cursor, wherever it is moved from.
+    ['keyup', 'mouseup', 'focus', 'blur', 'select'].forEach(function(type) {
+        source.addEventListener(type, asmtab.requestCaret, false);
+    });
+    document.addEventListener('selectionchange', asmtab.requestCaret, false);
+    window.addEventListener('resize', function() {
+        asmtab.charWidth = 0;
+        asmtab.requestCaret();
+    }, false);
+    document.getElementById('asm-copy').addEventListener(
+        'click', asmtab.onCopy, false);
     // The listing scrolls with the source, never by itself.
     document.getElementById('asm-listing').addEventListener(
         'wheel', function(event) {
@@ -283,6 +294,117 @@ asmtab.syncScroll = function() {
     highlight.scrollLeft = source.scrollLeft;
     document.getElementById('asm-gutter').scrollTop = source.scrollTop;
     document.getElementById('asm-listing').scrollTop = source.scrollTop;
+    asmtab.requestCaret();
+};
+
+/**
+ * One character of the editor's type, once measured: its width, and
+ * its box's height and offset within a line.
+ */
+asmtab.charWidth = 0;
+asmtab.charHeight = 0;
+asmtab.charOffset = 0;
+
+/** Measures the editor's type, for the caret. */
+asmtab.measure = function() {
+    var line = document.getElementById('asm-measure');
+    var glyphs = line.firstElementChild.getBoundingClientRect();
+    asmtab.charWidth = glyphs.width / 10;
+    asmtab.charHeight = glyphs.height;
+    asmtab.charOffset = glyphs.top - line.getBoundingClientRect().top;
+};
+
+/** Asks for the caret to be drawn again, at most once a frame. */
+asmtab.requestCaret = function() {
+    if (asmtab.caretPending) {
+        return;
+    }
+    asmtab.caretPending = true;
+    window.requestAnimationFrame(function() {
+        asmtab.caretPending = false;
+        asmtab.renderCaret();
+    });
+};
+
+/**
+ * Draws the block caret over the character the cursor is at - or a
+ * blank past the end of a line - while the editor has the keyboard and
+ * nothing is selected; text that is selected shows as selected instead.
+ * It starts each move solid, then blinks, as a terminal's does.
+ */
+asmtab.renderCaret = function() {
+    var source = asmtab.source();
+    var caret = document.getElementById('asm-caret');
+    var at = source.selectionStart;
+    if (document.activeElement !== source ||
+        at !== source.selectionEnd) {
+        caret.hidden = true;
+        return;
+    }
+    if (!asmtab.charWidth) {
+        asmtab.measure();
+    }
+    var text = source.value;
+    var start = text.lastIndexOf('\n', at - 1) + 1;
+    var line = text.slice(0, start).split('\n').length - 1;
+    var column = asmtab.columnOf(text.slice(start, at));
+    var under = text[at];
+    var style = getComputedStyle(source);
+    var lineHeight = parseFloat(style.lineHeight);
+    var x = parseFloat(style.paddingLeft) + column * asmtab.charWidth -
+        source.scrollLeft;
+    var y = parseFloat(style.paddingTop) + line * lineHeight -
+        source.scrollTop;
+    var moved = caret.dataset.at != String(at) || caret.hidden;
+    caret.textContent = under && under != '\n' && under != '\t' ? under : ' ';
+    caret.style.left = x + 'px';
+    caret.style.top = y + asmtab.charOffset + 'px';
+    caret.style.width = asmtab.charWidth + 'px';
+    caret.style.height = asmtab.charHeight + 'px';
+    caret.style.lineHeight = asmtab.charHeight + 'px';
+    caret.hidden = false;
+    caret.dataset.at = String(at);
+    if (moved) {
+        // Solid while it moves: the blink starts again from the top.
+        caret.classList.remove('blinking');
+        void caret.offsetWidth;
+        caret.classList.add('blinking');
+    }
+};
+
+/** How long the copy button shows its tick. @type {number} */
+asmtab.COPIED_MS = 1500;
+
+/**
+ * When the copy button is pressed: the whole source goes to the
+ * clipboard. A browser that will not allow it gets the source selected
+ * instead, to copy by hand.
+ */
+asmtab.onCopy = function() {
+    var source = asmtab.source();
+    var text = source.value;
+    if (!text.trim()) {
+        panel.setStatus('asm-copy-empty', {}, 'warn');
+        return;
+    }
+    var byHand = function() {
+        source.focus();
+        source.select();
+        panel.setStatus('asm-copy-blocked', {}, 'warn');
+    };
+    if (!navigator.clipboard || !navigator.clipboard.writeText) {
+        byHand();
+        return;
+    }
+    navigator.clipboard.writeText(text).then(function() {
+        panel.setStatus('asm-copied', {lines: text.split('\n').length});
+        var button = document.getElementById('asm-copy');
+        button.classList.add('copied');
+        window.clearTimeout(asmtab.copiedTimer);
+        asmtab.copiedTimer = window.setTimeout(function() {
+            button.classList.remove('copied');
+        }, asmtab.COPIED_MS);
+    }, byHand);
 };
 
 /**
@@ -729,6 +851,9 @@ asmtab.refreshText = function() {
     document.getElementById('asm-listing').setAttribute(
         'aria-label', msg('asm-listing-label'));
     document.getElementById('asm-assemble').title = msg('asm-assemble-title');
+    var copy = document.getElementById('asm-copy');
+    copy.title = msg('asm-copy-title');
+    copy.setAttribute('aria-label', msg('asm-copy-title'));
 };
 
 // Exports the namespace for unit tests when running in Node.js. This

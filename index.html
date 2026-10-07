@@ -200,6 +200,11 @@
                   <textarea id="asm-source" class="asm-source" wrap="off"
                             spellcheck="false" autocapitalize="off"
                             autocomplete="off" autocorrect="off"></textarea>
+                  <!-- The block caret, drawn as the Teletype's is; the text
+                       area's own is hidden. -->
+                  <span id="asm-caret" class="asm-caret" aria-hidden="true" hidden></span>
+                  <span id="asm-measure" class="asm-measure" aria-hidden="true"><span>0000000000</span></span>
+                  <button id="asm-copy" class="icon-button asm-copy" type="button"><svg class="icon asm-copy-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg><svg class="icon asm-copied-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></button>
                 </div>
               </div>
               <div id="asm-listing" class="asm-listing" role="region"></div>
@@ -284,6 +289,24 @@ JMP 0000H  ; 11 000 011
         </div>
 
         <div class="subheader-bar">
+          <div id="asm-tutorial-title" class="l10n">Writing in Assembly</div>
+        </div>
+        <div class="tutorial">
+          <p id="asm-tutorial-desc" class="tutorial-lead l10n">The same machine, without toggling each byte by hand: write the program in Intel's assembly language, and let the assembler make the bytes. A program that copies the sense switches to the data lamps:</p>
+          <ol class="steps">
+            <li><span id="asm-tutorial-1" class="l10n">Open the Assembler, under the panel, and type these three lines:</span>
+              <pre class="tutorial-code">LOOP:   IN      0FFH    ; read the sense switches
+        OUT     0FFH    ; light them on the data lamps
+        JMP     LOOP    ; and again, for ever</pre>
+            </li>
+            <li><span id="asm-tutorial-2" class="l10n">Beside each line, the listing shows its address and the bytes it makes: IN 0FFH is DB FF, at 0000H. A mistake is marked on its line, with what is wrong under the source.</span></li>
+            <li><span id="asm-tutorial-3" class="l10n">Click Assemble, or press Ctrl+Enter. The machine is switched on if it was off, the program goes into memory, and RESET is pressed.</span></li>
+            <li><span id="asm-tutorial-4" class="l10n">Click RUN on the front panel, then flip the switches A15-A8: the data lamps follow them.</span></li>
+          </ol>
+          <p id="asm-tutorial-note" class="tutorial-note l10n">More to try: the Assembler's Examples menu has seven programs, from this one to macros. Intel's own manual, in References, describes the whole language.</p>
+        </div>
+
+        <div class="subheader-bar">
           <div id="basic-title" class="l10n">Running Microsoft BASIC</div>
         </div>
         <div class="tutorial">
@@ -328,6 +351,7 @@ RUN</pre>
           <li><a href="https://altairclone.com/downloads/manuals/Altair%208800%20Operator's%20Manual.pdf" target="_blank" rel="noopener"><span id="ref-operators-manual" class="l10n">Altair 8800 Operator's Manual - the original manual as a scanned PDF</span></a></li>
           <li><a href="https://ubuntourist.codeberg.page/Altair-8800/" target="_blank" rel="noopener"><span id="ref-operators-manual-html" class="l10n">Altair 8800 Operator's Manual v2.0 - an HTML edition by Kevin Cole</span></a></li>
           <li><a href="http://www.classiccmp.org/dunfield/r/8080asm.pdf" target="_blank" rel="noopener"><span id="ref-asm-manual" class="l10n">Intel 8080 Assembly Language Programming Manual - Intel's original manual as a scanned PDF</span></a></li>
+          <li><a href="https://gracehoppercenter.codeberg.page/8080-assembly/" target="_blank" rel="noopener"><span id="ref-asm-manual-html" class="l10n">Intel 8080 Assembly Language Programming Manual - an HTML edition by the Grace Hopper Center</span></a></li>
           <li><a href="https://www.openbookproject.net/books/demystcomp/index.html" target="_blank" rel="noopener"><span id="ref-demystifying-computers" class="l10n">Demystifying Computers - an open source book by Chris Jones and Jeff Elkner</span></a></li>
           <li><a href="https://en.wikipedia.org/wiki/Altair_BASIC" target="_blank" rel="noopener"><span id="ref-altair-basic" class="l10n">Wikipedia: Altair BASIC - what it is, and how Microsoft started with it</span></a></li>
           <li><a href="https://altairclone.com/downloads/manuals/BASIC%20Manual%2075.pdf" target="_blank" rel="noopener"><span id="ref-basic-manual" class="l10n">MITS Altair BASIC Reference Manual (1975) - the language itself: a tutorial, every statement and function, the startup questions in Appendix B, and the error codes in Appendix C</span></a></li>

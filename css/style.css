@@ -1330,6 +1330,7 @@ a {
 .asm-code {
     flex: 1 1 auto;
     min-width: 0;
+    overflow: hidden;
     position: relative;
 }
 
@@ -1359,10 +1360,74 @@ a {
 
 .asm-source {
     background: transparent;
-    caret-color: #222;
+    caret-color: transparent;
     color: transparent;
     outline: none;
     resize: none;
+}
+
+/* The caret, a block over the character it is at, as the Teletype's
+   carriage is: dark, the character light on it, blinking at the same
+   rate. It holds still while the cursor moves, and for readers who ask
+   their system for less motion. */
+.asm-caret {
+    background-color: #222;
+    color: #ccc;
+    pointer-events: none;
+    position: absolute;
+    white-space: pre;
+    z-index: 1;
+}
+
+.asm-caret.blinking {
+    animation: tty-blink 1s step-end infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .asm-caret.blinking {
+        animation: none;
+    }
+}
+
+/* Ten characters of the editor's type, out of sight, to measure: their
+   width, and the height of their box within a line, which is the
+   caret's, as the Teletype's carriage covers a character's box. */
+.asm-measure {
+    left: 0;
+    position: absolute;
+    top: 0;
+    visibility: hidden;
+    white-space: pre;
+}
+
+/* Copy, in the editor's corner, as code boxes on the web have it. */
+.asm-copy {
+    background-color: rgba(255, 255, 255, 0.55);
+    border-radius: 6px;
+    color: #333;
+    height: 30px;
+    opacity: 0.75;
+    position: absolute;
+    right: 18px;
+    top: 6px;
+    width: 30px;
+    z-index: 2;
+}
+
+.asm-copy:hover,
+.asm-copy:focus-visible {
+    background-color: rgba(255, 255, 255, 0.85);
+    opacity: 1;
+}
+
+.asm-copied-icon,
+.asm-copy.copied .asm-copy-icon {
+    display: none;
+}
+
+.asm-copy.copied .asm-copied-icon {
+    color: #1b5e20;
+    display: block;
 }
 
 .asm-source::selection {
