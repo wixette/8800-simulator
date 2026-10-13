@@ -14,8 +14,8 @@ const test = require('node:test');
 const assert = require('node:assert');
 const {createSim, flushTimers, bitsToNumber, highAddressLeds} =
       require('./fixture.js');
-const {EXAMPLES_DIR, loadExamples, loadExample, normalizeSource} =
-      require('./examples.js');
+const {EXAMPLES_DIR, loadExamples, loadExample} = require('./examples.js');
+const Asm8080 = require('../js/asm8080.js');
 const cpu = require('../js/8080.js');
 const Sio = require('../js/sio.js');
 const Teletype = require('../js/teletype.js');
@@ -34,7 +34,7 @@ function simFor(example) {
     return fixture;
 }
 
-test('examples/ holds listings to check', () => {
+test('examples/ holds the programs, each with its header', () => {
     assert.ok(EXAMPLES.length >= 5,
               'expected the example programs, found ' + EXAMPLES.length);
     for (const example of EXAMPLES) {
@@ -52,43 +52,58 @@ test('examples/README.md lists every program and its bytes', () => {
                   'README.md does not link ' + example.id + '.asm');
         assert.ok(readme.includes(example.hex),
                   'README.md does not carry the bytes of ' + example.id +
-                      '; the listing has: ' + example.hex);
+                      '; it assembles to: ' + example.hex);
     }
 });
 
+/** The example ids js/panel.js offers, read out of the source. */
+function offeredExamples() {
+    const panel = fs.readFileSync(
+        path.join(__dirname, '..', 'js', 'panel.js'), 'utf8');
+    const block = panel.match(/panel\.EXAMPLES = \[([^\]]*)\]/);
+    assert.ok(block, 'panel.js should declare panel.EXAMPLES');
+    return [...block[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
+}
+
+test('both menus offer every example, and only real ones', () => {
+    // The Load menu and the Assembler's Examples menu are one list.
+    const offered = offeredExamples();
+    const onDisk = EXAMPLES.map((e) => e.id);
+    assert.deepStrictEqual([...offered].sort(), [...onDisk].sort(),
+                           'panel.EXAMPLES and examples/*.asm must match');
+    assert.doesNotMatch(fs.readFileSync(
+        path.join(__dirname, '..', 'js', 'asmtab.js'), 'utf8'),
+                        /asmtab\.EXAMPLES = \[/,
+                        'the Assembler keeps no list of its own');
+});
+
+test('every example fits the smallest machine, and says where to watch', () => {
+    for (const example of EXAMPLES) {
+        assert.ok(example.org + example.bytes.length <= 256,
+                  example.id + ' does not fit the 256 byte machine');
+        assert.ok(['panel', 'teletype'].includes(example.device),
+                  example.id + ' needs a ";;; device: panel" or' +
+                      ' ";;; device: teletype" header');
+    }
+});
+
+test('the menus list the panel programs first, then the teletype ones', () => {
+    // A teletype program watched on the front panel looks like a
+    // machine that has died, so which device a program speaks through
+    // is the first thing the order sorts by. See panel.EXAMPLES.
+    const byId = {};
+    for (const example of EXAMPLES) {
+        byId[example.id] = example;
+    }
+    const devices = offeredExamples().map((id) => byId[id].device);
+    const firstTeletype = devices.indexOf('teletype');
+    assert.notStrictEqual(firstTeletype, -1, 'expected both groups');
+    assert.ok(!devices.slice(firstTeletype).includes('panel'),
+              'a panel program is listed after a teletype one: ' +
+                  devices.join(', '));
+});
+
 for (const example of EXAMPLES) {
-    test(example.id + ': the bytes match the source next to them', () => {
-        for (const line of example.lines) {
-            if (line.isData) {
-                continue;  // A DB directive; there is nothing to decode.
-            }
-            const [text, length] = cpu.disasm(
-                line.bytes[0], line.bytes[1] || 0, line.bytes[2] || 0);
-            assert.strictEqual(
-                length, line.bytes.length,
-                example.id + ' at ' + line.address.toString(16) + ': ' +
-                    line.source + ' takes ' + length + ' bytes, the listing ' +
-                    'gives ' + line.bytes.length);
-            assert.strictEqual(
-                normalizeSource(text), normalizeSource(line.source, example.labels),
-                example.id + ' at ' + line.address.toString(16) +
-                    ': the bytes disassemble to "' + text + '", the listing ' +
-                    'says "' + line.source + '"');
-        }
-    });
-
-    test(example.id + ': the listing runs straight through memory', () => {
-        let expected = example.org;
-        for (const line of example.lines) {
-            assert.strictEqual(
-                line.address, expected,
-                example.id + ': expected an instruction at ' +
-                    expected.toString(16) + ', the listing has one at ' +
-                    line.address.toString(16));
-            expected += line.bytes.length;
-        }
-    });
-
     test(example.id + ': does not depend on what RESET left behind', () => {
         // A real 8080's RESET line clears the program counter and
         // nothing else, so a program started after another one has run
@@ -410,4 +425,68 @@ test('kill the bit: the matching sense switch kills the bit', () => {
     state.inputWord = 0;
     sim.step(300000);
     assert.strictEqual(highAddressLeds(state), 0);
+});
+
+test('tty-subroutines: echoes through a subroutine each way', () => {
+    const {sim, sio, tty} = ttySimFor('tty-subroutines');
+    sio.receiveText('HI');
+    sim.step(4000);
+    assert.strictEqual(tty.getText(), 'HI');
+    sio.receive(0x0d);
+    sio.receiveText('THERE');
+    sim.step(8000);
+    assert.strictEqual(tty.getText(), 'HI\nTHERE', 'RETURN starts a new line');
+});
+
+test('multiply: the 16-bit product of two bytes', () => {
+    for (const [x, y] of [[12, 13], [255, 255], [0, 99], [1, 200]]) {
+        const {sim} = simFor(loadExample('multiply'));
+        sim.mem[0x80] = x;
+        sim.mem[0x81] = y;
+        sim.step(4000);
+        assert.strictEqual(sim.halted, true);
+        assert.strictEqual(sim.mem[0x82] | (sim.mem[0x83] << 8), x * y,
+                           x + ' x ' + y);
+    }
+});
+
+test('print-number: three decimal digits', () => {
+    for (const [value, printed] of [[156, '156'], [7, '007'], [255, '255'],
+                                    [40, '040']]) {
+        const {sim, tty} = ttySimFor('print-number');
+        sim.mem[0x80] = value;
+        sim.step(8000);
+        assert.strictEqual(tty.getText(), printed + '\n');
+        assert.strictEqual(sim.halted, true);
+    }
+});
+
+test('macros: a lamp walks right, one place per delay', () => {
+    const {sim, state} = simFor(loadExample('macros'));
+    sim.step(300);
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0x80, 'it starts left');
+    // 3000H rounds of the delay, 25 cycles each, between the steps.
+    sim.step(0x3000 * 26);
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0x40);
+    sim.step(0x3000 * 25);
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0x20);
+    const result = Asm8080.assemble(loadExample('macros').text);
+    assert.strictEqual(result.symbols.LOOP, undefined,
+                       'LOOP is local to each expansion');
+});
+
+test('the README\'s assembly program makes exactly section 3\'s bytes', () => {
+    // Section 7 says so of the program it shows, which is the adder.
+    const readme = fs.readFileSync(
+        path.join(__dirname, '..', 'README.md'), 'utf8');
+    const section = readme.slice(readme.indexOf('## 7. Write it in assembly'));
+    const code = section.match(/```\n([\s\S]*?)```/)[1];
+    const r = Asm8080.assemble(code);
+    assert.deepStrictEqual(r.errors, []);
+    const bytes = [];
+    for (let a = r.start; a <= r.end; a++) bytes.push(r.memory.get(a));
+    assert.deepStrictEqual(bytes, loadExample('adder').bytes);
+    assert.strictEqual(loadExample('adder').hex,
+                       '3a 80 00 47 3a 81 00 80 32 82 00 c3 00 00',
+                       'the bytes section 3 toggles in by hand');
 });

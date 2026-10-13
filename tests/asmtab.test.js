@@ -87,17 +87,6 @@ test('an error reads as a sentence, with its line, and its macro\'s', () => {
                        'has 256 B of memory. Install more in the Memory menu.');
 });
 
-test('the tab offers every example source, and only those', () => {
-    const dir = path.join(__dirname, '..', 'examples', 'source');
-    const files = fs.readdirSync(dir).filter((f) => f.endsWith('.asm'))
-          .map((f) => path.basename(f, '.asm')).sort();
-    assert.deepStrictEqual([...asmtab.EXAMPLES].sort(), files);
-    const header = asmtab.parseHeader(
-        fs.readFileSync(path.join(dir, 'macros.asm'), 'utf8'));
-    assert.strictEqual(header.name, 'Macros');
-    assert.strictEqual(header.device, 'panel');
-});
-
 test('Tab inserts spaces to the next eight-column stop', () => {
     assert.strictEqual(asmtab.spacesToStop('', 0), '        ');
     assert.strictEqual(asmtab.spacesToStop('LOOP:', 5), '   ');

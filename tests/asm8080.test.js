@@ -13,7 +13,6 @@ const assert = require('node:assert');
 const Asm8080 = require('../js/asm8080.js');
 global.CPU8080 = require('../js/8080.js');
 const Sim8800 = require('../js/sim8800.js');
-const {loadExamples} = require('./examples.js');
 
 /** Assembles, and gives the bytes from the lowest address, in hex. */
 function hexOf(source, options) {
@@ -418,31 +417,6 @@ test('the listing has a row per line, with its address and bytes', () => {
         r.rows.map((row) => [row.line, row.address, row.bytes, row.value]),
         [[1, null, [], null], [2, null, [], 0xff], [3, 0, [0xdb, 0xff], null],
          [4, 2, [0xd3, 0xff], null], [5, 4, [0xc3, 0x00, 0x00], null]]);
-});
-
-test('the simulator\'s example listings reassemble to their bytes', () => {
-    // Each listing is source beside its bytes. Its source column,
-    // assembled, must give exactly the bytes listed - which the other
-    // tests prove run.
-    for (const example of loadExamples()) {
-        const labelOf = {};
-        for (const [name, address] of Object.entries(example.labels)) {
-            labelOf[address] = name;
-        }
-        const source = example.lines.map((line) =>
-            ' ORG ' + line.address + '\n' +
-            (labelOf[line.address] ? labelOf[line.address] + ': ' : ' ') +
-            line.source).join('\n');
-        const r = Asm8080.assemble(source);
-        assert.deepStrictEqual(r.errors, [], example.id);
-        const bytes = [];
-        for (const line of example.lines) {
-            for (let i = 0; i < line.bytes.length; i++) {
-                bytes.push(r.memory.get(line.address + i));
-            }
-        }
-        assert.deepStrictEqual(bytes, example.bytes, example.id);
-    }
 });
 
 test('the tokens give the line back, and say what each piece is', () => {

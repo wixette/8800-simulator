@@ -465,13 +465,19 @@ the machine is untouched, and the status line says how many there are.
 
 ### U5 — Examples in the tab
 
-**Examples ▾** lists the assembler's example sources (T3), grouped as
-the Load menu groups its examples: the front panel's, then the
-Teletype's. They are read from `examples/source/` when the menu first
-opens, so like the Load menu's they need the page served, not opened
-from the disk. Choosing one replaces the editor's text. If the editor
-holds anything that is not an unchanged example, a dialog asks first,
-since that text is otherwise lost.
+**Examples ▾** lists the simulator's example programs (T3), the same
+set and in the same order as the Load menu: the front panel's, then
+the Teletype's. There is one set, as source in `examples/`, and two
+ways in, as @cj0ne5 suggested: *Load* assembles an example out of
+sight and loads its bytes, leaving the editor alone, and says where its
+source is; **Examples ▾** puts the source in the editor. 4K BASIC,
+which is a binary, is only in *Load*.
+
+Both menus read the files once, when either first needs them, so like
+the rest of the page's files they need it served, not opened from the
+disk. Choosing one here replaces the editor's text. If the editor holds
+anything that is not an unchanged example, a dialog asks first, since
+that text is otherwise lost.
 
 ### U6 — Words
 
@@ -579,10 +585,12 @@ under a millisecond. Nothing is done while the tab is hidden.
   expressions and their stated values, the pseudo-instructions, and
   each of the macro examples (MAC1, MAC4, EQMAC, STMAC, TMAC, SBMAC,
   LIND, IXAD), with the misprints in the review notes corrected.
-- **The simulator's own examples:** each listing in `examples/` is
-  already source beside its bytes. The source column, assembled, must
-  give exactly the bytes listed, which the existing tests already prove
-  run.
+- **The simulator's own examples:** each program in `examples/`
+  assembles without an error. The ten that were listings before were
+  turned into labelled source that assembles to exactly the bytes they
+  listed, which `tests/examples.test.js` already proved run; it runs
+  them still, now from the source. (`tty-hello` alone changed: it
+  counts its message's length from `$` instead of ending at a zero.)
 - **Errors:** each error message is produced by a test, and says the
   line it should.
 - **The tab:** the overlay stays aligned (H1), and Assemble loads the
@@ -590,9 +598,9 @@ under a millisecond. Nothing is done while the tab is hidden.
 
 ### T3 — Example sources
 
-New examples, written as source with labels, comments and the features
-each one shows. They are both the menu in the tab (U5) and part of the
-golden set the tests run. A first set:
+Examples written as source with labels, comments and the features
+each one shows. They are both menus (U5) and part of the golden set
+the tests run. The first set, written new:
 
 | Example | Shows |
 | --- | --- |
@@ -604,8 +612,13 @@ golden set the tests run. A first set:
 | Print a number | Decimal output: division by repeated subtraction, the stack |
 | Macros | SHRT and an indirect-load macro, local labels, `::` |
 
-They live in `examples/source/`, with their own README, and are ours,
-under the repository's licence.
+They began in `examples/source/`, beside the listings of the Load
+menu's ten. Two sets that differed were one too many (@cj0ne5), so all
+of them are now source in `examples/`, fourteen programs, with one
+README; *Hello, world* replaced the old `tty-hello` and *Switches to
+lamps* the old `io-echo`, which made the same bytes. They are ours,
+under the repository's licence, and the old `js/listing.js`, which read
+the listings, is gone.
 
 ---
 
@@ -623,6 +636,8 @@ On branch `assembler`, merged into `v1.6.0` when done:
 5. ✅ **Examples and translations:** T3, and every message in ten
    languages.
 6. ✅ **Docs:** the README; a summary on #12 once reviewed.
+7. ✅ **@cj0ne5's review:** the PC followed in the source (U7), and one
+   set of examples behind both menus (U5, T3).
 
 Each step is a commit or a few, tested before the next.
 
@@ -630,10 +645,9 @@ Each step is a commit or a few, tested before the next.
 
 ## Part 8 — Open questions
 
-- **Octal in the listing.** @cj0ne5 is asking his students what they
-  would like. The listing is built so that octal can be added as a
-  toggle: for toggling bytes in by hand, the panel's switches are
-  grouped in octal.
+- ~~**Octal in the listing.**~~ Settled: @cj0ne5's class is happy
+  with hex, so there is no octal toggle. The listing is built so that
+  one could still be added.
 - **The tab's place.** Between Teletype and Debugger (U1), or after
   them?
 - **`MVI A,-1`.** L5 follows the manual and rejects it. If that proves

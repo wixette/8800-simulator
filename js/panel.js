@@ -343,13 +343,17 @@ panel.EXAMPLES = [
     'pattern-shift',
     'io-echo',
     'adder',
+    'multiply',
     'bouncing-light',
     'kill-the-bit',
+    'macros',
     // Teletype.
     'tty-hello',
     'tty-ascii',
     'tty-echo',
     'tty-leds',
+    'tty-subroutines',
+    'print-number',
     'guess-letter',
 ];
 
@@ -368,19 +372,51 @@ panel.needsServer = function() {
 };
 
 /**
- * Reads the example listings, once, the first time the Load menu opens.
- * A reader who never opens it never fetches anything. The menu shows
- * them as they arrive.
+ * Reads one example: its header, and its source assembled. Both menus
+ * offer the same programs from the same files: the Load menu loads the
+ * bytes, and the Assembler's Examples menu shows the source (U5 in
+ * docs/assembler.md).
+ * @param {string} text An examples/*.asm file.
+ * @return {?{name: string, desc: string, device: string,
+ *     bytes: !Array<number>, text: string}} The program, or null if it
+ *     does not assemble.
+ */
+panel.parseExample = function(text) {
+    var meta = {};
+    var re = /^;;;\s*(name|desc|device):\s*(.*)$/gm;
+    var m;
+    while ((m = re.exec(text))) {
+        meta[m[1]] = m[2].trim();
+    }
+    var result = Asm8080.assemble(text);
+    if (!result.ok || !result.size) {
+        return null;
+    }
+    // From 0000H, where every way of loading puts a program.
+    var bytes = [];
+    for (let a = 0; a <= result.end; a++) {
+        bytes.push(result.memory.has(a) ? result.memory.get(a) : 0);
+    }
+    return {name: meta.name || '', desc: meta.desc || '',
+            device: meta.device || '', bytes: bytes, text: text};
+};
+
+/**
+ * Reads the examples, once, the first time either menu opens. A reader
+ * who never opens one never fetches anything. The menus show them as
+ * they arrive.
+ * @return {!Promise} Settles once they are read, or cannot be.
  */
 panel.fetchExamples = function() {
     if (panel.examplesFetched) {
-        return;
+        return panel.examplesPromise;
     }
     panel.examplesFetched = true;
     panel.examplePrograms = {};
     if (panel.needsServer()) {
         panel.examplesProblem = 'needs-server';
-        return;
+        panel.examplesPromise = Promise.resolve();
+        return panel.examplesPromise;
     }
     panel.examplesLoading = true;
     // Fetched together, but listed in the order panel.EXAMPLES gives.
@@ -391,14 +427,14 @@ panel.fetchExamples = function() {
             }
             return response.text();
         }).then(function(text) {
-            var program = Listing.parse(text);
-            return program.bytes.length ? {id: id, program: program} : null;
+            var program = panel.parseExample(text);
+            return program ? {id: id, program: program} : null;
         }).catch(function() {
-            // A listing that cannot be read is simply not offered.
+            // An example that cannot be read is simply not offered.
             return null;
         });
     });
-    Promise.all(fetches).then(function(results) {
+    panel.examplesPromise = Promise.all(fetches).then(function(results) {
         panel.exampleOrder = [];
         for (let i = 0; i < results.length; i++) {
             if (results[i]) {
@@ -413,6 +449,7 @@ panel.fetchExamples = function() {
             panel.loadMenu.setItems(panel.loadMenuItems());
         }
     });
+    return panel.examplesPromise;
 };
 
 /**

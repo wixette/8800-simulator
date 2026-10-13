@@ -1,23 +1,25 @@
 ;;; name: Pattern shift
-;;; desc: Writes 8CH to the data LEDs and rotates it right forever, so
-;;;   the pattern walks across the display.
+;;; desc: Writes 8CH to the data LEDs and rotates it right forever, so the pattern walks across the display.
 ;;; device: panel
-;;;
-;;; Load at 0000H, RESET, then RUN. The data LEDs (D7-D0) show the bit
-;;; pattern 10001100 sliding one place to the right on every pass,
-;;; wrapping around from D0 back to D7.
-;;;
-;;; The simulator runs at 2 MHz, so the rotation is far too fast to
-;;; follow LED by LED; the row reads as a shimmer. Click STOP to freeze
-;;; it and the lamps hold whichever rotation the last OUT wrote.
-;;;
-;;; SINGLE STEP does not show it. The data LEDs carry whatever is on
-;;; the data bus, which between steps is the next instruction byte:
-;;; stepping the loop shows D3H, 0FH, C3H over and over, the opcodes
-;;; of OUT, RRC and JMP. The rotating value is in the accumulator, so
-;;; watch A in the Debugger tab's CPU dump instead.
+;
+; RUN: the data LEDs (D7-D0) show the bit pattern 10001100 sliding one
+; place to the right on every pass, wrapping around from D0 back to D7.
+;
+; The simulator runs at 2 MHz, so the rotation is far too fast to
+; follow LED by LED; the row reads as a shimmer. Click STOP to freeze
+; it and the lamps hold whichever rotation the last OUT wrote.
+;
+; SINGLE STEP does not show it. The data LEDs carry whatever is on
+; the data bus, which between steps is the next instruction byte:
+; stepping the loop shows D3H, 0FH, C3H over and over, the opcodes
+; of OUT, RRC and JMP. The rotating value is in the accumulator, so
+; watch A in the Debugger's CPU dump instead.
 
-0000  3e 8c      MVI A,08CH       ; the pattern to display
-0002  d3 ff      OUT 0FFH         ; port FFH drives the data LEDs
-0004  0f         RRC              ; rotate A right one bit
-0005  c3 02 00   JMP 0002H        ; display it again
+PANEL   EQU     0FFH            ; port FFH drives the data LEDs
+
+        MVI     A,8CH           ; the pattern to display
+SHOW:   OUT     PANEL
+        RRC                     ; rotate A right one bit
+        JMP     SHOW            ; display it again
+
+        END

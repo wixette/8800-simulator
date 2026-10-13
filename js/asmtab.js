@@ -36,18 +36,6 @@ asmtab = {};
 asmtab.STORAGE_KEY = 'sim8800asm';
 
 /**
- * The example sources in examples/source/, in the order the Examples
- * menu offers them: the front panel's first, then the teletype's, each
- * from the simplest up. Only the names are here; the rest is read from
- * each file's header (T3).
- * @type {Array<string>}
- */
-asmtab.EXAMPLES = [
-    'switches', 'adder', 'multiply', 'macros',
-    'hello', 'echo', 'print-number',
-];
-
-/**
  * How long typing must pause before the source is assembled again for
  * the listing and the error marks.
  * @type {number}
@@ -72,9 +60,6 @@ asmtab.loaded = null;
 
 /** The source line marked as the PC's, or 0 for none. @type {number} */
 asmtab.pcLine = 0;
-
-/** The examples, once read: id -> {name, device, text}. */
-asmtab.examples = null;
 
 /** The text of the example last put in the editor, unchanged. */
 asmtab.exampleText = null;
@@ -856,36 +841,12 @@ asmtab.refreshViewToggle = function() {
 
 /**
  * Before the Examples menu opens: the examples are read, the first
- * time, and offered.
+ * time, and offered. They are the Load menu's: the same files, read
+ * once by the panel for both (U5).
  */
 asmtab.onExamplesOpen = function() {
     asmtab.examplesMenu.setItems(asmtab.exampleItems());
-    if (asmtab.examples || asmtab.examplesLoading) {
-        return;
-    }
-    if (panel.needsServer()) {
-        asmtab.examplesProblem = 'needs-server-short';
-        asmtab.examplesMenu.setItems(asmtab.exampleItems());
-        return;
-    }
-    asmtab.examplesLoading = true;
-    Promise.all(asmtab.EXAMPLES.map(function(id) {
-        return window.fetch('examples/source/' + id + '.asm')
-            .then(function(response) {
-                if (!response.ok) {
-                    throw new Error('HTTP ' + response.status);
-                }
-                return response.text();
-            }).then(function(text) {
-                return [id, asmtab.parseHeader(text)];
-            });
-    })).then(function(pairs) {
-        asmtab.examples = Object.fromEntries(pairs);
-        asmtab.examplesProblem = null;
-    }).catch(function() {
-        asmtab.examplesProblem = 'examples-unreadable-short';
-    }).then(function() {
-        asmtab.examplesLoading = false;
+    panel.fetchExamples().then(function() {
         if (asmtab.examplesMenu.isOpen()) {
             asmtab.examplesMenu.setItems(asmtab.exampleItems());
         }
@@ -893,39 +854,28 @@ asmtab.onExamplesOpen = function() {
 };
 
 /**
- * An example source's name and where to watch it, from its header.
- * @param {string} text The file.
- * @return {{name: string, device: string, text: string}}
- */
-asmtab.parseHeader = function(text) {
-    var name = text.match(/^;;;\s*name:\s*(.*)$/m);
-    var device = text.match(/^;;;\s*device:\s*(.*)$/m);
-    return {name: name ? name[1].trim() : '', device:
-            device ? device[1].trim() : '', text: text};
-};
-
-/**
  * The Examples menu's items: grouped by where to watch, as the Load
- * menu's are.
+ * menu's are, and in its order.
  * @return {!Array<Object>}
  */
 asmtab.exampleItems = function() {
     var msg = l10n.getMessage;
-    if (!asmtab.examples) {
-        return [asmtab.examplesProblem ?
-                {value: 'unavailable', label: msg(asmtab.examplesProblem),
-                 disabled: true} :
-                {value: 'loading', label: msg('examples-loading'),
+    if (panel.examplesProblem) {
+        return [{value: 'unavailable', disabled: true,
+                 label: msg(panel.SHORT_REASONS[panel.examplesProblem] ||
+                            panel.examplesProblem)}];
+    }
+    if (panel.examplesLoading || !panel.exampleOrder) {
+        return [{value: 'loading', label: msg('examples-loading'),
                  disabled: true}];
     }
     var items = [];
     [['panel', 'examples-heading-panel'],
      ['teletype', 'examples-heading-tty']].forEach(function(group) {
         items.push({heading: true, label: msg(group[1])});
-        asmtab.EXAMPLES.forEach(function(id) {
-            var example = asmtab.examples[id];
-            if (example && (example.device == 'teletype') ==
-                (group[0] == 'teletype')) {
+        panel.exampleOrder.forEach(function(id) {
+            var example = panel.examplePrograms[id];
+            if ((example.device == 'teletype') == (group[0] == 'teletype')) {
                 items.push({value: id, label: example.name});
             }
         });
@@ -939,7 +889,7 @@ asmtab.exampleItems = function() {
  * @param {string} id The example.
  */
 asmtab.onExampleChosen = function(id) {
-    var example = asmtab.examples && asmtab.examples[id];
+    var example = panel.examplePrograms && panel.examplePrograms[id];
     if (!example) {
         return;
     }
@@ -954,7 +904,7 @@ asmtab.onExampleChosen = function(id) {
 
 /** Names the example the dialog is about to put in. */
 asmtab.onReplaceOpen = function() {
-    var example = asmtab.examples[asmtab.pendingExample];
+    var example = panel.examplePrograms[asmtab.pendingExample];
     document.getElementById('asm-replace-desc').textContent = asmtab.fill(
         l10n.getMessage('asm-replace-desc'), {name: example.name});
 };
@@ -970,7 +920,7 @@ asmtab.onReplaceConfirmed = function() {
  * @param {string} id The example.
  */
 asmtab.useExample = function(id) {
-    var example = asmtab.examples[id];
+    var example = panel.examplePrograms[id];
     var source = asmtab.source();
     source.value = example.text;
     asmtab.exampleText = example.text;

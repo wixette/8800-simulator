@@ -352,6 +352,21 @@ test('the open tab, pressed again, does nothing', (t) => {
     assert.deepStrictEqual(calls.pop(), ['show', 'asm']);
 });
 
+test('both menus read an example the same way: its header, and its bytes', () => {
+    // The Load menu loads the bytes; the Assembler's Examples menu shows
+    // the text. One reader, panel.parseExample, for both.
+    global.Asm8080 = require('../js/asm8080.js');
+    const {loadExample} = require('./examples.js');
+    const example = loadExample('macros');
+    const parsed = panel.parseExample(example.text);
+    assert.strictEqual(parsed.name, 'Macros');
+    assert.strictEqual(parsed.device, 'panel');
+    assert.deepStrictEqual(parsed.bytes, example.bytes);
+    assert.strictEqual(parsed.text, example.text, 'the source, for the Assembler');
+    assert.strictEqual(panel.parseExample(';;; name: Broken\n MVX A'), null,
+                       'a source that does not assemble is not offered');
+});
+
 test('a first visit opens the dock on the Tutorial', () => {
     // No storage at all - as in a private window, or here in Node -
     // is a first visit.

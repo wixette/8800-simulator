@@ -271,8 +271,8 @@ START:  LDA     FIRST           ; A = the first number
 What it takes is the whole of the manual's language: every
 instruction, labels, `EQU` and `SET`, `DB`, `DW` and `DS`, expressions
 and `$`, `IF` and `ENDIF`, and macros, whose labels are local to each
-use as Intel specified. Its **Examples** menu has seven programs, from
-switches to lamps to macros ([examples/source/](examples/source/README.md)),
+use as Intel specified. Its **Examples** menu has every example
+program, from switches to lamps to macros ([examples/](examples/README.md)),
 and **Copy** in the editor's corner takes the source with you. The
 design and its decisions are in [docs/assembler.md](docs/assembler.md).
 
@@ -282,8 +282,9 @@ design and its decisions are in [docs/assembler.md](docs/assembler.md).
   game by Dean McDaniel: a lit bit runs across the upper address lamps,
   and you kill it by flipping the sense switch under it at the right
   moment.
-- **Ten example programs** in all, each a listing with its bytes and
-  its source: see [examples/](examples/README.md).
+- **Fourteen example programs** in all, each written in assembly
+  language: **Load** runs one straight away, and the Assembler's
+  **Examples** shows its source. See [examples/](examples/README.md).
 - **Your own, in assembly language**: in the **Assembler** tab
   ([section 7](#7-write-it-in-assembly)).
 - **Your own, as bytes**: paste them in hex with **Load › Hex Bytes…**,
@@ -326,7 +327,6 @@ programs and the BASIC tape, which the page reads from `examples/` and
 | [js/panel.js](js/panel.js) | The page's own logic: panel drawing, menus, dock, debugger |
 | [js/link.js](js/link.js) | The program link format |
 | [js/asm8080.js](js/asm8080.js), [js/asmtab.js](js/asmtab.js) | The 8080 assembler, and its tab |
-| [js/listing.js](js/listing.js) | Reads the example listings |
 | [js/dropdown.js](js/dropdown.js), [js/dialog.js](js/dialog.js) | The menus and the dialogs |
 | [js/l10n.js](js/l10n.js) | Every message, in ten languages |
 
