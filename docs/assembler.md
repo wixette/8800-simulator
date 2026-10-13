@@ -479,6 +479,27 @@ The tab is a tool, so it reads as software (P5): Title Case labels,
 translated into all ten languages. The source is the programmer's own
 and is never translated; nor are mnemonics, which are the language.
 
+### U7 — The program counter, followed in the source
+
+Suggested by @cj0ne5's class, stepping through programs: the line the
+PC is on is marked in the source, its line number and its listing row,
+in the green the Debugger's dump marks the PC with. A macro's
+expansion marks the line that used it; a halted machine, its HLT.
+
+Two rules keep it simple:
+
+- **What is marked is worked out afresh every time**, never kept: a
+  line only while the machine is on and stopped, the source is the
+  text that was last assembled and loaded, and the bytes at the PC are
+  still that line's. Edit the source, load something else, DEPOSIT
+  over the code, run - and nothing is marked, with nothing to undo.
+  Assembling again brings it back.
+- **The editor scrolls to it only after something the reader did** -
+  Assemble, SINGLE STEP, STOP, RESET, opening the tab - and only if the
+  line is out of sight. A program that halts by itself is marked but
+  never scrolled to, since the reader may be typing; typing,
+  selecting and scrolling by hand never move it either.
+
 ---
 
 ## Part 5 — Highlighting

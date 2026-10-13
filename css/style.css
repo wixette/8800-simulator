@@ -1474,6 +1474,23 @@ a {
     background-color: rgba(176, 0, 32, 0.1);
 }
 
+/* The line the program counter is on, in the green the Debugger's dump
+   marks the PC with (U7): the line tinted, its number marked, its
+   bytes in the listing filled. */
+.asm-line-pc {
+    background-color: rgba(31, 157, 69, 0.22);
+}
+
+.asm-gutter-line.asm-gutter-pc {
+    background-color: #1f9d45;
+    color: #eee;
+}
+
+.asm-listing-line.asm-listing-pc {
+    background-color: #1f9d45;
+    color: #eee;
+}
+
 .asm-errors {
     flex: none;
     list-style: none;

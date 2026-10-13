@@ -57,6 +57,7 @@ panel.onStop = function() {
         return;
     }
     panel.sim.stop();
+    panel.followPc(true);
     if (panel.sim.blockedWrites) {
         panel.setStatus('status-stopped-blocked', panel.blockedParams(),
                         'warn');
@@ -86,6 +87,19 @@ panel.onSingle = function() {
         return;
     }
     panel.sim.singleStep();
+    panel.followPc(true);
+};
+
+/**
+ * Asks the Assembler to mark the line the program counter is on, and,
+ * after something the reader did, to bring it into view. See
+ * asmtab.requestPc().
+ * @param {boolean} scroll Whether the reader caused this.
+ */
+panel.followPc = function(scroll) {
+    if (typeof asmtab !== 'undefined' && asmtab.requestPc) {
+        asmtab.requestPc(scroll);
+    }
 };
 
 /**
@@ -150,6 +164,7 @@ panel.onReset = function() {
         return;
     }
     panel.sim.reset();
+    panel.followPc(true);
     panel.setStatus('status-reset');
 };
 
@@ -1199,6 +1214,7 @@ panel.setAddressLedsCallback = function(bits) {
     for (let i = 0; i < bits.length; i++) {
         panel.setLed('a' + i, bits[i]);
     }
+    panel.followPc(false);
 };
 
 /**
@@ -2880,9 +2896,14 @@ panel.makePressable = function(elem, action) {
  * @param {string} name One of panel.TABS.
  */
 panel.showTab = function(name) {
+    var arriving = name == 'asm' && !(panel.dock.tab == 'asm' && panel.dock.open);
     panel.dock.tab = name;
     panel.dock.open = true;
     panel.applyDock();
+    // Opening the Assembler is coming to look: its PC line, once.
+    if (arriving) {
+        panel.followPc(true);
+    }
 };
 
 /**

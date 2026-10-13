@@ -122,3 +122,29 @@ test('the Tutorial\'s program assembles to what the Tutorial says', () => {
     assert.strictEqual(r.start, 0);
     assert.match(l10n.MESSAGES['asm-tutorial-2'].en, /IN 0FFH is DB FF, at 0000H/);
 });
+
+test('the PC is marked on its line only while it is true (U7)', () => {
+    const text = ['SHRT MACRO', ' RRC', ' ANI 7FH', ' ENDM',
+                  'START: MVI A,80H', ' SHRT', ' JMP START', 'DATA: DB 1'].join('\n');
+    const result = Asm8080.assemble(text);
+    const loaded = {text: text, rows: asmtab.pcRows(result)};
+    const mem = new Array(256).fill(0);
+    for (const [a, b] of result.memory) mem[a] = b;
+    const at = (pc, extra = {}) => asmtab.pcLineOf(loaded, extra.text || text,
+        Object.assign({on: true, running: false, pc: pc,
+                       read: (a) => mem[a]}, extra));
+    assert.strictEqual(at(0), 5, 'MVI A,80H');
+    assert.strictEqual(at(1), 5, 'inside an instruction is still its line');
+    assert.strictEqual(at(2), 6, 'a macro\'s expansion is the line that used it');
+    assert.strictEqual(at(3), 6);
+    assert.strictEqual(at(5), 7, 'JMP START');
+    assert.strictEqual(at(8), 8, 'the bytes of a DB, if it runs into them');
+    assert.strictEqual(at(9), 0, 'past the program');
+    assert.strictEqual(at(0, {running: true}), 0, 'nothing while it runs');
+    assert.strictEqual(at(0, {on: false}), 0, 'nor while it is off');
+    assert.strictEqual(at(0, {text: text + ' '}), 0, 'nor once the source changed');
+    mem[5] = 0x00;
+    assert.strictEqual(at(5), 0, 'nor once the bytes under the PC changed');
+    assert.strictEqual(asmtab.pcLineOf(null, text, {on: true, pc: 0,
+                                                    read: () => 0}), 0);
+});

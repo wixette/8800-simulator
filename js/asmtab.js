@@ -63,6 +63,16 @@ asmtab.LISTING_BYTES = 6;
 /** The last assembly, for the listing and the marks. @type {?Object} */
 asmtab.result = null;
 
+/**
+ * The last assembly that was loaded into the machine: its source text,
+ * and the rows that made bytes, for following the PC (U7).
+ * @type {?{text: string, rows: !Array<Object>}}
+ */
+asmtab.loaded = null;
+
+/** The source line marked as the PC's, or 0 for none. @type {number} */
+asmtab.pcLine = 0;
+
 /** The examples, once read: id -> {name, device, text}. */
 asmtab.examples = null;
 
@@ -203,6 +213,8 @@ asmtab.renderText = function() {
     }
     document.getElementById('asm-highlight').innerHTML = html.join('');
     document.getElementById('asm-gutter').innerHTML = gutter.join('');
+    asmtab.pcLine = 0;
+    asmtab.requestPc(false);
     asmtab.syncScroll();
 };
 
@@ -479,6 +491,8 @@ asmtab.renderListing = function() {
             (c.title ? ' title="' + asmtab.escape(c.title) + '"' : '') + '>' +
             asmtab.escape(c.text) + '</span>';
     }).join('');
+    asmtab.pcLine = 0;
+    asmtab.requestPc(false);
     asmtab.syncScroll();
 };
 
@@ -538,6 +552,134 @@ asmtab.renderSummary = function() {
         summary.textContent = asmtab.fill(l10n.getMessage('asm-summary-ok'), {
             bytes: result.size, start: Asm8080.hex(result.start, 4),
             end: Asm8080.hex(result.end, 4)});
+    }
+};
+
+/**
+ * The rows of an assembly that made bytes, with the source line each
+ * belongs to: a macro's expansion belongs to the line that used it.
+ * @param {!Object} result An assembly.
+ * @return {!Array<{address: number, bytes: !Array<number>,
+ *     line: number}>}
+ */
+asmtab.pcRows = function(result) {
+    return result.rows.filter(function(row) {
+        return row.bytes.length && !row.skipped;
+    }).map(function(row) {
+        return {address: row.address, bytes: row.bytes, line: row.line};
+    });
+};
+
+/**
+ * The source line the program counter is on, worked out afresh (U7):
+ * only while the machine is on and stopped, the source is the text
+ * that was loaded, and the bytes at the PC are still that line's.
+ * Anything else - an edit, another load, a DEPOSIT over the code, a PC
+ * outside the program - and no line is the PC's.
+ * @param {?Object} loaded asmtab.loaded.
+ * @param {string} text The source now.
+ * @param {?{on: boolean, running: boolean, pc: number,
+ *     read: function(number): number}} machine The machine now.
+ * @return {number} The line, from 1, or 0 for none.
+ */
+asmtab.pcLineOf = function(loaded, text, machine) {
+    if (!loaded || loaded.text !== text || !machine || !machine.on ||
+        machine.running) {
+        return 0;
+    }
+    for (const row of loaded.rows) {
+        let offset = (machine.pc - row.address) & 0xffff;
+        if (offset >= row.bytes.length) {
+            continue;
+        }
+        for (let i = 0; i < row.bytes.length; i++) {
+            if (machine.read((row.address + i) & 0xffff) !== row.bytes[i]) {
+                return 0;
+            }
+        }
+        return row.line;
+    }
+    return 0;
+};
+
+/**
+ * Asks for the PC's line to be marked again, at most once a frame; and,
+ * when the reader caused it, scrolled into view if it is out of sight
+ * (U7). A program that halts by itself never scrolls the editor: the
+ * reader may be typing in it.
+ * @param {boolean} scroll Whether the reader caused this.
+ */
+asmtab.requestPc = function(scroll) {
+    asmtab.pcScroll = asmtab.pcScroll || scroll;
+    if (asmtab.pcPending) {
+        return;
+    }
+    asmtab.pcPending = true;
+    window.requestAnimationFrame(function() {
+        asmtab.pcPending = false;
+        var scrollNow = asmtab.pcScroll;
+        asmtab.pcScroll = false;
+        asmtab.renderPc(scrollNow);
+    });
+};
+
+/**
+ * Marks the PC's line in the source, its number and its listing row, in
+ * the green the Debugger's dump uses for the PC.
+ * @param {boolean} scroll Whether to bring it into view.
+ */
+asmtab.renderPc = function(scroll) {
+    var sim = panel.sim;
+    // A halted CPU has already stepped past its HLT; the line to mark is
+    // the HLT's, as the Share link points back at it (panel.linkCpu).
+    var line = asmtab.pcLineOf(asmtab.loaded, asmtab.source().value, sim ? {
+        on: sim.isPoweredOn, running: sim.isRunning,
+        pc: panel.linkCpu().pc,
+        read: function(address) { return sim.readByte(address); },
+    } : null);
+    if (line != asmtab.pcLine) {
+        asmtab.markPc(asmtab.pcLine, false);
+        asmtab.pcLine = line;
+        asmtab.markPc(line, true);
+    }
+    if (scroll && line && panel.dock.tab == 'asm' && panel.dock.open) {
+        asmtab.reveal(line);
+    }
+};
+
+/**
+ * Puts the PC's mark on a line, or takes it off.
+ * @param {number} line From 1, or 0 for none.
+ * @param {boolean} on
+ */
+asmtab.markPc = function(line, on) {
+    if (!line) {
+        return;
+    }
+    [['asm-highlight', 'asm-line', 'asm-line-pc'],
+     ['asm-gutter', 'asm-gutter-line', 'asm-gutter-pc'],
+     ['asm-listing', 'asm-listing-line', 'asm-listing-pc']]
+        .forEach(function(part) {
+            var elem = document.getElementById(part[0])
+                .getElementsByClassName(part[1])[line - 1];
+            if (elem) {
+                elem.classList.toggle(part[2], on);
+            }
+        });
+};
+
+/**
+ * Scrolls the editor so that a line is in view, if it is not already;
+ * it stays where it is if it is.
+ * @param {number} line From 1.
+ */
+asmtab.reveal = function(line) {
+    var source = asmtab.source();
+    var lineHeight = parseFloat(getComputedStyle(source).lineHeight) || 26;
+    var top = (line - 1) * lineHeight;
+    if (top < source.scrollTop ||
+        top + lineHeight > source.scrollTop + source.clientHeight) {
+        source.scrollTop = Math.max(0, top - source.clientHeight / 3);
     }
 };
 
@@ -654,6 +796,11 @@ asmtab.onAssemble = function() {
         return;
     }
     var loaded = asmtab.load(result);
+    // What the machine now holds, and the text it came from: the PC is
+    // followed through this, and only while both still hold (U7).
+    asmtab.loaded = {text: asmtab.source().value,
+                     rows: asmtab.pcRows(result)};
+    asmtab.requestPc(true);
     var params = {bytes: result.size, start: Asm8080.hex(result.start, 4),
                   end: Asm8080.hex(result.end, 4),
                   entry: Asm8080.hex(result.entry, 4)};
