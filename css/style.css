@@ -32,8 +32,10 @@ body {
     overflow: hidden;
 }
 
-input {
-    font-family: 'Consolas', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New', monospace;
+/* Browsers give form controls a font of their own; every one here
+   takes the page's, so a new button cannot come out in Arial. */
+button, input, select, textarea {
+    font-family: inherit;
 }
 
 div, img, pre {
