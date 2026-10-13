@@ -32,9 +32,10 @@ body {
     overflow: hidden;
 }
 
-/* Browsers give form controls a font of their own; every one here
-   takes the page's, so a new button cannot come out in Arial. */
-button, input, select, textarea {
+/* Browsers give form controls and preformatted text a font of their
+   own; every one here takes the page's, so a new button cannot come out
+   in Arial, nor the Teletype's paper in Courier. */
+button, input, select, textarea, pre, code, kbd, samp {
     font-family: inherit;
 }
 
