@@ -2008,6 +2008,32 @@ l10n.MESSAGES = {
         'ko': '편집기에 아직 복사할 것이 없습니다.',
     },
 
+    'asm-clear-title': {
+        'en': 'Clear the editor',
+        'es': 'Vaciar el editor',
+        'fr': 'Vider l’éditeur',
+        'de': 'Editor leeren',
+        'it': 'Svuota l’editor',
+        'pt-BR': 'Limpar o editor',
+        'zh': '清空编辑器',
+        'zh-TW': '清空編輯器',
+        'ja': 'エディタを空にする',
+        'ko': '편집기 비우기',
+    },
+
+    'asm-cleared': {
+        'en': 'The editor is cleared. Undo ({undo}) brings the source back.',
+        'es': 'El editor está vacío. Deshacer ({undo}) recupera el código fuente.',
+        'fr': 'L’éditeur est vidé. Annuler ({undo}) fait revenir la source.',
+        'de': 'Der Editor ist leer. Rückgängig ({undo}) holt den Quelltext zurück.',
+        'it': 'L’editor è vuoto. Annulla ({undo}) riporta il sorgente.',
+        'pt-BR': 'O editor foi limpo. Desfazer ({undo}) traz o código-fonte de volta.',
+        'zh': '编辑器已清空。撤销（{undo}）可以找回源程序。',
+        'zh-TW': '編輯器已清空。復原（{undo}）可以找回原始程式。',
+        'ja': 'エディタを空にしました。取り消し（{undo}）でソースが戻ります。',
+        'ko': '편집기를 비웠습니다. 실행 취소({undo})로 소스를 되돌릴 수 있습니다.',
+    },
+
     'asm-unterminated-string': {
         'en': '{text} is not closed: a string needs a quote at its end.',
         'es': '{text} no está cerrada: una cadena necesita una comilla al final.',

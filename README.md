@@ -272,8 +272,9 @@ What it takes is the whole of the manual's language: every
 instruction, labels, `EQU` and `SET`, `DB`, `DW` and `DS`, expressions
 and `$`, `IF` and `ENDIF`, and macros, whose labels are local to each
 use as Intel specified. Its **Examples** menu has every example
-program, from switches to lamps to macros ([examples/](examples/README.md)),
-and **Copy** in the editor's corner takes the source with you. The
+program, from switches to lamps to macros ([examples/](examples/README.md)).
+In the editor's corner, **Copy** takes the source with you, and
+**Clear** starts afresh (Undo brings it back). The
 design and its decisions are in [docs/assembler.md](docs/assembler.md).
 
 ## 8. More programs

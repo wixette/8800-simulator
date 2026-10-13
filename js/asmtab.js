@@ -87,6 +87,8 @@ asmtab.init = function() {
     }, false);
     document.getElementById('asm-copy').addEventListener(
         'click', asmtab.onCopy, false);
+    document.getElementById('asm-clear').addEventListener(
+        'click', asmtab.onClear, false);
     // The listing scrolls with the source, never by itself.
     document.getElementById('asm-listing').addEventListener(
         'wheel', function(event) {
@@ -145,6 +147,7 @@ asmtab.save = function() {
 asmtab.onEdit = function() {
     asmtab.save();
     asmtab.renderText();
+    asmtab.refreshClear();
     window.clearTimeout(asmtab.assembleTimer);
     asmtab.assembleTimer = window.setTimeout(asmtab.refresh,
                                              asmtab.ASSEMBLE_DELAY);
@@ -162,6 +165,7 @@ asmtab.refresh = function() {
     asmtab.renderListing();
     asmtab.renderErrors();
     asmtab.renderSummary();
+    asmtab.refreshClear();
 };
 
 /**
@@ -402,6 +406,50 @@ asmtab.onCopy = function() {
             button.classList.remove('copied');
         }, asmtab.COPIED_MS);
     }, byHand);
+};
+
+/**
+ * The keys that undo, as this machine's keyboard has them.
+ * @param {string} platform navigator.platform, or ''.
+ * @return {string}
+ */
+asmtab.undoKey = function(platform) {
+    return /Mac|iPhone|iPad|iPod/.test(platform) ? '⌘Z' : 'Ctrl+Z';
+};
+
+/** Clear is offered only while there is something to clear. */
+asmtab.refreshClear = function() {
+    document.getElementById('asm-clear').disabled = !asmtab.source().value;
+};
+
+/**
+ * When the clear button is pressed: the editor is emptied as selecting
+ * everything and deleting it would, so that Undo brings it back. Only
+ * the editor: memory, and what was loaded, stay as they are.
+ */
+asmtab.onClear = function() {
+    var source = asmtab.source();
+    if (!source.value) {
+        return;
+    }
+    source.focus();
+    source.select();
+    // The browser's own delete keeps the text area's undo; setting its
+    // value would lose it. Should a browser refuse, it is set instead.
+    var deleted = false;
+    try {
+        deleted = document.execCommand('delete');
+    } catch (e) {
+        deleted = false;
+    }
+    if (!deleted || source.value) {
+        source.value = '';
+        asmtab.onEdit();
+    }
+    window.clearTimeout(asmtab.assembleTimer);
+    asmtab.refresh();
+    panel.setStatus('asm-cleared',
+                    {undo: asmtab.undoKey(navigator.platform || '')});
 };
 
 /**
@@ -951,6 +999,9 @@ asmtab.refreshText = function() {
     var copy = document.getElementById('asm-copy');
     copy.title = msg('asm-copy-title');
     copy.setAttribute('aria-label', msg('asm-copy-title'));
+    var clear = document.getElementById('asm-clear');
+    clear.title = msg('asm-clear-title');
+    clear.setAttribute('aria-label', msg('asm-clear-title'));
 };
 
 // Exports the namespace for unit tests when running in Node.js. This

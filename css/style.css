@@ -1403,27 +1403,45 @@ a {
     white-space: pre;
 }
 
-/* Copy, in the editor's corner, as code boxes on the web have it. */
-.asm-copy {
+/* Copy and Clear, in the editor's corner, as code boxes on the web
+   have them. Clear stands a little apart: the two do very different
+   things. */
+.asm-corner {
     background-color: rgba(255, 255, 255, 0.55);
     border-radius: 6px;
     color: #333;
     height: 30px;
     opacity: 0.75;
     position: absolute;
-    right: 18px;
     top: 6px;
     width: 30px;
     z-index: 2;
 }
 
+.asm-copy {
+    right: 18px;
+}
+
+.asm-clear {
+    right: 60px;
+}
+
 /* On the editor's light grey, pointing darkens the icon - not the
    white the dark toolbar's icon buttons turn. */
-.asm-copy:hover,
-.asm-copy:focus-visible {
+.asm-corner:hover,
+.asm-corner:focus-visible {
     background-color: rgba(255, 255, 255, 0.85);
     color: #000;
     opacity: 1;
+}
+
+/* Nothing to clear. */
+.asm-corner:disabled,
+.asm-corner:disabled:hover {
+    background-color: rgba(255, 255, 255, 0.55);
+    color: #333;
+    cursor: default;
+    opacity: 0.3;
 }
 
 .asm-copied-icon,

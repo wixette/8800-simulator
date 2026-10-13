@@ -137,3 +137,15 @@ test('the PC is marked on its line only while it is true (U7)', () => {
     assert.strictEqual(asmtab.pcLineOf(null, text, {on: true, pc: 0,
                                                     read: () => 0}), 0);
 });
+
+test('Clear names the undo keys the machine has', () => {
+    assert.strictEqual(asmtab.undoKey('MacIntel'), '⌘Z');
+    assert.strictEqual(asmtab.undoKey('iPhone'), '⌘Z');
+    assert.strictEqual(asmtab.undoKey('Win32'), 'Ctrl+Z');
+    assert.strictEqual(asmtab.undoKey('Linux x86_64'), 'Ctrl+Z');
+    assert.strictEqual(asmtab.undoKey(''), 'Ctrl+Z');
+    for (const locale of Object.keys(l10n.MESSAGES['asm-cleared'])) {
+        assert.match(l10n.MESSAGES['asm-cleared'][locale], /\{undo\}/,
+                     locale + ' should name the undo keys');
+    }
+});

@@ -438,6 +438,11 @@ dependencies, and keeps it that way.
   web, puts the whole source on the clipboard, and shows a tick; where
   the browser will not allow it, the source is selected to copy by
   hand.
+- **Clear**, a little apart beside it, empties the editor as selecting
+  everything and deleting it would, through the browser's own delete,
+  so Undo (⌘Z or Ctrl+Z, which the status line names) brings the source
+  back; no dialog asks first. Only the editor: memory and what was
+  loaded stay as they are. It is greyed out while the editor is empty.
 - **The source is remembered** in this browser, as you type, and comes
   back with the page. It is never sent anywhere.
 - **Assembling does not change the source**: the listing is beside
