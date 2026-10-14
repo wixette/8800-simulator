@@ -52,9 +52,12 @@ asmtab.LISTING_BYTES = 6;
 asmtab.result = null;
 
 /**
- * The last assembly that was loaded into the machine: its source text,
- * and the rows that made bytes, for following the PC (U7).
- * @type {?{text: string, rows: !Array<Object>}}
+ * The last assembly that was loaded into the machine, for following the
+ * PC (U7): its source text, the rows that made bytes, and the machine's
+ * count of whole loads just after it went in. It says the source in the
+ * editor and the bytes in memory are one program, and is forgotten once
+ * they no longer are; see asmtab.pcLineOf and asmtab.onHandWrite.
+ * @type {?{text: string, rows: !Array<Object>, memLoads: number}}
  */
 asmtab.loaded = null;
 
@@ -604,20 +607,72 @@ asmtab.pcRows = function(result) {
 };
 
 /**
+ * Whether the source and memory are still one program: the text in the
+ * editor is the text that was loaded, and nothing has been loaded over
+ * it since - no other program, no power cycle, no clearing, no new
+ * memory boards (U7). A byte put in by hand is asmtab.onHandWrite's.
+ * @param {?Object} loaded asmtab.loaded.
+ * @param {string} text The source now.
+ * @param {number} memLoads The machine's count of whole loads now.
+ * @return {boolean}
+ */
+asmtab.inSync = function(loaded, text, memLoads) {
+    return !!loaded && loaded.text === text && loaded.memLoads === memLoads;
+};
+
+/**
+ * The byte the loaded source made at an address, if it made one there.
+ * @param {!Object} loaded asmtab.loaded.
+ * @param {number} address
+ * @return {?number} The byte, or null.
+ */
+asmtab.loadedByteAt = function(loaded, address) {
+    for (const row of loaded.rows) {
+        let offset = (address - row.address) & 0xffff;
+        if (offset < row.bytes.length) {
+            return row.bytes[offset];
+        }
+    }
+    return null;
+};
+
+/**
+ * After a byte is put in by hand, with DEPOSIT or in the Debugger: if it
+ * changed a byte the source made, the source no longer says what is in
+ * memory, and is forgotten until it is assembled again. A byte put
+ * anywhere else - the numbers a program reads, say - changes nothing.
+ * The program's own writes are not checked: a program may keep its
+ * variables among its bytes. If it rewrites its code, pcLineOf sees the
+ * bytes under the PC have changed.
+ * @param {number} address
+ * @param {number} value
+ */
+asmtab.onHandWrite = function(address, value) {
+    if (!asmtab.loaded) {
+        return;
+    }
+    var byte = asmtab.loadedByteAt(asmtab.loaded, address);
+    if (byte !== null && byte !== value) {
+        asmtab.loaded = null;
+        asmtab.requestPc(false);
+    }
+};
+
+/**
  * The source line the program counter is on, worked out afresh (U7):
- * only while the machine is on and stopped, the source is the text
- * that was loaded, and the bytes at the PC are still that line's.
+ * only while the source and memory are in sync (inSync), the machine
+ * is on and stopped, and the bytes at the PC are still that line's.
  * Anything else - an edit, another load, a DEPOSIT over the code, a PC
  * outside the program - and no line is the PC's.
  * @param {?Object} loaded asmtab.loaded.
  * @param {string} text The source now.
- * @param {?{on: boolean, running: boolean, pc: number,
+ * @param {?{on: boolean, running: boolean, pc: number, memLoads: number,
  *     read: function(number): number}} machine The machine now.
  * @return {number} The line, from 1, or 0 for none.
  */
 asmtab.pcLineOf = function(loaded, text, machine) {
-    if (!loaded || loaded.text !== text || !machine || !machine.on ||
-        machine.running) {
+    if (!machine || !asmtab.inSync(loaded, text, machine.memLoads) ||
+        !machine.on || machine.running) {
         return 0;
     }
     for (const row of loaded.rows) {
@@ -665,9 +720,13 @@ asmtab.renderPc = function(scroll) {
     var sim = panel.sim;
     // A halted CPU has already stepped past its HLT; the line to mark is
     // the HLT's, as the Share link points back at it (panel.linkCpu).
+    // Loaded over since, it is forgotten for good: the count only grows.
+    if (asmtab.loaded && sim && asmtab.loaded.memLoads !== sim.memLoads) {
+        asmtab.loaded = null;
+    }
     var line = asmtab.pcLineOf(asmtab.loaded, asmtab.source().value, sim ? {
         on: sim.isPoweredOn, running: sim.isRunning,
-        pc: panel.linkCpu().pc,
+        pc: panel.linkCpu().pc, memLoads: sim.memLoads,
         read: function(address) { return sim.readByte(address); },
     } : null);
     if (line != asmtab.pcLine) {
@@ -832,7 +891,8 @@ asmtab.onAssemble = function() {
     // What the machine now holds, and the text it came from: the PC is
     // followed through this, and only while both still hold (U7).
     asmtab.loaded = {text: asmtab.source().value,
-                     rows: asmtab.pcRows(result)};
+                     rows: asmtab.pcRows(result),
+                     memLoads: panel.sim.memLoads};
     asmtab.requestPc(true);
     var params = {bytes: result.size, start: Asm8080.hex(result.start, 4),
                   end: Asm8080.hex(result.end, 4),

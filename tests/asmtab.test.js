@@ -116,11 +116,11 @@ test('the PC is marked on its line only while it is true (U7)', () => {
     const text = ['SHRT MACRO', ' RRC', ' ANI 7FH', ' ENDM',
                   'START: MVI A,80H', ' SHRT', ' JMP START', 'DATA: DB 1'].join('\n');
     const result = Asm8080.assemble(text);
-    const loaded = {text: text, rows: asmtab.pcRows(result)};
+    const loaded = {text: text, rows: asmtab.pcRows(result), memLoads: 7};
     const mem = new Array(256).fill(0);
     for (const [a, b] of result.memory) mem[a] = b;
     const at = (pc, extra = {}) => asmtab.pcLineOf(loaded, extra.text || text,
-        Object.assign({on: true, running: false, pc: pc,
+        Object.assign({on: true, running: false, pc: pc, memLoads: 7,
                        read: (a) => mem[a]}, extra));
     assert.strictEqual(at(0), 5, 'MVI A,80H');
     assert.strictEqual(at(1), 5, 'inside an instruction is still its line');
@@ -132,6 +132,8 @@ test('the PC is marked on its line only while it is true (U7)', () => {
     assert.strictEqual(at(0, {running: true}), 0, 'nothing while it runs');
     assert.strictEqual(at(0, {on: false}), 0, 'nor while it is off');
     assert.strictEqual(at(0, {text: text + ' '}), 0, 'nor once the source changed');
+    assert.strictEqual(at(0, {memLoads: 8}), 0,
+                       'nor once anything was loaded over it, even the same bytes');
     mem[5] = 0x00;
     assert.strictEqual(at(5), 0, 'nor once the bytes under the PC changed');
     assert.strictEqual(asmtab.pcLineOf(null, text, {on: true, pc: 0,
@@ -148,4 +150,38 @@ test('Clear names the undo keys the machine has', () => {
         assert.match(l10n.MESSAGES['asm-cleared'][locale], /\{undo\}/,
                      locale + ' should name the undo keys');
     }
+});
+
+test('a byte put in by hand breaks the sync only if it changes the program (U7)', () => {
+    // The adder's numbers go in at 0080H and 0081H by hand: those are
+    // not the program's bytes, so the source still says what is there.
+    const text = ['X EQU 80H', 'START: LDA X', ' HLT', 'COUNT: DB 5'].join('\n');
+    const result = Asm8080.assemble(text);
+    const fresh = () => ({text: text, rows: asmtab.pcRows(result), memLoads: 1});
+    assert.strictEqual(asmtab.loadedByteAt(fresh(), 0), 0x3a);
+    assert.strictEqual(asmtab.loadedByteAt(fresh(), 2), 0x00);
+    assert.strictEqual(asmtab.loadedByteAt(fresh(), 4), 5, 'a DB is the program\'s too');
+    assert.strictEqual(asmtab.loadedByteAt(fresh(), 0x80), null);
+    const requestPc = asmtab.requestPc;
+    asmtab.requestPc = () => {};
+    try {
+        asmtab.loaded = fresh();
+        asmtab.onHandWrite(0x80, 1);
+        asmtab.onHandWrite(0x81, 2);
+        assert.ok(asmtab.loaded, 'data outside the program keeps it');
+        asmtab.onHandWrite(1, 0x80);
+        assert.ok(asmtab.loaded, 'the same byte again keeps it');
+        asmtab.onHandWrite(3, 0x00);
+        assert.strictEqual(asmtab.loaded, null, 'a changed instruction ends it');
+        asmtab.loaded = fresh();
+        asmtab.onHandWrite(4, 6);
+        assert.strictEqual(asmtab.loaded, null, 'so does a changed DB');
+    } finally {
+        asmtab.requestPc = requestPc;
+        asmtab.loaded = null;
+    }
+    assert.ok(asmtab.inSync(fresh(), text, 1));
+    assert.ok(!asmtab.inSync(fresh(), text + ' ', 1), 'an edit');
+    assert.ok(!asmtab.inSync(fresh(), text, 2), 'a load since');
+    assert.ok(!asmtab.inSync(null, text, 1));
 });

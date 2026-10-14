@@ -2298,6 +2298,12 @@ panel.init = function() {
         return panel.isDebugTabVisible;
     };
     panel.sim.setLampsCallback = panel.setLampsCallback;
+    // A byte put in by hand may undo what the Assembler loaded (U7).
+    panel.sim.onHandWrite = function(address, value) {
+        if (typeof asmtab !== 'undefined' && asmtab.onHandWrite) {
+            asmtab.onHandWrite(address, value);
+        }
+    };
     panel.sim.onProtectedWrite = panel.onProtectedWrite;
 
     // The teletype. The paper and the serial board are plain objects

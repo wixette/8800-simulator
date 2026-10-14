@@ -500,16 +500,35 @@ expansion marks the line that used it; a halted machine, its HLT.
 Two rules keep it simple:
 
 - **What is marked is worked out afresh every time**, never kept: a
-  line only while the machine is on and stopped, the source is the
-  text that was last assembled and loaded, and the bytes at the PC are
-  still that line's. Edit the source, load something else, DEPOSIT
-  over the code, run - and nothing is marked, with nothing to undo.
-  Assembling again brings it back.
+  line only while the source and memory are in sync (below), the
+  machine is on and stopped, and the bytes at the PC are still that
+  line's. Edit the source, load something else, DEPOSIT over the code,
+  run - and nothing is marked, with nothing to undo. Assembling again
+  brings it back.
 - **The editor scrolls to it only after something the reader did** -
   Assemble, SINGLE STEP, STOP, RESET, opening the tab - and only if the
   line is out of sight. A program that halts by itself is marked but
   never scrolled to, since the reader may be typing; typing,
   selecting and scrolling by hand never move it either.
+
+**In sync** means the source in the editor and the bytes in memory are
+still one program. Assemble records the text it loaded and, from the
+simulator, its count of whole loads (`Sim8800.memLoads`). Every way
+memory changes goes through the simulator, which is where this is
+guarded:
+
+| What changes memory | In sync after it? |
+| --- | --- |
+| Editing the source, Clear, another example | No, until the text is exactly the assembled text again (Undo) |
+| Any other load: *Load*'s examples, Hex Bytes, a binary file, 4K BASIC, a link | No, even with the very same bytes |
+| Zero All Memory, a power cycle, a change of memory size | No |
+| DEPOSIT, DEPOSIT NEXT or a Debugger edit that changes a byte the source made | No |
+| The same by hand, anywhere else (the adder's numbers at 0080H) | Yes |
+| The program's own stores | Yes: a program may keep its variables among its bytes. Code it rewrites is caught by the bytes at the PC no longer being that line's |
+
+A load, or a byte by hand that changes the program, forgets the record
+for good: only Assemble makes a new one. An edit does not, since memory
+has not changed: undone back to the exact text, the mark returns.
 
 ---
 

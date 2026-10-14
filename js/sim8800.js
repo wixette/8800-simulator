@@ -152,6 +152,21 @@ class Sim8800 {
          */
         this.resetFlashToken = 0;
         this.resetFlashPending = false;
+        /**
+         * How many times memory has been filled or loaded as a whole:
+         * powered on, cleared, given new boards, a program loaded. A
+         * tool that loaded memory can tell from it that what it put
+         * there has since been replaced. Single bytes, written by the
+         * program or by hand, do not count; see onHandWrite.
+         * @type {number}
+         */
+        this.memLoads = 0;
+        /**
+         * Called after a byte is put in by hand - DEPOSIT, or the
+         * Debugger's memory dump - with its address and value.
+         * @type {?function(number, number)}
+         */
+        this.onHandWrite = null;
         this.initMem();
         this.attachDevice(Sim8800.FRONT_PANEL_PORT,
                           this.createFrontPanelDevice());
@@ -247,6 +262,7 @@ class Sim8800 {
      * @param {boolean=} random False to zero the memory instead.
      */
     initMem(random = true) {
+        this.memLoads++;
         if (random) {
             for (let i = 0; i < this.mem.length; i++) {
                 this.mem[i] = Math.floor(Math.random() * 256);
@@ -264,6 +280,7 @@ class Sim8800 {
     loadData(address, data) {
         if (!this.isPoweredOn)
             return;
+        this.memLoads++;
         for (let i = 0; i < data.length && address < this.mem.length; i++) {
             this.mem[address++] = data[i];
         }
@@ -1092,6 +1109,9 @@ class Sim8800 {
             // Only 8 bits of input is considered.
             var value = this.getInputAddressCallback() & 0xff;
             this.writeByte(this.lastAddress, value);
+            if (this.onHandWrite) {
+                this.onHandWrite(this.lastAddress & 0xffff, value);
+            }
         }
         this.showAddressAndData();
         this.requestDump();
@@ -1121,6 +1141,9 @@ class Sim8800 {
         if (this.isProtected(address))
             return 'protected';
         this.mem[address] = value & 0xff;
+        if (this.onHandWrite) {
+            this.onHandWrite(address, value & 0xff);
+        }
         if (address == this.busAddress && this.setDataLedsCallback) {
             this.setDataLedsCallback(Sim8800.parseBits(this.mem[address], 8));
         }

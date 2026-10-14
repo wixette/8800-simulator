@@ -1072,6 +1072,58 @@ test('editByte changes a byte as the Debugger asks, by the machine\'s rules', ()
     assert.strictEqual(sim.editByte(0x0041, 0xff), 'off');
 });
 
+test('memLoads counts whole loads, and onHandWrite each byte put in by hand', () => {
+    // What the Assembler needs to know whether memory still holds what
+    // it loaded (U7 in docs/assembler.md).
+    const fixture = protectSim(256);
+    const {sim, state} = fixture;
+    const hand = [];
+    sim.onHandWrite = (address, value) => hand.push([address, value]);
+    let count = sim.memLoads;
+    const grew = (why) => {
+        assert.ok(sim.memLoads > count, why + ' counts as a whole load');
+        count = sim.memLoads;
+    };
+    sim.initMem(false);
+    grew('clearing memory');
+    sim.loadData(0, [0x76]);
+    grew('a load');
+    sim.powerOff();
+    sim.powerOn();
+    flushTimers();
+    grew('a power cycle');
+    sim.setMemSize(4096);
+    grew('new memory boards');
+    sim.powerOn();
+    flushTimers();
+    count = sim.memLoads;
+    // By hand: DEPOSIT, DEPOSIT NEXT and the Debugger.
+    examineAt(fixture, 0x0080);
+    state.inputWord = 0x01;
+    sim.deposit();
+    state.inputWord = 0x02;
+    sim.depositNext();
+    assert.strictEqual(sim.editByte(0x0090, 0x3e), 'ok');
+    assert.deepStrictEqual(hand, [[0x80, 0x01], [0x81, 0x02], [0x90, 0x3e]]);
+    // Refused, nothing went in, so nothing is reported.
+    sim.protect(true);
+    sim.deposit();
+    sim.editByte(0x0091, 0xff);
+    sim.protect(false);
+    assert.strictEqual(hand.length, 3, 'a refused write is not reported');
+    // The program's own stores are neither.
+    sim.initMem(false);
+    count = sim.memLoads;
+    sim.loadDataAsHexString(0, '3e 2a 32 80 00 76'); // MVI A,2AH; STA 0080H; HLT
+    count = sim.memLoads;
+    sim.reset();
+    sim.start();
+    sim.step(100);
+    assert.strictEqual(sim.mem[0x80], 0x2a, 'the program stored its byte');
+    assert.strictEqual(sim.memLoads, count, 'which is not a whole load');
+    assert.strictEqual(hand.length, 3, 'nor a byte put in by hand');
+});
+
 test('every byte in the dump carries its address', () => {
     const {sim, state} = poweredOnSim();
     sim.flushDump(true);
