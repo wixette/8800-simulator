@@ -536,14 +536,17 @@ class Sim8800 {
         var map = this.mem.length > Sim8800.DUMP_WINDOW_SIZE ?
             this.getMemMap(window, cpu) : null;
         var instr = this.getInstructionAtPc(cpu.pc);
+        // Every byte carries its address, so that the page can tell which
+        // one is pointed at and edit it (#14) - but only a stopped
+        // machine is edited, and a running one is drawn sixty times a
+        // second, so then only the marked bytes are elements.
+        var each = !this.isRunning;
         var sb = [];
         sb.push('<pre>\n');
         for (let i = window.start; i < window.end; i += 16) {
             sb.push(Sim8800.toHex(i, 4));
             sb.push('  ');
             for (let j = i; j < Math.min(window.end, i + 16); j++) {
-                // Every byte carries its address, so that the page can
-                // tell which one is pointed at and edit it (#14).
                 let mark = '';
                 // How far past the opcode this byte is, wrapping at the
                 // top of the address space as the CPU does.
@@ -555,8 +558,11 @@ class Sim8800 {
                 } else if (j == cpu.sp) {
                     mark = ' class="at-sp"';
                 }
-                sb.push('<span data-a="' + j + '"' + mark + '>' +
-                        Sim8800.toHex(this.mem[j], 2) + '</span>');
+                let digits = Sim8800.toHex(this.mem[j], 2);
+                sb.push(each ? '<span data-a="' + j + '"' + mark + '>' +
+                        digits + '</span>' :
+                        mark ? '<span' + mark + '>' + digits + '</span>' :
+                        digits);
                 sb.push((j + 1) % 8 == 0 ? '  ' : ' ');
             }
             sb.push('\n');
@@ -826,6 +832,7 @@ class Sim8800 {
      */
     powerOn() {
         this.isPoweredOn = true;
+        this.clearBlockedWrites();
         this.initMem();
         // POWER ON CLEAR: every memory board comes up unprotected.
         this.protectedBoards = [];
@@ -877,6 +884,9 @@ class Sim8800 {
      * Resets the machine.
      */
     reset() {
+        // A program started again is counted afresh: refusals from the
+        // last one are not this one's, for STOP to report.
+        this.clearBlockedWrites();
         if (!this.isPoweredOn)
             return;
         // The 8080's RESET line clears the program counter and the
@@ -1060,6 +1070,9 @@ class Sim8800 {
      * free-running, so that OUT FFh keeps full control of them.
      */
     singleStep() {
+        // Like the real panel, only a stopped machine takes it.
+        if (this.isRunning)
+            return null;
         if (!this.isPoweredOn)
             return;
         // Each step is a run of its own, so a write it makes to
@@ -1094,6 +1107,9 @@ class Sim8800 {
      * Reads a byte from the given address.
      */
     examine() {
+        // Like the real panel, only a stopped machine takes it.
+        if (this.isRunning)
+            return null;
         if (!this.isPoweredOn)
             return;
         if (this.getInputAddressCallback) {
@@ -1107,6 +1123,9 @@ class Sim8800 {
      * Reads a byte from the next address.
      */
     examineNext() {
+        // Like the real panel, only a stopped machine takes it.
+        if (this.isRunning)
+            return null;
         if (!this.isPoweredOn)
             return;
         this.lastAddress = (this.lastAddress + 1) & 0xffff;
@@ -1119,6 +1138,9 @@ class Sim8800 {
      *     byte did not go in.
      */
     deposit() {
+        // Like the real panel, only a stopped machine takes it.
+        if (this.isRunning)
+            return null;
         if (!this.isPoweredOn)
             return true;
         if (!this.getInputAddressCallback)
@@ -1175,6 +1197,9 @@ class Sim8800 {
      * @return {boolean} False if the board there is protected.
      */
     depositNext() {
+        // Like the real panel, only a stopped machine takes it.
+        if (this.isRunning)
+            return null;
         if (!this.isPoweredOn)
             return true;
         this.lastAddress = (this.lastAddress + 1) & 0xffff;

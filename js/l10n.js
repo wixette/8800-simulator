@@ -991,6 +991,19 @@ l10n.MESSAGES = {
         'ko': '메모리 {start}H-{end}H의 보호를 풀었습니다. 다시 바꿀 수 있습니다.',
     },
 
+    'switch-running': {
+        'en': '{name} works only while the machine is stopped, as on the real one. Click STOP first.',
+        'es': '{name} solo funciona con la máquina detenida, como en la real. Pulsa STOP primero.',
+        'fr': '{name} ne fonctionne que machine arrêtée, comme sur la vraie. Cliquez d’abord sur STOP.',
+        'de': '{name} wirkt nur, wenn die Maschine steht, wie bei der echten. Klicken Sie zuerst STOP.',
+        'it': '{name} funziona solo a macchina ferma, come su quella vera. Premi prima STOP.',
+        'pt-BR': '{name} só funciona com a máquina parada, como na real. Clique em STOP primeiro.',
+        'zh': '和真机一样，{name} 只在机器停止时起作用。请先点击 STOP。',
+        'zh-TW': '和真機一樣，{name} 只在機器停止時起作用。請先點擊 STOP。',
+        'ja': '実機と同じく、{name} は機械が止まっているときだけ働きます。先に STOP をクリックしてください。',
+        'ko': '실제 기계와 마찬가지로 {name}은(는) 기계가 멈춰 있을 때만 동작합니다. 먼저 STOP을 누르세요.',
+    },
+
     'protect-running': {
         'en': 'PROTECT and UNPROTECT work only while the machine is stopped, as on the real one. Click STOP first.',
         'es': 'PROTECT y UNPROTECT solo funcionan con la máquina detenida, como en la real. Pulsa STOP primero.',

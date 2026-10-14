@@ -1127,6 +1127,80 @@ test('memLoads counts whole loads, and onHandWrite each byte put in by hand', ()
     assert.strictEqual(hand.length, 3, 'nor a byte put in by hand');
 });
 
+test('while it runs, the switches but STOP and RESET do nothing', () => {
+    const fixture = protectSim(256);
+    const {sim, state} = fixture;
+    sim.loadDataAsHexString(0, 'c3 00 00');
+    sim.reset();
+    sim.start();
+    const hand = [];
+    sim.onHandWrite = (a, v) => hand.push([a, v]);
+    const pc = CPU8080.status().pc;
+    state.inputWord = 0x0080;
+    assert.strictEqual(sim.examine(), null);
+    assert.strictEqual(sim.examineNext(), null);
+    state.inputWord = 0x77;
+    assert.strictEqual(sim.deposit(), null);
+    assert.strictEqual(sim.depositNext(), null);
+    assert.strictEqual(sim.singleStep(), null);
+    assert.strictEqual(sim.mem[0x80], 0, 'nothing went in');
+    assert.deepStrictEqual(hand, []);
+    assert.strictEqual(CPU8080.status().pc, pc, 'nor did the program move');
+    sim.stop();
+    flushTimers();
+    state.inputWord = 0x0080;
+    sim.examine();
+    state.inputWord = 0x77;
+    sim.deposit();
+    assert.strictEqual(sim.mem[0x80], 0x77, 'stopped, it takes them again');
+});
+
+test('the refused writes are counted afresh after RESET and a power cycle', () => {
+    const fixture = protectSim(256);
+    const {sim, state} = fixture;
+    sim.loadDataAsHexString(0, '3e 01 32 10 00 76');  // MVI A,1; STA 0010H; HLT
+    examineAt(fixture, 0x10);
+    sim.protect(true);
+    sim.reset();
+    sim.start();
+    sim.step(100);
+    flushTimers();
+    assert.strictEqual(sim.blockedWrites, 1, 'the run was refused once');
+    sim.reset();
+    assert.strictEqual(sim.blockedWrites, 0, 'RESET starts the count again');
+    sim.reset();
+    sim.start();
+    sim.step(100);
+    flushTimers();
+    assert.strictEqual(sim.blockedWrites, 1);
+    sim.powerOff();
+    sim.powerOn();
+    flushTimers();
+    assert.strictEqual(sim.blockedWrites, 0, 'and so does power on');
+});
+
+test('a running machine\'s dump marks only the PC and SP bytes', () => {
+    // Drawn sixty times a second: 256 elements a frame was half the
+    // page's work. Only a stopped machine is edited, so only then does
+    // every byte carry its address.
+    const fixture = protectSim(256);
+    const {sim, state} = fixture;
+    let html = '';
+    sim.dumpMemCallback = (h) => { html = h; };
+    sim.loadDataAsHexString(0, 'c3 00 00');
+    sim.reset();
+    sim.dumpMem();
+    assert.strictEqual((html.match(/data-a=/g) || []).length, 256, 'stopped: every byte');
+    sim.start();
+    sim.dumpMem();
+    assert.strictEqual((html.match(/data-a=/g) || []).length, 0, 'running: none');
+    assert.match(html, /class="at-pc"/, 'the PC is still marked');
+    assert.strictEqual(html.replace(/<[^>]+>/g, '').match(/\b[0-9A-F]{2}\b/g).length,
+                       256, 'every byte is still there');
+    sim.stop();
+    flushTimers();
+});
+
 test('every byte in the dump carries its address', () => {
     const {sim, state} = poweredOnSim();
     sim.flushDump(true);

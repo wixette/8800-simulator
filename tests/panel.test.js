@@ -463,7 +463,8 @@ test('a switch thrown on a dead machine does nothing, and says the machine is of
     const done = [];
     const savedSim = panel.sim;
     const savedOn = panel.isPoweredOn;
-    panel.sim = new Proxy({}, {get: (target, name) => () => done.push(name)});
+    panel.sim = new Proxy({}, {get: (target, name) =>
+        name == 'isRunning' ? false : () => done.push(name)});
     t.after(() => { panel.sim = savedSim; panel.isPoweredOn = savedOn; });
     t.mock.method(panel, 'setStatus', (id) => said.push(id));
     const switches = ['onRun', 'onStop', 'onSingle', 'onExamine',
@@ -478,6 +479,33 @@ test('a switch thrown on a dead machine does nothing, and says the machine is of
     switches.forEach((name) => panel[name]());
     assert.strictEqual(done.length, switches.length);
     assert.ok(!said.includes('status-off'));
+});
+
+test('while it runs, only STOP and RESET act, as on the real panel', (t) => {
+    // EXAMINE, DEPOSIT and SINGLE STEP did their work mid-run, which
+    // counted a hand write and restarted the count of refused writes.
+    const said = [];
+    const done = [];
+    const savedSim = panel.sim;
+    const savedOn = panel.isPoweredOn;
+    panel.sim = new Proxy({}, {get: (target, name) =>
+        name == 'isRunning' ? true : name == 'blockedWrites' ? 0 :
+            () => done.push(name)});
+    t.after(() => { panel.sim = savedSim; panel.isPoweredOn = savedOn; });
+    t.mock.method(panel, 'setStatus', (id, params) => said.push([id, params && params.name]));
+    t.mock.method(panel, 'followPc', () => {});
+    panel.isPoweredOn = true;
+    const refused = {onSingle: 'SINGLE STEP', onExamine: 'EXAMINE',
+                     onExamineNext: 'EXAMINE NEXT', onDeposit: 'DEPOSIT',
+                     onDepositNext: 'DEPOSIT NEXT'};
+    for (const [handler, name] of Object.entries(refused)) {
+        panel[handler]();
+        assert.deepStrictEqual(said.pop(), ['switch-running', name]);
+    }
+    assert.deepStrictEqual(done, [], 'nothing reached the machine');
+    panel.onStop();
+    panel.onReset();
+    assert.deepStrictEqual(done, ['stop', 'reset']);
 });
 
 test('PROTECT works only on a stopped machine, and names the range it covers', (t) => {

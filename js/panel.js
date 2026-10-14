@@ -83,7 +83,7 @@ panel.onRun = function() {
  * When SINGLE STEP switch is pressed.
  */
 panel.onSingle = function() {
-    if (panel.reportIfOff()) {
+    if (panel.reportIfOff() || panel.reportIfRunning('SINGLE STEP')) {
         return;
     }
     panel.sim.singleStep();
@@ -106,7 +106,7 @@ panel.followPc = function(scroll) {
  * When EXAMINE switch is pressed.
  */
 panel.onExamine = function() {
-    if (panel.reportIfOff()) {
+    if (panel.reportIfOff() || panel.reportIfRunning('EXAMINE')) {
         return;
     }
     panel.sim.examine();
@@ -116,7 +116,7 @@ panel.onExamine = function() {
  * When EXAMINE NEXT switch is pressed.
  */
 panel.onExamineNext = function() {
-    if (panel.reportIfOff()) {
+    if (panel.reportIfOff() || panel.reportIfRunning('EXAMINE NEXT')) {
         return;
     }
     panel.sim.examineNext();
@@ -126,7 +126,7 @@ panel.onExamineNext = function() {
  * When DEPOSIT switch is pressed.
  */
 panel.onDeposit = function() {
-    if (panel.reportIfOff()) {
+    if (panel.reportIfOff() || panel.reportIfRunning('DEPOSIT')) {
         return;
     }
     if (panel.sim.deposit() === false) {
@@ -138,12 +138,27 @@ panel.onDeposit = function() {
  * When DEPOSIT NEXT switch is pressed.
  */
 panel.onDepositNext = function() {
-    if (panel.reportIfOff()) {
+    if (panel.reportIfOff() || panel.reportIfRunning('DEPOSIT NEXT')) {
         return;
     }
     if (panel.sim.depositNext() === false) {
         panel.reportProtectedDeposit();
     }
+};
+
+/**
+ * On the real panel, EXAMINE, DEPOSIT and SINGLE STEP do nothing while
+ * the machine runs; only STOP and RESET act. Here the status line says
+ * so, rather than leave the switch looking broken.
+ * @param {string} name The switch, as printed on the panel.
+ * @return {boolean} Whether the machine is running.
+ */
+panel.reportIfRunning = function(name) {
+    if (!panel.sim.isRunning) {
+        return false;
+    }
+    panel.setStatus('switch-running', {name: name}, 'warn');
+    return true;
 };
 
 /**
@@ -1050,6 +1065,11 @@ panel.onMemDumpClick = function(event) {
     var target = event.target && event.target.closest ?
         event.target.closest('span[data-a]') : null;
     if (!target) {
+        // A running machine's bytes are not elements of their own (see
+        // Sim8800.dumpMem), but a click on them still deserves the why.
+        if (panel.sim.isRunning) {
+            panel.setStatus('mem-edit-running', {}, 'warn');
+        }
         return;
     }
     var selection = window.getSelection ? window.getSelection() : null;
