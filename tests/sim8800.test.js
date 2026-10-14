@@ -1197,7 +1197,11 @@ test('a running machine\'s dump marks only the PC and SP bytes', () => {
     assert.match(html, /class="at-pc"/, 'the PC is still marked');
     assert.strictEqual(html.replace(/<[^>]+>/g, '').match(/\b[0-9A-F]{2}\b/g).length,
                        256, 'every byte is still there');
+    // STOP redraws it, whenever the last frame came: until then a click
+    // on a byte would find nothing to edit.
     sim.stop();
+    assert.strictEqual((html.match(/data-a=/g) || []).length, 256,
+                       'stopped again: every byte, at once');
     flushTimers();
 });
 

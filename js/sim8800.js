@@ -952,14 +952,20 @@ class Sim8800 {
     }
 
     /**
-     * Stops the CPU.
+     * Stops the CPU. The dump is redrawn as a stopped machine's, every
+     * byte its own again to be clicked and edited (see dumpMem): the
+     * last one drawn while running may have come before the stop.
      */
     stop() {
         if (!this.isPoweredOn)
             return;
+        var wasRunning = this.isRunning;
         this.isRunning = false;
         if (this.setWaitLedCallback) {
             this.setWaitLedCallback(this.isRunning);
+        }
+        if (wasRunning) {
+            this.requestDump();
         }
     }
 
