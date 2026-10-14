@@ -22,11 +22,13 @@ const TYPES = {
     '.css': 'text/css', '.json': 'application/json', '.png': 'image/png',
     '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.md': 'text/plain',
     '.asm': 'text/plain', '.txt': 'text/plain', '.bin': 'application/octet-stream',
-    '.pdf': 'application/pdf', '.woff2': 'font/woff2',
+    '.pdf': 'application/pdf', '.woff2': 'font/woff2', '.mp3': 'audio/mpeg',
 };
 
 /**
- * Serves the repository, as python3 -m http.server would, on a free port.
+ * Serves the repository, as python3 -m http.server would, on a free port,
+ * and only to this machine. Not its hidden files, .git among them: the
+ * page never asks for one.
  * @return {!Promise<{url: string, close: function()}>}
  */
 export function serve() {
@@ -44,7 +46,9 @@ export function serve() {
             path += 'index.html';
         }
         const file = normalize(join(ROOT, path));
-        if (!file.startsWith(ROOT + sep) || !existsSync(file) ||
+        const hidden = file.slice(ROOT.length).split(sep)
+              .some((part) => part.startsWith('.'));
+        if (!file.startsWith(ROOT + sep) || hidden || !existsSync(file) ||
             !statSync(file).isFile()) {
             response.writeHead(404);
             response.end();
