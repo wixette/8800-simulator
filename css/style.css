@@ -1225,7 +1225,7 @@ a {
     }
 }
 
-/* Takes the soft keyboard on a phone without showing a text box. */
+/* Holds the dump and its hidden input, placed against it. */
 .mem-dump-wrap {
     position: relative;
 }
@@ -1607,7 +1607,8 @@ a {
     background-color: var(--hover-bg);
 }
 
-/* Also used for the memory dump's input, beside it. */
+/* Takes the soft keyboard on a phone without showing a text box; also
+   used for the memory dump's input, beside it. */
 .tty-hidden-input {
     border: 0;
     height: 1px;

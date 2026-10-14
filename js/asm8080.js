@@ -1131,8 +1131,8 @@ Asm8080.Pass = class {
     }
 
     /**
-     * Notes an error. Only the last pass keeps them, except those the
-     * layout itself raises.
+     * Notes an error. Only the last pass keeps them: the layout passes
+     * before it see the same program, and would only say it again.
      */
     error(entry, scope, id, params) {
         if (!this.emit) return;

@@ -107,10 +107,10 @@ for (const example of EXAMPLES) {
         // A real 8080's RESET line clears the program counter and
         // nothing else, so a program started after another one has run
         // begins with that program's registers still in place. None of
-        // these examples should care; kill-the-bit is the one that
-        // reads a register it never sets - E, through LDAX D - and
-        // even there only the low address LEDs are affected, which its
-        // display does not use.
+        // these examples should care. Two read a register they never
+        // set: kill-the-bit, E through LDAX D, which reaches only the
+        // low address LEDs its display does not use; and guess-letter,
+        // B, on purpose, as where its letter's randomness starts.
         for (const poison of [0x00, 0xff, 0xa5]) {
             const {sim} = simFor(example);
             for (const r of ['A', 'B', 'C', 'D', 'E', 'H', 'L']) {
