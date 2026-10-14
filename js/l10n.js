@@ -2424,6 +2424,19 @@ l10n.MESSAGES = {
         'ko': '{name}가 매크로를 {depth}단계보다 깊이 쓰거나, 자기 자신을 씁니다.',
     },
 
+    'asm-macro-limit': {
+        'en': 'The macros make more than {count} lines here: does {name} use itself?',
+        'es': 'Las macros generan aquí más de {count} líneas: ¿se usa {name} a sí misma?',
+        'fr': 'Les macros produisent ici plus de {count} lignes : {name} s’utilise-t-elle elle-même ?',
+        'de': 'Die Makros erzeugen hier mehr als {count} Zeilen: Verwendet {name} sich selbst?',
+        'it': 'Le macro producono qui più di {count} righe: {name} usa sé stessa?',
+        'pt-BR': 'As macros geram aqui mais de {count} linhas: {name} usa a si mesma?',
+        'zh': '这里的宏展开超过了 {count} 行：{name} 是否用到了它自己？',
+        'zh-TW': '這裡的巨集展開超過了 {count} 行：{name} 是否用到了它自己？',
+        'ja': 'ここでマクロが {count} 行を超えて展開されます。{name} が自分自身を使っていませんか？',
+        'ko': '여기서 매크로가 {count}줄 넘게 펼쳐집니다. {name}이(가) 자기 자신을 쓰고 있지 않습니까?',
+    },
+
     'asm-macro-arg': {
         'en': "{text} is not an expression. Text passed to a macro goes in quotes: '{text}'.",
         'es': "{text} no es una expresión. El texto que se pasa a una macro va entre comillas: '{text}'.",

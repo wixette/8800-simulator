@@ -226,14 +226,29 @@ Asm8080.ERRORS = [
     'needs-name', 'not-bd', 'not-pair', 'not-pair-psw', 'not-register',
     'operands', 'overlap', 'reserved', 'rst-range', 'set-of-equ',
     'string-value', 'too-big', 'undefined', 'unknown-code',
-    'unterminated-string', 'word-range',
+    'unterminated-string', 'word-range', 'macro-limit',
 ];
 
-/** How many layout passes to try before giving up on a layout. */
-Asm8080.MAX_PASSES = 6;
+/**
+ * How many layout passes to try before giving up on a layout. Most
+ * programs settle in two; each name an EQU takes from one defined
+ * further down can need one more.
+ */
+Asm8080.MAX_PASSES = 32;
 
 /** How deep macro expansions may nest (L16). */
 Asm8080.MAX_DEPTH = 16;
+
+/**
+ * How many lines macro expansions may make in all (L16). The depth
+ * alone does not bound them: a macro that uses itself twice makes 2^16
+ * expansions before it reaches the depth, and three times 3^16, which
+ * would hang the page that assembles as you type.
+ */
+Asm8080.MAX_EXPANDED = 100000;
+
+/** How deeply an expression may nest its parentheses and operators. */
+Asm8080.MAX_NESTING = 200;
 
 /** After this many errors, no more are listed (L14). */
 Asm8080.MAX_ERRORS = 100;
@@ -353,12 +368,15 @@ Asm8080.Pass = class {
         // Every macro expansion, in order, gets a number; its local
         // symbols are found again by that number in the next pass.
         this.expansions = 0;
+        this.expanded = 0;
+        this.overflowed = false;
         this.locals = new Map();
         this.memory = new Map();
         this.owner = new Map();
         this.rows = [];
         this.errors = [];
         this.first = null;
+        this.entry = null;
         this.ended = false;
     }
 
@@ -432,16 +450,23 @@ Asm8080.Pass = class {
             }
             if (code == 'IF') {
                 let on = false;
+                if (!skipping && stmt.label) {
+                    this.defineLabel(stmt, entry, scope);
+                }
                 if (!skipping) {
                     let v = this.evaluateEarly(stmt, stmt.operands[0], scope,
                                                entry);
                     on = v !== null && v != 0;
                 }
                 conditions.push(on);
-                this.row(entry, scope, null, [], skipping);
+                this.row(entry, scope, stmt.label && !skipping ?
+                         this.address : null, [], skipping);
                 continue;
             }
             if (code == 'ENDIF') {
+                if (!skipping && stmt.label) {
+                    this.defineLabel(stmt, entry, scope);
+                }
                 if (!conditions.length) {
                     this.error(entry, scope, 'endif-without-if');
                 } else {
@@ -568,7 +593,11 @@ Asm8080.Pass = class {
      */
     statement(stmt, entry, scope) {
         var at = this.address;
-        if (stmt.bad) {
+        // What follows these is not read as the language, so a '.' or an
+        // apostrophe in it is not an error (L12).
+        var freeText = ['TITLE', 'PAGE', 'NEWPAGE', 'INCLUDE']
+            .indexOf(stmt.code) >= 0;
+        if (stmt.bad && !freeText) {
             this.error(entry, scope, stmt.bad.text[0] == "'" ||
                        stmt.bad.text[0] == '"' ? 'unterminated-string' :
                        'bad-character', {text: stmt.bad.text});
@@ -605,10 +634,20 @@ Asm8080.Pass = class {
             this.row(entry, scope, v, []);
             return;
         }
-        case 'END':
+        case 'END': {
+            // END START names where the program starts (L8).
+            let v = null;
+            if (stmt.operands.length) {
+                let e = this.evaluate(stmt, stmt.operands[0], scope, entry);
+                v = e ? e.value : null;
+                if (v !== null) {
+                    this.entry = v;
+                }
+            }
             this.ended = true;
-            this.row(entry, scope, null, []);
+            this.row(entry, scope, null, [], false, null, v);
             return;
+        }
         case 'ENDM':
             this.error(entry, scope, 'endm-without-macro');
             this.row(entry, scope, null, []);
@@ -668,7 +707,7 @@ Asm8080.Pass = class {
                                 other: this.owner.get(address)});
                     break;
                 }
-                this.owner.set(address, entry.line);
+                this.owner.set(address, scope ? scope.at.line : entry.line);
                 this.memory.set(address, bytes[i] & 0xff);
             }
         }
@@ -753,7 +792,8 @@ Asm8080.Pass = class {
      * @return {?number}
      */
     byteOf(stmt, tokens, scope, entry, quiet) {
-        var v = this.evaluate(stmt, tokens, scope, entry, quiet);
+        var v = this.evaluate(stmt, tokens, scope, entry, quiet, false, false,
+                              true);
         if (v === null) return null;
         if (v.value > 0xff) {
             if (!quiet) {
@@ -833,6 +873,7 @@ Asm8080.Pass = class {
         var v = this.evaluate(stmt, stmt.operands[0] || [], scope, entry);
         var value = v ? v.value : 0;
         var known = !!(v && v.known);
+        var derived = !!(v && v.derived);
         var global = this.symbols.get(name);
         if (stmt.code == 'EQU') {
             // An EQU in a macro is always local to its expansion.
@@ -845,7 +886,8 @@ Asm8080.Pass = class {
                 return;
             }
             table.set(name, {value: value, kind: 'equ', known: known,
-                             line: entry.line, pair: v && v.pair});
+                             derived: derived, line: entry.line,
+                             pair: v && v.pair});
             return;
         }
         // SET changes a global SET name; inside a macro, a name not
@@ -861,7 +903,8 @@ Asm8080.Pass = class {
             return;
         }
         table.set(name, {value: value, kind: 'set', known: known,
-                         line: entry.line, pair: v && v.pair});
+                         derived: derived, line: entry.line,
+                         pair: v && v.pair});
     }
 
     /** The innermost enclosing expansion that already SET a name. */
@@ -911,7 +954,20 @@ Asm8080.Pass = class {
     expand(stmt, entry, scope) {
         var macro = this.macros.get(stmt.code);
         var depth = scope ? scope.depth + 1 : 1;
+        if (this.overflowed) {
+            return;
+        }
+        if (this.expanded + macro.body.length > Asm8080.MAX_EXPANDED) {
+            this.overflowed = true;
+            this.error(entry, scope, 'macro-limit',
+                       {name: macro.name, count: Asm8080.MAX_EXPANDED});
+            return;
+        }
+        this.expanded += macro.body.length;
         if (depth > Asm8080.MAX_DEPTH) {
+            // Said once: every branch of a macro that uses itself would
+            // reach it, and nothing more it makes would help.
+            this.overflowed = true;
             this.error(entry, scope, 'macro-depth', {name: macro.name,
                                                      depth: Asm8080.MAX_DEPTH});
             return;
@@ -934,13 +990,15 @@ Asm8080.Pass = class {
                                {text: this.textOf(stmt, tokens)});
                     return;
                 }
-                if (v.known) {
+                if (v.known && !v.derived) {
                     // A register by its name, anything else in hex, so
                     // that the listing reads as it was written.
                     args.push(v.pair || Asm8080.literal(v.value));
                 } else {
-                    // Not known yet in this pass: the text stands in,
-                    // which a later pass replaces with its value.
+                    // Not known yet in this pass, or known only from a
+                    // name further down: the text stands in, so that the
+                    // body can tell, where it must know its value early
+                    // (L13), that it cannot yet.
                     args.push('(' + this.textOf(stmt, tokens) + ')');
                 }
             }
@@ -984,22 +1042,35 @@ Asm8080.Pass = class {
      * @param {boolean=} macroArg For a macro's argument: a register
      *     name keeps its name.
      * @param {boolean=} early Only what is defined above (L13).
-     * @return {?{value: number, known: boolean, pair: ?string}} Null
-     *     after an error.
+     * @param {boolean=} narrow An 8-bit operand, for an instruction in
+     *     parentheses (L7).
+     * @return {?{value: number, known: boolean, pair: ?string,
+     *     derived: boolean}} Null after an error. derived: the value
+     *     came, by way of some name, from one defined further down.
      */
-    evaluate(stmt, tokens, scope, entry, quiet, macroArg, early) {
+    evaluate(stmt, tokens, scope, entry, quiet, macroArg, early, narrow) {
         var self = this;
         var e = new Asm8080.Expression(tokens, function(name) {
             return self.lookup(name, scope, early);
         }, function(inner) {
-            // An instruction in parentheses (L7).
+            // An instruction in parentheses (L7): assembled quietly, but
+            // a name it needed and could not find is the outer one's.
             var parsed = self.parse({text: inner, line: entry.line}, scope);
-            if (!parsed.code || !Asm8080.INSTRUCTIONS[parsed.code]) {
+            if (!parsed.code || !Asm8080.INSTRUCTIONS[parsed.code] ||
+                parsed.bad) {
                 return null;
             }
-            return self.instruction(parsed, entry, scope, true);
-        }, this.address);
+            var outer = self.innerMissing;
+            self.innerMissing = null;
+            var bytes = self.instruction(parsed, entry, scope, true);
+            var missing = self.innerMissing;
+            self.innerMissing = outer;
+            return bytes && {bytes: bytes, missing: missing};
+        }, this.address, narrow);
         var v = e.evaluate();
+        if (!v.error && !v.known) {
+            this.innerMissing = this.innerMissing || v.missing;
+        }
         if (v.error) {
             if (!quiet) {
                 this.error(entry, scope, v.error, v.params);
@@ -1025,25 +1096,31 @@ Asm8080.Pass = class {
      */
     lookup(name, scope, early) {
         var upper = name.toUpperCase();
+        var self = this;
+        // A name defined above, in this pass; one whose value came from
+        // a name further down is not known early either (L13).
+        var here = function(sym) {
+            return early && sym.derived ? {forward: true} : sym;
+        };
+        // One defined further down, found in the pass before.
+        var later = function(p) {
+            if (!p || p.kind == 'set') return null;
+            return early ? {forward: true} :
+                Object.assign({}, p, {derived: true});
+        };
+        // An expansion's own names come first, whether above or further
+        // down in it, before any global of the same name (L19, L20).
         for (let s = scope; s; s = s.parent) {
             let sym = s.symbols.get(upper);
-            if (sym) return sym;
+            if (sym) return here(sym);
+            let old = self.previous && self.previous.locals.get(s.id);
+            let p = later(old && old.get(upper));
+            if (p) return p;
         }
         var sym = this.symbols.get(upper);
-        if (sym) return sym;
+        if (sym) return here(sym);
         if (!this.previous) return null;
-        for (let s = scope; s; s = s.parent) {
-            let old = this.previous.locals.get(s.id);
-            let p = old && old.get(upper);
-            if (p && p.kind != 'set') {
-                return early ? {forward: true} : p;
-            }
-        }
-        var p = this.previous.symbols.get(upper);
-        if (p && p.kind != 'set') {
-            return early ? {forward: true} : p;
-        }
-        return null;
+        return later(this.previous.symbols.get(upper));
     }
 
     /** A symbol's value, for the listing of an EQU or SET. */
@@ -1119,7 +1196,7 @@ Asm8080.Pass = class {
             memory: this.memory,
             start: keys.length ? Math.min.apply(null, keys) : null,
             end: keys.length ? Math.max.apply(null, keys) : null,
-            entry: this.first,
+            entry: this.entry !== null ? this.entry : this.first,
             size: keys.length,
             rows: this.rows,
             errors: this.errors,
@@ -1160,16 +1237,21 @@ Asm8080.Expression = class {
      * @param {function(string): ?Array<number>} encode Assembles an
      *     instruction written in parentheses (L7).
      * @param {number} here The value of $.
+     * @param {boolean=} narrow An 8-bit operand: an instruction in
+     *     parentheses gives its first byte (L7).
      */
-    constructor(tokens, lookup, encode, here) {
+    constructor(tokens, lookup, encode, here, narrow) {
         this.tokens = tokens;
         this.lookup = lookup;
         this.encode = encode;
         this.here = here;
+        this.narrow = !!narrow;
         this.k = 0;
         this.known = true;
+        this.derived = false;
         this.missing = null;
         this.registerName = null;
+        this.nesting = 0;
     }
 
     /**
@@ -1189,6 +1271,7 @@ Asm8080.Expression = class {
             // A lone register name keeps its name, for pairs (L6).
             var lone = this.tokens.length == 1 && this.registerName;
             return {value: value & 0xffff, known: this.known,
+                    derived: this.derived,
                     register: lone ? this.registerName : null,
                     pair: lone && (this.registerName == 'SP' ||
                                    this.registerName == 'PSW') ?
@@ -1224,6 +1307,10 @@ Asm8080.Expression = class {
     }
 
     level(min) {
+        // Deeper than any program needs, and the stack's limit is near.
+        if (++this.nesting > Asm8080.MAX_NESTING) {
+            throw {error: 'bad-expression', params: {text: this.text()}};
+        }
         var left = this.unary();
         for (;;) {
             var b = this.binary();
@@ -1294,6 +1381,7 @@ Asm8080.Expression = class {
                 this.missing = this.missing || t.text;
                 return 0;
             }
+            if (sym.derived) this.derived = true;
             if (sym.pair) this.registerName = sym.pair;
             return sym.value;
         }
@@ -1311,16 +1399,26 @@ Asm8080.Expression = class {
                     if (depth == 0) break;
                     this.k++;
                 }
+                if (depth != 0) {
+                    // No closing parenthesis.
+                    throw {error: 'bad-expression',
+                           params: {text: this.text()}};
+                }
                 let inner = this.tokens.slice(start, this.k)
                     .map(function(x) { return x.text; }).join(' ')
                     .replace(/ , /g, ',');
                 this.k++;
-                let bytes = this.encode(inner);
-                if (!bytes) {
+                let encoded = this.encode(inner);
+                if (!encoded) {
                     throw {error: 'bad-expression',
                            params: {text: this.text()}};
                 }
-                return bytes.length == 1 ? bytes[0] :
+                if (encoded.missing) {
+                    this.known = false;
+                    this.missing = this.missing || encoded.missing;
+                }
+                let bytes = encoded.bytes;
+                return bytes.length == 1 || this.narrow ? bytes[0] :
                     ((bytes[0] << 8) | bytes[1]) & 0xffff;
             }
             let v = this.level(1);

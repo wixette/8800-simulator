@@ -406,6 +406,108 @@ test('an error in an expansion names both lines (L22)', () => {
                            [[0, 'MX'], [1, 'NOP'], [1, 'MVI A']]);
 });
 
+test('a macro\'s own names win over globals, above or below in it (L19, L20)', () => {
+    // A local label further down in the body is the expansion's own,
+    // even when a global of the same name is defined above.
+    assert.strictEqual(hexOf(program(
+        'SKIP: NOP',
+        'MM MACRO', ' JZ SKIP', ' NOP', 'SKIP: RET', ' ENDM',
+        ' MM')), '00 ca 05 00 00 c9');
+    // And an EQU further down in the body.
+    assert.strictEqual(hexOf(program(
+        'VAL EQU 1',
+        'MM MACRO', ' DB VAL', 'VAL EQU 2', ' ENDM',
+        ' MM')), '02');
+});
+
+test('a macro that uses itself is stopped quickly, with one error (L16)', () => {
+    for (const uses of [2, 3]) {
+        const body = Array(uses).fill(' R');
+        const started = Date.now();
+        const r = Asm8080.assemble(program('R MACRO', ...body, ' ENDM', ' R'));
+        assert.ok(Date.now() - started < 1000, 'it took ' + (Date.now() - started) + ' ms');
+        assert.deepStrictEqual(r.errors.map((e) => e.id), ['macro-depth']);
+    }
+    // Shallow but wide: every level uses the next twice. 2^15 NOPs is a
+    // real program; made 2^17 deep wide, it is past the budget.
+    const levels = (n) => {
+        const lines = [];
+        for (let i = 1; i <= n; i++) {
+            lines.push('L' + i + ' MACRO');
+            lines.push(...(i < n ? [' L' + (i + 1), ' L' + (i + 1)] : [' NOP']));
+            lines.push(' ENDM');
+        }
+        return lines;
+    };
+    const wide = Asm8080.assemble(program(...levels(16), ' L1'));
+    assert.strictEqual(wide.ok, true);
+    assert.strictEqual(wide.size, 1 << 15);
+    const twice = Asm8080.assemble(program(...levels(16), ' L1', ' L1', ' L1', ' L1'));
+    assert.deepStrictEqual(twice.errors.map((e) => e.id), ['macro-limit']);
+});
+
+test('what came from a name further down is not known early either (L13)', () => {
+    // Through an EQU.
+    assert.deepStrictEqual(errorsOf(program(
+        'X EQU Y+1', ' ORG X', 'Y: NOP', ' DW X,Y')), ['later']);
+    assert.deepStrictEqual(errorsOf(program(
+        'N EQU CNT', ' DS N', 'CNT EQU 4')), ['later']);
+    // Through a macro's argument.
+    assert.deepStrictEqual(errorsOf(program(
+        'MM MACRO X', ' ORG X+3', ' ENDM',
+        ' JMP LBL', ' MM LBL', 'LBL: NOP')), ['later']);
+    // Where nothing needs it early, a name further down is fine, through
+    // a long chain of EQUs too.
+    assert.strictEqual(hexOf(program(' JMP DONE', 'DONE: HLT')), 'c3 03 00 76');
+    const chain = [];
+    for (let i = 1; i < 20; i++) chain.push('X' + i + ' EQU X' + (i + 1) + '+1');
+    chain.push('X20 EQU 1', ' DB X1');
+    assert.strictEqual(hexOf(program(...chain)), '14');
+});
+
+test('END names where the program starts (L8)', () => {
+    const r = Asm8080.assemble(program(' ORG 100H', 'MSG: DB 1', 'START: NOP', ' END START'));
+    assert.deepStrictEqual(r.errors, []);
+    assert.strictEqual(r.entry, 0x101, 'START, not the data before it');
+    assert.strictEqual(Asm8080.assemble(program(' ORG 100H', ' NOP', ' END')).entry, 0x100,
+                       'without one, the first byte');
+    assert.deepStrictEqual(errorsOf(program(' NOP', ' END NOWHERE')), ['undefined']);
+    assert.deepStrictEqual(errorsOf(program(' NOP', ' END 1+')), ['bad-expression']);
+});
+
+test('an instruction in parentheses: its names, its parenthesis, its width (L7)', () => {
+    assert.deepStrictEqual(errorsOf(' DB (ADD X)'), ['undefined']);
+    assert.deepStrictEqual(errorsOf(' DB (ADD C'), ['bad-expression']);
+    assert.strictEqual(hexOf(' DB (MVI A,5)'), '3e', 'a byte takes the first');
+    assert.strictEqual(hexOf(' DW (MVI A,5)'), '05 3e', 'a word the first two, high first');
+});
+
+test('a macro\'s bytes belong to the line that used it (L22)', () => {
+    let r = Asm8080.assemble(program('Q1 MACRO', ' LXI H,0', ' ENDM',
+                                     ' ORG 0FFH', ' NOP', ' Q1'), {memSize: 256});
+    assert.deepStrictEqual(r.errors.map((e) => [e.id, e.line]), [['too-big', 6]]);
+    r = Asm8080.assemble(program('Q1 MACRO', ' DB 1', ' ENDM', ' Q1', ' ORG 0', ' DB 2'));
+    assert.deepStrictEqual(r.errors.map((e) => [e.id, e.line, e.params.other]),
+                           [['overlap', 6, 4]]);
+});
+
+test('TITLE and INCLUDE take any text; IF and ENDIF keep a label (L11, L12)', () => {
+    assert.strictEqual(hexOf(program(' TITLE Monitor v1.0', ' NOP')), '00');
+    assert.strictEqual(hexOf(program(" TITLE Bob's monitor", ' NOP')), '00');
+    assert.deepStrictEqual(errorsOf(' INCLUDE lib.asm'), ['include']);
+    assert.deepStrictEqual(errorsOf(' INCLUDE <lib.asm>'), ['include']);
+    assert.strictEqual(hexOf(program('LB: IF 1', ' ENDIF', ' JMP LB')), 'c3 00 00');
+    assert.strictEqual(hexOf(program(' NOP', ' IF 1', ' NOP', 'LE: ENDIF', ' JMP LE')),
+                       '00 00 c3 02 00');
+});
+
+test('an expression nested past reason is an error, not a crash', () => {
+    for (const operand of ['('.repeat(5000) + '1' + ')'.repeat(5000),
+                           '-'.repeat(8000) + '1', 'NOT '.repeat(20000) + '1']) {
+        assert.deepStrictEqual(errorsOf(' DW ' + operand), ['bad-expression']);
+    }
+});
+
 test('the listing has a row per line, with its address and bytes', () => {
     const r = Asm8080.assemble(program(
         '; a comment',

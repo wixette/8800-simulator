@@ -187,6 +187,9 @@ its first byte, or its first two (first byte high) when used as a
 - **`END`** ends the program; anything after it is ignored. The manual
   says it must be there. We do not require it, since its absence
   changes nothing, but a program that has one still works as written.
+- **`END exp`**, as in the manual, names where the program starts:
+  Assemble sets the PC there. Without it, the program starts at its
+  first byte.
 
 ### L9 — `EQU`, `SET`
 
@@ -214,18 +217,21 @@ its first byte, or its first two (first byte high) when used as a
 the expression is not zero. The manual has no `ELSE`, and neither do
 we. `IF`s may be nested. The expression must be known when it is
 reached (L13). An `IF` without its `ENDIF` by the end of the program,
-or inside a macro by the end of that macro, is an error.
+or inside a macro by the end of that macro, is an error. A label on an
+`IF` or `ENDIF` line names the address there, as on any other line.
 
 ### L12 — Beyond the manual: a few compatibility allowances
 
 So that programs written for other 8080 assemblers - pyGHCassembler,
 AS, CP/M's ASM - paste in without edits:
 
-- `TITLE`, `PAGE` and `NEWPAGE` are accepted and ignored. They only
-  ever shaped the printed listing.
+- `TITLE`, `PAGE` and `NEWPAGE` are accepted and ignored, whatever
+  text follows them (`TITLE Bob's monitor v1.0`). They only ever shaped
+  the printed listing.
 - Strings may be in double quotes as well as single.
 - A colon after an `EQU` or `SET` name is accepted (L1).
-- **`INCLUDE`** is the one we deliberately refuse, with this error:
+- **`INCLUDE`**, whatever follows it, is the one we deliberately
+  refuse, with this error:
   *INCLUDE is not part of Intel's 8080 language. Paste the file's text
   here in its place.*
 
@@ -245,6 +251,13 @@ the condition of `IF`, and any expression a macro's expansion depends
 on for its size. A name used there before it is defined is an error:
 *The address of what follows depends on DONE, which is defined later.
 Move its definition up.*
+
+What counts as defined later goes through names: an `EQU` whose value
+comes from a label further down is itself not known early, and nor is
+a macro's argument that is. So `X EQU Y+1` followed by `ORG X`, with
+`Y` below, is the same error as `ORG Y+1`. Elsewhere such values are
+fine, through a chain of `EQU`s too: each link may take another pass,
+and the assembler makes as many as the program needs, up to 32.
 
 ### L14 — Errors
 
@@ -294,7 +307,10 @@ name  MACRO  P1,P2,...
 - A macro may not use itself, directly or through others. Since
   `IF` and `SET` could stop a recursion, this is the one limit we set
   beyond the manual: expansions nest at most 16 deep, and deeper is an
-  error.
+  error, said once. The depth alone does not bound the work - a macro
+  that uses itself three times makes 3^16 expansions before any of
+  them is that deep - so macros may also make at most 100,000 lines in
+  all, more than any program that fits in 64 KB needs.
 
 ### L17 — Reference and substitution
 
