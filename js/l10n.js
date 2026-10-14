@@ -1023,7 +1023,7 @@ l10n.MESSAGES = {
         'fr': 'Aucune mémoire ne répond en {address}H : il n’y a pas de carte à protéger ou déprotéger. Faites d’abord EXAMINE sur une adresse de la mémoire installée.',
         'de': 'Bei {address}H antwortet kein Speicher, also gibt es dort keine Karte zu schützen oder freizugeben. Wählen Sie zuerst mit EXAMINE eine Adresse im eingebauten Speicher.',
         'it': 'Nessuna memoria risponde a {address}H, quindi non c’è una scheda da proteggere o sproteggere. Fai prima EXAMINE di un indirizzo nella memoria installata.',
-        'pt-BR': 'Nenhuma memória responde em {address}H, então não há placa ali para proteger ou desproteger. Faça EXAMINE de um endereço da memória instalada primeiro.',
+        'pt-BR': 'Nenhuma memória responde em {address}H, então não há placa ali para proteger ou desproteger. Primeiro use EXAMINE em um endereço da memória instalada.',
         'zh': '{address}H 处没有内存响应，那里没有可以保护或解除保护的内存板。请先用 EXAMINE 选择已安装内存中的一个地址。',
         'zh-TW': '{address}H 處沒有記憶體回應，那裡沒有可以保護或解除保護的記憶體卡。請先用 EXAMINE 選擇已安裝記憶體中的一個位址。',
         'ja': '{address}H に応答するメモリがないので、保護や解除の対象となるボードがありません。先に EXAMINE で搭載メモリ内のアドレスを選んでください。',
@@ -1089,8 +1089,8 @@ l10n.MESSAGES = {
         'de': 'CLR. Die seriellen Karten sind zurückgesetzt: Was getippt, aber noch nicht gelesen wurde, ist verloren.',
         'it': 'CLR. Le schede seriali sono state azzerate: ciò che era stato digitato e non ancora letto è perso.',
         'pt-BR': 'CLR. As placas seriais foram limpas: o que foi digitado e ainda não lido se perdeu.',
-        'zh': 'CLR。串行板已清空：已输入但尚未被读取的字符都被丢弃了。',
-        'zh-TW': 'CLR。序列卡已清空：已輸入但尚未被讀取的字元都被丟棄了。',
+        'zh': 'CLR。串口板已清空：已输入但尚未被读取的字符都被丢弃了。',
+        'zh-TW': 'CLR。串列埠板已清空：已輸入但尚未被讀取的字元都被丟棄了。',
         'ja': 'CLR。シリアルボードをクリアしました。入力済みでまだ読まれていない文字は失われました。',
         'ko': 'CLR. 직렬 보드를 비웠습니다. 입력했지만 아직 읽히지 않은 문자는 사라졌습니다.',
     },
@@ -1177,29 +1177,29 @@ l10n.MESSAGES = {
     },
 
     'needs-server': {
-        'en': 'This page was opened straight off the disk, so the browser will not let it read the example listings or the BASIC tape. Serve the folder instead: run "python3 -m http.server 8000" in it and open http://localhost:8000/.',
-        'es': 'Esta página se abrió directamente desde el disco, así que el navegador no le deja leer los listados de ejemplo ni la cinta de BASIC. Sirve la carpeta: ejecuta "python3 -m http.server 8000" en ella y abre http://localhost:8000/.',
-        'fr': 'Cette page a été ouverte directement depuis le disque, le navigateur ne la laisse donc pas lire les listings d’exemple ni la bande BASIC. Servez le dossier : lancez-y « python3 -m http.server 8000 » et ouvrez http://localhost:8000/.',
-        'de': 'Diese Seite wurde direkt von der Festplatte geöffnet, daher lässt der Browser sie die Beispiel-Listings und das BASIC-Band nicht lesen. Stellen Sie den Ordner bereit: Führen Sie darin "python3 -m http.server 8000" aus und öffnen Sie http://localhost:8000/.',
-        'it': 'Questa pagina è stata aperta direttamente dal disco, quindi il browser non le lascia leggere i listati di esempio né il nastro BASIC. Servi la cartella: esegui "python3 -m http.server 8000" al suo interno e apri http://localhost:8000/.',
-        'pt-BR': 'Esta página foi aberta direto do disco, então o navegador não a deixa ler as listagens de exemplo nem a fita do BASIC. Sirva a pasta: rode "python3 -m http.server 8000" nela e abra http://localhost:8000/.',
-        'zh': '这个页面是直接从磁盘打开的，浏览器不允许它读取示例程序清单或 BASIC 纸带。请改用服务器：在该目录下运行 "python3 -m http.server 8000"，然后打开 http://localhost:8000/。',
-        'zh-TW': '這個頁面是直接從磁碟開啟的，瀏覽器不允許它讀取範例程式清單或 BASIC 紙帶。請改用伺服器：在該目錄下執行 "python3 -m http.server 8000"，然後開啟 http://localhost:8000/。',
-        'ja': 'このページはディスクから直接開かれているため、ブラウザーはサンプルのリスティングや BASIC の紙テープを読み込ませてくれません。フォルダーを配信してください。その中で "python3 -m http.server 8000" を実行し、http://localhost:8000/ を開きます。',
-        'ko': '이 페이지는 디스크에서 바로 열렸기 때문에 브라우저가 예제 리스팅이나 BASIC 종이테이프를 읽지 못하게 합니다. 폴더를 서버로 제공하세요. 그 안에서 "python3 -m http.server 8000"을 실행하고 http://localhost:8000/ 을 여세요.',
+        'en': 'This page was opened straight off the disk, so the browser will not let it read the example programs or the BASIC tape. Serve the folder instead: run "python3 -m http.server 8000" in it and open http://localhost:8000/.',
+        'es': 'Esta página se abrió directamente desde el disco, así que el navegador no le deja leer los programas de ejemplo ni la cinta de BASIC. Sirve la carpeta: ejecuta "python3 -m http.server 8000" en ella y abre http://localhost:8000/.',
+        'fr': 'Cette page a été ouverte directement depuis le disque, le navigateur ne la laisse donc pas lire les programmes d’exemple ni la bande BASIC. Servez le dossier : lancez-y « python3 -m http.server 8000 » et ouvrez http://localhost:8000/.',
+        'de': 'Diese Seite wurde direkt von der Festplatte geöffnet, daher lässt der Browser sie die Beispielprogramme und das BASIC-Band nicht lesen. Stellen Sie den Ordner bereit: Führen Sie darin "python3 -m http.server 8000" aus und öffnen Sie http://localhost:8000/.',
+        'it': 'Questa pagina è stata aperta direttamente dal disco, quindi il browser non le lascia leggere i programmi di esempio né il nastro BASIC. Servi la cartella: esegui "python3 -m http.server 8000" al suo interno e apri http://localhost:8000/.',
+        'pt-BR': 'Esta página foi aberta direto do disco, então o navegador não a deixa ler as programas de exemplo nem a fita do BASIC. Sirva a pasta: rode "python3 -m http.server 8000" nela e abra http://localhost:8000/.',
+        'zh': '这个页面是直接从磁盘打开的，浏览器不允许它读取示例程序或 BASIC 纸带。请改用服务器：在该目录下运行 "python3 -m http.server 8000"，然后打开 http://localhost:8000/。',
+        'zh-TW': '這個頁面是直接從磁碟開啟的，瀏覽器不允許它讀取範例程式或 BASIC 紙帶。請改用伺服器：在該目錄下執行 "python3 -m http.server 8000"，然後開啟 http://localhost:8000/。',
+        'ja': 'このページはディスクから直接開かれているため、ブラウザーはサンプルのプログラムや BASIC の紙テープを読み込ませてくれません。フォルダーを配信してください。その中で "python3 -m http.server 8000" を実行し、http://localhost:8000/ を開きます。',
+        'ko': '이 페이지는 디스크에서 바로 열렸기 때문에 브라우저가 예제 프로그램이나 BASIC 종이테이프를 읽지 못하게 합니다. 폴더를 서버로 제공하세요. 그 안에서 "python3 -m http.server 8000"을 실행하고 http://localhost:8000/ 을 여세요.',
     },
 
     'examples-unreadable': {
-        'en': 'The example listings could not be read. They live in the examples folder beside this page.',
-        'es': 'No se pudieron leer los listados de ejemplo. Están en la carpeta examples junto a esta página.',
-        'fr': 'Les listings d’exemple n’ont pas pu être lus. Ils se trouvent dans le dossier examples à côté de cette page.',
-        'de': 'Die Beispiel-Listings konnten nicht gelesen werden. Sie liegen im Ordner examples neben dieser Seite.',
-        'it': 'Non è stato possibile leggere i listati di esempio. Si trovano nella cartella examples accanto a questa pagina.',
-        'pt-BR': 'Não foi possível ler as listagens de exemplo. Elas ficam na pasta examples, ao lado desta página.',
-        'zh': '无法读取示例程序清单。它们在本页面旁边的 examples 目录里。',
-        'zh-TW': '無法讀取範例程式清單。它們在本頁面旁邊的 examples 目錄裡。',
-        'ja': 'サンプルのリスティングを読み込めませんでした。このページと同じ場所の examples フォルダーにあります。',
-        'ko': '예제 리스팅을 읽을 수 없습니다. 이 페이지 옆 examples 폴더에 있습니다.',
+        'en': 'The example programs could not be read. They live in the examples folder beside this page.',
+        'es': 'No se pudieron leer los programas de ejemplo. Están en la carpeta examples junto a esta página.',
+        'fr': 'Les programmes d’exemple n’ont pas pu être lus. Ils se trouvent dans le dossier examples à côté de cette page.',
+        'de': 'Die Beispielprogramme konnten nicht gelesen werden. Sie liegen im Ordner examples neben dieser Seite.',
+        'it': 'Non è stato possibile leggere i programmi di esempio. Si trovano nella cartella examples accanto a questa pagina.',
+        'pt-BR': 'Não foi possível ler os programas de exemplo. Eles ficam na pasta examples, ao lado desta página.',
+        'zh': '无法读取示例程序。它们在本页面旁边的 examples 目录里。',
+        'zh-TW': '無法讀取範例程式。它們在本頁面旁邊的 examples 目錄裡。',
+        'ja': 'サンプルのプログラムを読み込めませんでした。このページと同じ場所の examples フォルダーにあります。',
+        'ko': '예제 프로그램을 읽을 수 없습니다. 이 페이지 옆 examples 폴더에 있습니다.',
     },
 
     'rom-needs-memory': {
@@ -1755,8 +1755,8 @@ l10n.MESSAGES = {
         'de': 'Quelltext',
         'it': 'Sorgente',
         'pt-BR': 'Código-fonte',
-        'zh': '源程序',
-        'zh-TW': '原始程式',
+        'zh': '源代码',
+        'zh-TW': '原始碼',
         'ja': 'ソース',
         'ko': '소스',
     },
@@ -1794,8 +1794,8 @@ l10n.MESSAGES = {
         'de': 'Quelltext',
         'it': 'Sorgente',
         'pt-BR': 'Código-fonte',
-        'zh': '源程序',
-        'zh-TW': '原始程式',
+        'zh': '源代码',
+        'zh-TW': '原始碼',
         'ja': 'ソース',
         'ko': '소스',
     },
@@ -1859,8 +1859,8 @@ l10n.MESSAGES = {
         'de': 'Das Programm hat Fehler, also wurde nichts geladen. Sie stehen unter dem Quelltext: {count} insgesamt.',
         'it': 'Il programma ha errori, quindi non è stato caricato nulla. Sono elencati sotto il sorgente: {count} in tutto.',
         'pt-BR': 'O programa tem erros, então nada foi carregado. Eles estão listados sob o código-fonte: {count} no total.',
-        'zh': '程序有错误，所以没有载入任何内容。错误列在源程序下方，共 {count} 个。',
-        'zh-TW': '程式有錯誤，所以沒有載入任何內容。錯誤列在原始程式下方，共 {count} 個。',
+        'zh': '程序有错误，所以没有载入任何内容。错误列在源代码下方，共 {count} 个。',
+        'zh-TW': '程式有錯誤，所以沒有載入任何內容。錯誤列在原始碼下方，共 {count} 個。',
         'ja': 'プログラムにエラーがあるため、何も読み込みませんでした。ソースの下に全 {count} 件を挙げています。',
         'ko': '프로그램에 오류가 있어 아무것도 불러오지 않았습니다. 소스 아래에 모두 {count}개를 적었습니다.',
     },
@@ -1893,13 +1893,13 @@ l10n.MESSAGES = {
 
     'asm-replace-title': {
         'en': 'Replace the Source?',
-        'es': '¿Reemplazar el Código?',
+        'es': '¿Reemplazar el Código Fuente?',
         'fr': 'Remplacer la Source ?',
-        'de': 'Quelltext Ersetzen?',
+        'de': 'Quelltext ersetzen?',
         'it': 'Sostituire il Sorgente?',
-        'pt-BR': 'Substituir o Código?',
-        'zh': '替换源程序？',
-        'zh-TW': '替換原始程式？',
+        'pt-BR': 'Substituir o Código-Fonte?',
+        'zh': '替换源代码？',
+        'zh-TW': '替換原始碼？',
         'ja': 'ソースを置き換えますか？',
         'ko': '소스를 바꿀까요?',
     },
@@ -1950,8 +1950,8 @@ l10n.MESSAGES = {
         'de': 'Quelltext kopieren',
         'it': 'Copia il sorgente',
         'pt-BR': 'Copiar o código-fonte',
-        'zh': '复制源程序',
-        'zh-TW': '複製原始程式',
+        'zh': '复制源代码',
+        'zh-TW': '複製原始碼',
         'ja': 'ソースをコピー',
         'ko': '소스 복사',
     },
@@ -1963,8 +1963,8 @@ l10n.MESSAGES = {
         'de': 'Der Quelltext ist kopiert: {lines} Zeilen.',
         'it': 'Sorgente copiato: {lines} righe.',
         'pt-BR': 'Código-fonte copiado: {lines} linhas.',
-        'zh': '源程序已复制，共 {lines} 行。',
-        'zh-TW': '原始程式已複製，共 {lines} 行。',
+        'zh': '源代码已复制，共 {lines} 行。',
+        'zh-TW': '原始碼已複製，共 {lines} 行。',
         'ja': 'ソースをコピーしました（{lines} 行）。',
         'ko': '소스를 복사했습니다({lines}행).',
     },
@@ -1976,9 +1976,9 @@ l10n.MESSAGES = {
         'de': 'Der Browser ließ das Kopieren nicht zu, also ist der Quelltext markiert. Kopieren Sie ihn von dort.',
         'it': 'Il browser non ha permesso di copiare il sorgente, quindi è selezionato. Copialo da lì.',
         'pt-BR': 'O navegador não permitiu copiar o código, então ele foi selecionado. Copie-o de lá.',
-        'zh': '浏览器不允许复制，所以已选中源程序。请从那里复制。',
-        'zh-TW': '瀏覽器不允許複製，所以已選取原始程式。請從那裡複製。',
-        'ja': 'ブラウザがコピーを許可しなかったため、ソースを選択しました。そこからコピーしてください。',
+        'zh': '浏览器不允许复制，所以已选中源代码。请从那里复制。',
+        'zh-TW': '瀏覽器不允許複製，所以已選取原始碼。請從那裡複製。',
+        'ja': 'ブラウザーがコピーを許可しなかったため、ソースを選択しました。そこからコピーしてください。',
         'ko': '브라우저가 복사를 허락하지 않아 소스를 선택해 두었습니다. 거기서 복사하세요.',
     },
 
@@ -2015,8 +2015,8 @@ l10n.MESSAGES = {
         'de': 'Der Editor ist leer. Rückgängig ({undo}) holt den Quelltext zurück.',
         'it': 'L’editor è vuoto. Annulla ({undo}) riporta il sorgente.',
         'pt-BR': 'O editor foi limpo. Desfazer ({undo}) traz o código-fonte de volta.',
-        'zh': '编辑器已清空。撤销（{undo}）可以找回源程序。',
-        'zh-TW': '編輯器已清空。復原（{undo}）可以找回原始程式。',
+        'zh': '编辑器已清空。撤销（{undo}）可以找回源代码。',
+        'zh-TW': '編輯器已清空。復原（{undo}）可以找回原始碼。',
         'ja': 'エディタを空にしました。取り消し（{undo}）でソースが戻ります。',
         'ko': '편집기를 비웠습니다. 실행 취소({undo})로 소스를 되돌릴 수 있습니다.',
     },
@@ -2031,7 +2031,7 @@ l10n.MESSAGES = {
         'zh': '{text} 没有结束：字符串的末尾需要一个引号。',
         'zh-TW': '{text} 沒有結束：字串的結尾需要一個引號。',
         'ja': '{text} が閉じていません。文字列の終わりには引用符が必要です。',
-        'ko': '{text}가 닫히지 않았습니다. 문자열 끝에는 따옴표가 필요합니다.',
+        'ko': '{text}이(가) 닫히지 않았습니다. 문자열 끝에는 따옴표가 필요합니다.',
     },
 
     'asm-bad-character': {
@@ -2044,7 +2044,7 @@ l10n.MESSAGES = {
         'zh': '{text} 在 8080 汇编语言中没有意义。',
         'zh-TW': '{text} 在 8080 組合語言中沒有意義。',
         'ja': '{text} は 8080 のアセンブリ言語では意味を持ちません。',
-        'ko': '{text}는 8080 어셈블리 언어에서 아무 뜻이 없습니다.',
+        'ko': '{text}은(는) 8080 어셈블리 언어에서 아무 뜻이 없습니다.',
     },
 
     'asm-unknown-code': {
@@ -2057,7 +2057,7 @@ l10n.MESSAGES = {
         'zh': '{word} 不是指令、伪指令，也不是宏。标号后面要有冒号。',
         'zh-TW': '{word} 不是指令、虛擬指令，也不是巨集。標籤後面要有冒號。',
         'ja': '{word} は命令でも疑似命令でもマクロでもありません。ラベルの後にはコロンが必要です。',
-        'ko': '{word}는 명령어도, 의사 명령어도, 매크로도 아닙니다. 레이블 뒤에는 콜론이 필요합니다.',
+        'ko': '{word}은(는) 명령어도, 의사 명령어도, 매크로도 아닙니다. 레이블 뒤에는 콜론이 필요합니다.',
     },
 
     'asm-macro-before-definition': {
@@ -2070,7 +2070,7 @@ l10n.MESSAGES = {
         'zh': '{word} 是在下面才定义的宏。请把它定义在第一次使用之前。',
         'zh-TW': '{word} 是在下面才定義的巨集。請把它定義在第一次使用之前。',
         'ja': '{word} はこれより下で定義されているマクロです。最初に使う所より上で定義してください。',
-        'ko': '{word}는 더 아래에서 정의된 매크로입니다. 처음 쓰는 곳보다 위에서 정의하세요.',
+        'ko': '{word}은(는) 더 아래에서 정의된 매크로입니다. 처음 쓰는 곳보다 위에서 정의하세요.',
     },
 
     'asm-operands': {
@@ -2083,7 +2083,7 @@ l10n.MESSAGES = {
         'zh': '{code} 不是这样写的，应写作 {example} 的样子。',
         'zh-TW': '{code} 不是這樣寫的，應寫作 {example} 的樣子。',
         'ja': '{code} の書き方が違います。{example} のように書きます。',
-        'ko': '{code}는 그렇게 쓰지 않습니다. {example}처럼 씁니다.',
+        'ko': '{code}은(는) 그렇게 쓰지 않습니다. {example}처럼 씁니다.',
     },
 
     'asm-not-register': {
@@ -2096,7 +2096,7 @@ l10n.MESSAGES = {
         'zh': '{text} 不是寄存器。寄存器是 B、C、D、E、H、L、M 或 A。',
         'zh-TW': '{text} 不是暫存器。暫存器是 B、C、D、E、H、L、M 或 A。',
         'ja': '{text} はレジスタではありません。レジスタは B、C、D、E、H、L、M、A です。',
-        'ko': '{text}는 레지스터가 아닙니다. 레지스터는 B, C, D, E, H, L, M, A입니다.',
+        'ko': '{text}은(는) 레지스터가 아닙니다. 레지스터는 B, C, D, E, H, L, M, A입니다.',
     },
 
     'asm-not-pair': {
@@ -2108,8 +2108,8 @@ l10n.MESSAGES = {
         'pt-BR': '{text} não é aqui um par de registradores. Aceita B, D, H ou SP.',
         'zh': '{text} 在这里不是寄存器对。这里可用 B、D、H 或 SP。',
         'zh-TW': '{text} 在這裡不是暫存器對。這裡可用 B、D、H 或 SP。',
-        'ja': '{text} はここではレジスタペアではありません。B、D、H、SP のどれかです。',
-        'ko': '{text}는 여기서 레지스터 쌍이 아닙니다. B, D, H, SP 중 하나입니다.',
+        'ja': '{text} はここではレジスタペアではありません。ここで使えるのは B、D、H、SP のどれかです。',
+        'ko': '{text}은(는) 여기서 레지스터 쌍이 아닙니다. 여기에는 B, D, H, SP 중 하나만 쓸 수 있습니다.',
     },
 
     'asm-not-pair-psw': {
@@ -2121,8 +2121,8 @@ l10n.MESSAGES = {
         'pt-BR': '{text} não é um par de registradores para PUSH e POP. Eles aceitam B, D, H ou PSW.',
         'zh': '{text} 不是 PUSH 和 POP 的寄存器对。它们可用 B、D、H 或 PSW。',
         'zh-TW': '{text} 不是 PUSH 和 POP 的暫存器對。它們可用 B、D、H 或 PSW。',
-        'ja': '{text} は PUSH と POP のレジスタペアではありません。B、D、H、PSW のどれかです。',
-        'ko': '{text}는 PUSH와 POP의 레지스터 쌍이 아닙니다. B, D, H, PSW 중 하나입니다.',
+        'ja': '{text} は PUSH と POP のレジスタペアではありません。PUSH と POP に使えるのは B、D、H、PSW のどれかです。',
+        'ko': '{text}은(는) PUSH와 POP의 레지스터 쌍이 아닙니다. PUSH와 POP에는 B, D, H, PSW만 쓸 수 있습니다.',
     },
 
     'asm-not-bd': {
@@ -2135,7 +2135,7 @@ l10n.MESSAGES = {
         'zh': '这里不能用 {text}：LDAX 和 STAX 只接受 B 或 D。',
         'zh-TW': '這裡不能用 {text}：LDAX 和 STAX 只接受 B 或 D。',
         'ja': 'ここでは {text} は使えません。LDAX と STAX は B か D だけです。',
-        'ko': '여기서는 {text}를 쓸 수 없습니다. LDAX와 STAX는 B나 D만 받습니다.',
+        'ko': '여기서는 {text}을(를) 쓸 수 없습니다. LDAX와 STAX는 B나 D만 받습니다.',
     },
 
     'asm-rst-range': {
@@ -2148,7 +2148,7 @@ l10n.MESSAGES = {
         'zh': 'RST 只接受 0 到 7 的数，不接受 {text}。',
         'zh-TW': 'RST 只接受 0 到 7 的數，不接受 {text}。',
         'ja': 'RST に使えるのは 0 から 7 までの数で、{text} は使えません。',
-        'ko': 'RST는 0부터 7까지의 수만 받으며, {text}는 안 됩니다.',
+        'ko': 'RST는 0부터 7까지의 수만 받으며, {text}은(는) 안 됩니다.',
     },
 
     'asm-mov-m-m': {
@@ -2174,12 +2174,12 @@ l10n.MESSAGES = {
         'zh': '{text} 等于 {value}H，放不进一个字节（0 到 0FFH）。要写 -1，请写 0FFH，或加上 AND 0FFH。',
         'zh-TW': '{text} 等於 {value}H，放不進一個位元組（0 到 0FFH）。要寫 -1，請寫 0FFH，或加上 AND 0FFH。',
         'ja': '{text} は {value}H で、1 バイト（0 から 0FFH）に収まりません。-1 なら 0FFH と書くか、AND 0FFH を付けてください。',
-        'ko': '{text}는 {value}H로, 한 바이트(0부터 0FFH)에 들어가지 않습니다. -1이라면 0FFH로 쓰거나 AND 0FFH를 붙이세요.',
+        'ko': '{text}은(는) {value}H로, 한 바이트(0부터 0FFH)에 들어가지 않습니다. -1이라면 0FFH로 쓰거나 AND 0FFH를 붙이세요.',
     },
 
     'asm-word-range': {
         'en': '{text} is bigger than 16 bits can hold.',
-        'es': '{text} es mayor de lo que caben en 16 bits.',
+        'es': '{text} es mayor de lo que cabe en 16 bits.',
         'fr': '{text} dépasse ce que 16 bits peuvent contenir.',
         'de': '{text} ist größer, als 16 Bit fassen.',
         'it': '{text} è più grande di quanto stia in 16 bit.',
@@ -2187,7 +2187,7 @@ l10n.MESSAGES = {
         'zh': '{text} 超出了 16 位能表示的范围。',
         'zh-TW': '{text} 超出了 16 位元能表示的範圍。',
         'ja': '{text} は 16 ビットに収まりません。',
-        'ko': '{text}는 16비트에 담을 수 있는 것보다 큽니다.',
+        'ko': '{text}은(는) 16비트에 담을 수 있는 것보다 큽니다.',
     },
 
     'asm-bad-number': {
@@ -2200,7 +2200,7 @@ l10n.MESSAGES = {
         'zh': '{text} 不是数。十六进制数以 H 结尾、以数字开头，如 0FFH。',
         'zh-TW': '{text} 不是數。十六進位數以 H 結尾、以數字開頭，如 0FFH。',
         'ja': '{text} は数ではありません。16 進数は数字で始まり H で終わります。たとえば 0FFH です。',
-        'ko': '{text}는 수가 아닙니다. 16진수는 숫자로 시작해 H로 끝납니다. 0FFH처럼요.',
+        'ko': '{text}은(는) 수가 아닙니다. 16진수는 숫자로 시작해 H로 끝납니다(예: 0FFH).',
     },
 
     'asm-bad-expression': {
@@ -2213,7 +2213,7 @@ l10n.MESSAGES = {
         'zh': '{text} 不是汇编器能读懂的表达式。',
         'zh-TW': '{text} 不是組譯器能讀懂的運算式。',
         'ja': '{text} はアセンブラが読める式ではありません。',
-        'ko': '{text}는 어셈블러가 읽을 수 있는 식이 아닙니다.',
+        'ko': '{text}은(는) 어셈블러가 읽을 수 있는 식이 아닙니다.',
     },
 
     'asm-empty-operand': {
@@ -2239,7 +2239,7 @@ l10n.MESSAGES = {
         'zh': '{text} 要作为数值，只能有一到两个字符。',
         'zh-TW': '{text} 要作為數值，只能有一到兩個字元。',
         'ja': '{text} を値にするには 1 文字か 2 文字でなければなりません。',
-        'ko': '{text}를 값으로 쓰려면 한두 글자여야 합니다.',
+        'ko': '{text}을(를) 값으로 쓰려면 한두 글자여야 합니다.',
     },
 
     'asm-undefined': {
@@ -2252,7 +2252,7 @@ l10n.MESSAGES = {
         'zh': '{name} 没有在任何地方定义。',
         'zh-TW': '{name} 沒有在任何地方定義。',
         'ja': '{name} はどこにも定義されていません。',
-        'ko': '{name}는 어디에도 정의되어 있지 않습니다.',
+        'ko': '{name}은(는) 어디에도 정의되어 있지 않습니다.',
     },
 
     'asm-later': {
@@ -2291,7 +2291,7 @@ l10n.MESSAGES = {
         'zh': '{name} 已在第 {other} 行定义过。',
         'zh-TW': '{name} 已在第 {other} 行定義過。',
         'ja': '{name} はすでに {other} 行目で定義されています。',
-        'ko': '{name}는 이미 {other}행에서 정의되었습니다.',
+        'ko': '{name}은(는) 이미 {other}행에서 정의되었습니다.',
     },
 
     'asm-equ-of-set': {
@@ -2304,7 +2304,7 @@ l10n.MESSAGES = {
         'zh': '{name} 在第 {other} 行已由 SET 赋值，EQU 不能再给它一个值。',
         'zh-TW': '{name} 在第 {other} 行已由 SET 賦值，EQU 不能再給它一個值。',
         'ja': '{name} は {other} 行目で SET により値が決まっているので、EQU で別の値にはできません。',
-        'ko': '{name}는 {other}행에서 SET으로 값을 받았으므로 EQU로 다른 값을 줄 수 없습니다.',
+        'ko': '{name}은(는) {other}행에서 SET으로 값을 받았으므로 EQU로 다른 값을 줄 수 없습니다.',
     },
 
     'asm-set-of-equ': {
@@ -2317,7 +2317,7 @@ l10n.MESSAGES = {
         'zh': '{name} 在第 {other} 行已由 EQU 赋值，SET 不能改变它。',
         'zh-TW': '{name} 在第 {other} 行已由 EQU 賦值，SET 不能改變它。',
         'ja': '{name} は {other} 行目で EQU により値が決まっているので、SET では変えられません。',
-        'ko': '{name}는 {other}행에서 EQU로 값을 받았으므로 SET으로 바꿀 수 없습니다.',
+        'ko': '{name}은(는) {other}행에서 EQU로 값을 받았으므로 SET으로 바꿀 수 없습니다.',
     },
 
     'asm-needs-name': {
@@ -2343,13 +2343,13 @@ l10n.MESSAGES = {
         'zh': '{name} 是语言本身的词，不能用作名字。',
         'zh-TW': '{name} 是語言本身的詞，不能用作名字。',
         'ja': '{name} は言語そのものの語なので、名前には使えません。',
-        'ko': '{name}는 언어 자체의 낱말이라 이름으로 쓸 수 없습니다.',
+        'ko': '{name}은(는) 언어 자체의 낱말이라 이름으로 쓸 수 없습니다.',
     },
 
     'asm-endif-without-if': {
         'en': 'This ENDIF has no IF before it.',
         'es': 'Este ENDIF no tiene un IF antes.',
-        'fr': 'Ce ENDIF n’a pas de IF avant lui.',
+        'fr': 'Cet ENDIF n’est précédé d’aucun IF.',
         'de': 'Vor diesem ENDIF steht kein IF.',
         'it': 'Questo ENDIF non ha un IF prima.',
         'pt-BR': 'Este ENDIF não tem um IF antes.',
@@ -2375,7 +2375,7 @@ l10n.MESSAGES = {
     'asm-endm-without-macro': {
         'en': 'This ENDM has no MACRO before it.',
         'es': 'Este ENDM no tiene un MACRO antes.',
-        'fr': 'Ce ENDM n’a pas de MACRO avant lui.',
+        'fr': 'Cet ENDM n’est précédé d’aucun MACRO.',
         'de': 'Vor diesem ENDM steht kein MACRO.',
         'it': 'Questo ENDM non ha un MACRO prima.',
         'pt-BR': 'Este ENDM não tem um MACRO antes.',
@@ -2421,7 +2421,7 @@ l10n.MESSAGES = {
         'zh': '宏 {name} 已经定义过了。',
         'zh-TW': '巨集 {name} 已經定義過了。',
         'ja': 'マクロ {name} はすでに定義されています。',
-        'ko': '매크로 {name}는 이미 정의되었습니다.',
+        'ko': '매크로 {name}은(는) 이미 정의되었습니다.',
     },
 
     'asm-macro-depth': {
@@ -2434,7 +2434,7 @@ l10n.MESSAGES = {
         'zh': '{name} 嵌套使用宏超过了 {depth} 层，或者用到了它自己。',
         'zh-TW': '{name} 巢狀使用巨集超過了 {depth} 層，或者用到了它自己。',
         'ja': '{name} はマクロを {depth} 段より深く使っているか、自分自身を使っています。',
-        'ko': '{name}가 매크로를 {depth}단계보다 깊이 쓰거나, 자기 자신을 씁니다.',
+        'ko': '{name}이(가) 매크로를 {depth}단계보다 깊이 쓰거나, 자기 자신을 씁니다.',
     },
 
     'asm-macro-limit': {
@@ -2460,7 +2460,7 @@ l10n.MESSAGES = {
         'zh': "{text} 不是表达式。传给宏的文本要加引号：'{text}'。",
         'zh-TW': "{text} 不是運算式。傳給巨集的文字要加引號：'{text}'。",
         'ja': "{text} は式ではありません。マクロに渡す文字列は引用符で囲みます：'{text}'。",
-        'ko': "{text}는 식이 아닙니다. 매크로에 넘기는 글은 따옴표로 감쌉니다: '{text}'.",
+        'ko': "{text}은(는) 식이 아닙니다. 매크로에 넘기는 글은 따옴표로 감쌉니다: '{text}'.",
     },
 
     'asm-include': {
@@ -2831,7 +2831,7 @@ l10n.MESSAGES = {
         'en': 'Writing in Assembly',
         'es': 'Escribir en Ensamblador',
         'fr': 'Écrire en Assembleur',
-        'de': 'In Assembler Schreiben',
+        'de': 'In Assembler schreiben',
         'it': 'Scrivere in Assembly',
         'pt-BR': 'Escrevendo em Assembly',
         'zh': '用汇编语言编写',
@@ -2844,7 +2844,7 @@ l10n.MESSAGES = {
         'en': "The same machine, without toggling each byte by hand: write the program in Intel's assembly language, and let the assembler make the bytes. A program that copies the sense switches to the data lamps:",
         'es': 'La misma máquina, sin introducir cada byte a mano: escribe el programa en el lenguaje ensamblador de Intel y deja que el ensamblador genere los bytes. Un programa que copia los interruptores de detección a las lámparas de datos:',
         'fr': 'La même machine, sans entrer chaque octet à la main : écrivez le programme dans le langage d’assemblage d’Intel, et laissez l’assembleur faire les octets. Un programme qui recopie les interrupteurs de détection sur les lampes de données :',
-        'de': 'Dieselbe Maschine, ohne jedes Byte von Hand einzuschalten: Schreiben Sie das Programm in Intels Assemblersprache und lassen Sie den Assembler die Bytes erzeugen. Ein Programm, das die Sense-Schalter auf die Datenlampen kopiert:',
+        'de': 'Dieselbe Maschine, ohne jedes Byte von Hand über die Schalter einzugeben: Schreiben Sie das Programm in Intels Assemblersprache und lassen Sie den Assembler die Bytes erzeugen. Ein Programm, das die Sense-Schalter auf die Datenlampen kopiert:',
         'it': 'La stessa macchina, senza impostare ogni byte a mano: scrivi il programma nel linguaggio assembly di Intel e lascia che l’assembler produca i byte. Un programma che copia gli interruttori di rilevamento sulle spie dei dati:',
         'pt-BR': 'A mesma máquina, sem inserir cada byte à mão: escreva o programa na linguagem assembly da Intel e deixe o montador gerar os bytes. Um programa que copia as chaves de sensoriamento para as lâmpadas de dados:',
         'zh': '同一台机器，不必再一个字节一个字节地用开关输入：用 Intel 的汇编语言写程序，让汇编器生成字节。下面这个程序把感应开关的状态复制到数据灯上：',
@@ -2863,7 +2863,7 @@ l10n.MESSAGES = {
         'zh': '打开面板下方的“汇编器”，输入这三行：',
         'zh-TW': '打開面板下方的「組譯器」，輸入這三行：',
         'ja': 'パネルの下のアセンブラを開き、次の 3 行を入力します：',
-        'ko': '판 아래의 어셈블러를 열고 이 세 줄을 입력합니다:',
+        'ko': '패널 아래의 어셈블러를 열고 이 세 줄을 입력합니다:',
     },
 
     'asm-tutorial-2': {
@@ -2873,8 +2873,8 @@ l10n.MESSAGES = {
         'de': 'Neben jeder Zeile zeigt das Listing ihre Adresse und die Bytes, die sie erzeugt: IN 0FFH ist DB FF, bei 0000H. Ein Fehler wird an seiner Zeile markiert, und unter dem Quelltext steht, was falsch ist.',
         'it': 'Accanto a ogni riga, il listato mostra il suo indirizzo e i byte che produce: IN 0FFH è DB FF, a 0000H. Un errore è segnato sulla sua riga, con cosa c’è di sbagliato sotto il sorgente.',
         'pt-BR': 'Ao lado de cada linha, a listagem mostra seu endereço e os bytes que ela gera: IN 0FFH é DB FF, em 0000H. Um erro é marcado na sua linha, com o que está errado sob o código.',
-        'zh': '每一行旁边的列表显示它的地址和生成的字节：IN 0FFH 就是 0000H 处的 DB FF。出错的行会被标出，错在哪里写在源程序下方。',
-        'zh-TW': '每一行旁邊的列表顯示它的位址和產生的位元組：IN 0FFH 就是 0000H 處的 DB FF。出錯的行會被標出，錯在哪裡寫在原始程式下方。',
+        'zh': '每一行旁边的列表显示它的地址和生成的字节：IN 0FFH 就是 0000H 处的 DB FF。出错的行会被标出，错在哪里写在源代码下方。',
+        'zh-TW': '每一行旁邊的列表顯示它的位址和產生的位元組：IN 0FFH 就是 0000H 處的 DB FF。出錯的行會被標出，錯在哪裡寫在原始碼下方。',
         'ja': '各行の横のリストに、そのアドレスと作られるバイトが出ます。IN 0FFH は 0000H の DB FF です。間違いはその行に印が付き、ソースの下に理由が出ます。',
         'ko': '각 줄 옆의 리스팅에 그 주소와 만들어지는 바이트가 나옵니다. IN 0FFH는 0000H의 DB FF입니다. 잘못은 그 줄에 표시되고, 무엇이 틀렸는지는 소스 아래에 나옵니다.',
     },
@@ -2906,16 +2906,16 @@ l10n.MESSAGES = {
     },
 
     'asm-tutorial-note': {
-        'en': "More to try: the Assembler's Examples menu has seven programs, from this one to macros. Intel's own manual, in References, describes the whole language.",
-        'es': 'Más para probar: el menú Ejemplos del Ensamblador tiene siete programas, desde este hasta las macros. El propio manual de Intel, en Referencias, describe el lenguaje entero.',
-        'fr': 'Pour aller plus loin : le menu Exemples de l’Assembleur propose sept programmes, de celui-ci aux macros. Le manuel d’Intel lui-même, dans Références, décrit tout le langage.',
-        'de': 'Zum Weitermachen: Das Menü Beispiele des Assemblers hat sieben Programme, von diesem bis zu Makros. Intels eigenes Handbuch, unter Referenzen, beschreibt die ganze Sprache.',
-        'it': 'Per continuare: il menu Esempi dell’Assembler ha sette programmi, da questo alle macro. Il manuale di Intel, in Riferimenti, descrive tutto il linguaggio.',
-        'pt-BR': 'Para continuar: o menu Exemplos do Montador tem sete programas, deste até as macros. O próprio manual da Intel, em Referências, descreve a linguagem inteira.',
-        'zh': '还可以试试：汇编器的“示例”菜单里有七个程序，从这个一直到宏。Intel 自己的手册（见“参考资料”）讲解了整个语言。',
-        'zh-TW': '還可以試試：組譯器的「範例」選單裡有七個程式，從這個一直到巨集。Intel 自己的手冊（見「參考資料」）講解了整個語言。',
-        'ja': 'さらに試すなら、アセンブラのサンプルメニューに、これからマクロまで 7 本のプログラムがあります。言語の全体は、参考資料にある Intel 自身のマニュアルにあります。',
-        'ko': '더 해 보려면: 어셈블러의 예제 메뉴에 이것부터 매크로까지 일곱 개의 프로그램이 있습니다. 언어 전체는 참고 자료에 있는 Intel의 매뉴얼에 나옵니다.',
+        'en': "More to try: the Assembler's Examples menu has fourteen programs, from lamps on the front panel to a game on the Teletype, macros included. Intel's own manual, in References, describes the whole language.",
+        'es': 'Más para probar: el menú Ejemplos del Ensamblador tiene catorce programas, desde luces en el panel frontal hasta un juego en el Teletipo, con macros incluidas. El propio manual de Intel, en Referencias, describe el lenguaje entero.',
+        'fr': 'Pour aller plus loin : le menu Exemples de l’Assembleur propose quatorze programmes, des voyants de la façade à un jeu sur le Téléscripteur, macros comprises. Le manuel d’Intel lui-même, dans Références, décrit tout le langage.',
+        'de': 'Zum Weitermachen: Das Menü Beispiele des Assemblers hat vierzehn Programme, von Lampen an der Frontplatte bis zu einem Spiel am Fernschreiber, Makros eingeschlossen. Intels eigenes Handbuch, unter Referenzen, beschreibt die ganze Sprache.',
+        'it': 'Per continuare: il menu Esempi dell’Assembler ha quattordici programmi, dalle luci del pannello frontale a un gioco sulla Telescrivente, macro comprese. Il manuale di Intel, in Riferimenti, descrive tutto il linguaggio.',
+        'pt-BR': 'Para continuar: o menu Exemplos do Montador tem catorze programas, das lâmpadas do painel frontal a um jogo no Teletipo, macros incluídas. O próprio manual da Intel, em Referências, descreve a linguagem inteira.',
+        'zh': '还可以试试：汇编器的“示例”菜单里有十四个程序，从前面板上的指示灯到电传打字机上的游戏，也包括宏。Intel 自己的手册（见“参考资料”）讲解了整个语言。',
+        'zh-TW': '還可以試試：組譯器的「範例」選單裡有十四個程式，從前面板上的指示燈到電傳打字機上的遊戲，也包括巨集。Intel 自己的手冊（見「參考資料」）講解了整個語言。',
+        'ja': 'さらに試すなら、アセンブラのサンプルメニューに 14 本のプログラムがあります。フロントパネルのランプからテレタイプのゲームまで、マクロもあります。言語の全体は、参考資料にある Intel 自身のマニュアルにあります。',
+        'ko': '더 해 보려면: 어셈블러의 예제 메뉴에 앞판의 램프부터 텔레타이프의 게임까지, 매크로를 포함해 열네 개의 프로그램이 있습니다. 언어 전체는 참고 자료에 있는 Intel의 매뉴얼에 나옵니다.',
     },
 
     'basic-title': {
@@ -3028,7 +3028,7 @@ l10n.MESSAGES = {
         'fr': 'Il affiche le nombre d’octets libres, puis OK. Essayez PRINT 22/7 pour une réponse immédiate. Pour saisir un programme, tapez ces lignes une par une, en appuyant sur Entrée après chacune :',
         'de': 'Es zeigt die freien Bytes und dann OK. Für eine sofortige Antwort probieren Sie PRINT 22/7. Um ein Programm einzugeben, tippen Sie diese Zeilen einzeln und drücken nach jeder Enter:',
         'it': 'Stampa quanti byte sono liberi, poi OK. Prova PRINT 22/7 per una risposta immediata. Per scrivere un programma, digita queste righe una alla volta, premendo Invio dopo ciascuna:',
-        'pt-BR': 'Ele mostra quantos bytes estão livres e depois OK. Experimente PRINT 22/7 para ter uma resposta na hora. Para digitar um programa, entre estas linhas uma de cada vez, pressionando Enter após cada uma:',
+        'pt-BR': 'Ele mostra quantos bytes estão livres e depois OK. Experimente PRINT 22/7 para ter uma resposta na hora. Para inserir um programa, digite estas linhas uma de cada vez, pressionando Enter após cada uma:',
         'zh': '它会打印剩余字节数，然后显示 OK。输入 PRINT 22/7 可以立刻得到答案。要输入程序，请逐行键入下面几行，每行按一次回车：',
         'zh-TW': '它會印出剩餘位元組數，然後顯示 OK。輸入 PRINT 22/7 可以立刻得到答案。要輸入程式，請逐行鍵入下面幾行，每行按一次 Enter：',
         'ja': '空きバイト数を表示してから OK が出ます。PRINT 22/7 と打てばすぐ答えが返ります。プログラムを入れるときは、次の行を一行ずつ、それぞれの後で Enter を押しながら打ってください。',

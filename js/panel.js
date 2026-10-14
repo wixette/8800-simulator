@@ -376,7 +376,7 @@ panel.EXAMPLES = [
  * Whether the page was opened straight off the disk.
  *
  * A browser will not let a file:// page fetch the files beside it, so
- * the example listings and the BASIC tape need the folder to be served.
+ * the example programs and the BASIC tape need the folder to be served.
  * Checked up front rather than by letting the fetch fail, so that those
  * controls are greyed out before they are pressed and give the real
  * reason. See D22 in docs/ms-basic-4k.md.
