@@ -97,3 +97,27 @@ export default async function(h) {
     const back = await js(`({listing: document.getElementById('tab-asm').classList.contains('show-listing'), top: document.getElementById('asm-source').scrollTop})`);
     verify('Space shows the source again, where the listing was', !back.listing && Math.abs(back.top - scrolled) < 2, JSON.stringify({back, scrolled}));
 }
+
+/**
+ * The Assemble shortcut, as this keyboard names it: ⌘ on a Mac, Ctrl
+ * elsewhere, Strg on a German one - in the tooltip and the Tutorial.
+ */
+export async function shortcuts(h) {
+    const {js, send, viewport, fresh, sleep, verify} = h;
+    const said = () => js(`[document.getElementById('asm-assemble').title,
+        document.getElementById('asm-tutorial-3').textContent]`);
+    await viewport(1280, 860);
+    for (const [platform, en, de] of [['MacIntel', '⌘+Enter', '⌘+Eingabe'],
+                                      ['Win32', 'Ctrl+Enter', 'Strg+Eingabe']]) {
+        await send('Emulation.setUserAgentOverride',
+                   {userAgent: 'Mozilla/5.0 (' + platform + ')', platform});
+        await fresh();
+        verify(platform + ' is the platform', (await js(`navigator.platform`)) === platform);
+        let [title, step] = await said();
+        verify(platform + ': the tooltip says ' + en, title.includes('(' + en + ')'), title);
+        verify(platform + ': the Tutorial says ' + en, step.includes(en) && !step.includes('{'), step);
+        await js(`l10n.setLocale('de')`); await sleep(300);
+        [title, step] = await said();
+        verify(platform + ': in German, ' + de, title.includes(de) && step.includes(de), title + ' | ' + step);
+    }
+}

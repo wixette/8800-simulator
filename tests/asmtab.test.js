@@ -140,6 +140,28 @@ test('the PC is marked on its line only while it is true (U7)', () => {
                                                     read: () => 0}), 0);
 });
 
+test('a shortcut is named with the key this keyboard holds for it', (t) => {
+    // Ctrl+Enter assembles, and so does ⌘+Enter; a Mac is told the
+    // one its keyboard has, as the Assemble button's tooltip and the
+    // Tutorial say it.
+    assert.strictEqual(asmtab.ctrlKey('MacIntel'), '⌘');
+    assert.strictEqual(asmtab.ctrlKey('iPad'), '⌘');
+    assert.strictEqual(asmtab.ctrlKey('Win32'), 'Ctrl');
+    assert.strictEqual(asmtab.ctrlKey(''), 'Ctrl');
+    const saved = l10n.current;
+    t.after(() => { l10n.current = saved; });
+    l10n.current = l10n.LOCALES.indexOf('de');
+    assert.strictEqual(asmtab.ctrlKey('Win32'), 'Strg');
+    assert.strictEqual(asmtab.undoKey('Win32'), 'Strg+Z');
+    assert.strictEqual(asmtab.ctrlKey('MacIntel'), '⌘');
+    for (const id of ['asm-assemble-title', 'asm-tutorial-3']) {
+        for (const [locale, text] of Object.entries(l10n.MESSAGES[id])) {
+            assert.match(text, /\{ctrl\}\+/, id + ' in ' + locale);
+            assert.doesNotMatch(text, /Ctrl|Strg/, id + ' in ' + locale);
+        }
+    }
+});
+
 test('Clear names the undo keys the machine has', () => {
     assert.strictEqual(asmtab.undoKey('MacIntel'), '⌘Z');
     assert.strictEqual(asmtab.undoKey('iPhone'), '⌘Z');

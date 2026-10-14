@@ -78,3 +78,31 @@ export default async function(h) {
         verify(width + 'px: and no summary beside them', JSON.stringify(bar.shown) === JSON.stringify(expected), JSON.stringify(bar.shown));
     }
 }
+
+/**
+ * An unchanged example is replaced without a question, after a reload
+ * brought it back too; an edited one is asked about (U5).
+ */
+export async function replace(h) {
+    const {js, viewport, fresh, press, verify, setSource, sleep} = h;
+    const choose = async (id) => {
+        await press('#asm-examples-button'); await sleep(500);
+        await press(`#asm-examples-list li[data-value="${id}"]`); await sleep(300);
+    };
+    const asking = () => js(`document.getElementById('asm-replace-dialog').open`);
+    const val = () => js(`document.getElementById('asm-source').value`);
+    await viewport(1280, 860); await fresh();
+    await press('#nav-asm'); await sleep(300);
+    await choose('adder');
+    verify('an example goes into an empty editor', (await val()).includes('Add two'));
+    await js(`location.reload()`); await sleep(1500);
+    await press('#nav-asm'); await sleep(300);
+    verify('the reload brings it back', (await val()).includes('Add two'));
+    await choose('macros');
+    verify('and it is replaced without a question', !(await asking()) && (await val()).includes('Macros'));
+    await setSource((await val()) + '\n NOP'); await sleep(200);
+    await choose('adder');
+    verify('an edited example is asked about', await asking());
+    await press('#asm-replace-ok'); await sleep(300);
+    verify('and replaced once the dialog says so', !(await asking()) && (await val()).includes('Add two'));
+}

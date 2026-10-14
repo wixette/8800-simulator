@@ -263,8 +263,8 @@ START:  LDA     FIRST           ; A = the first number
 2. Beside each line, the listing shows its address and the bytes it
    makes, as you type. A mistake is marked on its line, with what is
    wrong under the source.
-3. Click **Assemble** (or press Ctrl+Enter). The program goes into
-   memory and RESET is pressed.
+3. Click **Assemble** (or press Ctrl+Enter, ⌘+Enter on a Mac). The
+   program goes into memory and RESET is pressed.
 4. DEPOSIT 1 at 0080H and 2 at 0081H, as in section 3, then RUN, STOP
    and EXAMINE 0082H: 00 000 011.
 

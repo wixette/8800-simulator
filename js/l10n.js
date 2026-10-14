@@ -1723,16 +1723,16 @@ l10n.MESSAGES = {
     },
 
     'asm-assemble-title': {
-        'en': 'Assemble, and put the program into memory (Ctrl+Enter)',
-        'es': 'Ensamblar y poner el programa en memoria (Ctrl+Intro)',
-        'fr': 'Assembler, et mettre le programme en mémoire (Ctrl+Entrée)',
-        'de': 'Assemblieren und das Programm in den Speicher laden (Strg+Eingabe)',
-        'it': 'Assembla e metti il programma in memoria (Ctrl+Invio)',
-        'pt-BR': 'Montar e pôr o programa na memória (Ctrl+Enter)',
-        'zh': '汇编，并把程序放入内存（Ctrl+Enter）',
-        'zh-TW': '組譯，並把程式放入記憶體（Ctrl+Enter）',
-        'ja': 'アセンブルして、プログラムをメモリに入れます（Ctrl+Enter）',
-        'ko': '어셈블하고 프로그램을 메모리에 넣습니다(Ctrl+Enter)',
+        'en': 'Assemble, and put the program into memory ({ctrl}+Enter)',
+        'es': 'Ensamblar y poner el programa en memoria ({ctrl}+Intro)',
+        'fr': 'Assembler, et mettre le programme en mémoire ({ctrl}+Entrée)',
+        'de': 'Assemblieren und das Programm in den Speicher laden ({ctrl}+Eingabe)',
+        'it': 'Assembla e metti il programma in memoria ({ctrl}+Invio)',
+        'pt-BR': 'Montar e pôr o programa na memória ({ctrl}+Enter)',
+        'zh': '汇编，并把程序放入内存（{ctrl}+Enter）',
+        'zh-TW': '組譯，並把程式放入記憶體（{ctrl}+Enter）',
+        'ja': 'アセンブルして、プログラムをメモリに入れます（{ctrl}+Enter）',
+        'ko': '어셈블하고 프로그램을 메모리에 넣습니다({ctrl}+Enter)',
     },
 
     'asm-examples': {
@@ -1995,6 +1995,18 @@ l10n.MESSAGES = {
         'ko': '편집기에 아직 복사할 것이 없습니다.',
     },
 
+    'key-ctrl': {
+        'en': 'Ctrl',
+        'es': 'Ctrl',
+        'fr': 'Ctrl',
+        'de': 'Strg',
+        'it': 'Ctrl',
+        'pt-BR': 'Ctrl',
+        'zh': 'Ctrl',
+        'zh-TW': 'Ctrl',
+        'ja': 'Ctrl',
+        'ko': 'Ctrl',
+    },
     'asm-clear-title': {
         'en': 'Clear the editor',
         'es': 'Vaciar el editor',
@@ -2880,16 +2892,16 @@ l10n.MESSAGES = {
     },
 
     'asm-tutorial-3': {
-        'en': 'Click Assemble, or press Ctrl+Enter. The machine is switched on if it was off, the program goes into memory, and RESET is pressed.',
-        'es': 'Pulsa Ensamblar, o Ctrl+Intro. La máquina se enciende si estaba apagada, el programa entra en memoria y se pulsa RESET.',
-        'fr': 'Cliquez sur Assembler, ou appuyez sur Ctrl+Entrée. La machine est allumée si elle était éteinte, le programme entre en mémoire, et RESET est appuyé.',
-        'de': 'Klicken Sie Assemblieren oder drücken Sie Strg+Eingabe. Die Maschine wird eingeschaltet, falls sie aus war, das Programm kommt in den Speicher, und RESET wird gedrückt.',
-        'it': 'Premi Assembla, o Ctrl+Invio. La macchina si accende se era spenta, il programma va in memoria e viene premuto RESET.',
-        'pt-BR': 'Clique em Montar, ou pressione Ctrl+Enter. A máquina é ligada se estava desligada, o programa vai para a memória e RESET é pressionado.',
-        'zh': '点击“汇编”，或按 Ctrl+Enter。若机器关着会先开机，程序被放入内存，并按下 RESET。',
-        'zh-TW': '點擊「組譯」，或按 Ctrl+Enter。若機器關著會先開機，程式被放入記憶體，並按下 RESET。',
-        'ja': 'アセンブルをクリックするか、Ctrl+Enter を押します。電源が切れていれば入り、プログラムがメモリに入って、RESET が押されます。',
-        'ko': '어셈블을 누르거나 Ctrl+Enter를 누릅니다. 기계가 꺼져 있으면 켜지고, 프로그램이 메모리에 들어간 뒤 RESET이 눌립니다.',
+        'en': 'Click Assemble, or press {ctrl}+Enter. The machine is switched on if it was off, the program goes into memory, and RESET is pressed.',
+        'es': 'Pulsa Ensamblar, o {ctrl}+Intro. La máquina se enciende si estaba apagada, el programa entra en memoria y se pulsa RESET.',
+        'fr': 'Cliquez sur Assembler, ou appuyez sur {ctrl}+Entrée. La machine est allumée si elle était éteinte, le programme entre en mémoire, et RESET est appuyé.',
+        'de': 'Klicken Sie Assemblieren oder drücken Sie {ctrl}+Eingabe. Die Maschine wird eingeschaltet, falls sie aus war, das Programm kommt in den Speicher, und RESET wird gedrückt.',
+        'it': 'Premi Assembla, o {ctrl}+Invio. La macchina si accende se era spenta, il programma va in memoria e viene premuto RESET.',
+        'pt-BR': 'Clique em Montar, ou pressione {ctrl}+Enter. A máquina é ligada se estava desligada, o programa vai para a memória e RESET é pressionado.',
+        'zh': '点击“汇编”，或按 {ctrl}+Enter。若机器关着会先开机，程序被放入内存，并按下 RESET。',
+        'zh-TW': '點擊「組譯」，或按 {ctrl}+Enter。若機器關著會先開機，程式被放入記憶體，並按下 RESET。',
+        'ja': 'アセンブルをクリックするか、{ctrl}+Enter を押します。電源が切れていれば入り、プログラムがメモリに入って、RESET が押されます。',
+        'ko': '어셈블을 누르거나 {ctrl}+Enter를 누릅니다. 기계가 꺼져 있으면 켜지고, 프로그램이 메모리에 들어간 뒤 RESET이 눌립니다.',
     },
 
     'asm-tutorial-4': {

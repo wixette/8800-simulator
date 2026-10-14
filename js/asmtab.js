@@ -480,12 +480,25 @@ asmtab.onCopy = function() {
 };
 
 /**
+ * The key the editor's shortcuts are held down with, as this machine's
+ * keyboard names it: ⌘ on a Mac, and Ctrl elsewhere, or Strg on a
+ * German keyboard. The messages that name a shortcut have it as {ctrl}.
+ * @param {string} platform navigator.platform, or ''.
+ * @return {string}
+ */
+asmtab.ctrlKey = function(platform) {
+    return /Mac|iPhone|iPad|iPod/.test(platform) ? '⌘' :
+        l10n.getMessage('key-ctrl');
+};
+
+/**
  * The keys that undo, as this machine's keyboard has them.
  * @param {string} platform navigator.platform, or ''.
  * @return {string}
  */
 asmtab.undoKey = function(platform) {
-    return /Mac|iPhone|iPad|iPod/.test(platform) ? '⌘Z' : 'Ctrl+Z';
+    var ctrl = asmtab.ctrlKey(platform);
+    return ctrl == '⌘' ? '⌘Z' : ctrl + '+Z';
 };
 
 /** Clear is offered only while there is something to clear. */
@@ -1180,16 +1193,23 @@ asmtab.useExample = function(id) {
  * panel.refreshPlaceholders().
  */
 asmtab.refreshText = function() {
+    var msg = l10n.getMessage;
+    var ctrl = {ctrl: asmtab.ctrlKey(navigator.platform || '')};
+    // The Tutorial's step names the shortcut too.
+    var step = document.getElementById('asm-tutorial-3');
+    if (step) {
+        step.textContent = asmtab.fill(msg('asm-tutorial-3'), ctrl);
+    }
     if (!asmtab.result) {
         return;
     }
     asmtab.renderErrors();
     asmtab.refreshViewToggle();
-    var msg = l10n.getMessage;
     asmtab.source().setAttribute('aria-label', msg('asm-source-label'));
     document.getElementById('asm-listing').setAttribute(
         'aria-label', msg('asm-listing-label'));
-    document.getElementById('asm-assemble').title = msg('asm-assemble-title');
+    document.getElementById('asm-assemble').title =
+        asmtab.fill(msg('asm-assemble-title'), ctrl);
     var copy = document.getElementById('asm-copy');
     copy.title = msg('asm-copy-title');
     copy.setAttribute('aria-label', msg('asm-copy-title'));
