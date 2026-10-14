@@ -1787,32 +1787,6 @@ l10n.MESSAGES = {
         'ko': '소스',
     },
 
-    'asm-summary-ok': {
-        'en': '{bytes} bytes, {start}H-{end}H',
-        'es': '{bytes} bytes, {start}H-{end}H',
-        'fr': '{bytes} octets, {start}H-{end}H',
-        'de': '{bytes} Bytes, {start}H-{end}H',
-        'it': '{bytes} byte, {start}H-{end}H',
-        'pt-BR': '{bytes} bytes, {start}H-{end}H',
-        'zh': '{bytes} 字节，{start}H-{end}H',
-        'zh-TW': '{bytes} 位元組，{start}H-{end}H',
-        'ja': '{bytes} バイト、{start}H-{end}H',
-        'ko': '{bytes}바이트, {start}H-{end}H',
-    },
-
-    'asm-summary-errors': {
-        'en': 'Errors: {count}',
-        'es': 'Errores: {count}',
-        'fr': 'Erreurs : {count}',
-        'de': 'Fehler: {count}',
-        'it': 'Errori: {count}',
-        'pt-BR': 'Erros: {count}',
-        'zh': '错误：{count}',
-        'zh-TW': '錯誤：{count}',
-        'ja': 'エラー：{count}',
-        'ko': '오류: {count}',
-    },
-
     'asm-error-at': {
         'en': 'Line {line}: {message}',
         'es': 'Línea {line}: {message}',

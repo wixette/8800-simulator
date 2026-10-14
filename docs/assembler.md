@@ -380,7 +380,7 @@ phone's width, so, as agreed in #12:
 
 ```
 ┌ Assembler ──────────────────────────────────────────────────────────────────┐
-│ [Assemble ⌘↵]  [Examples ▾]   12 bytes, 0000H-000BH                         │
+│ [Examples ▾]  [Assemble ⌘↵]                                                 │
 ├──────────────────────────────────────────────┬──────────────────────────────┤
 │  1        ORG  0                ; start here  │ 0000                         │
 │  2 LOOP:  IN   0FFH             ; switches    │ 0000  DB FF                  │
@@ -392,10 +392,13 @@ phone's width, so, as agreed in #12:
    the source, highlighted                         the listing, line for line
 ```
 
-- **A toolbar** across the top. **Assemble** is the primary button,
-  also pressed with Ctrl+Enter (⌘+Enter on a Mac). **Examples** opens
-  a menu of example sources (T3). Beside them, a summary of the last
-  assembly: its size and range, or how many errors.
+- **A toolbar** across the top. **Examples** opens a menu of example
+  sources (T3); **Assemble**, beside it in the order they are used, is
+  the primary button, also pressed with Ctrl+Enter (⌘+Enter on a Mac).
+  There was a summary beside them too, the size and range or how many
+  errors, kept up to date as you typed; it repeated the listing and
+  the error list, and the status line says the same once you
+  assemble, so it went.
 - **The source** on the left, in the editor: line numbers in a gutter,
   highlighting (Part 5), lines with errors marked in the gutter and
   tinted.
@@ -451,7 +454,7 @@ dependencies, and keeps it that way.
 ### U4 — Assembling
 
 The source is assembled again whenever typing pauses, for the listing,
-the error marks and the summary; that touches nothing in the machine.
+and the error marks; that touches nothing in the machine.
 **Assemble** reads the whole source and, if there is no error:
 
 1. Switches the machine on, if it was off, and says so.

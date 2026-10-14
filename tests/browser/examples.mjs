@@ -62,4 +62,20 @@ export default async function(h) {
     await press('#load-dropdown li[data-value="example:kill-the-bit"]'); await sleep(300);
     const ov = await js(`(() => { const e = document.getElementById('status-text'); return [e.scrollWidth, e.clientWidth, document.documentElement.scrollWidth]; })()`);
     verify('on a phone the longer status does not widen the page', ov[2] <= 390, JSON.stringify(ov));
+    // The Assembler's toolbar: Examples, then Assemble, in the order
+    // they are used, and nothing else beside them.
+    for (const [width, height] of [[1280, 860], [390, 844]]) {
+        await viewport(width, height); await press('#nav-asm'); await sleep(300);
+        const bar = await js(`(() => {
+            const e = document.querySelector('#asm-examples-button').getBoundingClientRect();
+            const a = document.querySelector('#asm-assemble').getBoundingClientRect();
+            const shown = [...document.querySelector('.asm-toolbar').children]
+                .filter(c => c.offsetParent !== null && !c.classList.contains('toolbar-spacer')).map(c => c.id);
+            return {order: e.right <= a.left && Math.abs(e.top - a.top) < 2, shown};
+        })()`);
+        verify(width + 'px: Examples, then Assemble, on one row', bar.order, JSON.stringify(bar));
+        const expected = width < 700 ? ['asm-examples-dropdown', 'asm-assemble', 'asm-view-toggle']
+                                     : ['asm-examples-dropdown', 'asm-assemble'];
+        verify(width + 'px: and no summary beside them', JSON.stringify(bar.shown) === JSON.stringify(expected), JSON.stringify(bar.shown));
+    }
 }

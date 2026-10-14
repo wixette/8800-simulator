@@ -1252,17 +1252,6 @@ a {
     color: #222;
 }
 
-.asm-summary {
-    color: #bbb;
-    font-size: 13px;
-    margin-left: 6px;
-    white-space: nowrap;
-}
-
-.asm-summary.asm-summary-bad {
-    color: #ff8a80;
-}
-
 /* Only a phone needs it. */
 #asm-view-toggle {
     display: none;

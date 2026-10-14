@@ -167,7 +167,6 @@ asmtab.refresh = function() {
     asmtab.renderText();
     asmtab.renderListing();
     asmtab.renderErrors();
-    asmtab.renderSummary();
     asmtab.refreshClear();
 };
 
@@ -572,23 +571,6 @@ asmtab.renderErrors = function() {
             e.line + '">' + asmtab.escape(asmtab.errorText(e)) +
             '</button></li>';
     }).join('');
-};
-
-/** Redraws the summary beside the toolbar's buttons. */
-asmtab.renderSummary = function() {
-    var result = asmtab.result;
-    var summary = document.getElementById('asm-summary');
-    summary.classList.toggle('asm-summary-bad', !!result && !result.ok);
-    if (!result || (result.ok && !result.size)) {
-        summary.textContent = '';
-    } else if (!result.ok) {
-        summary.textContent = asmtab.fill(l10n.getMessage('asm-summary-errors'),
-                                          {count: result.errors.length});
-    } else {
-        summary.textContent = asmtab.fill(l10n.getMessage('asm-summary-ok'), {
-            bytes: result.size, start: Asm8080.hex(result.start, 4),
-            end: Asm8080.hex(result.end, 4)});
-    }
 };
 
 /**
@@ -1047,7 +1029,6 @@ asmtab.refreshText = function() {
         return;
     }
     asmtab.renderErrors();
-    asmtab.renderSummary();
     asmtab.refreshViewToggle();
     var msg = l10n.getMessage;
     asmtab.source().setAttribute('aria-label', msg('asm-source-label'));
