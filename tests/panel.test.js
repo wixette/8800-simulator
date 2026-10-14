@@ -609,14 +609,43 @@ test('CLR clears the serial boards, and AUX always says it is spare', (t) => {
     assert.strictEqual(said.pop(), 'status-clr');
 });
 
-test('every way of putting a program in owns up to unprotecting memory', () => {
-    // A load is a fresh start, so it lifts protection, and when there
+test('every way of putting a program in lifts protection first, and says so', (t) => {
+    // A load is a fresh start, so it lifts protection - one half loaded
+    // around a protected board would be worse than none - and when there
     // was any the status line says so first, as it does for a power-up.
-    const ways = ['loadExample', 'onLoadBasic', 'onBinaryFileChosen',
-                  'debugLoadData', 'applyLinkState', 'onFillZero'];
-    for (const name of ways) {
-        assert.match(panel[name].toString(), /unprotect/i,
-                     name + ' does not say whether it unprotected memory');
+    // Run, not read: the three that touch memory themselves.
+    const saved = {sim: panel.sim, doc: global.document, link: global.Link};
+    t.after(() => {
+        panel.sim = saved.sim; global.document = saved.doc; global.Link = saved.link;
+    });
+    let lifted = 0;
+    panel.sim = {
+        mem: new Array(256).fill(0),
+        unprotectAll() { lifted++; return true; },
+        initMem() {}, loadData() {}, reset() {}, flushDump() {}, requestDump() {},
+    };
+    global.document = {getElementById: () => ({value: '3e 01'})};
+    global.Link = {parseBytes: () => ({bytes: [0x3e, 0x01]})};
+    const said = [];
+    t.mock.method(panel, 'setStatus', (...args) => said.push(args));
+    t.mock.method(panel, 'ensurePoweredOn', () => false);
+    t.mock.method(panel, 'updateMemoryControls', () => {});
+    t.mock.method(panel, 'showLoaded', () => {});
+    t.mock.method(panel, 'reportIfUnavailable', () => false);
+    const loaded = panel.loadImage([0x76]);
+    assert.strictEqual(lifted, 1, 'loadImage: the Load menu, files, BASIC, links');
+    assert.strictEqual(loaded.unprotected, true, 'and says it did');
+    panel.debugLoadData();
+    assert.strictEqual(lifted, 2, 'Hex Bytes');
+    assert.strictEqual(said.pop()[4], true, 'and says it did');
+    panel.onFillZero();
+    assert.strictEqual(lifted, 3, 'Zero All Memory');
+    assert.strictEqual(said.pop()[4], true, 'and says it did');
+    // The ways in through loadImage pass on what it says.
+    for (const name of ['loadExample', 'onLoadBasic', 'onBinaryFileChosen',
+                        'applyLinkState']) {
+        assert.match(panel[name].toString(), /\.unprotected/,
+                     name + ' does not pass on whether memory was unprotected');
     }
 });
 
@@ -677,13 +706,8 @@ test('the page hands every byte put in by hand to the Assembler (U7)', () => {
     // panel.init() wires the simulator's report to asmtab.onHandWrite.
     const source = panel.init.toString();
     assert.match(source, /sim\.onHandWrite = function\(address, value\) \{[\s\S]*?asmtab\.onHandWrite\(address, value\)/);
-    // And Assemble takes the count only once its own load is done, so
-    // that load is the one it is in sync with.
-    const assemble = sourceOf('js/asmtab.js')
-        .match(/asmtab\.onAssemble = function\(\) \{([\s\S]*?)\n\};/)[1];
-    assert.ok(assemble.indexOf('asmtab.load(') <
-              assemble.indexOf('memLoads: panel.sim.memLoads'),
-              'the count is taken before the load it should include');
+    // That Assemble takes the count after its own load is run, in
+    // tests/asmtab.test.js.
 });
 
 test('a status value is put in as it is, $ patterns and all', (t) => {
@@ -792,9 +816,20 @@ test('two hex digits write one byte, and the next byte is picked', (t) => {
     panel.selectMemByte(0x10);
     assert.deepStrictEqual(said.pop(), ['mem-edit-hint']);
     for (const key of '3e8C') {
-        assert.ok(panel.onMemKey(memKey(key)) === undefined);
+        const event = memKey(key);
+        panel.onMemKey(event);
+        // Taken, or the digit would land in the input as well and be
+        // typed a second time by onMemInput.
+        assert.strictEqual(event.defaultPrevented, true, key);
     }
     assert.deepStrictEqual(sim.edits, [[0x10, 0x3e], [0x11, 0x8c]]);
+    // A shortcut is the browser's: Ctrl+C on a picked byte types no C.
+    for (const modifier of ['ctrlKey', 'metaKey', 'altKey']) {
+        const event = Object.assign(memKey('c'), {[modifier]: true});
+        panel.onMemKey(event);
+        assert.strictEqual(event.defaultPrevented, false, modifier);
+    }
+    assert.strictEqual(panel.memPending, null, 'nor holds it as a digit');
     assert.strictEqual(panel.memSelection, 0x12);
     // One digit is held, not written; Backspace and Escape drop it.
     panel.onMemKey(memKey('5'));

@@ -670,7 +670,9 @@ is kept up, which is cheap.
   example menus (`examples`), following the PC (`pc`), every row of
   U7's table of what ends the sync (`sync`), Clear (`clear`), the
   caret and the layers to the end of a scroll (`caret`), the editor's
-  keys, menu and phone view (`editor`), and the page's font (`fonts`).
+  keys, menu and phone view (`editor`), the Debugger's dump and the
+  switches while a program runs (`debugger`), the dock and dialogs at
+  every width (`layout`), and the page's font (`fonts`).
 
 ### T3 — Example sources
 

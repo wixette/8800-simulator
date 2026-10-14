@@ -207,3 +207,45 @@ test('Tab replaces only what typing would, and indents lines it spans (U3)', () 
     assert.strictEqual(text.slice(0, partial.from) + partial.text + text.slice(partial.to),
                        '        L: MVI A,1\n         OUT 0FFH\n         JMP L');
 });
+
+test('Assemble lifts protection, loads, and is in sync with its own load (U4, U7)', (t) => {
+    // Run with a stand-in machine: its loads are counted as the real
+    // one's are, and the record must hold the count after Assemble's.
+    const sim = {
+        mem: new Array(256).fill(0), memLoads: 0, lifted: 0, pc: null,
+        unprotectAll() { this.lifted++; return false; },
+        initMem() { this.memLoads++; this.mem.fill(0); },
+        loadMap(pairs) {
+            this.memLoads++;
+            for (const [a, b] of pairs) this.mem[a] = b;
+        },
+        reset() {}, flushDump() {}, endResetFlash() {}, showAddressAndData() {},
+        lastAddress: 0,
+    };
+    const source = 'MSG: DB 1\nSTART: MVI A,1\n HLT\n END START';
+    const saved = {panel: global.panel, cpu: global.CPU8080, window: global.window};
+    t.after(() => {
+        global.panel = saved.panel; global.CPU8080 = saved.cpu; global.window = saved.window;
+    });
+    global.window = {clearTimeout() {}};
+    const said = [];
+    global.panel = Object.assign({}, saved.panel, {
+        sim: sim,
+        ensurePoweredOn: () => false,
+        updateMemoryControls: () => {},
+        setStatus: (...args) => said.push(args),
+    });
+    global.CPU8080 = {set: (reg, value) => { if (reg == 'PC') sim.pc = value; }};
+    t.mock.method(asmtab, 'source', () => ({value: source}));
+    t.mock.method(asmtab, 'refresh', () => { asmtab.result = Asm8080.assemble(source); });
+    t.mock.method(asmtab, 'requestPc', () => {});
+    asmtab.onAssemble();
+    assert.strictEqual(sim.lifted, 1, 'protection lifted first');
+    assert.deepStrictEqual(sim.mem.slice(0, 4), [1, 0x3e, 1, 0x76]);
+    assert.strictEqual(sim.pc, 1, 'the PC set where END START says');
+    assert.ok(asmtab.loaded, 'the record made');
+    assert.strictEqual(asmtab.loaded.memLoads, sim.memLoads,
+                       'with the count after its own load, so in sync with it');
+    assert.strictEqual(asmtab.loaded.text, source);
+    asmtab.loaded = null;
+});

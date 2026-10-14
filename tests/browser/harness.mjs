@@ -31,7 +31,15 @@ const TYPES = {
  */
 export function serve() {
     const server = createServer((request, response) => {
-        let path = decodeURIComponent(new URL(request.url, 'http://x').pathname);
+        let path;
+        try {
+            path = decodeURIComponent(new URL(request.url, 'http://x').pathname);
+        } catch (e) {
+            // A malformed address is the asker's mistake, not a crash.
+            response.writeHead(400);
+            response.end();
+            return;
+        }
         if (path.endsWith('/')) {
             path += 'index.html';
         }
@@ -81,6 +89,28 @@ export function findChrome() {
     return null;
 }
 
+/** The browsers running now, so that an interrupted run can end them. */
+const LIVE = new Set();
+
+/** How long a DevTools call may take before the check is failed. */
+const ANSWER_MS = 20000;
+
+/**
+ * Ends every browser still running and removes its profile: for a run
+ * that is interrupted (Ctrl-C), which would otherwise leave them.
+ */
+export function killAll() {
+    for (const live of LIVE) {
+        live.chrome.kill('SIGKILL');
+        try {
+            rmSync(live.profile, {recursive: true, force: true});
+        } catch (e) {
+            // In tmp; the system clears it in time.
+        }
+    }
+    LIVE.clear();
+}
+
 /**
  * Starts Chrome on a fresh profile, with the page's address, and gives
  * back what a check needs to drive it.
@@ -88,44 +118,86 @@ export function findChrome() {
  * @param {string} url The page.
  */
 export async function start(chromePath, url) {
+    if (!existsSync(chromePath)) {
+        throw new Error('Chrome is not at ' + chromePath);
+    }
     const profile = mkdtempSync(join(tmpdir(), '8800-browser-'));
-    const port = 9300 + Math.floor(Math.random() * 500);
+    // Port 0: Chrome takes a free one and writes it in the profile, so
+    // two runs at once can never find each other's browser.
     const chrome = spawn(chromePath, ['--headless=new',
-        '--remote-debugging-port=' + port, '--user-data-dir=' + profile,
+        '--remote-debugging-port=0', '--user-data-dir=' + profile,
         '--no-first-run', '--no-default-browser-check', '--lang=en-US',
         '--window-size=1280,860', 'about:blank'], {stdio: 'ignore'});
-    let target = null;
-    for (let i = 0; i < 75 && !target; i++) {
+    const live = {chrome, profile, exited: false};
+    LIVE.add(live);
+    let failed = null;
+    chrome.on('error', (e) => { failed = e; });
+    chrome.on('exit', () => { live.exited = true; });
+    const quit = async (why) => {
+        await stopChrome(live);
+        throw new Error(why);
+    };
+    let port = null;
+    for (let i = 0; i < 75 && !port && !failed && !live.exited; i++) {
         await sleep(200);
+        try {
+            port = Number(readFileSync(join(profile, 'DevToolsActivePort'),
+                                       'utf8').split('\n')[0]) || null;
+        } catch (e) {
+            // Not written yet.
+        }
+    }
+    if (!port) {
+        await quit('Chrome did not start: ' + chromePath +
+                   (failed ? ' (' + failed.message + ')' : ''));
+    }
+    let target = null;
+    for (let i = 0; i < 50 && !target; i++) {
         try {
             const list = await (await fetch(`http://127.0.0.1:${port}/json`)).json();
             target = list.find((t) => t.type == 'page');
         } catch (e) {
-            // Not up yet.
+            await sleep(100);
         }
     }
     if (!target) {
-        chrome.kill();
-        throw new Error('Chrome did not start: ' + chromePath);
+        await quit('Chrome started, but offered no page to drive');
     }
     const ws = new WebSocket(target.webSocketDebuggerUrl);
-    await new Promise((r) => ws.addEventListener('open', r));
+    await new Promise((r, reject) => {
+        ws.addEventListener('open', r);
+        ws.addEventListener('error', () => reject(new Error('no DevTools connection')));
+    });
     let id = 0;
     const pending = new Map();
     const errors = [];
     ws.addEventListener('message', (event) => {
         const msg = JSON.parse(event.data);
         if (msg.id && pending.has(msg.id)) {
-            pending.get(msg.id)(msg);
+            pending.get(msg.id).resolve(msg);
             pending.delete(msg.id);
         } else if (msg.method == 'Runtime.exceptionThrown') {
             errors.push(msg.params.exceptionDetails.exception?.description ||
                         msg.params.exceptionDetails.text);
         }
     });
-    const send = (method, params = {}) => new Promise((resolveSend) => {
+    // A browser that goes away fails what was waiting on it, rather
+    // than leaving the run hung.
+    ws.addEventListener('close', () => {
+        for (const [n, call] of pending) {
+            call.reject(new Error('the browser went away during ' + call.method));
+        }
+        pending.clear();
+    });
+    const send = (method, params = {}) => new Promise((resolveSend, reject) => {
         const n = ++id;
-        pending.set(n, resolveSend);
+        const timer = setTimeout(() => {
+            pending.delete(n);
+            reject(new Error('the browser did not answer ' + method));
+        }, ANSWER_MS);
+        pending.set(n, {method,
+                        resolve: (msg) => { clearTimeout(timer); resolveSend(msg); },
+                        reject: (e) => { clearTimeout(timer); reject(e); }});
         ws.send(JSON.stringify({id: n, method, params}));
     });
     await send('Page.enable');
@@ -177,15 +249,33 @@ export async function start(chromePath, url) {
         console.log('  ' + (ok ? 'PASS ' : 'FAIL ') + name +
                     (info !== '' && !ok ? '  | ' + info : ''));
     };
-    const stop = () => {
+    const stop = async () => {
         ws.close();
-        chrome.kill();
-        try {
-            rmSync(profile, {recursive: true, force: true});
-        } catch (e) {
-            // Chrome may still hold it for a moment; it is in tmp.
-        }
+        await stopChrome(live);
     };
     return {send, js, viewport, fresh, press, statusText, setSource, sleep,
             verify, results, errors, stop};
+}
+
+/**
+ * Ends a browser and, once it has let go of its profile, removes it:
+ * removed at once, Chrome writes into it again as it shuts down.
+ */
+async function stopChrome(live) {
+    if (!live.exited) {
+        live.chrome.kill();
+        for (let i = 0; i < 50 && !live.exited; i++) {
+            await sleep(100);
+        }
+        if (!live.exited) {
+            live.chrome.kill('SIGKILL');
+        }
+    }
+    try {
+        rmSync(live.profile, {recursive: true, force: true, maxRetries: 5,
+                              retryDelay: 100});
+    } catch (e) {
+        // In tmp; the system clears it in time.
+    }
+    LIVE.delete(live);
 }

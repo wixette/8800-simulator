@@ -9,15 +9,26 @@
  * so they are run by hand before a release rather than on every push;
  * `npm test` is what CI runs. Each check gets a fresh browser profile.
  */
-import {findChrome, serve, start} from './harness.mjs';
+import {existsSync} from 'node:fs';
+import {findChrome, killAll, serve, start} from './harness.mjs';
 
 const CHECKS = ['examples', 'pc', 'sync', 'clear', 'caret', 'editor', 'debugger', 'layout', 'fonts'];
 
 const chrome = findChrome();
-if (!chrome) {
-    console.error('Chrome was not found. Set CHROME to its path, e.g.\n' +
+if (!chrome || !existsSync(chrome)) {
+    console.error((chrome ? 'Chrome is not at ' + chrome + '.' :
+                   'Chrome was not found.') +
+                  ' Set CHROME to its path, e.g.\n' +
                   '  CHROME=/usr/bin/chromium npm run test:browser');
     process.exit(2);
+}
+// Interrupted, the browsers go too, rather than run on with no one to
+// end them.
+for (const signal of ['SIGINT', 'SIGTERM']) {
+    process.on(signal, () => {
+        killAll();
+        process.exit(130);
+    });
 }
 const wanted = process.argv.slice(2);
 const unknown = wanted.filter((name) => !CHECKS.includes(name));
@@ -47,13 +58,21 @@ process.exit(failed ? 1 : 0);
 
 /** Runs one check in a fresh browser, and counts what it found. */
 async function runCheck(check) {
-    const h = await start(chrome, server.url);
+    let h = null;
     try {
+        h = await start(chrome, server.url);
         await check(h);
     } catch (e) {
+        if (!h) {
+            console.log('  FAIL the browser started  | ' + e.message);
+            failed++;
+            return;
+        }
         h.verify('ran to the end', false, e.stack || String(e));
     } finally {
-        h.stop();
+        if (h) {
+            await h.stop();
+        }
     }
     if (h.errors.length) {
         h.verify('no errors in the page', false, JSON.stringify(h.errors));
