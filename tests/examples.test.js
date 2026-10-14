@@ -1,10 +1,9 @@
 /**
  * The example programs in examples/ as a golden set.
  *
- * Every listing is checked against the disassembler, so the bytes and
- * the source printed next to them cannot drift apart, and every program
- * is run on the simulator and checked for what it is supposed to do.
- * Adding a listing to examples/ adds it to the checks below.
+ * Every example's source is assembled, and its program run on the
+ * simulator and checked for what its header says it does. Adding a
+ * source to examples/ adds it to the checks below.
  *
  * Run with: npm test
  */

@@ -686,6 +686,20 @@ test('the page hands every byte put in by hand to the Assembler (U7)', () => {
               'the count is taken before the load it should include');
 });
 
+test('a status value is put in as it is, $ patterns and all', (t) => {
+    // A link's switch value or a file's name went through replace(),
+    // which reads $' and $& as patterns and garbled the message.
+    loadScript('l10n');
+    const text = {textContent: ''};
+    const bar = {classList: {toggle() {}}};
+    const saved = global.document;
+    global.document = {getElementById: (id) => id == 'status-text' ? text : bar};
+    t.after(() => { global.document = saved; });
+    panel.setStatus('link-bad-reg', {name: 'SW', text: "$'$`$&<b>"});
+    assert.strictEqual(text.textContent,
+                       'The link sets SW to "$\'$`$&<b>", which is not a hex value that fits in it.');
+});
+
 test('every lamp the simulator reports is drawn on the panel', () => {
     const drawn = panel.LED_INFO.map((info) => info.id);
     for (const id of ['prot', 'hlta', 'm1', 'inte']) {

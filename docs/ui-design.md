@@ -194,6 +194,10 @@ knows how all of them behave.
 └───────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
+*Since v1.6.0* the dock has five tabs, Assembler between Teletype and
+Debugger, each with an icon before its name ([U1 in
+assembler.md](assembler.md#u1--a-fifth-dock-tab-and-icons-for-all-five)).
+
 Where the pieces of the four tabs went. Share and the instruction
 pane's place are U2's; the menus, dialogs and icons U3's; the switch
 strip U4's; the tools' layouts U5's; the References tab U6's.
@@ -424,7 +428,10 @@ its bottom.
 - **On a phone** four tabs and the fold button are a squeeze. The tabs
   close up, and in the languages whose names are longer still the row
   scrolls under the fold button, which stays pinned at the right; the
-  chosen tab is scrolled into view.
+  chosen tab is scrolled into view. *Since v1.6.0* a phone shows the
+  five tabs as icons alone, the names kept for screen readers and as
+  tooltips, and the row scrolls under the pinned fold button at any
+  width, should it ever need to.
 
 ---
 
@@ -439,8 +446,12 @@ its bottom.
   it. What a program prints afterwards never switches the dock by
   itself; the Teletype tab's dot (D10) and the status line say so. A
   view that changes on its own while you are reading it is worse than
-  one that asks to be looked at.
-- **Keyboard shortcuts.** None, for now. The panel is always in view,
+  one that asks to be looked at. *Since v1.6.0* Assemble is a fifth
+  way in and the one exception: you are writing, so the Assembler
+  stays open.
+- **Keyboard shortcuts.** None, for now. *Since v1.6.0* there is one,
+  inside the Assembler's editor only: Ctrl+Enter (⌘+Enter) assembles.
+  The panel is always in view,
   so a switch is one click away. F5 is the browser's reload, a Mac
   needs Fn for the function keys, letters belong to the teletype, and
   so does Escape, which is KILL LINE there.

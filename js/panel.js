@@ -349,7 +349,7 @@ panel.MAX_IMAGE_BYTES = 65536;
  * docs/ms-basic-4k.md.
  *
  * Only the names are here. Everything else - title, size, device,
- * bytes - is read out of examples/<id>.asm, and tests/listing.test.js
+ * bytes - is read out of examples/<id>.asm, and tests/examples.test.js
  * keeps this list in step with the directory.
  * @type {Array<string>}
  */
@@ -715,7 +715,9 @@ panel.refreshStatus = function() {
     }
     var msg = l10n.getMessage(panel.statusId);
     for (let key in panel.statusParams) {
-        msg = msg.replace('{' + key + '}', panel.statusParams[key]);
+        // Split and joined, not replace(): a value from a link or a
+        // file name may hold $' or $&, which replace() would expand.
+        msg = msg.split('{' + key + '}').join(panel.statusParams[key]);
     }
     // First what happened, then what was loaded, then what to do next -
     // so the notes go in front of the message, not after the
@@ -2927,9 +2929,8 @@ panel.readSavedDock = function() {
 };
 
 /**
- * When one of the dock's tabs is pressed. The tab already showing
- * folds the dock away, as a tool window does in an IDE; any other opens
- * the dock on itself.
+ * When one of the dock's tabs is pressed. Any but the tab already
+ * showing opens the dock on itself; that one is left as it is (below).
  *
  * Opening the Teletype hands it the keyboard: from a mouse by letting go
  * of whatever control last had the focus - a menu button, typically -

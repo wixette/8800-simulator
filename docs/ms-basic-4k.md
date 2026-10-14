@@ -793,7 +793,8 @@ number that is no longer true.
 
 Everything the simulator needs to be a simulator is in the page. Two
 things are not, and both arrived with this work: the example listings
-in `examples/`, and the BASIC tape in `roms/`. The page reads them at
+in `examples/` (assembly source files since v1.6.0), and the BASIC
+tape in `roms/`. The page reads them at
 the moment they are asked for.
 
 A browser treats a `file://` page as a different site from the files
@@ -1143,6 +1144,14 @@ and its map strip are in the dock's Debugger. D4 itself is unchanged.
 ---
 
 ## Part 5 — Example programs
+
+> *Since v1.6.0* the examples are 8080 assembly source, fourteen of
+> them, offered in the Load menu and in the Assembler's Examples menu;
+> `tty-hello` now counts its message from `$` and is 36 bytes. The
+> current set, its bytes and its order are in
+> [../examples/README.md](../examples/README.md) and `panel.EXAMPLES`.
+> This part is kept as it was written, for the ordering rule the code
+> cites.
 
 The full set of ten, with their bytes, is in
 [../examples/README.md](../examples/README.md). This part covers the

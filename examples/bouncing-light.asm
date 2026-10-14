@@ -3,13 +3,14 @@
 ;;; device: panel
 ;
 ; RUN: one dark LED travels from D1 up to D7, turns around, travels
-; back down to D1, and repeats. The display is inverted on purpose: the
+; back down to D0, turns again, and bounces between the two ends. The display is inverted on purpose: the
 ; program keeps one bit set in D and writes the complement, so seven
 ; LEDs stay lit and the gap is what you follow.
 ;
-; The sense switches set the speed. With A15-A8 all down the bit moves
-; at its fastest; raising them lengthens the delay loop, and the more
-; switches you raise the slower it crawls.
+; The sense switches set the speed, read as a binary number. With
+; A15-A8 all down the bit moves at its fastest; the higher the number
+; they make, the longer the delay loop, so A15 counts most and A8
+; least: A15 alone is some sixty times slower than A8 alone.
 ;
 ; Register C is the direction flag, 00H to move left and FFH to move
 ; right. It is complemented at each end of the row, which is what makes
@@ -17,8 +18,9 @@
 
 PANEL   EQU     0FFH            ; the data LEDs, and the sense switches
 
-        MVI     C,0FFH          ; direction: start moving right
-        MVI     D,01H           ; the lit bit, at one end of the row
+        MVI     C,0FFH          ; direction: flipped at the first step,
+                                ; so the bit starts moving left
+        MVI     D,01H           ; the bit, shown dark, at the bottom end
 
 ; Turn around at either end.
 STEP:   MOV     A,D

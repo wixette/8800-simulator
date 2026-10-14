@@ -178,7 +178,7 @@ on paper, upper case only. Here it sits on an 88-SIO serial board, at
 ports 00H and 01H (and an 88-2SIO at 10H and 11H). Nothing echoes by
 itself: a program has to be running and reading the board.
 
-![The Teletype, playing Guess my letter: M LOWER, F LOWER, C GOT IT IN 3 TRIES](./screenshots/teletype.png)
+![The Teletype, playing Guess my letter: each guess answered HIGHER or LOWER, until GOT IT IN 5 TRIES](./screenshots/teletype.png)
 
 Try the *Teletype Examples* from the Load menu, in this order:
 
@@ -284,7 +284,7 @@ design and its decisions are in [docs/assembler.md](docs/assembler.md).
   and you kill it by flipping the sense switch under it at the right
   moment.
 - **Fourteen example programs** in all, each written in assembly
-  language: **Load** runs one straight away, and the Assembler's
+  language: **Load** puts one in memory, ready to RUN, and the Assembler's
   **Examples** shows its source. See [examples/](examples/README.md).
 - **Your own, in assembly language**: in the **Assembler** tab
   ([section 7](#7-write-it-in-assembly)).

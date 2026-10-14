@@ -11,8 +11,8 @@ Hopper Center, which is the text this document cites. Chapters 2 and 3
 are the specification: everything they describe is in scope, macros
 included.
 
-**Status.** Built, on branch `assembler`, for review before it is
-merged into `v1.6.0`: the language (Parts 2 and 3) in `js/asm8080.js`,
+**Status.** Built for v1.6.0 (#12), reviewed in class by @cj0ne5 and
+then for the release: the language (Parts 2 and 3) in `js/asm8080.js`,
 the tab (Parts 4 and 5) in `js/asmtab.js`, and the examples and tests
 of Part 6. Where building changed a decision, the decision says so.
 Decisions are numbered so that the code can cite them: **L** for the
@@ -88,9 +88,8 @@ Syntax*).
 ### L2 — Names
 
 - The first character is a letter, `@` or `?`; the rest are letters,
-  digits, `@` or `?`. We also allow `_` anywhere after the first
-  character, which the manual does not mention and modern programs
-  expect.
+  digits, `@` or `?`. We also allow `_` anywhere, which the manual does
+  not mention and modern programs expect.
 - **Names are not limited to five characters.** The manual recognises
   only the first five (`INSTRUCTION:` reads as `INSTR:`); copying that
   would surprise everyone, and no modern assembler does it.
@@ -249,8 +248,8 @@ But some things decide the addresses themselves, and must be known by
 the time the first pass reaches them: the operand of `ORG` and `DS`,
 the condition of `IF`, and any expression a macro's expansion depends
 on for its size. A name used there before it is defined is an error:
-*The address of what follows depends on DONE, which is defined later.
-Move its definition up.*
+*The address of what follows depends on DONE, which is defined further
+down. Define it above this line.*
 
 What counts as defined later goes through names: an `EQU` whose value
 comes from a label further down is itself not known early, and nor is
@@ -266,7 +265,8 @@ and the assembler makes as many as the program needs, up to 32.
   error assembles to nothing, and the assembly goes on; after 100
   errors it stops listing more.
 - **The words are plain**, and say what to do where they can:
-  *MVI needs a register and a byte, as in MVI A,3FH.* An error inside a
+  *MVI is not written like that. It is written as in MVI A,3FH.* An
+  error inside a
   macro's expansion names both lines: the macro's and the one that
   used it (L22).
 - **Nothing is loaded if there is any error.** A half-assembled program
@@ -278,7 +278,7 @@ and the assembler makes as many as the program needs, up to 32.
 
 The program must fit the memory installed. If it does not, the error
 says how much it needs: *This program reaches 1234H, but the machine
-has 256 bytes. Install 8 KB in the Memory menu.* Two parts of a
+has 256 B of memory. Install more in the Memory menu.* Two parts of a
 program assembled to the same address (by `ORG`) are an error too,
 naming both lines.
 
@@ -370,10 +370,12 @@ Every statement it produces must be legal: `MAC C`, expanding to
 
 ### L22 — Where things are reported
 
-The listing shows each macro use followed by its expansion, the
-expanded lines marked, with their addresses and bytes. An error inside
+The listing shows a macro's use on its own row, with the address and
+the bytes its expansion made; the expansion, line by line with each
+one's address and bytes, is that row's tooltip (U2). An error inside
 an expansion is reported on the line that used the macro, naming the
-macro's line too: *Line 40, in SBMAC (line 12): …*
+macro's line too: *Line 40, in SBMAC (line 12): …* So is a clash or a
+program too big for the machine that an expansion's bytes cause.
 
 ---
 
@@ -396,17 +398,21 @@ phone's width, so, as agreed in #12:
 
 ```
 ┌ Assembler ──────────────────────────────────────────────────────────────────┐
-│ [Examples ▾]  [Assemble ⌘↵]                                                 │
+│ [Examples ▾]  [Assemble]                                                    │
 ├──────────────────────────────────────────────┬──────────────────────────────┤
-│  1        ORG  0                ; start here  │ 0000                         │
+│  1        ORG  0         ; start [Clear][Copy]│ 0000                         │
 │  2 LOOP:  IN   0FFH             ; switches    │ 0000  DB FF                  │
 │  3        OUT  0FFH             ; to the lamps│ 0002  D3 FF                  │
 │  4        JMP  LOOP                           │ 0004  C3 00 00               │
 │  5        END                                 │                              │
-│                                               │                              │
 └──────────────────────────────────────────────┴──────────────────────────────┘
-   the source, highlighted                         the listing, line for line
+   the source, highlighted; Clear and Copy         the listing, line for line
+   in its corner
+ Line 3: …                                         the errors, when there are any
 ```
+
+On a phone the toolbar gains **[Listing]** at its right, and the source
+and the listing take turns in the one pane.
 
 - **A toolbar** across the top. **Examples** opens a menu of example
   sources (T3); **Assemble**, beside it in the order they are used, is
@@ -443,16 +449,19 @@ dependencies, and keeps it that way.
 - **Tab** inserts spaces up to the next stop, every eight columns, as
   editors do, since assembly is written in columns; there is no option
   for a tab character. A tab already in pasted text shows at the same
-  stops. **Esc, then Tab** moves the focus on, so the keyboard is never
-  trapped.
+  stops. With lines selected, Tab indents each of them one stop and
+  keeps them selected. Either way it is typed as text, so Undo takes
+  it back. **Esc, then Tab** moves the focus on, so the keyboard is
+  never trapped.
 - **The type** is the Teletype paper's, 16 px on 26 px lines, for the
   source, its line numbers and the listing alike.
 - **The caret is a block**, as the Teletype's carriage is: dark, the
   character under it light, blinking at the carriage's rate, and still
   while it moves or for readers who ask for less motion. A text area
   cannot draw one, so it is drawn in the highlighting's layer, sized
-  to a character's box measured in the editor's own type, and the text
-  area's caret is hidden. It hides while text is selected.
+  to a character's box measured in the editor's own type - a wide one,
+  Chinese or an emoji, measured as it stands - and the text area's
+  caret is hidden. It hides while text is selected.
 - **Copy**, an icon in the editor's corner as on code boxes across the
   web, puts the whole source on the clipboard, and shows a tick; where
   the browser will not allow it, the source is selected to copy by
@@ -491,11 +500,13 @@ the machine is untouched, and the status line says how many there are.
 
 **Examples ▾** lists the simulator's example programs (T3), the same
 set and in the same order as the Load menu: the front panel's, then
-the Teletype's. There is one set, as source in `examples/`, and two
-ways in, as @cj0ne5 suggested: *Load* assembles an example out of
-sight and loads its bytes, leaving the editor alone, and says where its
-source is; **Examples ▾** puts the source in the editor. 4K BASIC,
-which is a binary, is only in *Load*.
+the Teletype's. There is one set, as source in `examples/`, as @cj0ne5
+asked. He would have had the examples in this tab alone, with *Load*
+keeping only hex and binary files; we kept them in both, as two ways
+in: *Load* assembles an example out of sight and loads its bytes,
+leaving the editor alone, and says where its source is; **Examples ▾**
+puts the source in the editor. 4K BASIC, which is a binary, is only
+in *Load*.
 
 Both menus read the files once, when either first needs them, so like
 the rest of the page's files they need it served, not opened from the
@@ -556,7 +567,8 @@ has not changed: undone back to the exact text, the mark returns.
 ### H1 — The technique
 
 A `<pre>` of coloured spans sits exactly behind a `<textarea>` whose
-text is transparent but whose caret is not. The text area does the
+text and caret are transparent; the block caret is drawn over both
+(U3). The text area does the
 editing (selection, undo, the soft keyboard); the `<pre>` shows the
 colours. This is the usual way to highlight a text area without a
 library, and it is small.
@@ -577,8 +589,8 @@ What makes it work, and what the tests check:
   each coloured line is as wide as its text, so the room counts at the
   end of a long one too. `npm run test:browser -- caret` checks it.
 - **The same text:** the `<pre>` is redrawn from the text area's value
-  on every change, at most once a frame, with a trailing newline so
-  that its last line is not shorter.
+  on every change, with a trailing newline so that its last line is
+  not shorter.
 
 ### H2 — What is coloured
 
@@ -595,17 +607,22 @@ always agree with what the assembler accepts:
 | Number, `$` | `0FFH`, `$` | dark olive |
 | String | `'HELLO'` | green |
 | Macro name, where used | `SHRT` | purple, italic |
+| Operator word | `MOD`, `AND` | purple |
 | Unknown word | `MVX` | red, wavy underline |
 
 On the light background the dump and the paper already use, each
-colour meets 4.5:1 contrast. Colour is never the only sign: errors
-are also marked in the gutter and listed.
+colour meets 4.5:1 contrast, on the tinted rows of the PC's line and
+an error's too. Colour is never the only sign: errors are also marked
+in the gutter and listed.
 
 ### H3 — Cost
 
-The whole source is tokenized again on each change, once a frame.
-Kevin Cole's library and a program with it, about 600 lines, is well
-under a millisecond. Nothing is done while the tab is hidden.
+The whole source is tokenized and redrawn on each change, and
+assembled again once typing pauses. The examples, under a hundred
+lines, take about a millisecond; 600 lines about 14 ms; a source of
+thousands of lines, which nobody types by hand, is slower to type in,
+some 60 ms a key at 3,000. While the tab is hidden only the PC's mark
+is kept up, which is cheap.
 
 ---
 
@@ -620,8 +637,11 @@ under a millisecond. Nothing is done while the tab is hidden.
   are its own table, written from the manual's Appendix A, and checked
   by a test against the CPU core's disassembler (T2).
 - **`js/asmtab.js`**: the tab: editor, highlighting, listing, errors,
-  examples. It talks to the machine only through what `js/panel.js`
-  already uses to load a program. Its logic that needs no page - the
+  examples. It loads the machine through the simulator, as every
+  loader does, with `Sim8800.loadMap` for an assembly's scattered
+  bytes, and sets the PC for `END exp`; it follows the PC through the
+  simulator's count of loads and its reports of bytes put in by hand
+  (U7). Its logic that needs no page - the
   highlighting, the listing's cells, the errors as sentences - is
   tested in `tests/asmtab.test.js`.
 - **`js/l10n.js`**: the tab's words and the error messages.
@@ -642,13 +662,15 @@ under a millisecond. Nothing is done while the tab is hidden.
   listed, which `tests/examples.test.js` already proved run; it runs
   them still, now from the source. (`tty-hello` alone changed: it
   counts its message's length from `$` instead of ending at a zero.)
-- **Errors:** each error message is produced by a test, and says the
-  line it should.
+- **Errors:** each error is produced by a test, and every one has its
+  message in all ten languages.
 - **The tab:** the overlay stays aligned (H1), and Assemble loads the
   way the other loaders do.
 - **In the browser** (`npm run test:browser`, by hand, not in CI): both
-  example menus, following the PC, every row of U7's table of what
-  ends the sync, Clear, and the page's font.
+  example menus (`examples`), following the PC (`pc`), every row of
+  U7's table of what ends the sync (`sync`), Clear (`clear`), the
+  caret and the layers to the end of a scroll (`caret`), the editor's
+  keys, menu and phone view (`editor`), and the page's font (`fonts`).
 
 ### T3 — Example sources
 
@@ -658,27 +680,28 @@ the tests run. The first set, written new:
 
 | Example | Shows |
 | --- | --- |
-| Switches to lamps | The smallest program: `IN`, `OUT`, a label, `JMP` |
+| I/O echo | The smallest program: `IN`, `OUT`, a label, `JMP` |
 | Add two numbers | Chapter 1's program, with names for its addresses (`EQU`) |
-| Hello, world | A string with `DB`, a loop, `$` for its length, the 88-SIO |
-| Echo | Reading the serial board, a subroutine with `CALL`/`RET` |
+| Teletype hello | A string with `DB`, a loop, `$` for its length, the 88-SIO |
+| Echo, with subroutines | Reading the serial board, a subroutine with `CALL`/`RET` |
 | Multiply | Shift-and-add, from Chapter 4's techniques |
 | Print a number | Decimal output: division by repeated subtraction, the stack |
-| Macros | SHRT and an indirect-load macro, local labels, `::` |
+| Macros | SHRT, a register as an argument, local labels in each use |
 
 They began in `examples/source/`, beside the listings of the Load
 menu's ten. Two sets that differed were one too many (@cj0ne5), so all
 of them are now source in `examples/`, fourteen programs, with one
-README; *Hello, world* replaced the old `tty-hello` and *Switches to
-lamps* the old `io-echo`, which made the same bytes. They are ours,
-under the repository's licence, and the old `js/listing.js`, which read
-the listings, is gone.
+README. The new hello took the place of the old `tty-hello`'s listing,
+keeping its file and its name, and the new switches program the old
+`io-echo`'s, making the same bytes. They are ours, under the
+repository's licence, and the old `js/listing.js`, which read the
+listings, is gone.
 
 ---
 
 ## Part 7 — Plan
 
-On branch `assembler`, merged into `v1.6.0` when done:
+Built on branch `assembler`, and merged into `v1.6.0`:
 
 1. ✅ **The language core:** tokenizer, expressions, every instruction,
    the pseudo-instructions, two passes, errors (L1 to L15), with the
@@ -692,6 +715,11 @@ On branch `assembler`, merged into `v1.6.0` when done:
 6. ✅ **Docs:** the README; a summary on #12 once reviewed.
 7. ✅ **@cj0ne5's review:** the PC followed in the source (U7), and one
    set of examples behind both menus (U5, T3).
+8. ✅ **The release review:** ten reviewers' reading of all of v1.6.0,
+   and what they found fixed, among it macro scoping (L19, L20), a
+   macro that uses itself (L16), values known early through names
+   (L13), `END exp` (L8), Tab over a selection (U3), the phone's
+   listing, and contrast (H2).
 
 Each step is a commit or a few, tested before the next.
 
@@ -702,8 +730,10 @@ Each step is a commit or a few, tested before the next.
 - ~~**Octal in the listing.**~~ Settled: @cj0ne5's class is happy
   with hex, so there is no octal toggle. The listing is built so that
   one could still be added.
-- **The tab's place.** Between Teletype and Debugger (U1), or after
-  them?
-- **`MVI A,-1`.** L5 follows the manual and rejects it. If that proves
-  more confusing than instructive, the alternative is to accept 8-bit
-  operands from -128 to 255, as pyGHCassembler does.
+- ~~**The tab's place.**~~ Settled: between Teletype and Debugger
+  (U1), in the order you work.
+- **`MVI A,-1`.** Kept as the manual has it, for now: L5 rejects it,
+  and the error says how to write it (`0FFH`, or `-1 AND 0FFH`). If
+  classes find that more confusing than instructive, the alternative
+  is to accept 8-bit operands from -128 to 255, as pyGHCassembler
+  does.

@@ -12,16 +12,15 @@ export default async function(h) {
     const exampleIds = load.filter(v => v && v.startsWith('example:')).map(v => v.slice(8));
     verify('Load offers the 14 examples', exampleIds.length === 14, exampleIds.length);
     verify('Load still offers 4K BASIC', load.some(v => /basic/i.test(v || '')));
-    // Choose Kill the Bit from Load
+    // Choose Pattern shift from Load
     await press('#load-dropdown li[data-value="example:pattern-shift"]'); await sleep(400);
     const st = await statusText();
     verify('Load names where its source is', /Assembler › Examples/.test(st), st);
-    const mem = await js(`Array.from({length: 8}, (_, i) => panel.sim.getMemory ? panel.sim.getMemory(i) : panel.sim.mem[i])`);
     verify('the Assembler editor is untouched by Load', (await js(`document.getElementById('asm-source').value`)) === '');
     await press('#s-sw-run'); await sleep(600);
     await press('#s-sw-stop'); await sleep(200);
     const pc = await js(`panel.linkCpu().pc`);
-    verify('the loaded program runs (PC inside its 8 bytes)', pc >= 0 && pc < 8, pc);
+    verify('the loaded program runs (PC in its loop, past its start)', pc >= 2 && pc < 8, pc);
     // Assembler examples
     await press('#nav-asm'); await sleep(300);
     await press('#asm-examples-button'); await sleep(500);

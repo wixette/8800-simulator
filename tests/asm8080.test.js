@@ -1,8 +1,7 @@
 /**
  * The assembler (js/asm8080.js), against Intel's own manual: every
  * instruction, the manual's examples from Chapters 2 to 4 with the
- * bytes the manual gives, the simulator's example listings, and every
- * error. The decisions it checks are L1 to L22 in docs/assembler.md.
+ * bytes the manual gives, and every error. The decisions it checks are L1 to L22 in docs/assembler.md.
  *
  * Run with: npm test
  */
@@ -506,6 +505,14 @@ test('an expression nested past reason is an error, not a crash', () => {
                            '-'.repeat(8000) + '1', 'NOT '.repeat(20000) + '1']) {
         assert.deepStrictEqual(errorsOf(' DW ' + operand), ['bad-expression']);
     }
+});
+
+test('a number past 16 bits, an empty operand, a string too long for a value', () => {
+    assert.deepStrictEqual(errorsOf(' DW 10000H'), ['word-range']);
+    assert.deepStrictEqual(errorsOf(' DW 65536'), ['word-range']);
+    assert.deepStrictEqual(errorsOf(' DB 1,,2'), ['empty-operand']);
+    assert.deepStrictEqual(errorsOf(" MVI A,'ABC'"), ['string-value']);
+    assert.deepStrictEqual(errorsOf(" DW ''"), ['string-value']);
 });
 
 test('the listing has a row per line, with its address and bytes', () => {
