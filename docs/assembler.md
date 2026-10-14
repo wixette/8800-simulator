@@ -512,7 +512,9 @@ Both menus read the files once, when either first needs them, so like
 the rest of the page's files they need it served, not opened from the
 disk. Choosing one here replaces the editor's text. If the editor holds
 anything that is not an unchanged example, a dialog asks first, since
-that text is otherwise lost.
+that text is otherwise lost. Any example counts, not only the one last
+chosen, so an example the page brought back after a reload is replaced
+without a question too.
 
 ### U6 — Words
 

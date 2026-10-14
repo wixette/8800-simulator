@@ -249,3 +249,36 @@ test('Assemble lifts protection, loads, and is in sync with its own load (U4, U7
     assert.strictEqual(asmtab.loaded.text, source);
     asmtab.loaded = null;
 });
+
+test('choosing an example asks first only if text would be lost (U5)', (t) => {
+    // An unchanged example is not lost, whichever example it is and
+    // however it came back - after a reload too, when nothing in the
+    // page remembers having put it there.
+    const saved = {panel: global.panel};
+    t.after(() => { global.panel = saved.panel; });
+    global.panel = Object.assign({}, saved.panel, {
+        examplePrograms: {
+            a: {name: 'A', text: ' MVI A,1\n HLT\n'},
+            b: {name: 'B', text: ' NOP\n'},
+        },
+    });
+    let editor = '';
+    const asked = [];
+    const used = [];
+    t.mock.method(asmtab, 'source', () => ({value: editor}));
+    t.mock.method(asmtab, 'useExample', (id) => used.push(id));
+    asmtab.replaceDialog = {open: () => asked.push(asmtab.pendingExample)};
+    for (const [text, expectAsk] of [['', false], ['  \n', false],
+                                     [' MVI A,1\n HLT\n', false],
+                                     [' NOP\n', false],
+                                     [' MVI A,2\n HLT\n', true],
+                                     [' NOP', true]]) {
+        editor = text;
+        asked.length = 0;
+        used.length = 0;
+        asmtab.onExampleChosen('b');
+        assert.deepStrictEqual([asked.length > 0, used.length > 0],
+                               [expectAsk, !expectAsk], JSON.stringify(text));
+    }
+    asmtab.replaceDialog = null;
+});

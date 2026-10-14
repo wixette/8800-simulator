@@ -394,9 +394,11 @@ panel.needsServer = function() {
  * @param {string} text An examples/*.asm file.
  * @return {?{name: string, desc: string, device: string,
  *     bytes: !Array<number>, text: string}} The program, or null if it
- *     does not assemble.
+ *     does not assemble. Its text has the line endings a text area
+ *     gives back, so the editor can tell it is unchanged.
  */
 panel.parseExample = function(text) {
+    text = text.replace(/\r\n?/g, '\n');
     var meta = {};
     var re = /^;;;\s*(name|desc|device):\s*(.*)$/gm;
     var m;

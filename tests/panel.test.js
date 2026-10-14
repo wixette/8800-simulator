@@ -365,6 +365,13 @@ test('both menus read an example the same way: its header, and its bytes', () =>
     assert.strictEqual(parsed.text, example.text, 'the source, for the Assembler');
     assert.strictEqual(panel.parseExample(';;; name: Broken\n MVX A'), null,
                        'a source that does not assemble is not offered');
+    // A file saved with Windows line endings: a text area gives its
+    // text back with \n alone, and an unchanged example must still
+    // read as unchanged (U5).
+    const crlf = panel.parseExample(example.text.replace(/\n/g, '\r\n'));
+    assert.strictEqual(crlf.text, example.text);
+    assert.strictEqual(crlf.name, 'Macros', 'its header read, without the \\r');
+    assert.deepStrictEqual(crlf.bytes, example.bytes);
 });
 
 test('a first visit opens the dock on the Tutorial', () => {

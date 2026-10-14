@@ -64,9 +64,6 @@ asmtab.loaded = null;
 /** The source line marked as the PC's, or 0 for none. @type {number} */
 asmtab.pcLine = 0;
 
-/** The text of the example last put in the editor, unchanged. */
-asmtab.exampleText = null;
-
 /** Whether the next Tab moves the focus on, after an Escape (U3). */
 asmtab.tabLeaves = false;
 
@@ -1127,12 +1124,26 @@ asmtab.onExampleChosen = function(id) {
         return;
     }
     var text = asmtab.source().value;
-    if (text.trim() && text != asmtab.exampleText) {
+    if (text.trim() && !asmtab.isExample(text)) {
         asmtab.pendingExample = id;
         asmtab.replaceDialog.open();
         return;
     }
     asmtab.useExample(id);
+};
+
+/**
+ * Whether a text is one of the examples, unchanged: nothing would be
+ * lost by putting another in its place. Any example, not only the one
+ * last chosen, so that it holds after a reload brings the text back.
+ * @param {string} text The editor's text.
+ * @return {boolean} Whether it is an example's text.
+ */
+asmtab.isExample = function(text) {
+    var examples = panel.examplePrograms || {};
+    return Object.keys(examples).some(function(id) {
+        return examples[id].text == text;
+    });
 };
 
 /** Names the example the dialog is about to put in. */
@@ -1156,7 +1167,6 @@ asmtab.useExample = function(id) {
     var example = panel.examplePrograms[id];
     var source = asmtab.source();
     source.value = example.text;
-    asmtab.exampleText = example.text;
     source.scrollTop = 0;
     source.scrollLeft = 0;
     asmtab.save();
