@@ -85,3 +85,75 @@ export default async function(h) {
     m = await layers();
     verify('on a phone too', m.others[0] === m.source[0] && m.others[1] === m.source[0], JSON.stringify(m));
 }
+
+/**
+ * The Teletype and the Debugger's dump have no layers to part: the
+ * carriage is a span in the paper's own text, and a click on the dump
+ * picks the byte element it lands on. This holds them to that, scrolled
+ * to their ends as the editor was.
+ */
+export async function others(h) {
+    const {js, send, viewport, fresh, press, verify, sleep} = h;
+    const click = async (x, y) => {
+        for (const type of ['mousePressed', 'mouseReleased']) {
+            await send('Input.dispatchMouseEvent', {type, x, y, button: 'left', clickCount: 1});
+        }
+        await sleep(200);
+    };
+    // Whether the element is wholly inside the part of its scroller that
+    // can be seen, which the scroller's scrollbars do not cover.
+    const inView = (selector, scroller) => js(`(() => {
+        const e = document.querySelector('${selector}').getBoundingClientRect();
+        const s = document.querySelector('${scroller}');
+        const r = s.getBoundingClientRect();
+        const bottom = r.top + s.clientTop + s.clientHeight, right = r.left + s.clientLeft + s.clientWidth;
+        return {inside: e.top >= r.top - 0.5 && e.bottom <= bottom + 0.5 && e.left >= r.left - 0.5 && e.right <= right + 0.5,
+                e: [e.left, e.top, e.right, e.bottom], view: [r.left, r.top, right, bottom]};
+    })()`);
+    for (const [label, width, height] of [['desktop', 1280, 860], ['phone', 390, 844]]) {
+        await viewport(width, height); await fresh();
+        // The Teletype, after a long run of printing, the carriage far
+        // along its line.
+        await press('#nav-tty'); await sleep(300);
+        await js(`(() => { for (let i = 0; i < 120; i++) panel.tty.writeText('LINE ' + i + ' ' + 'X'.repeat(60) + '\\r\\n');
+            panel.tty.writeText('THE CARRIAGE IS HERE, FAR ALONG THE LINE: ' + '-'.repeat(20)); panel.renderTeletype(); })()`);
+        await sleep(300);
+        const tty = await inView('.tty-cursor', '#tty-paper');
+        verify(label + ': the Teletype\'s carriage is in view after a long print', tty.inside, JSON.stringify(tty));
+        // A carriage return takes it, and the view, back to the margin.
+        await js(`(() => { panel.tty.writeText('\\r'); panel.renderTeletype(); })()`);
+        await sleep(200);
+        const back = await inView('.tty-cursor', '#tty-paper');
+        verify(label + ': and after a carriage return, at the left margin', back.inside &&
+               (await js(`document.getElementById('tty-paper').scrollLeft`)) === 0, JSON.stringify(back));
+        // The Debugger's dump, scrolled to its end: a click picks the
+        // byte under the mouse, and that byte is the one marked.
+        await press('#s-off-on'); await sleep(300);
+        await press('#nav-debug'); await sleep(400);
+        await js(`(() => { let e = document.getElementById('mem-dump');
+            for (; e; e = e.parentElement) { if (e.scrollHeight > e.clientHeight + 1 && getComputedStyle(e).overflowY != 'visible') e.scrollTop = e.scrollHeight;
+                                             if (e.scrollWidth > e.clientWidth + 1 && getComputedStyle(e).overflowX != 'visible') e.scrollLeft = e.scrollWidth; } })()`);
+        await sleep(300);
+        // The last byte that can be seen whole, from the bottom right.
+        const pick = await js(`(() => {
+            let view = document.getElementById('mem-dump'), r = null;
+            for (let e = view; e; e = e.parentElement) if (e.scrollHeight > e.clientHeight + 1 || e.scrollWidth > e.clientWidth + 1) { view = e; break; }
+            const v = view.getBoundingClientRect();
+            const bytes = [...document.querySelectorAll('#mem-dump span[data-a]')].filter(s => {
+                const b = s.getBoundingClientRect();
+                return b.top >= v.top && b.bottom <= v.top + view.clientHeight && b.left >= v.left && b.right <= v.left + view.clientWidth && b.bottom <= innerHeight;
+            });
+            const s = bytes[bytes.length - 1], b = s.getBoundingClientRect();
+            return {a: +s.dataset.a, x: b.left + b.width / 2, y: b.top + b.height / 2};
+        })()`);
+        await click(pick.x, pick.y);
+        const picked = await js(`(() => { const s = document.querySelector('#mem-dump .mem-selected'); return {sel: panel.memSelection, marked: s ? +s.dataset.a : null}; })()`);
+        verify(label + ': scrolled to its end, a click in the dump picks the byte under the mouse',
+               picked.sel === pick.a && picked.marked === pick.a, JSON.stringify({pick, picked}));
+        await js(`document.querySelector('#mem-input').dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowLeft', bubbles: true}))`);
+        await sleep(200);
+        const moved = await js(`(() => { const s = document.querySelector('#mem-dump .mem-selected'); return {sel: panel.memSelection, marked: s ? +s.dataset.a : null}; })()`);
+        verify(label + ': and moved with the keys, the mark follows', moved.sel === pick.a - 1 && moved.marked === pick.a - 1, JSON.stringify(moved));
+        await js(`panel.clearMemSelection()`);
+    }
+}

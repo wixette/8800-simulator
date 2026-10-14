@@ -31,7 +31,22 @@ let passed = 0;
 let failed = 0;
 for (const name of wanted.length ? wanted : CHECKS) {
     console.log(name);
-    const check = (await import(`./${name}.mjs`)).default;
+    const module = await import(`./${name}.mjs`);
+    // A file's default check, then any other it exports, each in a
+    // browser of its own.
+    for (const [part, check] of Object.entries(module)) {
+        if (part != 'default') {
+            console.log(name + ' (' + part + ')');
+        }
+        await runCheck(check);
+    }
+}
+server.close();
+console.log(`\n${passed} passed, ${failed} failed`);
+process.exit(failed ? 1 : 0);
+
+/** Runs one check in a fresh browser, and counts what it found. */
+async function runCheck(check) {
     const h = await start(chrome, server.url);
     try {
         await check(h);
@@ -46,6 +61,3 @@ for (const name of wanted.length ? wanted : CHECKS) {
     passed += h.results.filter((r) => r.ok).length;
     failed += h.results.filter((r) => !r.ok).length;
 }
-server.close();
-console.log(`\n${passed} passed, ${failed} failed`);
-process.exit(failed ? 1 : 0);

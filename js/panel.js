@@ -1884,6 +1884,30 @@ panel.renderTeletype = function() {
     var paper = document.getElementById('tty-paper');
     if (paper) {
         paper.scrollTop = paper.scrollHeight;
+        panel.followCarriage(paper, textElem.querySelector('.tty-cursor'));
+    }
+};
+
+/**
+ * Scrolls the paper sideways, when it is narrower than a line - on a
+ * phone - just enough to keep the carriage in view, a few characters
+ * clear of the edge, as the paper is kept scrolled down to it. After a
+ * carriage return, that is back to the left margin.
+ * @param {!Element} paper The paper, which scrolls.
+ * @param {?Element} cursor The carriage, in it.
+ */
+panel.followCarriage = function(paper, cursor) {
+    if (!cursor || paper.scrollWidth <= paper.clientWidth) {
+        return;
+    }
+    // The paper is positioned, so the carriage is measured from it.
+    var left = cursor.offsetLeft;
+    var right = left + cursor.offsetWidth;
+    var margin = cursor.offsetWidth * 4;
+    if (left - margin < paper.scrollLeft) {
+        paper.scrollLeft = Math.max(0, left - margin);
+    } else if (right + margin > paper.scrollLeft + paper.clientWidth) {
+        paper.scrollLeft = right + margin - paper.clientWidth;
     }
 };
 
