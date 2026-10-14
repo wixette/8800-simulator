@@ -43,7 +43,7 @@ export default async function(h) {
     await setSource('  NOP'); await sleep(200);
     verify('typing offers Clear again', !(await dis()));
     await js(`l10n.setLocale ? l10n.setLocale('ja') : panel.setLocale('ja')`); await sleep(300);
-    verify('the tooltip follows the language', (await js(`document.getElementById('asm-clear').title`)) === 'エディタを空にする', await js(`document.getElementById('asm-clear').title`));
+    verify('the tooltip follows the language', (await js(`document.getElementById('asm-clear').title`)) === 'エディターを空にする', await js(`document.getElementById('asm-clear').title`));
     await viewport(390, 844); await sleep(300);
     const r = await js(`(() => { const a = document.getElementById('asm-clear').getBoundingClientRect(), b = document.getElementById('asm-copy').getBoundingClientRect(); return [a.right <= b.left - 8, b.right <= window.innerWidth, a.top === b.top]; })()`);
     verify('on a phone the two sit side by side, apart', r.every(Boolean), JSON.stringify(r));
