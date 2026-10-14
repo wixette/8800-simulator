@@ -1041,7 +1041,7 @@ a {
 
 /* The same two, on the byte itself inside the dump. */
 .at-pc {
-    background-color: #1f9d45;
+    background-color: #157a35;
     color: #eee;
 }
 
@@ -1304,7 +1304,7 @@ a {
 
 .asm-gutter {
     background-color: #bdbdbd;
-    color: #666;
+    color: #4a4a4a;
     flex: none;
     overflow: hidden;
     padding-left: 6px;
@@ -1322,7 +1322,7 @@ a {
 }
 
 .asm-gutter-error {
-    color: #b00020;
+    color: #900020;
     font-weight: bold;
 }
 
@@ -1390,7 +1390,16 @@ a {
 }
 
 .asm-caret.blinking {
-    animation: tty-blink 1s step-end infinite;
+    animation: asm-caret-blink 1s step-end infinite;
+}
+
+/* Its own blink, not the Teletype's: the character under it keeps its
+   colour in the off half, rather than turning the paper's black. */
+@keyframes asm-caret-blink {
+    50% {
+        background-color: transparent;
+        color: transparent;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1442,6 +1451,13 @@ a {
     opacity: 1;
 }
 
+/* Pointed at and focused look alike; the keyboard's focus also gets a
+   ring, so it can be told where it is. */
+.asm-corner:focus-visible {
+    outline: 2px solid #f90;
+    outline-offset: 1px;
+}
+
 /* Nothing to clear. */
 .asm-corner:disabled,
 .asm-corner:disabled:hover {
@@ -1467,7 +1483,7 @@ a {
 }
 
 .asm-line-error {
-    background-color: rgba(176, 0, 32, 0.1);
+    background-color: rgba(176, 0, 32, 0.08);
 }
 
 /* The colours (H2), each 4.5:1 or more on the editor's grey. Bold
@@ -1475,15 +1491,15 @@ a {
    bold face, and the browser's stand-in barely shows. */
 .asm-comment { color: #4d4d4d; font-style: italic; }
 .asm-label { color: #0d3c8c; }
-.asm-mnemonic { color: #a0111f; font-weight: bold; }
+.asm-mnemonic { color: #9a101e; font-weight: bold; }
 .asm-pseudo { color: #6a1b9a; }
 .asm-macro { color: #6a1b9a; font-style: italic; }
 .asm-register { color: #00574b; }
-.asm-number { color: #525200; }
-.asm-string { color: #1b5e20; }
+.asm-number { color: #505000; }
+.asm-string { color: #19581e; }
 .asm-operator { color: #6a1b9a; }
 .asm-bad {
-    color: #b00020;
+    color: #9e001d;
     text-decoration: underline wavy #b00020;
 }
 
@@ -1499,23 +1515,23 @@ a {
 }
 
 .asm-listing-error {
-    background-color: rgba(176, 0, 32, 0.1);
+    background-color: rgba(176, 0, 32, 0.08);
 }
 
 /* The line the program counter is on, in the green the Debugger's dump
    marks the PC with (U7): the line tinted, its number marked, its
    bytes in the listing filled. */
 .asm-line-pc {
-    background-color: rgba(31, 157, 69, 0.22);
+    background-color: rgba(31, 157, 69, 0.15);
 }
 
 .asm-gutter-line.asm-gutter-pc {
-    background-color: #1f9d45;
+    background-color: #157a35;
     color: #eee;
 }
 
 .asm-listing-line.asm-listing-pc {
-    background-color: #1f9d45;
+    background-color: #157a35;
     color: #eee;
 }
 
@@ -1686,6 +1702,7 @@ a {
     #tab-asm.show-listing .asm-listing {
         display: block;
         flex: 1;
+        overflow-y: auto;
         width: auto;
     }
 

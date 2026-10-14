@@ -20,7 +20,7 @@
 /**
  * The Assembler tab: an editor for 8080 source, highlighted, with the
  * listing beside it line for line and the errors under it, and the
- * Assemble button that puts the program into the machine. U1 to U6
+ * Assemble button that puts the program into the machine. U1 to U7
  * and H1 to H3 in docs/assembler.md.
  *
  * The assembling is js/asm8080.js's; this is only the page around it.
@@ -84,6 +84,13 @@ asmtab.init = function() {
         source.addEventListener(type, asmtab.requestCaret, false);
     });
     document.addEventListener('selectionchange', asmtab.requestCaret, false);
+    // Escape lets the next Tab leave the editor; going elsewhere, or
+    // clicking back in, ends that.
+    ['blur', 'mousedown'].forEach(function(type) {
+        source.addEventListener(type, function() {
+            asmtab.tabLeaves = false;
+        }, false);
+    });
     window.addEventListener('resize', function() {
         asmtab.charWidth = 0;
         asmtab.requestCaret();
@@ -101,6 +108,9 @@ asmtab.init = function() {
     // The listing scrolls with the source, never by itself.
     document.getElementById('asm-listing').addEventListener(
         'wheel', function(event) {
+            if (asmtab.showingListing()) {
+                return;  // On a phone it is all there is, and scrolls itself.
+            }
             source.scrollTop += event.deltaY;
             source.scrollLeft += event.deltaX;
             event.preventDefault();
@@ -298,6 +308,11 @@ asmtab.escape = function(text) {
  */
 asmtab.syncScroll = function() {
     var source = asmtab.source();
+    if (asmtab.showingListing()) {
+        // A phone showing the listing in its place: the source, hidden,
+        // has no scroll of its own to give the listing.
+        return;
+    }
     asmtab.matchScrollbars();
     var highlight = document.getElementById('asm-highlight');
     highlight.scrollTop = source.scrollTop;
@@ -352,6 +367,26 @@ asmtab.measure = function() {
     asmtab.charOffset = glyphs.top - line.getBoundingClientRect().top;
 };
 
+/**
+ * How wide some text from the start of a line is on screen. Plain ASCII
+ * is so many of the type's characters; anything else - a Chinese
+ * comment, an emoji - is measured, since it is wider, or two code
+ * units to one character.
+ * @param {string} text Part of one line, from its start.
+ * @return {number} Pixels.
+ */
+asmtab.widthOf = function(text) {
+    if (/^[\x00-\x7f]*$/.test(text)) {
+        return asmtab.columnOf(text) * asmtab.charWidth;
+    }
+    var glyphs = document.getElementById('asm-measure').firstElementChild;
+    var kept = glyphs.textContent;
+    glyphs.textContent = text;
+    var width = glyphs.getBoundingClientRect().width;
+    glyphs.textContent = kept;
+    return width;
+};
+
 /** Asks for the caret to be drawn again, at most once a frame. */
 asmtab.requestCaret = function() {
     if (asmtab.caretPending) {
@@ -385,11 +420,12 @@ asmtab.renderCaret = function() {
     var text = source.value;
     var start = text.lastIndexOf('\n', at - 1) + 1;
     var line = text.slice(0, start).split('\n').length - 1;
-    var column = asmtab.columnOf(text.slice(start, at));
-    var under = text[at];
+    var prefix = text.slice(start, at);
+    var code = text.codePointAt(at);
+    var under = code === undefined ? '' : String.fromCodePoint(code);
     var style = getComputedStyle(source);
     var lineHeight = parseFloat(style.lineHeight);
-    var x = parseFloat(style.paddingLeft) + column * asmtab.charWidth -
+    var x = parseFloat(style.paddingLeft) + asmtab.widthOf(prefix) -
         source.scrollLeft;
     var y = parseFloat(style.paddingTop) + line * lineHeight -
         source.scrollTop;
@@ -397,7 +433,8 @@ asmtab.renderCaret = function() {
     caret.textContent = under && under != '\n' && under != '\t' ? under : ' ';
     caret.style.left = x + 'px';
     caret.style.top = y + asmtab.charOffset + 'px';
-    caret.style.width = asmtab.charWidth + 'px';
+    caret.style.width = (under && under != '\n' && under != '\t' ?
+                         asmtab.widthOf(under) : asmtab.charWidth) + 'px';
     caret.style.height = asmtab.charHeight + 'px';
     caret.style.lineHeight = asmtab.charHeight + 'px';
     caret.hidden = false;
@@ -855,6 +892,59 @@ asmtab.columnOf = function(text) {
     return column;
 };
 
+/**
+ * What Tab does to the text: with nothing selected, or a selection in
+ * one line, the spaces to the next stop take its place, as typing
+ * would; a selection across lines indents each of them one stop, and
+ * stays selected. Nothing is lost either way.
+ * @param {string} text The source.
+ * @param {number} start The selection's start.
+ * @param {number} end The selection's end.
+ * @return {{from: number, to: number, text: string,
+ *     selectStart: number, selectEnd: number}} The range to replace,
+ *     what goes there, and the selection after.
+ */
+asmtab.tabEdit = function(text, start, end) {
+    var selected = text.slice(start, end);
+    if (selected.indexOf('\n') < 0) {
+        var spaces = asmtab.spacesToStop(text, start);
+        return {from: start, to: end, text: spaces,
+                selectStart: start + spaces.length,
+                selectEnd: start + spaces.length};
+    }
+    var from = text.lastIndexOf('\n', start - 1) + 1;
+    // A selection ending at the start of a line does not take that line.
+    var last = text[end - 1] == '\n' ? end - 1 : end;
+    var to = text.indexOf('\n', last);
+    if (to < 0) to = text.length;
+    var indent = ' '.repeat(asmtab.TAB_STOP);
+    var block = text.slice(from, to).split('\n').map(function(line) {
+        return indent + line;
+    }).join('\n');
+    return {from: from, to: to, text: block,
+            selectStart: from, selectEnd: from + block.length};
+};
+
+/**
+ * Replaces part of the text area's text as typing would, so that Undo
+ * takes it back; a browser that will not do it so is given the text
+ * directly.
+ */
+asmtab.replaceText = function(source, from, to, text) {
+    source.focus();
+    source.setSelectionRange(from, to);
+    var done = false;
+    try {
+        done = document.execCommand('insertText', false, text);
+    } catch (e) {
+        done = false;
+    }
+    if (!done || source.value.slice(from, from + text.length) !== text) {
+        source.setRangeText(text, from, to, 'end');
+        asmtab.onEdit();
+    }
+};
+
 /** Columns between tab stops, in the editor. @type {number} */
 asmtab.TAB_STOP = 8;
 
@@ -878,10 +968,11 @@ asmtab.onKey = function(event) {
         !event.ctrlKey && !event.metaKey && !asmtab.tabLeaves) {
         event.preventDefault();
         var source = event.target;
-        source.setRangeText(asmtab.spacesToStop(source.value,
-                                                source.selectionStart),
-                            source.selectionStart, source.selectionEnd, 'end');
-        asmtab.onEdit();
+        var edit = asmtab.tabEdit(source.value, source.selectionStart,
+                                  source.selectionEnd);
+        asmtab.replaceText(source, edit.from, edit.to, edit.text);
+        source.setSelectionRange(edit.selectStart, edit.selectEnd);
+        asmtab.requestCaret();
         return;
     }
     asmtab.tabLeaves = false;
@@ -950,16 +1041,35 @@ asmtab.load = function(result) {
  */
 asmtab.onViewToggle = function() {
     var tab = document.getElementById('tab-asm');
-    tab.classList.toggle('show-listing');
+    var source = asmtab.source();
+    var listing = document.getElementById('asm-listing');
+    // The one shown next opens where the other was.
+    if (asmtab.showingListing()) {
+        var top = listing.scrollTop;
+        tab.classList.remove('show-listing');
+        source.scrollTop = top;
+        asmtab.syncScroll();
+    } else {
+        var from = source.scrollTop;
+        tab.classList.add('show-listing');
+        listing.scrollTop = from;
+    }
     asmtab.refreshViewToggle();
+};
+
+/** Whether a phone is showing the listing in place of the source. */
+asmtab.showingListing = function() {
+    return document.getElementById('tab-asm').classList
+        .contains('show-listing');
 };
 
 /** Names the phone's toggle after what it would show. */
 asmtab.refreshViewToggle = function() {
-    var listing = document.getElementById('tab-asm')
-        .classList.contains('show-listing');
-    document.getElementById('asm-view-toggle').textContent =
+    var listing = asmtab.showingListing();
+    var toggle = document.getElementById('asm-view-toggle');
+    toggle.textContent =
         l10n.getMessage(listing ? 'asm-show-source' : 'asm-show-listing');
+    toggle.setAttribute('aria-pressed', listing ? 'true' : 'false');
 };
 
 /**

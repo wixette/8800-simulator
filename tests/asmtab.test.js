@@ -185,3 +185,25 @@ test('a byte put in by hand breaks the sync only if it changes the program (U7)'
     assert.ok(!asmtab.inSync(fresh(), text, 2), 'a load since');
     assert.ok(!asmtab.inSync(null, text, 1));
 });
+
+test('Tab replaces only what typing would, and indents lines it spans (U3)', () => {
+    const text = 'L: MVI A,1\n OUT 0FFH\n JMP L';
+    // Nothing selected: spaces to the next stop.
+    assert.deepStrictEqual(asmtab.tabEdit(text, 2, 2),
+                           {from: 2, to: 2, text: '      ', selectStart: 8, selectEnd: 8});
+    // A selection in one line: the spaces take its place, as typing would.
+    assert.deepStrictEqual(asmtab.tabEdit(text, 3, 6),
+                           {from: 3, to: 6, text: '     ', selectStart: 8, selectEnd: 8});
+    // Across lines: every line it touches is indented, none is lost.
+    const across = asmtab.tabEdit(text, 0, 21);
+    assert.strictEqual(across.from, 0);
+    assert.strictEqual(across.to, 20, 'up to the end of the second line, not the third');
+    assert.strictEqual(across.text, '        L: MVI A,1\n         OUT 0FFH');
+    const after = text.slice(0, across.from) + across.text + text.slice(across.to);
+    assert.strictEqual(after, '        L: MVI A,1\n         OUT 0FFH\n JMP L');
+    assert.deepStrictEqual([across.selectStart, across.selectEnd], [0, across.text.length]);
+    // Part way into the first and last lines takes them whole.
+    const partial = asmtab.tabEdit(text, 5, 25);
+    assert.strictEqual(text.slice(0, partial.from) + partial.text + text.slice(partial.to),
+                       '        L: MVI A,1\n         OUT 0FFH\n         JMP L');
+});
