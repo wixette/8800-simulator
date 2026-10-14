@@ -1,5 +1,5 @@
 ;;; name: Kill the Bit
-;;; desc: The classic Altair 8800 game by Dean McDaniel, 1975. A bit rotates across the upper address LEDs and you kill it with the sense switch underneath.
+;;; desc: The classic Altair 8800 game by Dean McDaniel, 1975. A bit rotates across the upper address lamps and you kill it with the sense switch underneath.
 ;;; device: panel
 ;
 ; See kill-the-bit.md for how to play, and why you have to flip the
@@ -9,15 +9,15 @@
 ;
 ; The game has no output instruction at all. Its display is a side
 ; effect of the real machine: every memory read puts its address on the
-; address bus, and the panel LEDs mirror the bus. LDAX D reads at the
+; address bus, and the panel lamps mirror the bus. LDAX D reads at the
 ; address in DE, so the four LDAX D in the loop hold register D, the bit
-; pattern, on the upper address LEDs A15-A8.
+; pattern, on the upper address lamps A15-A8.
 
         LXI     H,0             ; clear the counter
         MVI     D,80H           ; the bit to kill, at A15
         LXI     B,0EH           ; speed; a higher value is faster
 
-BEG:    LDAX    D               ; hold D on the upper address LEDs
+BEG:    LDAX    D               ; hold D on the upper address lamps
         LDAX    D
         LDAX    D
         LDAX    D

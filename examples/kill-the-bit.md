@@ -1,7 +1,7 @@
 # Kill the Bit
 
 The classic Altair 8800 game, written by Dean McDaniel in May 1975. A
-single lit bit rotates across the upper address LEDs and you kill it by
+single lit bit rotates across the upper address lamps and you kill it by
 flipping the sense switch underneath at the right moment.
 
 The program is [kill-the-bit.asm](kill-the-bit.asm). The original
@@ -45,10 +45,10 @@ Then lower all switches, click RESET, and RUN.
 
 ## Playing
 
-A single lit bit rotates across the upper eight address LEDs (A15-A8).
+A single lit bit rotates across the upper eight address lamps (A15-A8).
 Kill it by flipping the sense switch (S15-S8) directly under the lit
-LED at the right moment, then flipping it straight back down. If you
-miss, the XOR turns another bit on. You win when all the upper LEDs are
+lamp at the right moment, then flipping it straight back down. If you
+miss, the XOR turns another bit on. You win when all the upper lamps are
 dark.
 
 `LXI B,000EH` at address 0005H sets the speed: a higher value makes the

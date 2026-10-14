@@ -1,22 +1,23 @@
 ;;; name: Bouncing light
-;;; desc: Walks a single dark bit back and forth across the data LEDs, at a speed set by the sense switches.
+;;; desc: Walks a single dark bit back and forth across the data lamps, at a speed set by the sense switches.
 ;;; device: panel
 ;
-; RUN: one dark LED travels from D1 up to D7, turns around, travels
-; back down to D0, turns again, and bounces between the two ends. The display is inverted on purpose: the
-; program keeps one bit set in D and writes the complement, so seven
-; LEDs stay lit and the gap is what you follow.
+; RUN: one dark lamp travels from D1 up to D7, turns around, travels
+; back down to D0, turns again, and bounces between the two ends. The
+; display is inverted on purpose: the program keeps one bit set in D
+; and writes the complement, so seven lamps stay lit and the gap is
+; what you follow.
 ;
 ; The sense switches set the speed, read as a binary number. With
 ; A15-A8 all down the bit moves at its fastest; the higher the number
 ; they make, the longer the delay loop, so A15 counts most and A8
 ; least: A15 alone is some sixty times slower than A8 alone.
 ;
-; Register C is the direction flag, 00H to move left and FFH to move
+; Register C is the direction flag, 00H to move left and 0FFH to move
 ; right. It is complemented at each end of the row, which is what makes
 ; the bit bounce rather than wrap around.
 
-PANEL   EQU     0FFH            ; the data LEDs, and the sense switches
+PANEL   EQU     0FFH            ; the data lamps, and the sense switches
 
         MVI     C,0FFH          ; direction: flipped at the first step,
                                 ; so the bit starts moving left
@@ -40,7 +41,7 @@ MOVE:   MOV     A,C
         RAL
         MOV     D,A
         JMP     SHOW
-RIGHT:  MOV     A,D             ; direction FFH: move right
+RIGHT:  MOV     A,D             ; direction 0FFH: move right
         RAR
         MOV     D,A
 

@@ -30,8 +30,8 @@ export default async function(h) {
     verify('Assembler offers no 4K BASIC', !asmIds.some(v => /basic/i.test(v)));
     await press('#asm-examples-list li[data-value="tty-subroutines"]'); await sleep(400);
     const src = await js(`document.getElementById('asm-source').value`);
-    verify('Examples puts the source in the editor', src.startsWith(';;; name: Echo, with subroutines'), src.slice(0, 40));
-    verify('and says so', /Echo, with subroutines/.test(await statusText()), await statusText());
+    verify('Examples puts the source in the editor', src.startsWith(';;; name: Teletype echo, with subroutines'), src.slice(0, 40));
+    verify('and says so', /Teletype echo, with subroutines/.test(await statusText()), await statusText());
     await press('#asm-assemble'); await sleep(400);
     const b = await js(`[0,1,2,3,4].map(i => panel.sim.mem[i])`);
     verify('Assemble loads its bytes (31 00 01 cd 16)', JSON.stringify(b) === '[49,0,1,205,22]', JSON.stringify(b));

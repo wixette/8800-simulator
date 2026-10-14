@@ -18,17 +18,17 @@ the teletype, each group from the simplest up.
 
 | Program | Size | Watch | What it does | Shows |
 | --- | --- | --- | --- | --- |
-| [pattern-shift.asm](pattern-shift.asm) | 8 B | Panel | Rotates 8CH across the data LEDs | `MVI`, `OUT`, `RRC` |
-| [io-echo.asm](io-echo.asm) | 7 B | Panel | Echoes the sense switches to the data LEDs | `IN`, `OUT`, a label, `JMP` |
+| [pattern-shift.asm](pattern-shift.asm) | 8 B | Panel | Rotates 8CH across the data lamps | `MVI`, `OUT`, `RRC` |
+| [io-echo.asm](io-echo.asm) | 7 B | Panel | Echoes the sense switches to the data lamps | `IN`, `OUT`, a label, `JMP` |
 | [adder.asm](adder.asm) | 14 B | Panel | Adds the bytes at 0080H and 0081H, sum at 0082H | Names for addresses (`EQU`) |
 | [multiply.asm](multiply.asm) | 31 B | Panel | Multiplies the bytes at 0080H and 0081H, product at 0082H | Shifting and adding, 16-bit sums with `DAD` |
-| [bouncing-light.asm](bouncing-light.asm) | 59 B | Panel | A dark bit bounces across the data LEDs, speed set by the switches | Nested delay loops |
+| [bouncing-light.asm](bouncing-light.asm) | 59 B | Panel | A dark bit bounces across the data lamps, speed set by the switches | Nested delay loops |
 | [kill-the-bit.asm](kill-the-bit.asm) | 24 B | Panel | The 1975 game by Dean McDaniel ([how to play](kill-the-bit.md)) | A display made from the address bus |
 | [macros.asm](macros.asm) | 37 B | Panel | A lamp walks across the data lamps | Macros (`MACRO`, `ENDM`): an argument, and labels local to each use |
 | [tty-hello.asm](tty-hello.asm) | 36 B | Teletype | Prints `HELLO, WORLD!` and halts | A message in memory (`DB`), its length counted from `$` |
 | [tty-ascii.asm](tty-ascii.asm) | 20 B | Teletype | Prints every printable ASCII character, then halts | Waiting for the serial board |
 | [tty-echo.asm](tty-echo.asm) | 16 B | Teletype | Echoes what you type | Reading and writing the serial board |
-| [tty-leds.asm](tty-leds.asm) | 18 B | Teletype | Echoes it, and shows its ASCII code on the data LEDs | Two devices at once |
+| [tty-leds.asm](tty-leds.asm) | 18 B | Teletype | Echoes it, and shows its ASCII code on the data lamps | Two devices at once |
 | [tty-subroutines.asm](tty-subroutines.asm) | 46 B | Teletype | Echoes what you type | Subroutines: `CALL`, `RET`, and the stack |
 | [print-number.asm](print-number.asm) | 59 B | Teletype | Prints the byte at 0080H in decimal, then halts | Repeated subtraction, `PUSH` and `POP` |
 | [guess-letter.asm](guess-letter.asm) | 218 B | Teletype | A guessing game, with HIGHER and LOWER | A whole program: messages, a counter, subroutines |
@@ -96,7 +96,7 @@ teletype programs wait for keys.
 3. Set A7-A0 to `00 000 001` and click DEPOSIT.
 4. Set A7-A0 to `00 000 010` and click DEPOSIT NEXT.
 5. RESET, RUN, wait a moment, STOP.
-6. Set A7-A0 to `10 000 010` (0082H) and click EXAMINE. The data LEDs
+6. Set A7-A0 to `10 000 010` (0082H) and click EXAMINE. The data lamps
    show `00 000 011`, which is 3.
 
 ## The 256 byte limit
@@ -104,7 +104,7 @@ teletype programs wait for keys.
 The simulated machine starts with 256 bytes of memory, as the Altair
 8800 did in its base configuration, and every program here fits in it -
 below 0100H, data and stack included - so none of them needs a memory
-board installed. It also means the address LEDs above A7 stay dark for
+board installed. It also means the address lamps above A7 stay dark for
 ordinary programs; Kill the Bit lights them only through the address
 bus trick described in its own source.
 

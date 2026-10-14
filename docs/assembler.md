@@ -687,7 +687,7 @@ the tests run. The first set, written new:
 | I/O echo | The smallest program: `IN`, `OUT`, a label, `JMP` |
 | Add two numbers | Chapter 1's program, with names for its addresses (`EQU`) |
 | Teletype hello | A string with `DB`, a loop, `$` for its length, the 88-SIO |
-| Echo, with subroutines | Reading the serial board, a subroutine with `CALL`/`RET` |
+| Teletype echo, with subroutines | Reading the serial board, a subroutine with `CALL`/`RET` |
 | Multiply | Shift-and-add, from Chapter 4's techniques |
 | Print a number | Decimal output: division by repeated subtraction, the stack |
 | Macros | SHRT, a register as an argument, local labels in each use |

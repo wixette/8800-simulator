@@ -1,4 +1,4 @@
-;;; name: Echo, with subroutines
+;;; name: Teletype echo, with subroutines
 ;;; desc: Echoes what you type, through a subroutine for each direction.
 ;;; device: teletype
 ;

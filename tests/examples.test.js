@@ -109,7 +109,7 @@ for (const example of EXAMPLES) {
         // begins with that program's registers still in place. None of
         // these examples should care. Two read a register they never
         // set: kill-the-bit, E through LDAX D, which reaches only the
-        // low address LEDs its display does not use; and guess-letter,
+        // low address lamps its display does not use; and guess-letter,
         // B, on purpose, as where its letter's randomness starts.
         for (const poison of [0x00, 0xff, 0xa5]) {
             const {sim} = simFor(example);
@@ -167,12 +167,12 @@ test('tty-echo: prints back what is typed', () => {
     assert.strictEqual(tty.getText(), 'PRINT 10');
 });
 
-test('tty-leds: echoes, and shows the ASCII code on the data LEDs', () => {
+test('tty-leds: echoes, and shows the ASCII code on the data lamps', () => {
     const {sim, state, sio, tty} = ttySimFor('tty-leds');
     sio.receiveText('A');
     sim.step(500);
     assert.strictEqual(tty.getText(), 'A');
-    // 'A' is 41h: 01000001 on the data LEDs.
+    // 'A' is 41h: 01000001 on the data lamps.
     assert.strictEqual(bitsToNumber(state.dataLeds), 0x41);
 
     sio.receiveText('B');
@@ -285,7 +285,7 @@ test('adder: adds the two bytes it is given', () => {
     assert.strictEqual(sim.mem[0x82], 0x30);
 });
 
-test('pattern shift: 8Ch rotates right across the data LEDs', () => {
+test('pattern shift: 8Ch rotates right across the data lamps', () => {
     const {sim, state} = simFor(loadExample('pattern-shift'));
     sim.step(17);  // MVI A,8Ch (7) + OUT FFh (10).
     assert.strictEqual(bitsToNumber(state.dataLeds), 0x8c);

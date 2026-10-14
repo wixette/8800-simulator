@@ -13,79 +13,95 @@
 ; counter happens to be is the letter. It is how home computers
 ; seeded their games for years afterwards.
 ;
-; 218 bytes, so it fits the 256 byte machine with the stack at 00FFH
+; 218 bytes, so it fits the 256-byte machine with the stack at 0FFH
 ; and thirty-odd bytes to spare.
 
-START:  LXI     SP,00FFH        ; a stack, above the program and its messages
+STATUS  EQU     00H             ; 88-SIO status
+DATA    EQU     01H             ; 88-SIO data
+STACK   EQU     0FFH            ; above the program and its messages
+
+START:  LXI     SP,STACK
         LXI     H,TITLE
         CALL    PRINT
 SEED:   INR     B               ; count while nobody is typing...
-        IN      000H
-        ANI     001H
-        JNZ     SEED            ; ...which is the only randomness this machine has
-        IN      001H            ; eat the key that started us
+        IN      STATUS
+        ANI     01H             ; bit 0 is 0 when a key is waiting
+        JNZ     SEED            ; ...the only randomness it has
+        IN      DATA            ; eat the key that started us
         MOV     A,B
-MOD26:  CPI     01AH            ; B modulo 26, the slow and obvious way
-        JC      MODDONE
-        SUI     01AH
+MOD26:  CPI     26              ; B modulo 26, the slow and obvious way
+        JC      PICK
+        SUI     26
         JMP     MOD26
-MODDONE: ADI     041H            ; 'A', so the target is a letter
+PICK:   ADI     'A'             ; so the target is a letter
         MOV     B,A             ; B holds it for the rest of the game
-        MVI     D,000H          ; D counts the guesses
+        MVI     D,00H           ; D counts the guesses
+
+; One guess: read it, echo it, and say which way to go.
 ROUND:  LXI     H,GUESS
         CALL    PRINT
-        CALL    GETCHAR
+        CALL    GETCH
         MOV     C,A
-        CALL    PUTCHAR         ; nothing echoes by itself
+        CALL    PUTCH           ; nothing echoes by itself
         INR     D
         MOV     A,C
         CMP     B
         JZ      GOTIT
-        JC      SAYHIGH         ; guessed low, so the letter is higher
+        JC      SAYHI           ; guessed low, so the letter is higher
         LXI     H,LOWER
         JMP     SAY
-SAYHIGH: LXI     H,HIGHER
+SAYHI:  LXI     H,HIGHER
 SAY:    CALL    PRINT
         JMP     ROUND
+
+; Found: say how many tries it took, and start again.
 GOTIT:  LXI     H,WIN
         CALL    PRINT
         MOV     A,D
-        CPI     00AH            ; ten guesses or more all print as nine
+        CPI     10              ; ten guesses or more all print as nine
         JC      DIGIT
-        MVI     A,009H
-DIGIT:  ADI     030H            ; '0', making it a printable digit
+        MVI     A,9
+DIGIT:  ADI     '0'             ; making it a printable digit
         MOV     C,A
-        CALL    PUTCHAR
+        CALL    PUTCH
         LXI     H,TRIES
         CALL    PRINT
         JMP     START           ; another letter, another game
-PRINT:  MOV     A,M             ; prints the string at HL, up to its 00H
+
+; PRINT: prints the string at HL, up to its 00H.
+PRINT:  MOV     A,M
         ORA     A
         RZ
         MOV     C,A
-        CALL    PUTCHAR
+        CALL    PUTCH
         INX     H
         JMP     PRINT
-GETCHAR: IN      000H            ; waits for a character from the SIO
-        ANI     001H
-        JNZ     GETCHAR
-        IN      001H
-        ANI     07FH
+
+; GETCH: waits for a key, and returns it in A.
+GETCH:  IN      STATUS
+        ANI     01H             ; bit 0 is 0 when a key is waiting
+        JNZ     GETCH
+        IN      DATA
+        ANI     7FH             ; the Teletype sends seven bits
         RET
-PUTCHAR: IN      000H            ; sends the character in C
-        ANI     080H
-        JNZ     PUTCHAR
+
+; PUTCH: prints the character in C.
+PUTCH:  IN      STATUS
+        ANI     80H             ; bit 7 is 0 when it can print
+        JNZ     PUTCH
         MOV     A,C
-        OUT     001H
+        OUT     DATA
         RET
-TITLE:  DB      00DH,00AH
+
+; The messages, each ending in 00H.
+TITLE:  DB      0DH,0AH
         DB      'GUESS MY LETTER A-Z.'
         DB      ' ANY KEY STARTS.'
-        DB      00DH,00AH,000H
-GUESS:  DB      00DH,00AH,'? ',000H
-HIGHER: DB      ' HIGHER',000H
-LOWER:  DB      ' LOWER',000H
-WIN:    DB      ' GOT IT IN ',000H
-TRIES:  DB      ' TRIES.',00DH,00AH,000H
+        DB      0DH,0AH,00H
+GUESS:  DB      0DH,0AH,'? ',00H
+HIGHER: DB      ' HIGHER',00H
+LOWER:  DB      ' LOWER',00H
+WIN:    DB      ' GOT IT IN ',00H
+TRIES:  DB      ' TRIES.',0DH,0AH,00H
 
         END

@@ -184,7 +184,7 @@ Try the *Teletype Examples* from the Load menu, in this order:
 
 1. **Teletype hello** prints `HELLO, WORLD!` and stops.
 2. **Teletype echo** prints whatever you type.
-3. **Teletype echo with LEDs** does the same, and shows each key's
+3. **Teletype echo with lamps** does the same, and shows each key's
    ASCII code on the data lamps: press A and `01000001` lights up.
 4. **Guess my letter** is a game. It thinks of a letter and says
    HIGHER or LOWER. Halve the alphabet each time and 26 letters fall to

@@ -1,5 +1,5 @@
 ;;; name: I/O echo
-;;; desc: Copies the sense switches, A15-A8, to the data lamps, for ever.
+;;; desc: Copies the sense switches, A15-A8, to the data lamps, forever.
 ;;; device: panel
 ;
 ; The smallest program worth running: read a port, write a port, go
@@ -13,6 +13,6 @@ PANEL   EQU     0FFH            ; the front panel's port
 
 LOOP:   IN      PANEL           ; read the sense switches...
         OUT     PANEL           ; ...and show them on the data lamps
-        JMP     LOOP            ; and again, for ever
+        JMP     LOOP            ; and again, forever
 
         END
