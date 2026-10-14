@@ -352,6 +352,18 @@ manual, every program in [examples/](examples/), and 4K BASIC booting
 and running end to end. It
 runs on each push and pull request.
 
+The page itself - clicks, menus, the Assembler's editor, the layout -
+is checked in a headless Chrome:
+
+```
+npm run test:browser
+npm run test:browser -- sync clear
+```
+
+It takes a minute or so and needs Chrome installed (or `CHROME` set to
+its path, Chromium too), so it is not part of CI: run it by hand
+before a release. The checks are in [tests/browser/](tests/browser/run.mjs).
+
 ### The link format
 
 A link opens the simulator with a program loaded at 0000H, ready to

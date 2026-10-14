@@ -619,6 +619,9 @@ under a millisecond. Nothing is done while the tab is hidden.
   line it should.
 - **The tab:** the overlay stays aligned (H1), and Assemble loads the
   way the other loaders do.
+- **In the browser** (`npm run test:browser`, by hand, not in CI): both
+  example menus, following the PC, every row of U7's table of what
+  ends the sync, Clear, and the page's font.
 
 ### T3 — Example sources
 
