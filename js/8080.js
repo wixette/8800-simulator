@@ -2384,7 +2384,9 @@ exports["status"] = function() {
       "h":proc.h,
       "l":proc.l,
       // Added for the simulator's INTE lamp: the interrupt enable
-      // flip-flop, set by EI and cleared by DI, RESET and an interrupt.
+      // flip-flop, set by EI and cleared by DI and RESET. On a real
+      // 8080 an interrupt clears it too; interrupt() below does not
+      // (see docs/ms-basic-4k.md).
       "inte":proc.inte
     };
   };

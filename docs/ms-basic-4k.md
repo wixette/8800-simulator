@@ -51,6 +51,11 @@ Byte-identical after stripping our file-overview header and one extra
   so an undefined opcode cannot crash the machine.
 - BASIC begins with `DI` (`F3` at `0000h`) and never enables
   interrupts. No interrupt support is required.
+- The core's `interrupt()` does not clear the interrupt enable, as a
+  real 8080 does when it takes an interrupt; the comment on `inte` in
+  `status()` says what the hardware does. Nothing in the simulator
+  raises an interrupt, so it never shows. A device that interrupts
+  would need `interrupt()` to clear it first.
 - Throughput measured in Node: ~500 million simulated cycles per
   second. Boot-to-`OK` costs about 0.46 s of *simulated* time at
   2 MHz. The CPU has roughly 250× the headroom it needs.

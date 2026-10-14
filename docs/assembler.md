@@ -208,7 +208,8 @@ its first byte, or its first two (first byte high) when used as a
 - **`DS exp`** reserves that many bytes. The manual: "the programmer
   should not assume that these locations will contain zero". Since
   Assemble clears memory first (U5), reserved bytes do read 00 here;
-  the listing shows them as reserved, not as data.
+  the listing gives the line its address and no bytes, as it does a
+  label alone.
 
 ### L11 — `IF`, `ENDIF`
 
@@ -236,7 +237,10 @@ AS, CP/M's ASM - paste in without edits:
 
 Nothing else is added. A program that uses features of other
 assemblers (`ELSE`, `HIGH`, `LOW`, `LOCAL`, `REPT`) gets an ordinary
-"unknown" error naming the word.
+"unknown" error naming the word, when the word is the statement's
+code. `HIGH` or `LOW` inside an operand, as in `DW HIGH 1234H`, gets
+the error for an expression it cannot read instead, which names the
+whole operand but not the word (L23).
 
 ### L13 — Two passes, and what must be known early
 
@@ -377,6 +381,25 @@ an expansion is reported on the line that used the macro, naming the
 macro's line too: *Line 40, in SBMAC (line 12): …* So is a clash or a
 program too big for the machine that an expansion's bytes cause.
 
+### L23 — What is not checked
+
+A few mistakes are let through, each rare, and none harms the machine:
+the program is simply not the one meant. Recorded here so that they
+are known rather than found.
+
+- **A macro's parameters** are not checked as names. `X MACRO 1` is
+  accepted, and so is the same name twice (`MACRO P,P`; the first
+  wins). A parameter may be named like a register, and then takes the
+  register's place in the body: with `X MACRO A`, the body's `MOV A,B`
+  becomes `MOV C,B` for `X C`.
+- **A macro named `TITLE`, `PAGE` or `NEWPAGE`** can be defined, but
+  never expands: the word is read as the listing instruction first
+  (L12), and ignored.
+- **Extra operands** after the one that `ORG`, `DS`, `IF` and `EQU`
+  take are ignored: `ORG 10H,5` is `ORG 10H`.
+- **`HIGH` and `LOW` in an operand** are reported as an expression
+  that cannot be read, not as unknown words (L12).
+
 ---
 
 ## Part 4 — The Assembler tab
@@ -507,6 +530,12 @@ in: *Load* assembles an example out of sight and loads its bytes,
 leaving the editor alone, and says where its source is; **Examples ▾**
 puts the source in the editor. 4K BASIC, which is a binary, is only
 in *Load*.
+
+*Load* puts an example's bytes in memory from 0000H, with zeros in any
+gap, and RESET leaves the PC at 0000H. So an `ORG` puts the bytes at
+their addresses, with zeros below them, and an `END` start address is
+not used. **Assemble** follows both. None of the fourteen examples has
+either.
 
 Both menus read the files once, when either first needs them, so like
 the rest of the page's files they need it served, not opened from the

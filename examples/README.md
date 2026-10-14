@@ -134,6 +134,12 @@ through, so the simulator can say where to watch it. The program is
 assembled at 0000H unless an `ORG` says otherwise. The hex block above
 is the only other copy of its bytes, and the tests check it matches.
 
+Start it at 0000H. The *Load* menu puts the bytes in from 0000H, zeros
+filling any gap, and leaves the PC at 0000H, so it does not use a
+start address given by `END`, and below an `ORG` the machine would run
+through zeros, NOPs, to reach the program. The Assembler's
+**Assemble** follows both (U5 in [../docs/assembler.md](../docs/assembler.md)).
+
 To offer it in the simulator's menus, add its name to `panel.EXAMPLES`
 in [../js/panel.js](../js/panel.js), in its place in the order; both
 the *Load* menu and the Assembler's *Examples* menu read that list.
