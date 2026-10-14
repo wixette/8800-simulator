@@ -11,7 +11,7 @@
  */
 import {findChrome, serve, start} from './harness.mjs';
 
-const CHECKS = ['examples', 'pc', 'sync', 'clear', 'caret', 'editor', 'debugger', 'fonts'];
+const CHECKS = ['examples', 'pc', 'sync', 'clear', 'caret', 'editor', 'debugger', 'layout', 'fonts'];
 
 const chrome = findChrome();
 if (!chrome) {
