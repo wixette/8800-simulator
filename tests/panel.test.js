@@ -51,11 +51,37 @@ function sourceOf(file) {
 test('every message is translated into every locale', () => {
     const all = messages();
     const expected = locales();
-    assert.ok(expected.length >= 9, 'expected nine locales');
+    assert.ok(expected.length >= 10, 'expected ten locales');
     for (const id of Object.keys(all)) {
         const got = Object.keys(all[id]);
         assert.deepStrictEqual([...got].sort(), [...expected].sort(),
                                id + ' is not translated everywhere');
+    }
+});
+
+test('every translation keeps the placeholders of the English', () => {
+    // {name}, {bytes} and the rest are filled in by panel.setStatus. A
+    // translation that drops or misspells one shows the reader a raw
+    // brace, or leaves out the very number the message is about.
+    const all = messages();
+    const holes = (text) => (text.match(/\{[a-z]+\}/g) || []).sort();
+    let checked = 0;
+    for (const id of Object.keys(all)) {
+        const english = holes(all[id]['en']);
+        for (const locale of locales()) {
+            assert.deepStrictEqual(holes(all[id][locale]), english,
+                                   id + ' in ' + locale + ' has other placeholders');
+            checked += english.length;
+        }
+    }
+    assert.ok(checked > 100, 'expected plenty of placeholders: ' + checked);
+});
+
+test('every locale names itself in the menu and on the button', () => {
+    const l10n = loadScript('l10n');
+    for (const locale of locales()) {
+        assert.ok(l10n.LOCALE_NAMES[locale], locale + ' has no name in the menu');
+        assert.ok(l10n.LOCALE_SHORT[locale], locale + ' has no short label');
     }
 });
 
@@ -135,9 +161,10 @@ test('every Debugger control that can be unavailable can say why', () => {
  * three tools, and the status line.
  * @type {Array<string>}
  */
-const REGIONS = ['toolbar', 'stage', 'dock', 'tab-tty', 'tab-debug',
-                 'tab-ref', 'tab-links', 'status-bar', 'hex-dialog',
-                 'share-dialog', 'about-dialog'];
+const REGIONS = ['toolbar', 'stage', 'dock', 'tab-tty', 'tab-asm',
+                 'tab-debug', 'tab-ref', 'tab-links', 'status-bar',
+                 'hex-dialog', 'asm-replace-dialog', 'share-dialog',
+                 'about-dialog'];
 
 /**
  * The part of index.html one region takes up.
@@ -230,8 +257,9 @@ test('the toolbar, the Debugger and the dialogs read as software', () => {
     // Title Case, like the headings it sits under. Shouting here would
     // borrow the machine's voice for something that is not the machine
     // (P5 in docs/ui-design.md).
-    const labels = ['toolbar', 'tab-debug', 'hex-dialog', 'share-dialog',
-                    'about-dialog'].flatMap(labelsIn);
+    const labels = ['toolbar', 'tab-asm', 'tab-debug', 'hex-dialog',
+                    'asm-replace-dialog', 'share-dialog', 'about-dialog']
+          .flatMap(labelsIn);
     assert.ok(labels.length >= 20, 'expected the menus, dialogs and dump');
     const all = messages();
     const debugButtons = buttonsIn('tab-debug');
@@ -292,7 +320,7 @@ test('Share and the next instruction are where U2 put them', () => {
 test('the references have a tab of their own, which About opens', () => {
     // The Tutorial is a lesson; the source and further reading are
     // looked up, so they get the dock's last tab rather than its foot.
-    assert.deepStrictEqual(panel.TABS, ['tty', 'debug', 'ref', 'links']);
+    assert.deepStrictEqual(panel.TABS, ['tty', 'asm', 'debug', 'ref', 'links']);
     assert.ok(!regionOf('tab-ref').includes('<a '),
               'the Tutorial keeps no links');
     const links = regionOf('tab-links');
@@ -303,6 +331,47 @@ test('the references have a tab of their own, which About opens', () => {
         /panel\.onAboutReferences = function\(\) \{[\s\S]*?\n\};/)[0];
     assert.ok(handler.includes("panel.showTab('links')"),
               "About's References button opens the References tab");
+});
+
+test('the open tab, pressed again, does nothing', (t) => {
+    // With five tabs it is too easily pressed by mistake; folding the
+    // dock is the fold button's job.
+    const calls = [];
+    t.mock.method(panel, 'setDockOpen', (open) => calls.push(['fold', open]));
+    t.mock.method(panel, 'showTab', (name) => calls.push(['show', name]));
+    const saved = panel.dock;
+    t.after(() => { panel.dock = saved; });
+    panel.dock = {tab: 'asm', open: true, height: null};
+    panel.onDockTab('asm', false);
+    assert.deepStrictEqual(calls, []);
+    panel.onDockTab('debug', false);
+    assert.deepStrictEqual(calls, [['show', 'debug']]);
+    // A folded dock still opens on the tab pressed.
+    panel.dock = {tab: 'asm', open: false, height: null};
+    panel.onDockTab('asm', false);
+    assert.deepStrictEqual(calls.pop(), ['show', 'asm']);
+});
+
+test('both menus read an example the same way: its header, and its bytes', () => {
+    // The Load menu loads the bytes; the Assembler's Examples menu shows
+    // the text. One reader, panel.parseExample, for both.
+    global.Asm8080 = require('../js/asm8080.js');
+    const {loadExample} = require('./examples.js');
+    const example = loadExample('macros');
+    const parsed = panel.parseExample(example.text);
+    assert.strictEqual(parsed.name, 'Macros');
+    assert.strictEqual(parsed.device, 'panel');
+    assert.deepStrictEqual(parsed.bytes, example.bytes);
+    assert.strictEqual(parsed.text, example.text, 'the source, for the Assembler');
+    assert.strictEqual(panel.parseExample(';;; name: Broken\n MVX A'), null,
+                       'a source that does not assemble is not offered');
+    // A file saved with Windows line endings: a text area gives its
+    // text back with \n alone, and an unchanged example must still
+    // read as unchanged (U5).
+    const crlf = panel.parseExample(example.text.replace(/\n/g, '\r\n'));
+    assert.strictEqual(crlf.text, example.text);
+    assert.strictEqual(crlf.name, 'Macros', 'its header read, without the \\r');
+    assert.deepStrictEqual(crlf.bytes, example.bytes);
 });
 
 test('a first visit opens the dock on the Tutorial', () => {
@@ -401,7 +470,8 @@ test('a switch thrown on a dead machine does nothing, and says the machine is of
     const done = [];
     const savedSim = panel.sim;
     const savedOn = panel.isPoweredOn;
-    panel.sim = new Proxy({}, {get: (target, name) => () => done.push(name)});
+    panel.sim = new Proxy({}, {get: (target, name) =>
+        name == 'isRunning' ? false : () => done.push(name)});
     t.after(() => { panel.sim = savedSim; panel.isPoweredOn = savedOn; });
     t.mock.method(panel, 'setStatus', (id) => said.push(id));
     const switches = ['onRun', 'onStop', 'onSingle', 'onExamine',
@@ -416,6 +486,438 @@ test('a switch thrown on a dead machine does nothing, and says the machine is of
     switches.forEach((name) => panel[name]());
     assert.strictEqual(done.length, switches.length);
     assert.ok(!said.includes('status-off'));
+});
+
+test('while it runs, only STOP and RESET act, as on the real panel', (t) => {
+    // EXAMINE, DEPOSIT and SINGLE STEP did their work mid-run, which
+    // counted a hand write and restarted the count of refused writes.
+    const said = [];
+    const done = [];
+    const savedSim = panel.sim;
+    const savedOn = panel.isPoweredOn;
+    panel.sim = new Proxy({}, {get: (target, name) =>
+        name == 'isRunning' ? true : name == 'blockedWrites' ? 0 :
+            () => done.push(name)});
+    t.after(() => { panel.sim = savedSim; panel.isPoweredOn = savedOn; });
+    t.mock.method(panel, 'setStatus', (id, params) => said.push([id, params && params.name]));
+    t.mock.method(panel, 'followPc', () => {});
+    panel.isPoweredOn = true;
+    const refused = {onSingle: 'SINGLE STEP', onExamine: 'EXAMINE',
+                     onExamineNext: 'EXAMINE NEXT', onDeposit: 'DEPOSIT',
+                     onDepositNext: 'DEPOSIT NEXT'};
+    for (const [handler, name] of Object.entries(refused)) {
+        panel[handler]();
+        assert.deepStrictEqual(said.pop(), ['switch-running', name]);
+    }
+    assert.deepStrictEqual(done, [], 'nothing reached the machine');
+    panel.onStop();
+    panel.onReset();
+    assert.deepStrictEqual(done, ['stop', 'reset']);
+});
+
+test('PROTECT works only on a stopped machine, and names the range it covers', (t) => {
+    // Like every switch but RESET on the real machine (the Theory of
+    // Operation), and the line says which board it latched.
+    const said = [];
+    const protects = [];
+    const savedSim = panel.sim;
+    const savedOn = panel.isPoweredOn;
+    t.after(() => { panel.sim = savedSim; panel.isPoweredOn = savedOn; });
+    t.mock.method(panel, 'setStatus', (...args) => said.push(args));
+    let range = {start: 0x1000, end: 0x1fff};
+    panel.sim = {isRunning: false, busAddress: 0x1234,
+                 protect: (on) => { protects.push(on); return range; }};
+    panel.isPoweredOn = false;
+    panel.onProtect();
+    assert.deepStrictEqual(said.pop(), ['status-off']);
+    panel.isPoweredOn = true;
+    panel.sim.isRunning = true;
+    panel.onProtect();
+    assert.strictEqual(said.pop()[0], 'protect-running');
+    assert.deepStrictEqual(protects, [], 'a running machine is not touched');
+    panel.sim.isRunning = false;
+    panel.onProtect();
+    assert.deepStrictEqual(said.pop(), ['status-protected',
+                                        {start: '1000', end: '1FFF'}]);
+    panel.onUnprotect();
+    assert.strictEqual(said.pop()[0], 'status-unprotected');
+    assert.deepStrictEqual(protects, [true, false]);
+    range = null;
+    panel.onProtect();
+    assert.deepStrictEqual(said.pop(), ['protect-no-memory',
+                                        {address: '1234'}, 'warn']);
+});
+
+test('DEPOSIT into a protected board says why nothing changed', (t) => {
+    const said = [];
+    const savedSim = panel.sim;
+    const savedOn = panel.isPoweredOn;
+    t.after(() => { panel.sim = savedSim; panel.isPoweredOn = savedOn; });
+    t.mock.method(panel, 'setStatus', (...args) => said.push(args));
+    let accepted = false;
+    panel.sim = {lastAddress: 0x0042, deposit: () => accepted,
+                 depositNext: () => accepted};
+    panel.isPoweredOn = true;
+    panel.onDeposit();
+    panel.onDepositNext();
+    assert.deepStrictEqual(said, [
+        ['deposit-protected', {address: '0042'}, 'warn'],
+        ['deposit-protected', {address: '0042'}, 'warn']]);
+    said.length = 0;
+    accepted = true;
+    panel.onDeposit();
+    assert.deepStrictEqual(said, [], 'an ordinary DEPOSIT says nothing');
+});
+
+test('stopping after writes to protected memory says how many were refused', (t) => {
+    const said = [];
+    const savedSim = panel.sim;
+    const savedOn = panel.isPoweredOn;
+    t.after(() => { panel.sim = savedSim; panel.isPoweredOn = savedOn; });
+    t.mock.method(panel, 'setStatus', (...args) => said.push(args));
+    t.mock.method(panel, 'setLed', () => {});
+    panel.sim = {blockedWrites: 3412, firstBlockedAddress: 0x0123,
+                 halted: false, stop() {}};
+    panel.isPoweredOn = true;
+    panel.onProtectedWrite(0x0123);
+    assert.deepStrictEqual(said.pop(), ['write-protected', {address: '0123'},
+                                        'warn']);
+    panel.onStop();
+    assert.deepStrictEqual(said.pop(), ['status-stopped-blocked',
+                                        {count: 3412, address: '0123'},
+                                        'warn']);
+    panel.sim.halted = true;
+    panel.setWaitLedCallback(false);
+    assert.strictEqual(said.pop()[0], 'status-halted-blocked');
+    panel.sim.blockedWrites = 0;
+    panel.setWaitLedCallback(false);
+    assert.deepStrictEqual(said.pop(), ['status-halted']);
+    panel.onStop();
+    assert.deepStrictEqual(said.pop(), ['status-stopped']);
+});
+
+test('CLR clears the serial boards, and AUX always says it is spare', (t) => {
+    const said = [];
+    let clears = 0;
+    const savedSio = panel.sio;
+    const savedOn = panel.isPoweredOn;
+    t.after(() => { panel.sio = savedSio; panel.isPoweredOn = savedOn; });
+    t.mock.method(panel, 'setStatus', (id) => said.push(id));
+    panel.sio = {reset: () => clears++};
+    panel.isPoweredOn = false;
+    panel.onClr();
+    panel.onAux();
+    assert.deepStrictEqual(said, ['status-off', 'status-aux'],
+                           'AUX is spare whether the machine is on or not');
+    assert.strictEqual(clears, 0);
+    panel.isPoweredOn = true;
+    panel.onClr();
+    assert.strictEqual(clears, 1);
+    assert.strictEqual(said.pop(), 'status-clr');
+});
+
+test('every way of putting a program in lifts protection first, and says so', (t) => {
+    // A load is a fresh start, so it lifts protection - one half loaded
+    // around a protected board would be worse than none - and when there
+    // was any the status line says so first, as it does for a power-up.
+    // Run, not read: the three that touch memory themselves.
+    const saved = {sim: panel.sim, doc: global.document, link: global.Link};
+    t.after(() => {
+        panel.sim = saved.sim; global.document = saved.doc; global.Link = saved.link;
+    });
+    let lifted = 0;
+    panel.sim = {
+        mem: new Array(256).fill(0),
+        unprotectAll() { lifted++; return true; },
+        initMem() {}, loadData() {}, reset() {}, flushDump() {}, requestDump() {},
+    };
+    global.document = {getElementById: () => ({value: '3e 01'})};
+    global.Link = {parseBytes: () => ({bytes: [0x3e, 0x01]})};
+    const said = [];
+    t.mock.method(panel, 'setStatus', (...args) => said.push(args));
+    t.mock.method(panel, 'ensurePoweredOn', () => false);
+    t.mock.method(panel, 'updateMemoryControls', () => {});
+    t.mock.method(panel, 'showLoaded', () => {});
+    t.mock.method(panel, 'reportIfUnavailable', () => false);
+    const loaded = panel.loadImage([0x76]);
+    assert.strictEqual(lifted, 1, 'loadImage: the Load menu, files, BASIC, links');
+    assert.strictEqual(loaded.unprotected, true, 'and says it did');
+    panel.debugLoadData();
+    assert.strictEqual(lifted, 2, 'Hex Bytes');
+    assert.strictEqual(said.pop()[4], true, 'and says it did');
+    panel.onFillZero();
+    assert.strictEqual(lifted, 3, 'Zero All Memory');
+    assert.strictEqual(said.pop()[4], true, 'and says it did');
+    // The ways in through loadImage pass on what it says.
+    for (const name of ['loadExample', 'onLoadBasic', 'onBinaryFileChosen',
+                        'applyLinkState']) {
+        assert.match(panel[name].toString(), /\.unprotected/,
+                     name + ' does not pass on whether memory was unprotected');
+    }
+});
+
+test('only the simulator writes memory, so it can count every load (U7)', () => {
+    // The Assembler marks the PC only while memory still holds what it
+    // assembled. It knows by the simulator's count of whole loads
+    // (memLoads) and its reports of bytes put in by hand (onHandWrite):
+    // a page that wrote memory itself would slip past both.
+    const jsDir = path.join(__dirname, '..', 'js');
+    for (const file of fs.readdirSync(jsDir)) {
+        if (!file.endsWith('.js') || file == 'sim8800.js') {
+            continue;
+        }
+        const source = fs.readFileSync(path.join(jsDir, file), 'utf8');
+        assert.doesNotMatch(source, /\.mem\[[^\]]*\]\s*=[^=]|\.mem\.fill|\.mem\s*=[^=]/,
+                            file + ' writes memory itself, past the simulator');
+    }
+    // And the simulator counts each whole load, and reports each byte
+    // put in by hand.
+    const sim = sourceOf('js/sim8800.js');
+    for (const name of ['initMem', 'loadData', 'loadMap']) {
+        const body = sim.match(new RegExp('\\n    ' + name + '\\([^)]*\\) \\{([\\s\\S]*?)\\n    \\}'));
+        assert.ok(body, 'Sim8800.' + name + ' is missing');
+        assert.match(body[1], /this\.memLoads\+\+/, name + ' does not count as a load');
+    }
+    for (const name of ['deposit', 'editByte']) {
+        const body = sim.match(new RegExp('\\n    ' + name + '\\([^)]*\\) \\{([\\s\\S]*?)\\n    \\}'));
+        assert.match(body[1], /onHandWrite/, name + ' does not report its byte');
+    }
+});
+
+test('every way of loading memory goes through a counted load (U7)', () => {
+    // Each must end the Assembler's sync, even with the very same bytes.
+    // These want a document, so they are read rather than run.
+    const direct = {
+        loadImage: /initMem\(|loadData\(/,       // the Load menu's examples, files, BASIC, links
+        debugLoadData: /loadData\(/,              // Hex Bytes
+        onFillZero: /initMem\(/,                  // Zero All Memory
+        onSetMemSize: /setMemSize\(/,             // new memory boards
+    };
+    for (const [name, call] of Object.entries(direct)) {
+        assert.match(panel[name].toString(), call, name + ' loads past the count');
+    }
+    for (const name of ['loadExample', 'onLoadBasic', 'onBinaryFileChosen',
+                        'applyLinkState']) {
+        assert.match(panel[name].toString(), /loadImage\(/,
+                     name + ' does not load through loadImage');
+    }
+    // Power on fills memory as a real machine's comes up: counted too.
+    assert.match(sourceOf('js/sim8800.js'),
+                 /powerOn\(\) \{[\s\S]*?this\.initMem\(\)/);
+    // setMemSize fills the new boards the same way.
+    assert.match(sourceOf('js/sim8800.js'),
+                 /setMemSize\(memSize\) \{[\s\S]*?this\.initMem\(\)/);
+});
+
+test('the page hands every byte put in by hand to the Assembler (U7)', () => {
+    // panel.init() wires the simulator's report to asmtab.onHandWrite.
+    const source = panel.init.toString();
+    assert.match(source, /sim\.onHandWrite = function\(address, value\) \{[\s\S]*?asmtab\.onHandWrite\(address, value\)/);
+    // That Assemble takes the count after its own load is run, in
+    // tests/asmtab.test.js.
+});
+
+test('a status value is put in as it is, $ patterns and all', (t) => {
+    // A link's switch value or a file's name went through replace(),
+    // which reads $' and $& as patterns and garbled the message.
+    loadScript('l10n');
+    const text = {textContent: ''};
+    const bar = {classList: {toggle() {}}};
+    const saved = global.document;
+    global.document = {getElementById: (id) => id == 'status-text' ? text : bar};
+    t.after(() => { global.document = saved; });
+    panel.setStatus('link-bad-reg', {name: 'SW', text: "$'$`$&<b>"});
+    assert.strictEqual(text.textContent,
+                       'The link sets SW to "$\'$`$&<b>", which is not a hex value that fits in it.');
+});
+
+test('every lamp the simulator reports is drawn on the panel', () => {
+    const drawn = panel.LED_INFO.map((info) => info.id);
+    for (const id of ['prot', 'hlta', 'm1', 'inte']) {
+        assert.ok(drawn.includes(id), id + ' has no lamp on the panel');
+    }
+});
+
+test('the lamps the simulator reports touch the page only when they change', (t) => {
+    // A running program reports them after every batch of cycles.
+    const lit = [];
+    t.mock.method(panel, 'setLed', (id, on) => lit.push([id, on]));
+    panel.lampStates = {};
+    panel.setLampsCallback({prot: false});
+    panel.setLampsCallback({prot: false});
+    panel.setLampsCallback({prot: true});
+    panel.setLampsCallback({prot: true});
+    assert.deepStrictEqual(lit, [['prot', false], ['prot', true]]);
+    panel.lampStates = {};
+});
+
+test('every switch on the panel does something, with its label to click', () => {
+    // PROTECT, CLR and both AUX switches were drawn but did nothing.
+    for (const info of panel.STATELESS_SWITCH_INFO) {
+        assert.ok(info.upperCmd || info.lowerCmd, info.id + ' does nothing');
+        for (const cmd of [info.upperCmd, info.lowerCmd].filter(Boolean)) {
+            assert.strictEqual(typeof cmd.callback, 'function',
+                               cmd.id + ' has no handler');
+        }
+    }
+    const html = sourceOf('index.html');
+    for (const id of ['sw-clr', 'sw-protect', 'sw-unprotect']) {
+        assert.ok(html.includes('id="s-' + id + '"'),
+                  id + ' has no button on the strip');
+    }
+    assert.ok(!html.includes('id="s-sw-aux'), 'AUX does nothing worth a button');
+});
+
+/**
+ * Stands in for the simulator and the dump while the byte editor is
+ * exercised: memory, the window shown, and what was written.
+ * @param {!Object} t The test context.
+ * @return {!Object} The fake simulator; its edits are in .edits.
+ */
+function stubMemEditor(t) {
+    const saved = {sim: panel.sim, render: panel.renderMemSelection,
+                   doc: global.document};
+    const sim = {
+        mem: new Array(512).fill(0), isRunning: false, isPoweredOn: true,
+        protectedAt: -1, window: {start: 0, end: 256}, edits: [],
+        followPc: true,
+        editByte(address, value) {
+            if (this.isRunning) return 'running';
+            if (address == this.protectedAt) return 'protected';
+            this.mem[address] = value;
+            this.edits.push([address, value]);
+            return 'ok';
+        },
+        getDumpWindow() { return this.window; },
+        setDumpWindow(address) {
+            this.window = {start: address - address % 256,
+                           end: address - address % 256 + 256};
+        },
+        setFollowPc(on) { this.followPc = on; },
+        readByte(address) { return this.mem[address]; },
+    };
+    panel.sim = sim;
+    panel.renderMemSelection = () => {};
+    global.document = {getElementById: () => ({focus() {}, blur() {}})};
+    t.mock.method(panel, 'updateMemoryControls', () => {});
+    t.after(() => {
+        panel.sim = saved.sim;
+        panel.renderMemSelection = saved.render;
+        global.document = saved.doc;
+        panel.memSelection = null;
+        panel.memPending = null;
+    });
+    return sim;
+}
+
+/** A keydown event as the dump's input receives it. */
+function memKey(key) {
+    return {key: key, defaultPrevented: false, target: {blur() {}},
+            preventDefault() { this.defaultPrevented = true; }};
+}
+
+test('two hex digits write one byte, and the next byte is picked', (t) => {
+    const sim = stubMemEditor(t);
+    const said = [];
+    t.mock.method(panel, 'setStatus', (...args) => said.push(args));
+    panel.selectMemByte(0x10);
+    assert.deepStrictEqual(said.pop(), ['mem-edit-hint']);
+    for (const key of '3e8C') {
+        const event = memKey(key);
+        panel.onMemKey(event);
+        // Taken, or the digit would land in the input as well and be
+        // typed a second time by onMemInput.
+        assert.strictEqual(event.defaultPrevented, true, key);
+    }
+    assert.deepStrictEqual(sim.edits, [[0x10, 0x3e], [0x11, 0x8c]]);
+    // A shortcut is the browser's: Ctrl+C on a picked byte types no C.
+    for (const modifier of ['ctrlKey', 'metaKey', 'altKey']) {
+        const event = Object.assign(memKey('c'), {[modifier]: true});
+        panel.onMemKey(event);
+        assert.strictEqual(event.defaultPrevented, false, modifier);
+    }
+    assert.strictEqual(panel.memPending, null, 'nor holds it as a digit');
+    assert.strictEqual(panel.memSelection, 0x12);
+    // One digit is held, not written; Backspace and Escape drop it.
+    panel.onMemKey(memKey('5'));
+    assert.strictEqual(panel.memPending, 5);
+    assert.strictEqual(sim.edits.length, 2, 'nothing written yet');
+    panel.onMemKey(memKey('Backspace'));
+    assert.strictEqual(panel.memPending, null);
+    panel.onMemKey(memKey('7'));
+    panel.onMemKey(memKey('Escape'));
+    assert.strictEqual(panel.memPending, null);
+    assert.strictEqual(panel.memSelection, 0x12, 'the first Escape keeps the byte');
+    panel.onMemKey(memKey('Escape'));
+    assert.strictEqual(panel.memSelection, null, 'the second lets it go');
+    assert.strictEqual(sim.edits.length, 2);
+});
+
+test('the arrows move the pick, turning the page at its edges', (t) => {
+    const sim = stubMemEditor(t);
+    t.mock.method(panel, 'setStatus', () => {});
+    panel.selectMemByte(0x00ff);
+    const right = memKey('ArrowRight');
+    panel.onMemKey(right);
+    assert.strictEqual(right.defaultPrevented, true, 'the page does not scroll');
+    assert.strictEqual(panel.memSelection, 0x0100);
+    assert.deepStrictEqual(sim.window, {start: 0x100, end: 0x200});
+    assert.strictEqual(sim.followPc, false, 'following the PC would turn it back');
+    panel.onMemKey(memKey('ArrowUp'));
+    assert.strictEqual(panel.memSelection, 0x00f0);
+    panel.onMemKey(memKey('ArrowDown'));
+    panel.onMemKey(memKey('ArrowDown'));
+    assert.strictEqual(panel.memSelection, 0x0110);
+    // Held at the ends of memory.
+    panel.memSelection = 0x01ff;
+    panel.onMemKey(memKey('ArrowRight'));
+    assert.strictEqual(panel.memSelection, 0x01ff);
+    panel.memSelection = 0;
+    panel.onMemKey(memKey('ArrowLeft'));
+    assert.strictEqual(panel.memSelection, 0);
+    // Other typing is swallowed; Tab passes, to move the focus on.
+    const letter = memKey('x');
+    panel.onMemKey(letter);
+    assert.strictEqual(letter.defaultPrevented, true);
+    const tab = memKey('Tab');
+    panel.onMemKey(tab);
+    assert.strictEqual(tab.defaultPrevented, false);
+});
+
+test('a byte is edited only on a stopped machine, and not on a protected board', (t) => {
+    const sim = stubMemEditor(t);
+    const said = [];
+    t.mock.method(panel, 'setStatus', (...args) => said.push(args));
+    sim.isRunning = true;
+    panel.selectMemByte(0x20);
+    assert.deepStrictEqual(said.pop(), ['mem-edit-running', {}, 'warn']);
+    assert.strictEqual(panel.memSelection, null);
+    sim.isRunning = false;
+    sim.protectedAt = 0x20;
+    panel.selectMemByte(0x20);
+    panel.typeMemDigit(0xa);
+    panel.typeMemDigit(0xb);
+    assert.deepStrictEqual(said.pop(), ['mem-edit-protected',
+                                        {address: '0020'}, 'warn']);
+    assert.strictEqual(panel.memSelection, 0x20, 'the pick stays put');
+    assert.deepStrictEqual(sim.edits, []);
+    // RUN lets go of the byte.
+    panel.clearMemSelection();
+    panel.selectMemByte(0x21);
+    t.mock.method(panel, 'reportIfOff', () => false);
+    sim.start = () => {};
+    panel.onRun();
+    assert.strictEqual(panel.memSelection, null);
+});
+
+test('a soft keyboard\'s text is typed in as hex digits', (t) => {
+    const sim = stubMemEditor(t);
+    t.mock.method(panel, 'setStatus', () => {});
+    panel.selectMemByte(0x30);
+    const input = {value: 'c3 0g0'};
+    panel.onMemInput({target: input});
+    assert.strictEqual(input.value, '', 'nothing collects in the input');
+    assert.deepStrictEqual(sim.edits, [[0x30, 0xc3], [0x31, 0x00]]);
 });
 
 test('a machine that is off receives nothing from the teletype keyboard', () => {

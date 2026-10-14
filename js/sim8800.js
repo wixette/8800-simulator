@@ -67,6 +67,50 @@ class Sim8800 {
          */
         this.halted = false;
         this.lastAddress = 0;
+        /**
+         * The address on the bus, as the address lamps show it while
+         * the machine is stopped: the one examined or deposited, or
+         * where the CPU stopped. PROTECT acts on the memory board at
+         * this address, and the PROT lamp shows that board's latch.
+         * @type {number}
+         */
+        this.busAddress = 0;
+        /**
+         * Which memory boards are write protected, by board number. On
+         * the real machine each MITS memory board carried its own
+         * protect flip-flop, set by PROTECT and cleared by UNPROTECT or
+         * by power-on. See protect() and boardOf().
+         * @type {Array<boolean>}
+         */
+        this.protectedBoards = [];
+        /**
+         * Whether any board is protected, so that the write path - run
+         * for every byte the CPU stores - looks no further when none is.
+         * @type {boolean}
+         */
+        this.anyProtected = false;
+        /**
+         * The writes a protected board has refused since the program
+         * last started, and the address of the first. A program can
+         * hammer protected memory thousands of times a second; each
+         * refusal is only counted, and the page is told once, through
+         * onProtectedWrite. See writeByte().
+         * @type {number}
+         */
+        this.blockedWrites = 0;
+        /** @type {?number} */
+        this.firstBlockedAddress = null;
+        /**
+         * Called with the address of the first write refused in a run.
+         * @type {?function(number)}
+         */
+        this.onProtectedWrite = null;
+        /**
+         * Called with what the lamps that report the machine's state
+         * should show. See updateLamps().
+         * @type {?function(Object<string, boolean>)}
+         */
+        this.setLampsCallback = null;
         this.lastTickTime = 0;
         /**
          * I/O devices, keyed by port number. Every port the machine
@@ -108,6 +152,21 @@ class Sim8800 {
          */
         this.resetFlashToken = 0;
         this.resetFlashPending = false;
+        /**
+         * How many times memory has been filled or loaded as a whole:
+         * powered on, cleared, given new boards, a program loaded. A
+         * tool that loaded memory can tell from it that what it put
+         * there has since been replaced. Single bytes, written by the
+         * program or by hand, do not count; see onHandWrite.
+         * @type {number}
+         */
+        this.memLoads = 0;
+        /**
+         * Called after a byte is put in by hand - DEPOSIT, or the
+         * Debugger's memory dump - with its address and value.
+         * @type {?function(number, number)}
+         */
+        this.onHandWrite = null;
         this.initMem();
         this.attachDevice(Sim8800.FRONT_PANEL_PORT,
                           this.createFrontPanelDevice());
@@ -203,6 +262,7 @@ class Sim8800 {
      * @param {boolean=} random False to zero the memory instead.
      */
     initMem(random = true) {
+        this.memLoads++;
         if (random) {
             for (let i = 0; i < this.mem.length; i++) {
                 this.mem[i] = Math.floor(Math.random() * 256);
@@ -220,8 +280,28 @@ class Sim8800 {
     loadData(address, data) {
         if (!this.isPoweredOn)
             return;
+        this.memLoads++;
         for (let i = 0; i < data.length && address < this.mem.length; i++) {
             this.mem[address++] = data[i];
+        }
+        this.requestDump();
+    }
+
+    /**
+     * Loads bytes that each have an address of their own, as an
+     * assembly gives them: in any order, with gaps between. A whole
+     * load, counted as loadData's is.
+     * @param {!Iterable<!Array<number>>} pairs [address, byte] pairs,
+     *     such as a Map from address to byte.
+     */
+    loadMap(pairs) {
+        if (!this.isPoweredOn)
+            return;
+        this.memLoads++;
+        for (const [address, byte] of pairs) {
+            if (address >= 0 && address < this.mem.length) {
+                this.mem[address] = byte & 0xff;
+            }
         }
         this.requestDump();
     }
@@ -257,6 +337,102 @@ class Sim8800 {
         this.initMem();
         this.dumpWindow = 0;
         this.lastAddress = 0;
+        this.busAddress = 0;
+        // Different boards, so none of the old latches carry over.
+        this.protectedBoards = [];
+        this.anyProtected = false;
+    }
+
+    /**
+     * The memory board an address falls on. The base machine's memory
+     * is one board, however little of it is fitted; above that each
+     * 88-4MCS board holds 4 KB.
+     * @param {number} address The address.
+     * @return {number} The board's number, or -1 where no memory
+     *     answers.
+     */
+    boardOf(address) {
+        address &= 0xffff;
+        if (address >= this.mem.length)
+            return -1;
+        return Math.floor(
+            address / Math.min(this.mem.length, Sim8800.BOARD_SIZE));
+    }
+
+    /**
+     * Whether the board an address falls on is protected.
+     * @param {number} address The address.
+     * @return {boolean}
+     */
+    isProtected(address) {
+        var board = this.boardOf(address);
+        return board >= 0 && !!this.protectedBoards[board];
+    }
+
+    /**
+     * PROTECT or UNPROTECT. Latches the memory board at the address on
+     * the bus, as the switch did on the real machine: "examine any
+     * address on the board, and push the PROTECT switch" (the 88-4MCS
+     * manual). A protected board ignores every write, the program's
+     * own included, until UNPROTECT or the next power-on.
+     * @param {boolean} on True to protect, false to unprotect.
+     * @return {?{start: number, end: number}} The addresses the board
+     *     covers, first and last, or null if the machine is off or no
+     *     memory answers at the address on the bus.
+     */
+    protect(on) {
+        if (!this.isPoweredOn)
+            return null;
+        var board = this.boardOf(this.busAddress);
+        if (board < 0)
+            return null;
+        this.protectedBoards[board] = on;
+        this.anyProtected = this.protectedBoards.some(Boolean);
+        this.updateLamps();
+        var size = Math.min(this.mem.length, Sim8800.BOARD_SIZE);
+        return {start: board * size, end: board * size + size - 1};
+    }
+
+    /**
+     * Unprotects every board. The real machine's POWER ON CLEAR did
+     * this; the page also does it before putting a program in.
+     * @return {boolean} Whether any board had been protected.
+     */
+    unprotectAll() {
+        var was = this.anyProtected;
+        this.protectedBoards = [];
+        this.anyProtected = false;
+        this.updateLamps();
+        return was;
+    }
+
+    /**
+     * Tells the page what the lamps that report the machine's state
+     * should show:
+     * - PROT, the latch of the memory board at the address on the bus;
+     * - HLTA, "a HALT instruction has been executed and acknowledged";
+     * - M1, the first cycle of an instruction;
+     * - INTE, the CPU's interrupt enable, which EI sets and DI clears.
+     *
+     * The machine only ever stops between instructions - SINGLE STEP
+     * runs a whole one - so the status lamps show one of two status
+     * words: an instruction fetch (MEMR, M1, WO), or after a HLT the
+     * halt acknowledge (MEMR, HLTA, WO), which has no M1. MEMR and WO
+     * are lit in both, and follow the power (setStatusLedsCallback).
+     *
+     * Called after every batch of cycles a running program steps
+     * through, so the page should only redraw what changed.
+     */
+    updateLamps() {
+        if (!this.setLampsCallback)
+            return;
+        var on = this.isPoweredOn;
+        this.setLampsCallback({
+            prot: on && this.isProtected(this.busAddress),
+            hlta: on && this.halted,
+            m1: on && !this.halted,
+            inte: on && !!CPU8080.status().inte,
+        });
     }
 
     /**
@@ -360,24 +536,33 @@ class Sim8800 {
         var map = this.mem.length > Sim8800.DUMP_WINDOW_SIZE ?
             this.getMemMap(window, cpu) : null;
         var instr = this.getInstructionAtPc(cpu.pc);
+        // Every byte carries its address, so that the page can tell which
+        // one is pointed at and edit it (#14) - but only a stopped
+        // machine is edited, and a running one is drawn sixty times a
+        // second, so then only the marked bytes are elements.
+        var each = !this.isRunning;
         var sb = [];
         sb.push('<pre>\n');
         for (let i = window.start; i < window.end; i += 16) {
             sb.push(Sim8800.toHex(i, 4));
             sb.push('  ');
             for (let j = i; j < Math.min(window.end, i + 16); j++) {
-                let byte = Sim8800.toHex(this.mem[j], 2);
+                let mark = '';
                 // How far past the opcode this byte is, wrapping at the
                 // top of the address space as the CPU does.
                 let offset = (j - cpu.pc) & 0xffff;
                 if (offset == 0) {
-                    byte = '<span class="at-pc">' + byte + '</span>';
+                    mark = ' class="at-pc"';
                 } else if (offset < instr.length) {
-                    byte = '<span class="at-operand">' + byte + '</span>';
+                    mark = ' class="at-operand"';
                 } else if (j == cpu.sp) {
-                    byte = '<span class="at-sp">' + byte + '</span>';
+                    mark = ' class="at-sp"';
                 }
-                sb.push(byte);
+                let digits = Sim8800.toHex(this.mem[j], 2);
+                sb.push(each ? '<span data-a="' + j + '"' + mark + '>' +
+                        digits + '</span>' :
+                        mark ? '<span' + mark + '>' + digits + '</span>' :
+                        digits);
                 sb.push((j + 1) % 8 == 0 ? '  ' : ' ');
             }
             sb.push('\n');
@@ -468,12 +653,27 @@ class Sim8800 {
     /**
      * Writes a byte of memory. Writes above the installed memory go
      * nowhere, as they would on the real machine. See readByte().
+     *
+     * Nor do writes to a protected board: its latch keeps the write
+     * pulse from reaching the memory chips. Each one is counted, and
+     * the first in a run is reported, once. This runs for every byte
+     * the CPU stores, so with no board protected it costs one test.
      * @param {number} address The address to write.
      * @param {number} value The byte to write.
      */
     writeByte(address, value) {
         address &= 0xffff;
         if (address < this.mem.length) {
+            if (this.anyProtected && this.isProtected(address)) {
+                this.blockedWrites++;
+                if (this.blockedWrites == 1) {
+                    this.firstBlockedAddress = address;
+                    if (this.onProtectedWrite) {
+                        this.onProtectedWrite(address);
+                    }
+                }
+                return;
+            }
             this.mem[address] = value;
         }
     }
@@ -632,7 +832,11 @@ class Sim8800 {
      */
     powerOn() {
         this.isPoweredOn = true;
+        this.clearBlockedWrites();
         this.initMem();
+        // POWER ON CLEAR: every memory board comes up unprotected.
+        this.protectedBoards = [];
+        this.anyProtected = false;
         // A cold machine: clear the whole CPU, which reset() below
         // deliberately does not do.
         CPU8080.reset();
@@ -673,12 +877,16 @@ class Sim8800 {
         // CPU that has no power, until the next power-on clears it.
         this.isRunning = false;
         this.halted = false;
+        this.updateLamps();
     }
 
     /**
      * Resets the machine.
      */
     reset() {
+        // A program started again is counted afresh: refusals from the
+        // last one are not this one's, for STOP to report.
+        this.clearBlockedWrites();
         if (!this.isPoweredOn)
             return;
         // The 8080's RESET line clears the program counter and the
@@ -703,6 +911,8 @@ class Sim8800 {
         this.halted = false;
         this.stop();
         this.lastAddress = 0;
+        this.busAddress = 0;
+        this.updateLamps();
         if (this.setAddressLedsCallback) {
             this.setAddressLedsCallback(new Array(16).fill(1));
         }
@@ -742,14 +952,20 @@ class Sim8800 {
     }
 
     /**
-     * Stops the CPU.
+     * Stops the CPU. The dump is redrawn as a stopped machine's, every
+     * byte its own again to be clicked and edited (see dumpMem): the
+     * last one drawn while running may have come before the stop.
      */
     stop() {
         if (!this.isPoweredOn)
             return;
+        var wasRunning = this.isRunning;
         this.isRunning = false;
         if (this.setWaitLedCallback) {
             this.setWaitLedCallback(this.isRunning);
+        }
+        if (wasRunning) {
+            this.requestDump();
         }
     }
 
@@ -762,6 +978,7 @@ class Sim8800 {
     halt() {
         this.halted = true;
         this.stop();
+        this.updateLamps();
     }
 
     /**
@@ -771,12 +988,22 @@ class Sim8800 {
         if (!this.isPoweredOn)
             return;
         this.endResetFlash();
+        this.clearBlockedWrites();
         this.isRunning = true;
         if (this.setWaitLedCallback) {
             this.setWaitLedCallback(this.isRunning);
         }
         this.lastTickTime = Date.now();
         window.setTimeout(this.getClockTickerCallback(), 1);
+    }
+
+    /**
+     * Forgets the writes refused so far: a new run is counted afresh,
+     * and reported afresh if it writes to protected memory too.
+     */
+    clearBlockedWrites() {
+        this.blockedWrites = 0;
+        this.firstBlockedAddress = null;
     }
 
     /**
@@ -830,10 +1057,12 @@ class Sim8800 {
         }
         this.requestDump();
         var address = ldaxAddress != null ? ldaxAddress : CPU8080.status().pc;
+        this.busAddress = address;
         if (this.setAddressLedsCallback) {
             let bits = Sim8800.parseBits(address, 16);
             this.setAddressLedsCallback(bits);
         }
+        this.updateLamps();
         return address;
     }
 
@@ -847,8 +1076,14 @@ class Sim8800 {
      * free-running, so that OUT FFh keeps full control of them.
      */
     singleStep() {
+        // Like the real panel, only a stopped machine takes it.
+        if (this.isRunning)
+            return null;
         if (!this.isPoweredOn)
             return;
+        // Each step is a run of its own, so a write it makes to
+        // protected memory is reported every time.
+        this.clearBlockedWrites();
         var address = this.step(1);
         if (this.setDataLedsCallback) {
             this.setDataLedsCallback(
@@ -862,6 +1097,8 @@ class Sim8800 {
      * memory behind it shows FFh rather than a stray value.
      */
     showAddressAndData() {
+        this.busAddress = this.lastAddress;
+        this.updateLamps();
         if (this.setAddressLedsCallback) {
             let bits = Sim8800.parseBits(this.lastAddress, 16);
             this.setAddressLedsCallback(bits);
@@ -876,6 +1113,9 @@ class Sim8800 {
      * Reads a byte from the given address.
      */
     examine() {
+        // Like the real panel, only a stopped machine takes it.
+        if (this.isRunning)
+            return null;
         if (!this.isPoweredOn)
             return;
         if (this.getInputAddressCallback) {
@@ -889,6 +1129,9 @@ class Sim8800 {
      * Reads a byte from the next address.
      */
     examineNext() {
+        // Like the real panel, only a stopped machine takes it.
+        if (this.isRunning)
+            return null;
         if (!this.isPoweredOn)
             return;
         this.lastAddress = (this.lastAddress + 1) & 0xffff;
@@ -897,27 +1140,76 @@ class Sim8800 {
 
     /**
      * Writes a byte to the given address.
+     * @return {boolean} False if the board there is protected, so the
+     *     byte did not go in.
      */
     deposit() {
+        // Like the real panel, only a stopped machine takes it.
+        if (this.isRunning)
+            return null;
         if (!this.isPoweredOn)
-            return;
-        if (this.getInputAddressCallback) {
+            return true;
+        if (!this.getInputAddressCallback)
+            return true;
+        var refused = this.isProtected(this.lastAddress);
+        if (!refused) {
             // Only 8 bits of input is considered.
             var value = this.getInputAddressCallback() & 0xff;
             this.writeByte(this.lastAddress, value);
-            this.showAddressAndData();
-            this.requestDump();
+            if (this.onHandWrite) {
+                this.onHandWrite(this.lastAddress & 0xffff, value);
+            }
         }
+        this.showAddressAndData();
+        this.requestDump();
+        return !refused;
+    }
+
+    /**
+     * Changes one byte from the Debugger's memory dump (#14). Tooling the
+     * real machine never had, but it keeps the machine's rules: only a
+     * stopped machine is changed, as DEPOSIT changes only a stopped one;
+     * a protected board refuses; and if the data lamps are showing the
+     * byte - it is at the address on the bus - they show the new one.
+     * Not a write by the program, so it is never counted as one.
+     * @param {number} address The address.
+     * @param {number} value The new byte.
+     * @return {string} 'ok'; or why not: 'off', 'running', 'protected',
+     *     or 'none' where no memory answers.
+     */
+    editByte(address, value) {
+        if (!this.isPoweredOn)
+            return 'off';
+        if (this.isRunning)
+            return 'running';
+        address &= 0xffff;
+        if (address >= this.mem.length)
+            return 'none';
+        if (this.isProtected(address))
+            return 'protected';
+        this.mem[address] = value & 0xff;
+        if (this.onHandWrite) {
+            this.onHandWrite(address, value & 0xff);
+        }
+        if (address == this.busAddress && this.setDataLedsCallback) {
+            this.setDataLedsCallback(Sim8800.parseBits(this.mem[address], 8));
+        }
+        this.requestDump();
+        return 'ok';
     }
 
     /**
      * Writes a byte to the next address.
+     * @return {boolean} False if the board there is protected.
      */
     depositNext() {
+        // Like the real panel, only a stopped machine takes it.
+        if (this.isRunning)
+            return null;
         if (!this.isPoweredOn)
-            return;
+            return true;
         this.lastAddress = (this.lastAddress + 1) & 0xffff;
-        this.deposit();
+        return this.deposit();
     }
 };
 
@@ -927,6 +1219,13 @@ class Sim8800 {
  * @type {number}
  */
 Sim8800.FRONT_PANEL_PORT = 0xff;
+
+/**
+ * How much memory one 88-4MCS board holds, and so how much one PROTECT
+ * covers. The base machine's single board is smaller: see boardOf().
+ * @type {number}
+ */
+Sim8800.BOARD_SIZE = 4096;
 
 /**
  * How much memory the debugger's memory dump shows at once, and the

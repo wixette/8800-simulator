@@ -650,10 +650,10 @@ test('the dump marks the bytes at PC and SP, and their pages', () => {
     sim.step(20);
     sim.flushDump(true);
 
-    assert.ok(/<span class="at-pc">[0-9A-F]{2}<\/span>/.test(state.memDump),
-              'the byte at PC is marked');
-    assert.ok(/<span class="at-sp">[0-9A-F]{2}<\/span>/.test(state.memDump),
-              'the byte at SP is marked');
+    assert.ok(/<span data-a="\d+" class="at-pc">[0-9A-F]{2}<\/span>/
+              .test(state.memDump), 'the byte at PC is marked');
+    assert.ok(/<span data-a="128" class="at-sp">[0-9A-F]{2}<\/span>/
+              .test(state.memDump), 'the byte at SP is marked');
     // Both live in page 0 here, so that cell carries both marks.
     assert.strictEqual(state.memMap[0].shown, true);
     assert.strictEqual(state.memMap[0].pc, true);
@@ -706,7 +706,10 @@ test('the dump marks an instruction\'s operand bytes along with its opcode', () 
     sim.loadDataAsHexString(0, '2a 12 00 00');
     sim.flushDump(true);
     assert.match(state.memDump,
-                 /<span class="at-pc">2A<\/span> <span class="at-operand">12<\/span> <span class="at-operand">00<\/span> 00 /);
+                 new RegExp('<span data-a="0" class="at-pc">2A</span> ' +
+                            '<span data-a="1" class="at-operand">12</span> ' +
+                            '<span data-a="2" class="at-operand">00</span> ' +
+                            '<span data-a="3">00</span> '));
     assert.strictEqual(state.instr.mnemonic, 'LHLD a16');
     assert.strictEqual(state.instr.address, 0);
     assert.deepStrictEqual(state.instr.bytes, [0x2a, 0x12, 0x00]);
@@ -810,4 +813,403 @@ test('switching off a running machine stops its clock', () => {
     sim.powerOff();
     assert.strictEqual(sim.isRunning, false);
     assert.strictEqual(sim.halted, false);
+});
+
+/**
+ * A simulator with the given memory, switched on and zeroed, that
+ * records what it reports through updateLamps().
+ */
+function protectSim(memSize) {
+    const fixture = createSim(memSize);
+    fixture.state.lamps = null;
+    fixture.sim.setLampsCallback = (lamps) => { fixture.state.lamps = lamps; };
+    fixture.sim.powerOn();
+    flushTimers();
+    fixture.sim.initMem(false);
+    return fixture;
+}
+
+/** EXAMINE an address, as the switches and the lever do. */
+function examineAt(fixture, address) {
+    fixture.state.inputWord = address;
+    fixture.sim.examine();
+}
+
+test('PROTECT latches the board on the bus, which then refuses DEPOSIT', () => {
+    // "To protect a 4K block of memory, examine any address on the
+    // board, and push the PROTECT switch" - the 88-4MCS manual.
+    const fixture = protectSim(256);
+    const {sim, state} = fixture;
+    examineAt(fixture, 0x10);
+    assert.deepStrictEqual(sim.protect(true), {start: 0x00, end: 0xff},
+                           'the base machine is one board');
+    assert.strictEqual(state.lamps.prot, true, 'and PROT lights');
+    state.inputWord = 0xab;
+    assert.strictEqual(sim.deposit(), false, 'DEPOSIT is refused');
+    assert.strictEqual(sim.mem[0x10], 0, 'and the byte did not go in');
+    assert.strictEqual(sim.depositNext(), false);
+    assert.strictEqual(sim.mem[0x11], 0);
+    assert.strictEqual(sim.blockedWrites, 0,
+                       'a refused DEPOSIT is not a program write');
+    assert.deepStrictEqual(sim.protect(false), {start: 0x00, end: 0xff});
+    assert.strictEqual(state.lamps.prot, false);
+    assert.strictEqual(sim.deposit(), true);
+    assert.strictEqual(sim.mem[0x11], 0xab, 'UNPROTECT lets it in again');
+});
+
+test('one PROTECT covers one 4 KB board, and each board has its own latch', () => {
+    const fixture = protectSim(8192);
+    const {sim, state} = fixture;
+    examineAt(fixture, 0x1234);
+    assert.deepStrictEqual(sim.protect(true), {start: 0x1000, end: 0x1fff});
+    assert.strictEqual(sim.isProtected(0x0fff), false);
+    assert.strictEqual(sim.isProtected(0x1000), true);
+    assert.strictEqual(sim.isProtected(0x1fff), true);
+    // The PROT lamp follows the board at the address on the bus.
+    examineAt(fixture, 0x0100);
+    assert.strictEqual(state.lamps.prot, false);
+    sim.examineNext();
+    assert.strictEqual(state.lamps.prot, false);
+    examineAt(fixture, 0x1fff);
+    assert.strictEqual(state.lamps.prot, true);
+    // RESET puts the bus back at 0000H, on the other board.
+    sim.reset();
+    flushTimers();
+    assert.strictEqual(state.lamps.prot, false);
+    assert.strictEqual(sim.isProtected(0x1000), true,
+                       'RESET does not touch the latches');
+});
+
+test('where no memory answers there is no board to protect', () => {
+    const fixture = protectSim(256);
+    examineAt(fixture, 0x0400);
+    assert.strictEqual(fixture.sim.protect(true), null);
+    assert.strictEqual(fixture.sim.anyProtected, false);
+    fixture.sim.powerOff();
+    assert.strictEqual(fixture.sim.protect(true), null, 'nor on a dead machine');
+});
+
+test('a protected board refuses the program too, and a run is reported once', () => {
+    // MVI A,55H / loop: STA 0800H / JMP loop - thousands of writes to a
+    // protected board. Each is counted; the page hears of the first.
+    const fixture = protectSim(4096);
+    const {sim} = fixture;
+    sim.loadDataAsHexString(0, '3e 55 32 00 08 c3 02 00');
+    examineAt(fixture, 0x0000);
+    sim.protect(true);
+    const reported = [];
+    sim.onProtectedWrite = (address) => reported.push(address);
+    sim.reset();
+    flushTimers();
+    sim.start();
+    sim.step(100000);
+    sim.stop();
+    assert.ok(sim.blockedWrites > 1000, 'counted: ' + sim.blockedWrites);
+    assert.deepStrictEqual(reported, [0x0800], 'and reported once');
+    assert.strictEqual(sim.firstBlockedAddress, 0x0800);
+    assert.strictEqual(sim.mem[0x0800], 0, 'nothing went in');
+    // The next run is counted, and reported, afresh.
+    sim.start();
+    assert.strictEqual(sim.blockedWrites, 0);
+    sim.step(1000);
+    sim.stop();
+    assert.deepStrictEqual(reported, [0x0800, 0x0800]);
+    // So is each SINGLE STEP that writes there: the loop alternates
+    // STA and JMP, so four steps make two writes.
+    for (let i = 0; i < 4; i++) {
+        sim.singleStep();
+    }
+    assert.strictEqual(reported.length, 4);
+    flushTimers();
+});
+
+test('a write to an unprotected board goes in beside a protected one', () => {
+    const fixture = protectSim(8192);
+    const {sim} = fixture;
+    examineAt(fixture, 0x1000);
+    sim.protect(true);
+    // STA 0800H on the unprotected board, then STA 1800H on the other.
+    sim.loadDataAsHexString(0, '3e 77 32 00 08 32 00 18 76');
+    sim.reset();
+    flushTimers();
+    sim.step(1000);
+    assert.strictEqual(sim.mem[0x0800], 0x77);
+    assert.strictEqual(sim.mem[0x1800], 0);
+    assert.strictEqual(sim.blockedWrites, 1);
+});
+
+test('power-on and a new memory size leave every board unprotected', () => {
+    // "The 4K Static Board is automatically unprotected by POWER ON
+    // CLEAR."
+    const fixture = protectSim(4096);
+    const {sim, state} = fixture;
+    examineAt(fixture, 0x0000);
+    sim.protect(true);
+    sim.powerOff();
+    assert.strictEqual(state.lamps.prot, false, 'a dead machine lights nothing');
+    sim.powerOn();
+    flushTimers();
+    assert.strictEqual(sim.isProtected(0), false);
+    examineAt(fixture, 0x0000);
+    sim.protect(true);
+    sim.setMemSize(8192);
+    sim.powerOn();
+    flushTimers();
+    assert.strictEqual(sim.anyProtected, false);
+    assert.strictEqual(sim.isProtected(0), false);
+});
+
+test('unprotectAll says whether there was anything to unprotect', () => {
+    const fixture = protectSim(4096);
+    const {sim, state} = fixture;
+    assert.strictEqual(sim.unprotectAll(), false);
+    examineAt(fixture, 0x0000);
+    sim.protect(true);
+    assert.strictEqual(sim.unprotectAll(), true);
+    assert.strictEqual(sim.isProtected(0), false);
+    assert.strictEqual(state.lamps.prot, false);
+});
+
+test('HLTA lights while the CPU is halted, and RESET puts it out', () => {
+    // "A HALT instruction has been executed and acknowledged."
+    const fixture = protectSim(256);
+    const {sim, state} = fixture;
+    sim.loadDataAsHexString(0, '00 76');
+    assert.strictEqual(state.lamps.hlta, false);
+    sim.singleStep();
+    assert.strictEqual(state.lamps.hlta, false, 'a NOP is not a halt');
+    sim.singleStep();
+    assert.strictEqual(sim.halted, true);
+    assert.strictEqual(state.lamps.hlta, true);
+    sim.reset();
+    flushTimers();
+    assert.strictEqual(state.lamps.hlta, false);
+    // A free-running program that halts lights it too.
+    sim.start();
+    sim.step(1000);
+    assert.strictEqual(state.lamps.hlta, true);
+    flushTimers();
+});
+
+test('a halt shows the halt acknowledge: HLTA lit, M1 out', () => {
+    // The machine stops only between instructions, so the status lamps
+    // show either an instruction fetch - MEMR, M1, WO - or, after a
+    // HLT, the halt acknowledge - MEMR, HLTA, WO - which has no M1.
+    const fixture = protectSim(256);
+    const {sim, state} = fixture;
+    sim.loadDataAsHexString(0, '00 76');
+    assert.strictEqual(state.lamps.m1, true, 'stopped at a fetch');
+    sim.singleStep();
+    assert.strictEqual(state.lamps.m1, true);
+    sim.singleStep();
+    assert.deepStrictEqual([state.lamps.hlta, state.lamps.m1], [true, false]);
+    assert.strictEqual(state.statusLedsArg, true, 'MEMR and WO stay lit');
+    sim.reset();
+    flushTimers();
+    assert.deepStrictEqual([state.lamps.hlta, state.lamps.m1], [false, true]);
+});
+
+test('INTE follows EI and DI, and RESET clears it as the 8080 does', () => {
+    const fixture = protectSim(256);
+    const {sim, state} = fixture;
+    sim.loadDataAsHexString(0, 'fb f3 fb 76');
+    assert.strictEqual(state.lamps.inte, false, 'off at power-on');
+    sim.singleStep();
+    assert.strictEqual(state.lamps.inte, true, 'EI');
+    sim.singleStep();
+    assert.strictEqual(state.lamps.inte, false, 'DI');
+    sim.singleStep();
+    assert.strictEqual(state.lamps.inte, true, 'EI again');
+    assert.strictEqual(CPU8080.status().inte, 1, 'the core reports it');
+    sim.reset();
+    flushTimers();
+    assert.strictEqual(state.lamps.inte, false, 'RESET clears it');
+});
+
+test('a dead machine lights none of the lamps it reports', () => {
+    const fixture = protectSim(256);
+    const {sim, state} = fixture;
+    sim.loadDataAsHexString(0, 'fb 76');
+    sim.singleStep();
+    sim.singleStep();
+    fixture.state.inputWord = 0;
+    sim.examine();
+    sim.protect(true);
+    assert.deepStrictEqual(state.lamps,
+                           {prot: true, hlta: true, m1: false, inte: true});
+    sim.powerOff();
+    assert.deepStrictEqual(state.lamps,
+                           {prot: false, hlta: false, m1: false, inte: false});
+});
+
+test('editByte changes a byte as the Debugger asks, by the machine\'s rules', () => {
+    const fixture = protectSim(4096);
+    const {sim, state} = fixture;
+    assert.strictEqual(sim.editByte(0x0123, 0x3e), 'ok');
+    assert.strictEqual(sim.mem[0x0123], 0x3e);
+    assert.strictEqual(sim.blockedWrites, 0);
+    assert.strictEqual(sim.editByte(0x2000, 0x3e), 'none',
+                       'no memory answers above 4 KB');
+    // The data lamps show the byte at the address on the bus.
+    examineAt(fixture, 0x0040);
+    sim.editByte(0x0040, 0xa5);
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0xa5);
+    sim.editByte(0x0041, 0x5a);
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0xa5,
+                       'a byte the lamps are not showing leaves them be');
+    // A protected board refuses, and that is not a program write.
+    sim.protect(true);
+    assert.strictEqual(sim.editByte(0x0041, 0xff), 'protected');
+    assert.strictEqual(sim.mem[0x0041], 0x5a);
+    assert.strictEqual(sim.blockedWrites, 0);
+    sim.protect(false);
+    // Only a stopped machine is edited.
+    sim.start();
+    assert.strictEqual(sim.editByte(0x0041, 0xff), 'running');
+    sim.stop();
+    flushTimers();
+    sim.powerOff();
+    assert.strictEqual(sim.editByte(0x0041, 0xff), 'off');
+});
+
+test('memLoads counts whole loads, and onHandWrite each byte put in by hand', () => {
+    // What the Assembler needs to know whether memory still holds what
+    // it loaded (U7 in docs/assembler.md).
+    const fixture = protectSim(256);
+    const {sim, state} = fixture;
+    const hand = [];
+    sim.onHandWrite = (address, value) => hand.push([address, value]);
+    let count = sim.memLoads;
+    const grew = (why) => {
+        assert.ok(sim.memLoads > count, why + ' counts as a whole load');
+        count = sim.memLoads;
+    };
+    sim.initMem(false);
+    grew('clearing memory');
+    sim.loadData(0, [0x76]);
+    grew('a load');
+    sim.loadMap(new Map([[0x10, 0x3e], [0x40, 0x76]]));
+    grew('a load of an assembly');
+    assert.deepStrictEqual([sim.mem[0x10], sim.mem[0x40]], [0x3e, 0x76]);
+    sim.powerOff();
+    sim.powerOn();
+    flushTimers();
+    grew('a power cycle');
+    sim.setMemSize(4096);
+    grew('new memory boards');
+    sim.powerOn();
+    flushTimers();
+    count = sim.memLoads;
+    // By hand: DEPOSIT, DEPOSIT NEXT and the Debugger.
+    examineAt(fixture, 0x0080);
+    state.inputWord = 0x01;
+    sim.deposit();
+    state.inputWord = 0x02;
+    sim.depositNext();
+    assert.strictEqual(sim.editByte(0x0090, 0x3e), 'ok');
+    assert.deepStrictEqual(hand, [[0x80, 0x01], [0x81, 0x02], [0x90, 0x3e]]);
+    // Refused, nothing went in, so nothing is reported.
+    sim.protect(true);
+    sim.deposit();
+    sim.editByte(0x0091, 0xff);
+    sim.protect(false);
+    assert.strictEqual(hand.length, 3, 'a refused write is not reported');
+    // The program's own stores are neither.
+    sim.initMem(false);
+    count = sim.memLoads;
+    sim.loadDataAsHexString(0, '3e 2a 32 80 00 76'); // MVI A,2AH; STA 0080H; HLT
+    count = sim.memLoads;
+    sim.reset();
+    sim.start();
+    sim.step(100);
+    assert.strictEqual(sim.mem[0x80], 0x2a, 'the program stored its byte');
+    assert.strictEqual(sim.memLoads, count, 'which is not a whole load');
+    assert.strictEqual(hand.length, 3, 'nor a byte put in by hand');
+});
+
+test('while it runs, the switches but STOP and RESET do nothing', () => {
+    const fixture = protectSim(256);
+    const {sim, state} = fixture;
+    sim.loadDataAsHexString(0, 'c3 00 00');
+    sim.reset();
+    sim.start();
+    const hand = [];
+    sim.onHandWrite = (a, v) => hand.push([a, v]);
+    const pc = CPU8080.status().pc;
+    state.inputWord = 0x0080;
+    assert.strictEqual(sim.examine(), null);
+    assert.strictEqual(sim.examineNext(), null);
+    state.inputWord = 0x77;
+    assert.strictEqual(sim.deposit(), null);
+    assert.strictEqual(sim.depositNext(), null);
+    assert.strictEqual(sim.singleStep(), null);
+    assert.strictEqual(sim.mem[0x80], 0, 'nothing went in');
+    assert.deepStrictEqual(hand, []);
+    assert.strictEqual(CPU8080.status().pc, pc, 'nor did the program move');
+    sim.stop();
+    flushTimers();
+    state.inputWord = 0x0080;
+    sim.examine();
+    state.inputWord = 0x77;
+    sim.deposit();
+    assert.strictEqual(sim.mem[0x80], 0x77, 'stopped, it takes them again');
+});
+
+test('the refused writes are counted afresh after RESET and a power cycle', () => {
+    const fixture = protectSim(256);
+    const {sim, state} = fixture;
+    sim.loadDataAsHexString(0, '3e 01 32 10 00 76');  // MVI A,1; STA 0010H; HLT
+    examineAt(fixture, 0x10);
+    sim.protect(true);
+    sim.reset();
+    sim.start();
+    sim.step(100);
+    flushTimers();
+    assert.strictEqual(sim.blockedWrites, 1, 'the run was refused once');
+    sim.reset();
+    assert.strictEqual(sim.blockedWrites, 0, 'RESET starts the count again');
+    sim.reset();
+    sim.start();
+    sim.step(100);
+    flushTimers();
+    assert.strictEqual(sim.blockedWrites, 1);
+    sim.powerOff();
+    sim.powerOn();
+    flushTimers();
+    assert.strictEqual(sim.blockedWrites, 0, 'and so does power on');
+});
+
+test('a running machine\'s dump marks only the PC and SP bytes', () => {
+    // Drawn sixty times a second: 256 elements a frame was half the
+    // page's work. Only a stopped machine is edited, so only then does
+    // every byte carry its address.
+    const fixture = protectSim(256);
+    const {sim, state} = fixture;
+    let html = '';
+    sim.dumpMemCallback = (h) => { html = h; };
+    sim.loadDataAsHexString(0, 'c3 00 00');
+    sim.reset();
+    sim.dumpMem();
+    assert.strictEqual((html.match(/data-a=/g) || []).length, 256, 'stopped: every byte');
+    sim.start();
+    sim.dumpMem();
+    assert.strictEqual((html.match(/data-a=/g) || []).length, 0, 'running: none');
+    assert.match(html, /class="at-pc"/, 'the PC is still marked');
+    assert.strictEqual(html.replace(/<[^>]+>/g, '').match(/\b[0-9A-F]{2}\b/g).length,
+                       256, 'every byte is still there');
+    // STOP redraws it, whenever the last frame came: until then a click
+    // on a byte would find nothing to edit.
+    sim.stop();
+    assert.strictEqual((html.match(/data-a=/g) || []).length, 256,
+                       'stopped again: every byte, at once');
+    flushTimers();
+});
+
+test('every byte in the dump carries its address', () => {
+    const {sim, state} = poweredOnSim();
+    sim.flushDump(true);
+    const addresses = [...state.memDump.matchAll(/data-a="(\d+)"/g)]
+          .map((m) => Number(m[1]));
+    assert.strictEqual(addresses.length, 256);
+    assert.deepStrictEqual(addresses, [...Array(256).keys()]);
 });

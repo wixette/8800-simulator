@@ -57,6 +57,12 @@ panel.onStop = function() {
         return;
     }
     panel.sim.stop();
+    panel.followPc(true);
+    if (panel.sim.blockedWrites) {
+        panel.setStatus('status-stopped-blocked', panel.blockedParams(),
+                        'warn');
+        return;
+    }
     panel.setStatus('status-stopped');
 };
 
@@ -67,6 +73,8 @@ panel.onRun = function() {
     if (panel.reportIfOff()) {
         return;
     }
+    // A running machine is not edited.
+    panel.clearMemSelection();
     panel.sim.start();
     panel.setStatus('status-running');
 };
@@ -75,17 +83,30 @@ panel.onRun = function() {
  * When SINGLE STEP switch is pressed.
  */
 panel.onSingle = function() {
-    if (panel.reportIfOff()) {
+    if (panel.reportIfOff() || panel.reportIfRunning('SINGLE STEP')) {
         return;
     }
     panel.sim.singleStep();
+    panel.followPc(true);
+};
+
+/**
+ * Asks the Assembler to mark the line the program counter is on, and,
+ * after something the reader did, to bring it into view. See
+ * asmtab.requestPc().
+ * @param {boolean} scroll Whether the reader caused this.
+ */
+panel.followPc = function(scroll) {
+    if (typeof asmtab !== 'undefined' && asmtab.requestPc) {
+        asmtab.requestPc(scroll);
+    }
 };
 
 /**
  * When EXAMINE switch is pressed.
  */
 panel.onExamine = function() {
-    if (panel.reportIfOff()) {
+    if (panel.reportIfOff() || panel.reportIfRunning('EXAMINE')) {
         return;
     }
     panel.sim.examine();
@@ -95,7 +116,7 @@ panel.onExamine = function() {
  * When EXAMINE NEXT switch is pressed.
  */
 panel.onExamineNext = function() {
-    if (panel.reportIfOff()) {
+    if (panel.reportIfOff() || panel.reportIfRunning('EXAMINE NEXT')) {
         return;
     }
     panel.sim.examineNext();
@@ -105,20 +126,49 @@ panel.onExamineNext = function() {
  * When DEPOSIT switch is pressed.
  */
 panel.onDeposit = function() {
-    if (panel.reportIfOff()) {
+    if (panel.reportIfOff() || panel.reportIfRunning('DEPOSIT')) {
         return;
     }
-    panel.sim.deposit();
+    if (panel.sim.deposit() === false) {
+        panel.reportProtectedDeposit();
+    }
 };
 
 /**
  * When DEPOSIT NEXT switch is pressed.
  */
 panel.onDepositNext = function() {
-    if (panel.reportIfOff()) {
+    if (panel.reportIfOff() || panel.reportIfRunning('DEPOSIT NEXT')) {
         return;
     }
-    panel.sim.depositNext();
+    if (panel.sim.depositNext() === false) {
+        panel.reportProtectedDeposit();
+    }
+};
+
+/**
+ * On the real panel, EXAMINE, DEPOSIT and SINGLE STEP do nothing while
+ * the machine runs; only STOP and RESET act. Here the status line says
+ * so, rather than leave the switch looking broken.
+ * @param {string} name The switch, as printed on the panel.
+ * @return {boolean} Whether the machine is running.
+ */
+panel.reportIfRunning = function(name) {
+    if (!panel.sim.isRunning) {
+        return false;
+    }
+    panel.setStatus('switch-running', {name: name}, 'warn');
+    return true;
+};
+
+/**
+ * A DEPOSIT into a protected board changes nothing, and the real panel
+ * left you to notice the data lamps had not moved. The status line
+ * says why.
+ */
+panel.reportProtectedDeposit = function() {
+    panel.setStatus('deposit-protected',
+                    {address: Sim8800.toHex(panel.sim.lastAddress, 4)}, 'warn');
 };
 
 /**
@@ -129,7 +179,93 @@ panel.onReset = function() {
         return;
     }
     panel.sim.reset();
+    panel.followPc(true);
     panel.setStatus('status-reset');
+};
+
+/**
+ * When CLR is pressed: RESET's lower position, "a CLEAR command for
+ * external input/output equipment". Here that is the serial boards,
+ * which drop whatever was typed and not yet read.
+ */
+panel.onClr = function() {
+    if (panel.reportIfOff()) {
+        return;
+    }
+    if (panel.sio) {
+        // The two boards share one key queue, so this clears both.
+        panel.sio.reset();
+    }
+    panel.setStatus('status-clr');
+};
+
+/**
+ * When PROTECT is pressed.
+ */
+panel.onProtect = function() {
+    panel.setProtection(true);
+};
+
+/**
+ * When UNPROTECT is pressed.
+ */
+panel.onUnprotect = function() {
+    panel.setProtection(false);
+};
+
+/**
+ * PROTECT or UNPROTECT the memory board at the address on the bus. Like
+ * every switch but RESET on the real machine, it works only while the
+ * machine is stopped.
+ * @param {boolean} on True to protect, false to unprotect.
+ */
+panel.setProtection = function(on) {
+    if (panel.reportIfOff()) {
+        return;
+    }
+    if (panel.sim.isRunning) {
+        panel.setStatus('protect-running', {}, 'warn');
+        return;
+    }
+    var range = panel.sim.protect(on);
+    if (!range) {
+        panel.setStatus('protect-no-memory',
+                        {address: Sim8800.toHex(panel.sim.busAddress, 4)},
+                        'warn');
+        return;
+    }
+    panel.setStatus(on ? 'status-protected' : 'status-unprotected',
+                    {start: Sim8800.toHex(range.start, 4),
+                     end: Sim8800.toHex(range.end, 4)});
+};
+
+/**
+ * When either AUX switch is pressed. Connected to nothing, on a new
+ * Altair as here, which is worth saying whether the machine is on or
+ * not.
+ */
+panel.onAux = function() {
+    panel.setStatus('status-aux');
+};
+
+/**
+ * When a running program first writes to protected memory. Called once
+ * a run however often it tries; the rest are counted, for the message
+ * when the machine stops.
+ * @param {number} address Where it tried.
+ */
+panel.onProtectedWrite = function(address) {
+    panel.setStatus('write-protected', {address: Sim8800.toHex(address, 4)},
+                    'warn');
+};
+
+/**
+ * The count of refused writes, and the first address, for a message.
+ * @return {{count: number, address: string}}
+ */
+panel.blockedParams = function() {
+    return {count: panel.sim.blockedWrites,
+            address: Sim8800.toHex(panel.sim.firstBlockedAddress, 4)};
 };
 
 /**
@@ -174,9 +310,11 @@ panel.onFillZero = function() {
     if (panel.reportIfUnavailable('debug-fill-zero')) {
         return;
     }
+    // All of it, as the button says: protection is lifted first.
+    var unprotected = panel.sim.unprotectAll();
     panel.sim.initMem(false);
     panel.sim.requestDump();
-    panel.setStatus('status-zeroed');
+    panel.setStatus('status-zeroed', {}, '', false, unprotected);
 };
 
 /**
@@ -211,7 +349,7 @@ panel.MAX_IMAGE_BYTES = 65536;
  * docs/ms-basic-4k.md.
  *
  * Only the names are here. Everything else - title, size, device,
- * bytes - is read out of examples/<id>.asm, and tests/listing.test.js
+ * bytes - is read out of examples/<id>.asm, and tests/examples.test.js
  * keeps this list in step with the directory.
  * @type {Array<string>}
  */
@@ -220,13 +358,17 @@ panel.EXAMPLES = [
     'pattern-shift',
     'io-echo',
     'adder',
+    'multiply',
     'bouncing-light',
     'kill-the-bit',
+    'macros',
     // Teletype.
     'tty-hello',
     'tty-ascii',
     'tty-echo',
     'tty-leds',
+    'tty-subroutines',
+    'print-number',
     'guess-letter',
 ];
 
@@ -234,7 +376,7 @@ panel.EXAMPLES = [
  * Whether the page was opened straight off the disk.
  *
  * A browser will not let a file:// page fetch the files beside it, so
- * the example listings and the BASIC tape need the folder to be served.
+ * the example programs and the BASIC tape need the folder to be served.
  * Checked up front rather than by letting the fetch fail, so that those
  * controls are greyed out before they are pressed and give the real
  * reason. See D22 in docs/ms-basic-4k.md.
@@ -245,19 +387,53 @@ panel.needsServer = function() {
 };
 
 /**
- * Reads the example listings, once, the first time the Load menu opens.
- * A reader who never opens it never fetches anything. The menu shows
- * them as they arrive.
+ * Reads one example: its header, and its source assembled. Both menus
+ * offer the same programs from the same files: the Load menu loads the
+ * bytes, and the Assembler's Examples menu shows the source (U5 in
+ * docs/assembler.md).
+ * @param {string} text An examples/*.asm file.
+ * @return {?{name: string, desc: string, device: string,
+ *     bytes: !Array<number>, text: string}} The program, or null if it
+ *     does not assemble. Its text has the line endings a text area
+ *     gives back, so the editor can tell it is unchanged.
+ */
+panel.parseExample = function(text) {
+    text = text.replace(/\r\n?/g, '\n');
+    var meta = {};
+    var re = /^;;;\s*(name|desc|device):\s*(.*)$/gm;
+    var m;
+    while ((m = re.exec(text))) {
+        meta[m[1]] = m[2].trim();
+    }
+    var result = Asm8080.assemble(text);
+    if (!result.ok || !result.size) {
+        return null;
+    }
+    // From 0000H, where every way of loading puts a program.
+    var bytes = [];
+    for (let a = 0; a <= result.end; a++) {
+        bytes.push(result.memory.has(a) ? result.memory.get(a) : 0);
+    }
+    return {name: meta.name || '', desc: meta.desc || '',
+            device: meta.device || '', bytes: bytes, text: text};
+};
+
+/**
+ * Reads the examples, once, the first time either menu opens. A reader
+ * who never opens one never fetches anything. The menus show them as
+ * they arrive.
+ * @return {!Promise} Settles once they are read, or cannot be.
  */
 panel.fetchExamples = function() {
     if (panel.examplesFetched) {
-        return;
+        return panel.examplesPromise;
     }
     panel.examplesFetched = true;
     panel.examplePrograms = {};
     if (panel.needsServer()) {
         panel.examplesProblem = 'needs-server';
-        return;
+        panel.examplesPromise = Promise.resolve();
+        return panel.examplesPromise;
     }
     panel.examplesLoading = true;
     // Fetched together, but listed in the order panel.EXAMPLES gives.
@@ -268,14 +444,14 @@ panel.fetchExamples = function() {
             }
             return response.text();
         }).then(function(text) {
-            var program = Listing.parse(text);
-            return program.bytes.length ? {id: id, program: program} : null;
+            var program = panel.parseExample(text);
+            return program ? {id: id, program: program} : null;
         }).catch(function() {
-            // A listing that cannot be read is simply not offered.
+            // An example that cannot be read is simply not offered.
             return null;
         });
     });
-    Promise.all(fetches).then(function(results) {
+    panel.examplesPromise = Promise.all(fetches).then(function(results) {
         panel.exampleOrder = [];
         for (let i = 0; i < results.length; i++) {
             if (results[i]) {
@@ -290,6 +466,7 @@ panel.fetchExamples = function() {
             panel.loadMenu.setItems(panel.loadMenuItems());
         }
     });
+    return panel.examplesPromise;
 };
 
 /**
@@ -397,7 +574,7 @@ panel.loadExample = function(id) {
     panel.setStatus(program.device == 'teletype' ?
                         'example-loaded-tty' : 'example-loaded',
                     {name: program.name, bytes: loaded.bytes}, '',
-                    loaded.poweredOn);
+                    loaded.poweredOn, loaded.unprotected);
 };
 
 /**
@@ -475,6 +652,23 @@ panel.refreshPlaceholders = function() {
     if (logo) {
         logo.alt = l10n.getMessage('header-title');
     }
+    // A tab's name is its tooltip too: on a phone only its icon shows.
+    for (let i = 0; i < panel.TABS.length; i++) {
+        let nav = document.getElementById('nav-' + panel.TABS[i]);
+        if (nav) {
+            nav.title = l10n.getMessage('nav-' + panel.TABS[i] + '-name');
+        }
+    }
+    if (typeof asmtab !== 'undefined' && document.getElementById('asm-source')) {
+        asmtab.refreshText();
+    }
+    // How to edit the dump, for the pointer and for a screen reader.
+    var memDump = document.getElementById('mem-dump');
+    if (memDump) {
+        memDump.title = l10n.getMessage('mem-dump-hint');
+        document.getElementById('mem-input').setAttribute(
+            'aria-label', l10n.getMessage('mem-dump-hint'));
+    }
     var closers = document.querySelectorAll('.dialog-close');
     for (let i = 0; i < closers.length; i++) {
         closers[i].title = l10n.getMessage('dialog-close');
@@ -493,12 +687,16 @@ panel.refreshPlaceholders = function() {
  * @param {string=} severity '', 'warn' or 'error'.
  * @param {boolean=} afterPowerOn Whether the machine had to be
  *     switched on to do this, which the line says first (D23).
+ * @param {boolean=} afterUnprotect Whether protected memory had to be
+ *     unprotected to do this, which the line says first too.
  */
-panel.setStatus = function(id, params, severity = '', afterPowerOn = false) {
+panel.setStatus = function(id, params, severity = '', afterPowerOn = false,
+                           afterUnprotect = false) {
     panel.statusId = id;
     panel.statusParams = params || {};
     panel.statusSeverity = severity;
     panel.statusAfterPowerOn = afterPowerOn;
+    panel.statusAfterUnprotect = afterUnprotect;
     panel.refreshStatus();
 };
 
@@ -519,15 +717,24 @@ panel.refreshStatus = function() {
     }
     var msg = l10n.getMessage(panel.statusId);
     for (let key in panel.statusParams) {
-        msg = msg.replace('{' + key + '}', panel.statusParams[key]);
+        // Split and joined, not replace(): a value from a link or a
+        // file name may hold $' or $&, which replace() would expand.
+        msg = msg.split('{' + key + '}').join(panel.statusParams[key]);
     }
+    // First what happened, then what was loaded, then what to do next -
+    // so the notes go in front of the message, not after the
+    // instruction at the end of it. Chinese and Japanese put no space
+    // after their full stop; a space there reads as a hole in the middle
+    // of the line.
+    var notes = [];
     if (panel.statusAfterPowerOn) {
-        // First what happened, then what was loaded, then what to do
-        // next - so the note goes in front of the message, not after
-        // the instruction at the end of it. Chinese and Japanese put
-        // no space after their full stop; a space there reads as a
-        // hole in the middle of the line.
-        var note = l10n.getMessage('powered-on-first');
+        notes.push('powered-on-first');
+    }
+    if (panel.statusAfterUnprotect) {
+        notes.push('unprotected-first');
+    }
+    for (let i = notes.length - 1; i >= 0; i--) {
+        var note = l10n.getMessage(notes[i]);
         msg = note + (/\u3002$/.test(note) ? '' : ' ') + msg;
     }
     text.textContent = msg;
@@ -564,12 +771,16 @@ panel.ensurePoweredOn = function() {
  * what was just loaded before the program writes over it (D14).
  * @param {Array<number>|Uint8Array} bytes The image. Anything longer
  *     than the installed memory is ignored past the top.
- * @return {{bytes: number, poweredOn: boolean}} How many bytes
- *     actually fit in the machine, and whether it had to be switched
- *     on first.
+ * @return {{bytes: number, poweredOn: boolean, unprotected: boolean}}
+ *     How many bytes actually fit in the machine, whether it had to be
+ *     switched on first, and whether protected memory had to be
+ *     unprotected.
  */
 panel.loadImage = function(bytes) {
     var poweredOn = panel.ensurePoweredOn();
+    // A program going in is a fresh start, and one that half went in
+    // around a protected board would be worse than none.
+    var unprotected = panel.sim.unprotectAll();
     panel.sim.initMem(false);
     panel.sim.loadData(0, bytes);
     panel.sim.reset();
@@ -577,7 +788,7 @@ panel.loadImage = function(bytes) {
     panel.updateMemoryControls();
     panel.showLoaded();
     return {bytes: Math.min(bytes.length, panel.sim.mem.length),
-            poweredOn: poweredOn};
+            poweredOn: poweredOn, unprotected: unprotected};
 };
 
 /**
@@ -604,7 +815,7 @@ panel.onLoadBasic = function() {
     }).then(function(buffer) {
         var loaded = panel.loadImage(new Uint8Array(buffer));
         panel.setStatus('rom-loaded', {bytes: loaded.bytes}, '',
-                        loaded.poweredOn);
+                        loaded.poweredOn, loaded.unprotected);
     }).catch(function() {
         panel.setStatus('rom-missing', {}, 'error');
     });
@@ -638,11 +849,11 @@ panel.onBinaryFileChosen = function(event) {
         if (file.size > size) {
             panel.setStatus('rom-file-truncated',
                             {bytes: loaded.bytes, name: file.name,
-                             size: file.size}, 'warn', loaded.poweredOn);
+                             size: file.size}, 'warn', loaded.poweredOn, loaded.unprotected);
         } else {
             panel.setStatus('rom-file-loaded',
                             {bytes: loaded.bytes, name: file.name}, '',
-                            loaded.poweredOn);
+                            loaded.poweredOn, loaded.unprotected);
         }
     };
     reader.onerror = function() {
@@ -827,12 +1038,244 @@ panel.onMemMapPress = function(event) {
 };
 
 /**
+ * The byte picked in the memory dump for editing, by address, or null.
+ * Bytes are typed over as in a hex editor (#14): two hex digits write
+ * one whole byte, and the next byte is picked.
+ * @type {?number}
+ */
+panel.memSelection = null;
+
+/**
+ * The first hex digit typed over the picked byte, waiting for its
+ * second; memory is not touched until that arrives. Null if none.
+ * @type {?number}
+ */
+panel.memPending = null;
+
+/**
+ * The dump's element that is drawn as picked, to be put back as it was
+ * when the pick moves on.
+ * @type {?Element}
+ */
+panel.memSelectedElem = null;
+
+/**
+ * When the memory dump is clicked: picks the byte under the pointer, if
+ * there is one. A click that ends a text selection is left alone, so
+ * the dump can still be copied.
+ * @param {Event} event The click event.
+ */
+panel.onMemDumpClick = function(event) {
+    var target = event.target && event.target.closest ?
+        event.target.closest('span[data-a]') : null;
+    if (!target) {
+        // A running machine's bytes are not elements of their own (see
+        // Sim8800.dumpMem), but a click on them still deserves the why.
+        if (panel.sim.isRunning) {
+            panel.setStatus('mem-edit-running', {}, 'warn');
+        }
+        return;
+    }
+    var selection = window.getSelection ? window.getSelection() : null;
+    if (selection && !selection.isCollapsed) {
+        return;
+    }
+    panel.selectMemByte(parseInt(target.dataset.a, 10));
+};
+
+/**
+ * Picks a byte for editing, and gives the keyboard to the dump. Only a
+ * stopped machine is edited, as on the panel only a stopped machine
+ * takes a DEPOSIT.
+ * @param {number} address The byte's address.
+ */
+panel.selectMemByte = function(address) {
+    if (panel.sim.isRunning) {
+        panel.setStatus('mem-edit-running', {}, 'warn');
+        return;
+    }
+    panel.memSelection = address;
+    panel.memPending = null;
+    panel.renderMemSelection();
+    // preventScroll: the input sits beside the dump, and scrolling it
+    // into view would move the dock's contents.
+    document.getElementById('mem-input').focus({preventScroll: true});
+    panel.setStatus('mem-edit-hint');
+};
+
+/**
+ * Lets go of the picked byte, dropping a digit typed but not finished.
+ */
+panel.clearMemSelection = function() {
+    if (panel.memSelection === null) {
+        return;
+    }
+    panel.memSelection = null;
+    panel.memPending = null;
+    panel.renderMemSelection();
+};
+
+/**
+ * Moves the pick, turning the dump's page when it crosses an edge of
+ * the window shown. Following the PC would turn the page straight back,
+ * so moving the pick stops that, as paging by hand does.
+ * @param {number} delta How many bytes on, or back if negative.
+ */
+panel.moveMemSelection = function(delta) {
+    var top = panel.sim.mem.length - 1;
+    var address = Math.min(Math.max(panel.memSelection + delta, 0), top);
+    panel.memSelection = address;
+    panel.memPending = null;
+    var shown = panel.sim.getDumpWindow();
+    if (address < shown.start || address >= shown.end) {
+        panel.sim.setFollowPc(false);
+        panel.sim.setDumpWindow(address);
+        panel.updateMemoryControls();
+    }
+    panel.renderMemSelection();
+};
+
+/**
+ * Takes one hex digit typed over the picked byte. The first is held;
+ * the second writes the whole byte and picks the next, as DEPOSIT NEXT
+ * moves on. A protected board refuses, and the pick stays put.
+ * @param {number} digit 0 to 15.
+ */
+panel.typeMemDigit = function(digit) {
+    if (panel.memSelection === null) {
+        return;
+    }
+    if (panel.memPending === null) {
+        panel.memPending = digit;
+        panel.renderMemSelection();
+        return;
+    }
+    var address = panel.memSelection;
+    var value = panel.memPending * 16 + digit;
+    panel.memPending = null;
+    var result = panel.sim.editByte(address, value);
+    if (result == 'protected') {
+        panel.setStatus('mem-edit-protected',
+                        {address: Sim8800.toHex(address, 4)}, 'warn');
+        panel.renderMemSelection();
+        return;
+    }
+    if (result != 'ok') {
+        if (result == 'running') {
+            panel.setStatus('mem-edit-running', {}, 'warn');
+        }
+        panel.clearMemSelection();
+        return;
+    }
+    if (address < panel.sim.mem.length - 1) {
+        panel.moveMemSelection(1);
+    } else {
+        panel.renderMemSelection();
+    }
+};
+
+/**
+ * The keys the picked byte answers: hex digits, the arrows, Backspace
+ * and Escape. Every other key that would type something is swallowed,
+ * so that nothing collects in the input; Tab still moves the focus on,
+ * which lets go of the byte.
+ * @param {Event} event The keydown event, from the dump's input.
+ */
+panel.onMemKey = function(event) {
+    if (panel.memSelection === null || event.ctrlKey || event.metaKey ||
+        event.altKey) {
+        return;
+    }
+    var key = event.key;
+    var moves = {ArrowLeft: -1, ArrowRight: 1, ArrowUp: -16, ArrowDown: 16};
+    if (/^[0-9a-fA-F]$/.test(key)) {
+        panel.typeMemDigit(parseInt(key, 16));
+    } else if (moves[key]) {
+        panel.moveMemSelection(moves[key]);
+    } else if (key == 'Backspace') {
+        panel.memPending = null;
+        panel.renderMemSelection();
+    } else if (key == 'Escape') {
+        if (panel.memPending !== null) {
+            panel.memPending = null;
+            panel.renderMemSelection();
+        } else {
+            panel.clearMemSelection();
+            event.target.blur();
+        }
+    } else if (key.length != 1) {
+        return;
+    }
+    event.preventDefault();
+};
+
+/**
+ * Takes text from a soft keyboard, which often reports its keys as
+ * 'Unidentified' and so is not caught by onMemKey.
+ * @param {Event} event The input event.
+ */
+panel.onMemInput = function(event) {
+    var text = event.target.value;
+    event.target.value = '';
+    for (let i = 0; i < text.length; i++) {
+        if (/[0-9a-fA-F]/.test(text[i])) {
+            panel.typeMemDigit(parseInt(text[i], 16));
+        }
+    }
+};
+
+/**
+ * Draws the pick on the dump: the byte filled, with an underline cursor
+ * under the digit the next key types over - the first, or once one has
+ * been typed, the second, the typed one shown in its place.
+ * Called again after every redraw of the dump, which replaces the
+ * bytes; a pick the dump no longer shows - the machine went off, or
+ * less memory is installed - is let go.
+ */
+panel.renderMemSelection = function() {
+    var old = panel.memSelectedElem;
+    if (old) {
+        old.classList.remove('mem-selected');
+        old.textContent = Sim8800.toHex(
+            panel.sim.readByte(parseInt(old.dataset.a, 10)), 2);
+        panel.memSelectedElem = null;
+    }
+    if (panel.memSelection === null) {
+        return;
+    }
+    if (!panel.sim.isPoweredOn ||
+        panel.memSelection >= panel.sim.mem.length) {
+        panel.memSelection = null;
+        panel.memPending = null;
+        return;
+    }
+    var elem = document.querySelector(
+        '#mem-dump span[data-a="' + panel.memSelection + '"]');
+    if (!elem) {
+        return;
+    }
+    elem.classList.add('mem-selected');
+    // Hex digits only, so safe to write as markup.
+    var digits = Sim8800.toHex(panel.sim.readByte(panel.memSelection), 2);
+    if (panel.memPending === null) {
+        elem.innerHTML = '<span class="mem-caret">' + digits[0] + '</span>' +
+            digits[1];
+    } else {
+        elem.innerHTML = '<span class="mem-typed">' +
+            panel.memPending.toString(16).toUpperCase() + '</span>' +
+            '<span class="mem-caret">' + digits[1] + '</span>';
+    }
+    panel.memSelectedElem = elem;
+};
+
+/**
  * When CPU sets the address LEDs.
  */
 panel.setAddressLedsCallback = function(bits) {
     for (let i = 0; i < bits.length; i++) {
         panel.setLed('a' + i, bits[i]);
     }
+    panel.followPc(false);
 };
 
 /**
@@ -854,7 +1297,35 @@ panel.setWaitLedCallback = function(isRunning) {
     // everyone else (D26). A stop asked for from the panel writes its
     // own message afterwards.
     if (!isRunning && panel.sim && panel.sim.halted) {
+        if (panel.sim.blockedWrites) {
+            panel.setStatus('status-halted-blocked', panel.blockedParams(),
+                            'warn');
+            return;
+        }
         panel.setStatus('status-halted');
+    }
+};
+
+/**
+ * What each lamp the simulator reports through updateLamps() last
+ * showed, so that a running program, which reports them after every
+ * batch of cycles, only touches the page when one changes.
+ * @type {Object<string, boolean>}
+ */
+panel.lampStates = {};
+
+/**
+ * When the simulator reports the lamps that show the machine's state:
+ * PROT, HLTA, M1 and INTE.
+ * @param {Object<string, boolean>} lamps Each lamp's id, and whether it
+ *     is lit.
+ */
+panel.setLampsCallback = function(lamps) {
+    for (let id in lamps) {
+        if (panel.lampStates[id] !== lamps[id]) {
+            panel.lampStates[id] = lamps[id];
+            panel.setLed(id, lamps[id]);
+        }
     }
 };
 
@@ -862,7 +1333,9 @@ panel.setWaitLedCallback = function(isRunning) {
  * When CPU sets the status LEDs.
  */
 panel.setStatusLedsCallback = function(isPoweredOn) {
-    ['memr', 'mi', 'wo'].forEach(function(id) {
+    // M1 is not among them: it goes out in a halt, so the simulator
+    // reports it with HLTA, through setLampsCallback.
+    ['memr', 'wo'].forEach(function(id) {
         panel.setLed(id, isPoweredOn);
     });
 };
@@ -910,6 +1383,9 @@ panel.dumpCpuCallback = function(dumpHtml) {
  */
 panel.dumpMemCallback = function(dumpHtml, pages, instr) {
     document.getElementById('mem-dump').innerHTML = dumpHtml;
+    // The bytes were all replaced, the picked one among them.
+    panel.memSelectedElem = null;
+    panel.renderMemSelection();
     panel.renderMemMap(pages);
     panel.lastInstr = instr || null;
     panel.renderInstrPane();
@@ -1045,11 +1521,12 @@ panel.debugLoadData = function() {
     // On, but not wiped: this is a deposit into the machine as it
     // stands, not a fresh tape. loadImage() is the one that clears.
     var poweredOn = panel.ensurePoweredOn();
+    var unprotected = panel.sim.unprotectAll();
     panel.sim.loadData(0, parsed.bytes);
     panel.updateMemoryControls();
     panel.showLoaded();
     panel.setStatus('load-data-loaded', {bytes: parsed.bytes.length}, '',
-                    poweredOn);
+                    poweredOn, unprotected);
     return true;
 };
 
@@ -1208,10 +1685,10 @@ panel.applyLinkState = function(state) {
         panel.setStatus('link-state-loaded',
                         {size: panel.formatMemSize(state.memSize),
                          pc: Sim8800.toHex(CPU8080.status().pc, 4)},
-                        '', loaded.poweredOn);
+                        '', loaded.poweredOn, loaded.unprotected);
     } else {
         panel.setStatus('link-loaded', {bytes: loaded.bytes}, '',
-                        loaded.poweredOn);
+                        loaded.poweredOn, loaded.unprotected);
     }
 };
 
@@ -1431,6 +1908,30 @@ panel.renderTeletype = function() {
     var paper = document.getElementById('tty-paper');
     if (paper) {
         paper.scrollTop = paper.scrollHeight;
+        panel.followCarriage(paper, textElem.querySelector('.tty-cursor'));
+    }
+};
+
+/**
+ * Scrolls the paper sideways, when it is narrower than a line - on a
+ * phone - just enough to keep the carriage in view, a few characters
+ * clear of the edge, as the paper is kept scrolled down to it. After a
+ * carriage return, that is back to the left margin.
+ * @param {!Element} paper The paper, which scrolls.
+ * @param {?Element} cursor The carriage, in it.
+ */
+panel.followCarriage = function(paper, cursor) {
+    if (!cursor || paper.scrollWidth <= paper.clientWidth) {
+        return;
+    }
+    // The paper is positioned, so the carriage is measured from it.
+    var left = cursor.offsetLeft;
+    var right = left + cursor.offsetWidth;
+    var margin = cursor.offsetWidth * 4;
+    if (left - margin < paper.scrollLeft) {
+        paper.scrollLeft = Math.max(0, left - margin);
+    } else if (right + margin > paper.scrollLeft + paper.clientWidth) {
+        paper.scrollLeft = right + margin - paper.clientWidth;
     }
 };
 
@@ -1530,7 +2031,7 @@ panel.LED_INFO = [
     {id: 'prot', x: 245, y: 120},
     {id: 'memr', x: 296, y: 120},
     {id: 'inp', x: 347, y: 120},
-    {id: 'mi', x: 398, y: 120},
+    {id: 'm1', x: 398, y: 120},
     {id: 'out', x: 449, y: 120},
     {id: 'hlta', x: 500, y: 120},
     {id: 'stack', x: 551, y: 120},
@@ -1688,28 +2189,66 @@ panel.STATELESS_SWITCH_INFO = [
             height: 13.87,
             callback: panel.onReset,
         },
-        lowerCmd: null,
+        lowerCmd: {
+            id: 'sw-clr',
+            x: 749.28,
+            y: 469.85,
+            width: 25.75,
+            height: 13.87,
+            callback: panel.onClr,
+        },
     },
     {
         id: 'protect',
         x: 853,
         y: 439,
-        upperCmd: null,
-        lowerCmd: null,
+        upperCmd: {
+            id: 'sw-protect',
+            x: 833.76,
+            y: 426.75,
+            width: 59.75,
+            height: 13.87,
+            callback: panel.onProtect,
+        },
+        lowerCmd: {
+            id: 'sw-unprotect',
+            x: 824.69,
+            y: 469.85,
+            width: 77.87,
+            height: 13.87,
+            callback: panel.onUnprotect,
+        },
     },
+    // The AUX switches throw both ways, but only the upper position has
+    // a label to click; the lower is reached through the lever. Neither
+    // has a button on the strip, since neither does anything.
     {
         id: 'aux1',
         x: 957,
         y: 439,
-        upperCmd: null,
-        lowerCmd: null,
+        upperCmd: {
+            id: 'sw-aux1',
+            x: 952.91,
+            y: 427.03,
+            width: 27.07,
+            height: 13.87,
+            callback: panel.onAux,
+        },
+        lowerCmd: {id: 'sw-aux1-down', callback: panel.onAux},
     },
     {
         id: 'aux2',
         x: 1060,
         y: 439,
-        upperCmd: null,
-        lowerCmd: null,
+        upperCmd: {
+            id: 'sw-aux2',
+            x: 1055.02,
+            y: 427.03,
+            width: 27.07,
+            height: 13.87,
+            callback: panel.onAux,
+        },
+        lowerCmd: {id: 'sw-aux2-down', callback: panel.onAux},
     },
 ];
 
@@ -1806,6 +2345,14 @@ panel.init = function() {
     panel.sim.dumpFilter = function() {
         return panel.isDebugTabVisible;
     };
+    panel.sim.setLampsCallback = panel.setLampsCallback;
+    // A byte put in by hand may undo what the Assembler loaded (U7).
+    panel.sim.onHandWrite = function(address, value) {
+        if (typeof asmtab !== 'undefined' && asmtab.onHandWrite) {
+            asmtab.onHandWrite(address, value);
+        }
+    };
+    panel.sim.onProtectedWrite = panel.onProtectedWrite;
 
     // The teletype. The paper and the serial board are plain objects
     // that keep working whether or not the dock shows them; only the
@@ -1825,6 +2372,7 @@ panel.init = function() {
 
     panel.initSwitchStrip();
     panel.setHelperShown(panel.readHelperShown(), false);
+    asmtab.init();
 
     // The toolbar. Load is built as it opens, since what it offers
     // depends on the moment: 4K BASIC needs 4 KB, the examples a server.
@@ -1893,6 +2441,15 @@ panel.init = function() {
     // cells can come and go when the memory size changes.
     document.getElementById('mem-map').addEventListener(
         'pointerdown', panel.onMemMapPress, false);
+    // The dump's bytes, typed over (#14). Likewise one listener, since
+    // every redraw replaces the bytes. The keys arrive at the input,
+    // and leaving it - a click anywhere else - lets go of the byte.
+    var memInput = document.getElementById('mem-input');
+    document.getElementById('mem-dump').addEventListener(
+        'click', panel.onMemDumpClick, false);
+    memInput.addEventListener('keydown', panel.onMemKey, false);
+    memInput.addEventListener('input', panel.onMemInput, false);
+    memInput.addEventListener('blur', panel.clearMemSelection, false);
     panel.updateMemoryControls();
     // The machine comes up switched off, and the empty dump and dark
     // panel should say why rather than look broken.
@@ -2015,8 +2572,11 @@ panel.createCmdLabel = function(cmd, callback) {
     elem.addEventListener('click', callback, false);
     panelElem.appendChild(elem);
 
-    document.getElementById('s-' + cmd.id).addEventListener(
-        'click', callback, false);
+    // Its button on the strip under the panel, if it has one.
+    var helper = document.getElementById('s-' + cmd.id);
+    if (helper) {
+        helper.addEventListener('click', callback, false);
+    }
 };
 
 /**
@@ -2094,10 +2654,11 @@ panel.createSwitch = function(id, type, x, y, upperCmd, lowerCmd) {
             panel.playSwitch();
             lowerCmd.callback();
         };
-        if (upper) {
+        // A position with no label in the artwork has no box to click.
+        if (upper && upperCmd.width) {
             panel.createCmdLabel(upperCmd, upper);
         }
-        if (lower) {
+        if (lower && lowerCmd.width) {
             panel.createCmdLabel(lowerCmd, lower);
         }
         // The lever's top half throws it up and its bottom half down,
@@ -2279,10 +2840,12 @@ panel.playSwitch = function() {
  * The dock's tabs, in the order they appear. The teletype comes first:
  * it and the front panel are the two things a 1975 owner actually
  * touched (D8 in docs/ms-basic-4k.md, which U1 in docs/ui-design.md
- * carries over).
+ * carries over). The Assembler follows, before the Debugger, in the
+ * order you work: write a program, then watch it run (U1 in
+ * docs/assembler.md).
  * @type {Array<string>}
  */
-panel.TABS = ['tty', 'debug', 'ref', 'links'];
+panel.TABS = ['tty', 'asm', 'debug', 'ref', 'links'];
 
 /**
  * The tab a first visit opens on: the Tutorial, which says what to do
@@ -2368,9 +2931,8 @@ panel.readSavedDock = function() {
 };
 
 /**
- * When one of the dock's tabs is pressed. The tab already showing
- * folds the dock away, as a tool window does in an IDE; any other opens
- * the dock on itself.
+ * When one of the dock's tabs is pressed. Any but the tab already
+ * showing opens the dock on itself; that one is left as it is (below).
  *
  * Opening the Teletype hands it the keyboard: from a mouse by letting go
  * of whatever control last had the focus - a menu button, typically -
@@ -2379,8 +2941,10 @@ panel.readSavedDock = function() {
  * @param {boolean=} byKey Whether it was pressed from the keyboard.
  */
 panel.onDockTab = function(name, byKey) {
+    // The open tab, pressed again, does nothing: with five tabs it is
+    // too easily pressed by mistake, and folding the dock away is the
+    // fold button's job, and the handle's.
     if (name == panel.dock.tab && panel.dock.open) {
-        panel.setDockOpen(false);
         return;
     }
     panel.showTab(name);
@@ -2422,9 +2986,14 @@ panel.makePressable = function(elem, action) {
  * @param {string} name One of panel.TABS.
  */
 panel.showTab = function(name) {
+    var arriving = name == 'asm' && !(panel.dock.tab == 'asm' && panel.dock.open);
     panel.dock.tab = name;
     panel.dock.open = true;
     panel.applyDock();
+    // Opening the Assembler is coming to look: its PC line, once.
+    if (arriving) {
+        panel.followPc(true);
+    }
 };
 
 /**

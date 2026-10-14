@@ -139,6 +139,11 @@ class Dropdown {
                 item.focus();
             }
         }
+        // Filled while open - the examples arriving - it may now be
+        // too long for where it is.
+        if (!this.list.hidden) {
+            this.fit();
+        }
     }
 
     /**
@@ -202,6 +207,7 @@ class Dropdown {
             return;
         }
         this.list.hidden = false;
+        this.fit();
         this.button.setAttribute('aria-expanded', 'true');
         // A menu of actions holds no choice - loading an example does
         // not leave the machine on that example - so it opens with
@@ -218,6 +224,32 @@ class Dropdown {
      * @param {boolean=} refocus Whether to put the keyboard back on the
      *     button.
      */
+    /**
+     * Keeps the open list inside what can be seen: the window, and the
+     * pane it opens in, which would otherwise cut it off - the
+     * Assembler's Examples in the dock. Too long, it scrolls itself.
+     */
+    fit() {
+        if (!this.list.getBoundingClientRect) {
+            return;
+        }
+        this.list.style.maxHeight = '';
+        var bottom = window.innerHeight;
+        for (let e = this.root.parentElement; e; e = e.parentElement) {
+            let overflow = getComputedStyle(e).overflowY;
+            if (overflow != 'visible') {
+                bottom = Math.min(bottom, e.getBoundingClientRect().bottom);
+                break;
+            }
+        }
+        var top = this.list.getBoundingClientRect().top;
+        var room = bottom - top - 8;
+        if (room < this.list.scrollHeight) {
+            // Never so short that it is no use: three items at least.
+            this.list.style.maxHeight = Math.max(room, 108) + 'px';
+        }
+    }
+
     close(refocus = true) {
         this.list.hidden = true;
         this.button.setAttribute('aria-expanded', 'false');

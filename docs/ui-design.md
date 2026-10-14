@@ -194,6 +194,10 @@ knows how all of them behave.
 └───────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
+*Since v1.6.0* the dock has five tabs, Assembler between Teletype and
+Debugger, each with an icon before its name ([U1 in
+assembler.md](assembler.md#u1--a-fifth-dock-tab-and-icons-for-all-five)).
+
 Where the pieces of the four tabs went. Share and the instruction
 pane's place are U2's; the menus, dialogs and icons U3's; the switch
 strip U4's; the tools' layouts U5's; the References tab U6's.
@@ -373,6 +377,15 @@ so it is always two rows high, and it widens to the panel's artwork;
 on a phone the address switches go eight to a row. It keeps the panel's
 voice (P5).
 
+Since #16 every lever on the panel does something, and the strip has
+RESET and CLR as one lever's two halves, and PROTECT and UNPROTECT last
+in the row. A label never breaks inside its button; just below 1100 px
+the levers close up to stay on one line, and below 940 px they wrap
+between levers. On a phone PROTECT stays off the strip: it is for now
+and then, the dock needs the height, and the panel's own lever stands
+apart enough to tap. The AUX switches, connected to nothing, have no
+button at all; the panel's levers answer that on the status line.
+
 ### U5 — Each tool laid out as a tool
 
 - **Teletype:** the keys a PC keyboard lacks are the paper's toolbar,
@@ -385,6 +398,19 @@ voice (P5).
   dock - and memory under them, the whole width, with its toolbar on
   one line and Zero All Memory kept apart at the far right. The flags
   are shown by letter, S Z AC P CY, each lit when set.
+- **Editing a byte (#14):** typed over in place, as in a hex editor,
+  rather than in an edit box: click a byte, and two hex digits write
+  it whole and pick the next, the rhythm of DEPOSIT NEXT. The picked
+  byte is filled orange, with a blinking underline cursor - the sign
+  of typing over - under the digit the next key replaces; the first
+  digit typed is held, in bold, and the cursor moves to the second,
+  until that arrives. The pointer is an I-beam over the bytes; the
+  arrows
+  move the pick, turning the page at its edges; Backspace drops a held
+  digit and Esc the pick. Only a stopped machine is edited, a
+  protected board refuses, and the data lamps follow an edit of the
+  byte they show. The keys go to a hidden input beside the dump, which
+  also raises a phone's keyboard, as the Teletype's does.
 
 ### U6 — The references are a tab of their own
 
@@ -402,7 +428,10 @@ its bottom.
 - **On a phone** four tabs and the fold button are a squeeze. The tabs
   close up, and in the languages whose names are longer still the row
   scrolls under the fold button, which stays pinned at the right; the
-  chosen tab is scrolled into view.
+  chosen tab is scrolled into view. *Since v1.6.0* a phone shows the
+  five tabs as icons alone, the names kept for screen readers and as
+  tooltips, and the row scrolls under the pinned fold button at any
+  width, should it ever need to.
 
 ---
 
@@ -417,8 +446,12 @@ its bottom.
   it. What a program prints afterwards never switches the dock by
   itself; the Teletype tab's dot (D10) and the status line say so. A
   view that changes on its own while you are reading it is worse than
-  one that asks to be looked at.
-- **Keyboard shortcuts.** None, for now. The panel is always in view,
+  one that asks to be looked at. *Since v1.6.0* Assemble is a fifth
+  way in and the one exception: you are writing, so the Assembler
+  stays open.
+- **Keyboard shortcuts.** None, for now. *Since v1.6.0* there is one,
+  inside the Assembler's editor only: Ctrl+Enter (⌘+Enter) assembles.
+  The panel is always in view,
   so a switch is one click away. F5 is the browser's reload, a Mac
   needs Fn for the function keys, letters belong to the teletype, and
   so does Escape, which is KILL LINE there.
@@ -442,6 +475,11 @@ its bottom.
   name the front panel, the Load and Memory menus and the Teletype
   rather than tabs to go to. So were `README.md`, `examples/README.md`
   and `examples/kill-the-bit.md`.
+
+- **Pressing the open tab** does nothing. It used to fold the dock
+  away; with five tabs (the Assembler's, in
+  [assembler.md](assembler.md)) the open one was too easily pressed by
+  mistake, and folding is the job of the fold button and the handle.
 
 ### Still open
 

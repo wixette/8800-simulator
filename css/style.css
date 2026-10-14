@@ -32,8 +32,11 @@ body {
     overflow: hidden;
 }
 
-input {
-    font-family: 'Consolas', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New', monospace;
+/* Browsers give form controls and preformatted text a font of their
+   own; every one here takes the page's, so a new button cannot come out
+   in Arial, nor the Teletype's paper in Courier. */
+button, input, select, textarea, pre, code, kbd, samp {
+    font-family: inherit;
 }
 
 div, img, pre {
@@ -97,7 +100,6 @@ a {
     color: #eee;
     cursor: pointer;
     display: flex;
-    font-family: inherit;
     font-size: 14px;
     gap: 6px;
     line-height: 20px;
@@ -186,7 +188,21 @@ a {
     background-color: rgba(0, 0, 0, 0.55);
 }
 
+/* Taller than the window - About in German on a small phone - the body
+   scrolls, and the title and its close button stay in reach. */
+.dialog[open] {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100dvh - 24px);
+}
+
+.dialog-head {
+    flex: none;
+}
+
 .dialog-body {
+    min-height: 0;
+    overflow-y: auto;
     padding: 16px 20px 18px 20px;
 }
 
@@ -234,7 +250,6 @@ a {
     border-radius: 8px;
     box-sizing: border-box;
     color: #eee;
-    font-family: inherit;
     font-size: 14px;
     line-height: 1.5;
     padding: 8px 10px;
@@ -303,7 +318,6 @@ a {
     border-radius: 8px;
     color: #eee;
     cursor: pointer;
-    font-family: inherit;
     font-size: 14px;
     padding: 7px 16px;
 }
@@ -312,14 +326,17 @@ a {
     background-color: #474747;
 }
 
+/* The orange says enough: an action button keeps the ordinary weight,
+   like every other button. (A button holding a state - Follow PC, a
+   raised switch - is bold as well, to mark the state.) */
 .dialog-button.primary {
     background-color: #f90;
     color: #222;
-    font-weight: bold;
 }
 
+/* A shade darker, as .button:hover makes Assemble's. */
 .dialog-button.primary:hover {
-    background-color: #ffad33;
+    background-color: #e08700;
 }
 
 /* Copy Link while there is nothing to copy: it still answers. */
@@ -369,7 +386,6 @@ a {
     color: #222;
     cursor: pointer;
     display: flex;
-    font-family: inherit;
     font-size: 14px;
     /* Roomier on the right so the arrow is not against the edge. */
     gap: 10px;
@@ -628,6 +644,9 @@ a {
     font-size: 13px;
     min-width: 30px;
     padding: 2px 8px;
+    /* A label never breaks inside its button: a row too narrow for
+       its levers wraps between them instead. */
+    white-space: nowrap;
 }
 
 .strip-address .button {
@@ -643,8 +662,30 @@ a {
     width: 2px;
 }
 
+/* Just above a phone's width the five names and icons only just fit:
+   a little less room around each, so that they do. Wider than 700px,
+   rather than from 701px, so that no width between the two (at a zoom)
+   is left out. */
+@media (width > 700px) and (width <= 820px) {
+    .dock-tab {
+        padding: 0 9px;
+    }
+}
+
+/* A little narrower, and the levers close up to keep to one line. The
+   address row has room to spare, and keeps its octal groups apart. */
+@media (width > 700px) and (width <= 1100px) {
+    .strip-row:not(.strip-address) {
+        gap: 6px 6px;
+    }
+
+    .strip-row:not(.strip-address) .button {
+        padding: 2px 5px;
+    }
+}
+
 /* A window too narrow for the rows lets them wrap. */
-@media (max-width: 900px) {
+@media (max-width: 940px) {
     .strip-row {
         flex-wrap: wrap;
     }
@@ -697,6 +738,9 @@ a {
     height: auto;
 }
 
+/* Should the tabs ever be too many for the row - names in French just
+   above a phone's width, or icons on the narrowest phone - it scrolls
+   under the fold button rather than pushing it off. */
 #dock-tabs {
     align-items: stretch;
     background-color: #2b2b2b;
@@ -704,6 +748,26 @@ a {
     display: flex;
     flex: none;
     min-height: 34px;
+    overflow-x: auto;
+    /* So a tab scrolled to is not left under the fold button. */
+    scroll-padding-right: 36px;
+    scrollbar-width: none;
+}
+
+#dock-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+#dock-toggle {
+    background-color: #2b2b2b;
+    position: sticky;
+    right: 0;
+}
+
+/* Solid, to cover the tabs scrolled under it, but lit when pointed at
+   as the other tools are. */
+#dock-toggle:hover {
+    background-image: linear-gradient(var(--hover-bg), var(--hover-bg));
 }
 
 .dock-closed #dock-tabs {
@@ -1021,7 +1085,7 @@ a {
 
 /* The same two, on the byte itself inside the dump. */
 .at-pc {
-    background-color: #1f9d45;
+    background-color: #157a35;
     color: #eee;
 }
 
@@ -1160,7 +1224,381 @@ a {
     }
 }
 
-/* Takes the soft keyboard on a phone without showing a text box. */
+/* Holds the dump and its hidden input, placed against it. */
+.mem-dump-wrap {
+    position: relative;
+}
+
+/* A byte in the memory dump is text you can type over, as in a hex
+   editor: the I-beam says so, and pointing tints it - with a shadow
+   laid over it, so that the marks of PC and SP show through. */
+#mem-dump span[data-a] {
+    border-radius: 3px;
+    cursor: text;
+}
+
+#mem-dump span[data-a]:hover {
+    box-shadow: inset 0 0 0 2em rgba(0, 0, 0, 0.12);
+}
+
+/* The byte picked for editing: filled with the orange that means
+   active, over the pointer's tint and the marks of PC and SP alike. */
+#mem-dump span.mem-selected,
+#mem-dump span.mem-selected:hover {
+    background-color: #f90;
+    box-shadow: none;
+    color: #222;
+}
+
+/* Where the next hex digit goes: an underline cursor, the sign of
+   typing over rather than inserting, blinking as cursors do. */
+#mem-dump .mem-caret {
+    animation: mem-caret-blink 1s steps(1) infinite;
+    box-shadow: inset 0 -2px 0 #222;
+}
+
+@keyframes mem-caret-blink {
+    50% {
+        box-shadow: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #mem-dump .mem-caret {
+        animation: none;
+    }
+}
+
+/* The first digit typed, held until its second arrives. */
+#mem-dump .mem-typed {
+    font-weight: bold;
+}
+
+/* The Assembler tab (U2 in docs/assembler.md): a toolbar, the source
+   with its line numbers and the listing beside it, the errors under. */
+#tab-asm:not([hidden]) {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.asm-toolbar {
+    align-items: center;
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.asm-assemble {
+    background-color: #f90;
+    color: #222;
+}
+
+/* Only a phone needs it. */
+#asm-view-toggle {
+    display: none;
+}
+
+.asm-work {
+    background-color: #ccc;
+    border-radius: 10px;
+    display: flex;
+    flex: 1 1 0;
+    min-height: 120px;
+    overflow: hidden;
+}
+
+/* The source, its line numbers and its listing share one line grid:
+   the same font, size, line height and top padding, and no wrapping,
+   so that a line's number, colours and bytes are always on its row. */
+.asm-editor,
+.asm-listing {
+    --asm-line: 26px;
+    font-size: 16px;
+    line-height: var(--asm-line);
+    tab-size: 8;
+}
+
+.asm-editor {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.asm-gutter,
+.asm-listing,
+.asm-highlight,
+.asm-source {
+    box-sizing: border-box;
+    margin: 0;
+    padding-bottom: 8px;
+    padding-top: 8px;
+}
+
+/* The text area's scrollbars take room from its view, so it scrolls
+   further than the layers beside and behind it; they get that room at
+   their ends instead, measured by asmtab.matchScrollbars (H1). */
+.asm-gutter,
+.asm-listing,
+.asm-highlight {
+    padding-bottom: calc(8px + var(--asm-bar-below, 0px));
+}
+
+.asm-gutter {
+    background-color: #bdbdbd;
+    color: #4a4a4a;
+    flex: none;
+    overflow: hidden;
+    padding-left: 6px;
+    padding-right: 8px;
+    text-align: right;
+    width: 3.6em;
+}
+
+.asm-gutter-line,
+.asm-listing-line,
+.asm-line {
+    display: block;
+    height: var(--asm-line);
+    white-space: pre;
+}
+
+.asm-gutter-error {
+    color: #900020;
+    font-weight: bold;
+}
+
+/* The text area does the editing, its text transparent; the coloured
+   copy behind it shows through (H1). */
+.asm-code {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.asm-highlight,
+.asm-source {
+    border: 0;
+    font-size: inherit;
+    height: 100%;
+    inset: 0;
+    letter-spacing: normal;
+    line-height: inherit;
+    overflow: auto;
+    padding-left: 10px;
+    padding-right: 10px;
+    position: absolute;
+    tab-size: inherit;
+    white-space: pre;
+    width: 100%;
+}
+
+.asm-highlight {
+    color: #222;
+    overflow: hidden;
+    padding-right: calc(10px + var(--asm-bar-beside, 0px));
+    pointer-events: none;
+}
+
+/* As wide as its text, so a long line ends with the padding above, and
+   the coloured copy scrolls as far right as the text area does; never
+   narrower than the editor, so a mark across a line still spans it. */
+.asm-highlight .asm-line {
+    min-width: 100%;
+    width: max-content;
+}
+
+.asm-source {
+    background: transparent;
+    caret-color: transparent;
+    color: transparent;
+    outline: none;
+    resize: none;
+}
+
+/* The caret, a block over the character it is at, as the Teletype's
+   carriage is: dark, the character light on it, blinking at the same
+   rate. It holds still while the cursor moves, and for readers who ask
+   their system for less motion. */
+.asm-caret {
+    background-color: #222;
+    color: #ccc;
+    pointer-events: none;
+    position: absolute;
+    white-space: pre;
+    z-index: 1;
+}
+
+.asm-caret.blinking {
+    animation: asm-caret-blink 1s step-end infinite;
+}
+
+/* Its own blink, not the Teletype's: the character under it keeps its
+   colour in the off half, rather than turning the paper's black. */
+@keyframes asm-caret-blink {
+    50% {
+        background-color: transparent;
+        color: transparent;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .asm-caret.blinking {
+        animation: none;
+    }
+}
+
+/* Ten characters of the editor's type, out of sight, to measure: their
+   width, and the height of their box within a line, which is the
+   caret's, as the Teletype's carriage covers a character's box. */
+.asm-measure {
+    left: 0;
+    position: absolute;
+    top: 0;
+    visibility: hidden;
+    white-space: pre;
+}
+
+/* Copy and Clear, in the editor's corner, as code boxes on the web
+   have them. Clear stands a little apart: the two do very different
+   things. */
+.asm-corner {
+    background-color: rgba(255, 255, 255, 0.55);
+    border-radius: 6px;
+    color: #333;
+    height: 30px;
+    opacity: 0.75;
+    position: absolute;
+    top: 6px;
+    width: 30px;
+    z-index: 2;
+}
+
+.asm-copy {
+    right: 18px;
+}
+
+.asm-clear {
+    right: 60px;
+}
+
+/* On the editor's light grey, pointing darkens the icon - not the
+   white the dark toolbar's icon buttons turn. */
+.asm-corner:hover,
+.asm-corner:focus-visible {
+    background-color: rgba(255, 255, 255, 0.85);
+    color: #000;
+    opacity: 1;
+}
+
+/* Pointed at and focused look alike; the keyboard's focus also gets a
+   ring, so it can be told where it is. */
+.asm-corner:focus-visible {
+    outline: 2px solid #f90;
+    outline-offset: 1px;
+}
+
+/* Nothing to clear. */
+.asm-corner:disabled,
+.asm-corner:disabled:hover {
+    background-color: rgba(255, 255, 255, 0.55);
+    color: #333;
+    cursor: default;
+    opacity: 0.3;
+}
+
+.asm-copied-icon,
+.asm-copy.copied .asm-copy-icon {
+    display: none;
+}
+
+.asm-copy.copied .asm-copied-icon {
+    color: #1b5e20;
+    display: block;
+}
+
+.asm-source::selection {
+    background-color: rgba(51, 102, 204, 0.3);
+    color: transparent;
+}
+
+.asm-line-error,
+.asm-listing-error {
+    background-color: rgba(176, 0, 32, 0.08);
+}
+
+/* The colours (H2), each 4.5:1 or more on the editor's grey. Bold
+   alone is not enough for mnemonics: some monospaced fonts have no
+   bold face, and the browser's stand-in barely shows. */
+.asm-comment { color: #4d4d4d; font-style: italic; }
+.asm-label { color: #0d3c8c; }
+.asm-mnemonic { color: #9a101e; font-weight: bold; }
+.asm-pseudo { color: #6a1b9a; }
+.asm-macro { color: #6a1b9a; font-style: italic; }
+.asm-register { color: #00574b; }
+.asm-number { color: #505000; }
+.asm-string { color: #19581e; }
+.asm-operator { color: #6a1b9a; }
+.asm-bad {
+    color: #9e001d;
+    text-decoration: underline wavy #b00020;
+}
+
+.asm-listing {
+    background-color: #d6d6d6;
+    border-left: 1px solid #b0b0b0;
+    color: #333;
+    flex: none;
+    overflow: hidden;
+    padding-left: 10px;
+    padding-right: 10px;
+    width: 27ch;
+}
+
+/* The line the program counter is on, in the green the Debugger's dump
+   marks the PC with (U7): the line tinted, its number marked, its
+   bytes in the listing filled. */
+.asm-line-pc {
+    background-color: rgba(31, 157, 69, 0.15);
+}
+
+.asm-gutter-line.asm-gutter-pc,
+.asm-listing-line.asm-listing-pc {
+    background-color: #157a35;
+    color: #eee;
+}
+
+.asm-errors {
+    flex: none;
+    list-style: none;
+    margin: 6px 0 0 0;
+    max-height: 6.5em;
+    overflow-y: auto;
+    padding: 0;
+}
+
+.asm-error {
+    background: none;
+    border: 0;
+    color: #ffb4b4;
+    cursor: pointer;
+    display: block;
+    font-size: 13px;
+    padding: 2px 4px;
+    text-align: left;
+    width: 100%;
+}
+
+.asm-error:hover,
+.asm-error:focus-visible {
+    background-color: var(--hover-bg);
+}
+
+/* Takes the soft keyboard on a phone without showing a text box; also
+   used for the memory dump's input, beside it. */
 .tty-hidden-input {
     border: 0;
     height: 1px;
@@ -1168,6 +1606,13 @@ a {
     padding: 0;
     position: absolute;
     width: 1px;
+}
+
+/* Each dock tab is an icon and its name (U1 in docs/assembler.md). */
+.dock-tab .icon {
+    height: 18px;
+    margin-right: 6px;
+    width: 18px;
 }
 
 /* Marks the Teletype tab while its machine is printing and you are
@@ -1213,7 +1658,7 @@ a {
 
 #status-bar.status-error {
     background-color: #5a2323;
-    color: #ffc2c2;
+    color: #ffb4b4;
 }
 
 #mem-window-label {
@@ -1251,29 +1696,39 @@ a {
         flex: none;
     }
 
-    /* Four tabs and the fold button across a phone: the tabs closer
-       together, and where a language's names are longer still, the row
-       scrolls under the fold button rather than pushing it off. */
-    #dock-tabs {
-        overflow-x: auto;
-        /* So a tab scrolled to is not left under the fold button. */
-        scroll-padding-right: 36px;
-        scrollbar-width: none;
+    /* Five tabs across a phone: the icons alone. The names stay for
+       screen readers, and as each tab's tooltip. */
+    .dock-tab .icon {
+        margin-right: 0;
     }
 
-    #dock-tabs::-webkit-scrollbar {
+    .dock-tab-name {
+        clip-path: inset(50%);
+        height: 1px;
+        overflow: hidden;
+        position: absolute;
+        white-space: nowrap;
+        width: 1px;
+    }
+
+    /* The Assembler's source and listing take turns. */
+    #tab-asm .asm-listing {
         display: none;
     }
 
-    .dock-tab {
-        font-size: 13px;
-        padding: 0 9px;
+    #tab-asm.show-listing .asm-listing {
+        display: block;
+        flex: 1;
+        overflow-y: auto;
+        width: auto;
     }
 
-    #dock-toggle {
-        background-color: #2b2b2b;
-        position: sticky;
-        right: 0;
+    #tab-asm.show-listing .asm-editor {
+        display: none;
+    }
+
+    #asm-view-toggle {
+        display: block;
     }
 
     /* The labels go, the icons and the installed size stay. */
@@ -1321,6 +1776,12 @@ a {
     .strip-address .button {
         min-width: 0;
         padding: 2px 0;
+    }
+
+    /* PROTECT is for now and then, and the dock needs the height more;
+       the panel's own lever stands apart enough to tap. */
+    .strip-protect {
+        display: none;
     }
 
 }

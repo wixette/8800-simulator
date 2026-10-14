@@ -1,0 +1,1225 @@
+/**
+ *   Copyright 2020-2026 wixette@gmail.com
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ *
+ * @fileoverview The dock's Assembler tab.
+ */
+
+
+/**
+ * The Assembler tab: an editor for 8080 source, highlighted, with the
+ * listing beside it line for line and the errors under it, and the
+ * Assemble button that puts the program into the machine. U1 to U7
+ * and H1 to H3 in docs/assembler.md.
+ *
+ * The assembling is js/asm8080.js's; this is only the page around it.
+ * It reaches the machine through what js/panel.js already uses to load
+ * a program.
+ */
+asmtab = {};
+
+/**
+ * Where the source is kept between visits, in this browser only (U3).
+ * @type {string}
+ */
+asmtab.STORAGE_KEY = 'sim8800asm';
+
+/**
+ * How long typing must pause before the source is assembled again for
+ * the listing and the error marks.
+ * @type {number}
+ */
+asmtab.ASSEMBLE_DELAY = 150;
+
+/**
+ * Bytes a listing row shows before it is cut short with an ellipsis.
+ * @type {number}
+ */
+asmtab.LISTING_BYTES = 6;
+
+/** The last assembly, for the listing and the marks. @type {?Object} */
+asmtab.result = null;
+
+/**
+ * The last assembly that was loaded into the machine, for following the
+ * PC (U7): its source text, the rows that made bytes, and the machine's
+ * count of whole loads just after it went in. It says the source in the
+ * editor and the bytes in memory are one program, and is forgotten once
+ * they no longer are; see asmtab.pcLineOf and asmtab.onHandWrite.
+ * @type {?{text: string, rows: !Array<Object>, memLoads: number}}
+ */
+asmtab.loaded = null;
+
+/** The source line marked as the PC's, or 0 for none. @type {number} */
+asmtab.pcLine = 0;
+
+/** Whether the next Tab moves the focus on, after an Escape (U3). */
+asmtab.tabLeaves = false;
+
+/**
+ * Sets the tab up. Called by panel.init().
+ */
+asmtab.init = function() {
+    var source = asmtab.source();
+    source.value = asmtab.readSaved();
+    source.addEventListener('input', asmtab.onEdit, false);
+    source.addEventListener('scroll', asmtab.syncScroll, false);
+    source.addEventListener('keydown', asmtab.onKey, false);
+    // The block caret follows the cursor, wherever it is moved from.
+    ['keyup', 'mouseup', 'focus', 'blur', 'select'].forEach(function(type) {
+        source.addEventListener(type, asmtab.requestCaret, false);
+    });
+    document.addEventListener('selectionchange', asmtab.requestCaret, false);
+    // Escape lets the next Tab leave the editor; going elsewhere, or
+    // clicking back in, ends that.
+    ['blur', 'mousedown'].forEach(function(type) {
+        source.addEventListener(type, function() {
+            asmtab.tabLeaves = false;
+        }, false);
+    });
+    window.addEventListener('resize', function() {
+        asmtab.charWidth = 0;
+        asmtab.requestCaret();
+    }, false);
+    // Opening the tab, moving the dock's edge or resizing the window
+    // changes the text area's size, and so its scrollbars, with no
+    // scroll to say so.
+    if (window.ResizeObserver) {
+        new ResizeObserver(asmtab.syncScroll).observe(source);
+    }
+    document.getElementById('asm-copy').addEventListener(
+        'click', asmtab.onCopy, false);
+    document.getElementById('asm-clear').addEventListener(
+        'click', asmtab.onClear, false);
+    // The listing scrolls with the source, never by itself.
+    document.getElementById('asm-listing').addEventListener(
+        'wheel', function(event) {
+            if (asmtab.showingListing()) {
+                return;  // On a phone it is all there is, and scrolls itself.
+            }
+            source.scrollTop += event.deltaY;
+            source.scrollLeft += event.deltaX;
+            event.preventDefault();
+        }, {passive: false});
+    document.getElementById('asm-assemble').addEventListener(
+        'click', asmtab.onAssemble, false);
+    document.getElementById('asm-errors').addEventListener(
+        'click', asmtab.onErrorClick, false);
+    document.getElementById('asm-view-toggle').addEventListener(
+        'click', asmtab.onViewToggle, false);
+    asmtab.examplesMenu = new Dropdown('asm-examples-dropdown',
+                                       asmtab.onExampleChosen,
+                                       asmtab.onExamplesOpen);
+    asmtab.replaceDialog = new Dialog('asm-replace-dialog',
+                                      asmtab.onReplaceOpen,
+                                      panel.returnKeyboard);
+    document.getElementById('asm-replace-ok').addEventListener(
+        'click', asmtab.onReplaceConfirmed, false);
+    asmtab.refresh();
+};
+
+/** @return {!Element} The source's text area. */
+asmtab.source = function() {
+    return document.getElementById('asm-source');
+};
+
+/**
+ * The source as it was left. Site data may be blocked, in which case
+ * the editor simply starts empty.
+ * @return {string}
+ */
+asmtab.readSaved = function() {
+    try {
+        return localStorage.getItem(asmtab.STORAGE_KEY) || '';
+    } catch (e) {
+        return '';
+    }
+};
+
+/** Keeps the source, in this browser. */
+asmtab.save = function() {
+    try {
+        localStorage.setItem(asmtab.STORAGE_KEY, asmtab.source().value);
+    } catch (e) {
+        // Not kept; it still works for this visit.
+    }
+};
+
+/**
+ * After every change to the source: it is kept, redrawn at once, and
+ * assembled again once typing pauses.
+ */
+asmtab.onEdit = function() {
+    asmtab.save();
+    asmtab.renderText();
+    asmtab.refreshClear();
+    window.clearTimeout(asmtab.assembleTimer);
+    asmtab.assembleTimer = window.setTimeout(asmtab.refresh,
+                                             asmtab.ASSEMBLE_DELAY);
+};
+
+/**
+ * Assembles the source for the listing and the marks, without loading
+ * it, and redraws everything.
+ */
+asmtab.refresh = function() {
+    var memSize = panel.sim ? panel.sim.mem.length : 256;
+    asmtab.result = Asm8080.assemble(asmtab.source().value,
+                                     {memSize: memSize});
+    asmtab.renderText();
+    asmtab.renderListing();
+    asmtab.renderErrors();
+    asmtab.refreshClear();
+};
+
+/**
+ * The lines with an error, by number.
+ * @return {!Set<number>}
+ */
+asmtab.errorLines = function() {
+    var lines = new Set();
+    var result = asmtab.result;
+    if (result) {
+        result.errors.forEach(function(e) { lines.add(e.line); });
+    }
+    return lines;
+};
+
+/**
+ * Redraws the highlighting behind the text area, and the line numbers
+ * beside it (H1, H2).
+ */
+asmtab.renderText = function() {
+    var text = asmtab.source().value;
+    var lines = text.split('\n');
+    var errors = asmtab.errorLines();
+    var macros = Asm8080.macroNames(text);
+    var html = [];
+    var gutter = [];
+    for (let i = 0; i < lines.length; i++) {
+        let bad = errors.has(i + 1);
+        html.push('<span class="asm-line' + (bad ? ' asm-line-error' : '') +
+                  '">' + asmtab.highlightLine(lines[i], macros) + '</span>');
+        gutter.push('<span class="asm-gutter-line' +
+                    (bad ? ' asm-gutter-error' : '') + '">' + (i + 1) +
+                    '</span>');
+    }
+    document.getElementById('asm-highlight').innerHTML = html.join('');
+    document.getElementById('asm-gutter').innerHTML = gutter.join('');
+    asmtab.pcLine = 0;
+    asmtab.requestPc(false);
+    asmtab.syncScroll();
+};
+
+/**
+ * One line, as coloured markup (H2). It is coloured by the assembler's
+ * own tokenizer, so the colours agree with what the assembler reads.
+ * @param {string} line The line.
+ * @param {!Set<string>} macros The macros the source defines.
+ * @return {string} Markup, the line's text escaped.
+ */
+asmtab.highlightLine = function(line, macros) {
+    var tokens = Asm8080.tokenize(line);
+    var words = tokens.filter(function(t) {
+        return t.type != 'space' && t.type != 'comment';
+    });
+    // Which word is the label or name, and which the code (L1).
+    var label = null;
+    var code = null;
+    var k = 0;
+    if (words[0] && words[0].type == 'name' && words[1] &&
+        words[1].type == 'colon') {
+        label = words[0];
+        k = 2;
+    }
+    var named = function(t) {
+        return t && t.type == 'name' &&
+            ['EQU', 'SET', 'MACRO'].indexOf(t.text.toUpperCase()) >= 0;
+    };
+    if (!label && words[k] && words[k].type == 'name' && named(words[k + 1])) {
+        label = words[k];
+        k++;
+    }
+    if (words[k] && words[k].type == 'name') {
+        code = words[k];
+    }
+    var out = '';
+    for (const t of tokens) {
+        let cls = null;
+        switch (t.type) {
+        case 'comment': cls = 'asm-comment'; break;
+        case 'string': cls = 'asm-string'; break;
+        case 'bad': cls = 'asm-bad'; break;
+        case 'number':
+        case 'dollar': cls = 'asm-number'; break;
+        case 'colon': cls = 'asm-label'; break;
+        case 'name': {
+            let kind = Asm8080.classify(t.text);
+            if (t === label) {
+                cls = 'asm-label';
+            } else if (t === code) {
+                cls = kind == 'mnemonic' ? 'asm-mnemonic' :
+                    kind == 'pseudo' ? 'asm-pseudo' :
+                    macros.has(t.text.toUpperCase()) ? 'asm-macro' :
+                    'asm-bad';
+            } else if (kind == 'register') {
+                cls = 'asm-register';
+            } else if (kind == 'operator') {
+                cls = 'asm-operator';
+            } else if (kind == 'mnemonic') {
+                // An instruction in parentheses (L7).
+                cls = 'asm-mnemonic';
+            }
+            break;
+        }
+        }
+        let text = asmtab.escape(t.text);
+        out += cls ? '<span class="' + cls + '">' + text + '</span>' : text;
+    }
+    return out;
+};
+
+/**
+ * @param {string} text Plain text.
+ * @return {string} The text, safe to write as markup.
+ */
+asmtab.escape = function(text) {
+    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+};
+
+/**
+ * Keeps the highlighting, the line numbers and the listing where the
+ * text area has scrolled to (H1).
+ */
+asmtab.syncScroll = function() {
+    var source = asmtab.source();
+    if (asmtab.showingListing()) {
+        // A phone showing the listing in its place: the source, hidden,
+        // has no scroll of its own to give the listing.
+        return;
+    }
+    asmtab.matchScrollbars();
+    var highlight = document.getElementById('asm-highlight');
+    highlight.scrollTop = source.scrollTop;
+    highlight.scrollLeft = source.scrollLeft;
+    document.getElementById('asm-gutter').scrollTop = source.scrollTop;
+    document.getElementById('asm-listing').scrollTop = source.scrollTop;
+    asmtab.requestCaret();
+};
+
+/**
+ * Lets the coloured copy, the line numbers and the listing scroll as far
+ * as the text area does. The text area's scrollbars take room from its
+ * view, so it scrolls further than they would by that much, and at the
+ * very end its text - where clicks land, and where the caret is drawn -
+ * would part from the text that is seen (H1). They get that much more
+ * room at the end instead. Scrollbars are as wide as the system makes
+ * them, or take no room at all, and the horizontal one comes and goes
+ * with the longest line, so they are measured each time.
+ */
+asmtab.matchScrollbars = function() {
+    var source = asmtab.source();
+    if (!source.offsetHeight) {
+        return;  // Not on screen: nothing to measure.
+    }
+    var below = source.offsetHeight - source.clientHeight -
+        2 * source.clientTop;
+    var beside = source.offsetWidth - source.clientWidth -
+        2 * source.clientLeft;
+    var pane = document.getElementById('tab-asm');
+    var key = below + ',' + beside;
+    if (pane.dataset.scrollbars !== key) {
+        pane.dataset.scrollbars = key;
+        pane.style.setProperty('--asm-bar-below', below + 'px');
+        pane.style.setProperty('--asm-bar-beside', beside + 'px');
+    }
+};
+
+/**
+ * One character of the editor's type, once measured: its width, and
+ * its box's height and offset within a line.
+ */
+asmtab.charWidth = 0;
+asmtab.charHeight = 0;
+asmtab.charOffset = 0;
+
+/** Measures the editor's type, for the caret. */
+asmtab.measure = function() {
+    var line = document.getElementById('asm-measure');
+    var glyphs = line.firstElementChild.getBoundingClientRect();
+    asmtab.charWidth = glyphs.width / 10;
+    asmtab.charHeight = glyphs.height;
+    asmtab.charOffset = glyphs.top - line.getBoundingClientRect().top;
+};
+
+/**
+ * How wide some text from the start of a line is on screen. Plain ASCII
+ * is so many of the type's characters; anything else - a Chinese
+ * comment, an emoji - is measured, since it is wider, or two code
+ * units to one character.
+ * @param {string} text Part of one line, from its start.
+ * @return {number} Pixels.
+ */
+asmtab.widthOf = function(text) {
+    if (/^[\x00-\x7f]*$/.test(text)) {
+        return asmtab.columnOf(text) * asmtab.charWidth;
+    }
+    var glyphs = document.getElementById('asm-measure').firstElementChild;
+    var kept = glyphs.textContent;
+    glyphs.textContent = text;
+    var width = glyphs.getBoundingClientRect().width;
+    glyphs.textContent = kept;
+    return width;
+};
+
+/** Asks for the caret to be drawn again, at most once a frame. */
+asmtab.requestCaret = function() {
+    if (asmtab.caretPending) {
+        return;
+    }
+    asmtab.caretPending = true;
+    window.requestAnimationFrame(function() {
+        asmtab.caretPending = false;
+        asmtab.renderCaret();
+    });
+};
+
+/**
+ * Draws the block caret over the character the cursor is at - or a
+ * blank past the end of a line - while the editor has the keyboard and
+ * nothing is selected; text that is selected shows as selected instead.
+ * It starts each move solid, then blinks, as a terminal's does.
+ */
+asmtab.renderCaret = function() {
+    var source = asmtab.source();
+    var caret = document.getElementById('asm-caret');
+    var at = source.selectionStart;
+    if (document.activeElement !== source ||
+        at !== source.selectionEnd) {
+        caret.hidden = true;
+        return;
+    }
+    if (!asmtab.charWidth) {
+        asmtab.measure();
+    }
+    var text = source.value;
+    var start = text.lastIndexOf('\n', at - 1) + 1;
+    var line = text.slice(0, start).split('\n').length - 1;
+    var prefix = text.slice(start, at);
+    var code = text.codePointAt(at);
+    var under = code === undefined ? '' : String.fromCodePoint(code);
+    var style = getComputedStyle(source);
+    var lineHeight = parseFloat(style.lineHeight);
+    var x = parseFloat(style.paddingLeft) + asmtab.widthOf(prefix) -
+        source.scrollLeft;
+    var y = parseFloat(style.paddingTop) + line * lineHeight -
+        source.scrollTop;
+    var moved = caret.dataset.at != String(at) || caret.hidden;
+    caret.textContent = under && under != '\n' && under != '\t' ? under : ' ';
+    caret.style.left = x + 'px';
+    caret.style.top = y + asmtab.charOffset + 'px';
+    caret.style.width = (under && under != '\n' && under != '\t' ?
+                         asmtab.widthOf(under) : asmtab.charWidth) + 'px';
+    caret.style.height = asmtab.charHeight + 'px';
+    caret.style.lineHeight = asmtab.charHeight + 'px';
+    caret.hidden = false;
+    caret.dataset.at = String(at);
+    if (moved) {
+        // Solid while it moves: the blink starts again from the top.
+        caret.classList.remove('blinking');
+        void caret.offsetWidth;
+        caret.classList.add('blinking');
+    }
+};
+
+/** How long the copy button shows its tick. @type {number} */
+asmtab.COPIED_MS = 1500;
+
+/**
+ * When the copy button is pressed: the whole source goes to the
+ * clipboard. A browser that will not allow it gets the source selected
+ * instead, to copy by hand.
+ */
+asmtab.onCopy = function() {
+    var source = asmtab.source();
+    var text = source.value;
+    if (!text.trim()) {
+        panel.setStatus('asm-copy-empty', {}, 'warn');
+        return;
+    }
+    var byHand = function() {
+        source.focus();
+        source.select();
+        panel.setStatus('asm-copy-blocked', {}, 'warn');
+    };
+    if (!navigator.clipboard || !navigator.clipboard.writeText) {
+        byHand();
+        return;
+    }
+    navigator.clipboard.writeText(text).then(function() {
+        panel.setStatus('asm-copied', {lines: text.split('\n').length});
+        var button = document.getElementById('asm-copy');
+        button.classList.add('copied');
+        window.clearTimeout(asmtab.copiedTimer);
+        asmtab.copiedTimer = window.setTimeout(function() {
+            button.classList.remove('copied');
+        }, asmtab.COPIED_MS);
+    }, byHand);
+};
+
+/**
+ * The key the editor's shortcuts are held down with, as this machine's
+ * keyboard names it: ⌘ on a Mac, and Ctrl elsewhere, or Strg on a
+ * German keyboard. The messages that name a shortcut have it as {ctrl}.
+ * @param {string} platform navigator.platform, or ''.
+ * @return {string}
+ */
+asmtab.ctrlKey = function(platform) {
+    return /Mac|iPhone|iPad|iPod/.test(platform) ? '⌘' :
+        l10n.getMessage('key-ctrl');
+};
+
+/**
+ * The keys that undo, as this machine's keyboard has them.
+ * @param {string} platform navigator.platform, or ''.
+ * @return {string}
+ */
+asmtab.undoKey = function(platform) {
+    var ctrl = asmtab.ctrlKey(platform);
+    return ctrl == '⌘' ? '⌘Z' : ctrl + '+Z';
+};
+
+/** Clear is offered only while there is something to clear. */
+asmtab.refreshClear = function() {
+    document.getElementById('asm-clear').disabled = !asmtab.source().value;
+};
+
+/**
+ * When the clear button is pressed: the editor is emptied as selecting
+ * everything and deleting it would, so that Undo brings it back. Only
+ * the editor: memory, and what was loaded, stay as they are.
+ */
+asmtab.onClear = function() {
+    var source = asmtab.source();
+    if (!source.value) {
+        return;
+    }
+    source.focus();
+    source.select();
+    // The browser's own delete keeps the text area's undo; setting its
+    // value would lose it. Should a browser refuse, it is set instead.
+    var deleted = false;
+    try {
+        deleted = document.execCommand('delete');
+    } catch (e) {
+        deleted = false;
+    }
+    if (!deleted || source.value) {
+        source.value = '';
+        asmtab.onEdit();
+    }
+    window.clearTimeout(asmtab.assembleTimer);
+    asmtab.refresh();
+    panel.setStatus('asm-cleared',
+                    {undo: asmtab.undoKey(navigator.platform || '')});
+};
+
+/**
+ * What the listing shows beside each line of the source: its address
+ * and the bytes it made, in hex. A macro's use shows its expansion's.
+ * @param {!Object} result An assembly.
+ * @param {number} count How many lines the source has.
+ * @return {!Array<{text: string, title: string, error: boolean}>} One
+ *     cell per line, from line 1.
+ */
+asmtab.listingCells = function(result, count) {
+    var byLine = [];
+    for (let i = 0; i < count; i++) {
+        byLine.push([]);
+    }
+    result.rows.forEach(function(row) {
+        if (row.line >= 1 && row.line <= count) {
+            byLine[row.line - 1].push(row);
+        }
+    });
+    var errors = new Set(result.errors.map(function(e) { return e.line; }));
+    var hex = Asm8080.hex;
+    return byLine.map(function(rows, i) {
+        var cell = {text: '', title: '', error: errors.has(i + 1)};
+        var own = rows[0];
+        if (!own || own.skipped) {
+            return cell;
+        }
+        var bytes = [];
+        var address = null;
+        rows.forEach(function(row) {
+            if (row.bytes.length && address === null) {
+                address = row.address;
+            }
+            bytes = bytes.concat(row.bytes);
+        });
+        if (bytes.length) {
+            let shown = bytes.slice(0, asmtab.LISTING_BYTES).map(function(b) {
+                return hex(b, 2);
+            }).join(' ');
+            cell.text = hex(address, 4) + '  ' + shown +
+                (bytes.length > asmtab.LISTING_BYTES ? ' …' : '');
+        } else if (own.value !== null) {
+            cell.text = '= ' + hex(own.value, 4);
+        } else if (own.address !== null) {
+            cell.text = hex(own.address, 4);
+        }
+        // The whole of it, where a row could not hold it all: a long
+        // DB, or a macro's expansion, line by line.
+        if (rows.length > 1 || bytes.length > asmtab.LISTING_BYTES) {
+            cell.title = rows.filter(function(row) {
+                return !row.skipped && (rows.length == 1 || row.depth > 0);
+            }).map(function(row) {
+                var at = row.address === null ? '    ' : hex(row.address, 4);
+                var made = row.bytes.map(function(b) {
+                    return hex(b, 2);
+                }).join(' ');
+                return at + '  ' + made.padEnd(12) + '  ' + row.text.trim();
+            }).join('\n');
+        }
+        return cell;
+    });
+};
+
+/** Redraws the listing beside the source (U2). */
+asmtab.renderListing = function() {
+    var count = asmtab.source().value.split('\n').length;
+    var cells = asmtab.listingCells(asmtab.result, count);
+    document.getElementById('asm-listing').innerHTML = cells.map(function(c) {
+        return '<span class="asm-listing-line' +
+            (c.error ? ' asm-listing-error' : '') + '"' +
+            (c.title ? ' title="' + asmtab.escape(c.title) + '"' : '') + '>' +
+            asmtab.escape(c.text) + '</span>';
+    }).join('');
+    asmtab.pcLine = 0;
+    asmtab.requestPc(false);
+    asmtab.syncScroll();
+};
+
+/**
+ * An error, as a sentence in the reader's language (L14, L22).
+ * @param {!Object} error One of an assembly's errors.
+ * @return {string}
+ */
+asmtab.errorText = function(error) {
+    var params = Object.assign({}, error.params);
+    if (error.id == 'too-big' && params.size) {
+        params.size = panel.formatMemSize(params.size);
+    }
+    var message = asmtab.fill(l10n.getMessage('asm-' + error.id), params);
+    return asmtab.fill(l10n.getMessage(error.macro ? 'asm-error-in-macro' :
+                                       'asm-error-at'),
+                       {line: error.line, macro: error.macro,
+                        macroLine: error.macroLine, message: message});
+};
+
+/**
+ * Puts values in place of a message's {placeholders}.
+ * @param {string} message The message.
+ * @param {!Object} params The values.
+ * @return {string}
+ */
+asmtab.fill = function(message, params) {
+    for (let key in params) {
+        message = message.split('{' + key + '}').join(params[key]);
+    }
+    return message;
+};
+
+/** Redraws the list of errors under the source (U2). */
+asmtab.renderErrors = function() {
+    var list = document.getElementById('asm-errors');
+    var errors = asmtab.result ? asmtab.result.errors : [];
+    list.hidden = !errors.length;
+    list.innerHTML = errors.map(function(e) {
+        return '<li><button type="button" class="asm-error" data-line="' +
+            e.line + '">' + asmtab.escape(asmtab.errorText(e)) +
+            '</button></li>';
+    }).join('');
+};
+
+/**
+ * The rows of an assembly that made bytes, with the source line each
+ * belongs to: a macro's expansion belongs to the line that used it.
+ * @param {!Object} result An assembly.
+ * @return {!Array<{address: number, bytes: !Array<number>,
+ *     line: number}>}
+ */
+asmtab.pcRows = function(result) {
+    return result.rows.filter(function(row) {
+        return row.bytes.length && !row.skipped;
+    }).map(function(row) {
+        return {address: row.address, bytes: row.bytes, line: row.line};
+    });
+};
+
+/**
+ * Whether the source and memory are still one program: the text in the
+ * editor is the text that was loaded, and nothing has been loaded over
+ * it since - no other program, no power cycle, no clearing, no new
+ * memory boards (U7). A byte put in by hand is asmtab.onHandWrite's.
+ * @param {?Object} loaded asmtab.loaded.
+ * @param {string} text The source now.
+ * @param {number} memLoads The machine's count of whole loads now.
+ * @return {boolean}
+ */
+asmtab.inSync = function(loaded, text, memLoads) {
+    return !!loaded && loaded.text === text && loaded.memLoads === memLoads;
+};
+
+/**
+ * The byte the loaded source made at an address, if it made one there.
+ * @param {!Object} loaded asmtab.loaded.
+ * @param {number} address
+ * @return {?number} The byte, or null.
+ */
+asmtab.loadedByteAt = function(loaded, address) {
+    for (const row of loaded.rows) {
+        let offset = (address - row.address) & 0xffff;
+        if (offset < row.bytes.length) {
+            return row.bytes[offset];
+        }
+    }
+    return null;
+};
+
+/**
+ * After a byte is put in by hand, with DEPOSIT or in the Debugger: if it
+ * changed a byte the source made, the source no longer says what is in
+ * memory, and is forgotten until it is assembled again. A byte put
+ * anywhere else - the numbers a program reads, say - changes nothing.
+ * The program's own writes are not checked: a program may keep its
+ * variables among its bytes. If it rewrites its code, pcLineOf sees the
+ * bytes under the PC have changed.
+ * @param {number} address
+ * @param {number} value
+ */
+asmtab.onHandWrite = function(address, value) {
+    if (!asmtab.loaded) {
+        return;
+    }
+    var byte = asmtab.loadedByteAt(asmtab.loaded, address);
+    if (byte !== null && byte !== value) {
+        asmtab.loaded = null;
+        asmtab.requestPc(false);
+    }
+};
+
+/**
+ * The source line the program counter is on, worked out afresh (U7):
+ * only while the source and memory are in sync (inSync), the machine
+ * is on and stopped, and the bytes at the PC are still that line's.
+ * Anything else - an edit, another load, a DEPOSIT over the code, a PC
+ * outside the program - and no line is the PC's.
+ * @param {?Object} loaded asmtab.loaded.
+ * @param {string} text The source now.
+ * @param {?{on: boolean, running: boolean, pc: number, memLoads: number,
+ *     read: function(number): number}} machine The machine now.
+ * @return {number} The line, from 1, or 0 for none.
+ */
+asmtab.pcLineOf = function(loaded, text, machine) {
+    if (!machine || !asmtab.inSync(loaded, text, machine.memLoads) ||
+        !machine.on || machine.running) {
+        return 0;
+    }
+    for (const row of loaded.rows) {
+        let offset = (machine.pc - row.address) & 0xffff;
+        if (offset >= row.bytes.length) {
+            continue;
+        }
+        for (let i = 0; i < row.bytes.length; i++) {
+            if (machine.read((row.address + i) & 0xffff) !== row.bytes[i]) {
+                return 0;
+            }
+        }
+        return row.line;
+    }
+    return 0;
+};
+
+/**
+ * Asks for the PC's line to be marked again, at most once a frame; and,
+ * when the reader caused it, scrolled into view if it is out of sight
+ * (U7). A program that halts by itself never scrolls the editor: the
+ * reader may be typing in it.
+ * @param {boolean} scroll Whether the reader caused this.
+ */
+asmtab.requestPc = function(scroll) {
+    asmtab.pcScroll = asmtab.pcScroll || scroll;
+    if (asmtab.pcPending) {
+        return;
+    }
+    asmtab.pcPending = true;
+    window.requestAnimationFrame(function() {
+        asmtab.pcPending = false;
+        var scrollNow = asmtab.pcScroll;
+        asmtab.pcScroll = false;
+        asmtab.renderPc(scrollNow);
+    });
+};
+
+/**
+ * Marks the PC's line in the source, its number and its listing row, in
+ * the green the Debugger's dump uses for the PC.
+ * @param {boolean} scroll Whether to bring it into view.
+ */
+asmtab.renderPc = function(scroll) {
+    var sim = panel.sim;
+    // A halted CPU has already stepped past its HLT; the line to mark is
+    // the HLT's, as the Share link points back at it (panel.linkCpu).
+    // Loaded over since, it is forgotten for good: the count only grows.
+    if (asmtab.loaded && sim && asmtab.loaded.memLoads !== sim.memLoads) {
+        asmtab.loaded = null;
+    }
+    var line = asmtab.pcLineOf(asmtab.loaded, asmtab.source().value, sim ? {
+        on: sim.isPoweredOn, running: sim.isRunning,
+        pc: panel.linkCpu().pc, memLoads: sim.memLoads,
+        read: function(address) { return sim.readByte(address); },
+    } : null);
+    if (line != asmtab.pcLine) {
+        asmtab.markPc(asmtab.pcLine, false);
+        asmtab.pcLine = line;
+        asmtab.markPc(line, true);
+    }
+    if (scroll && line && panel.dock.tab == 'asm' && panel.dock.open) {
+        asmtab.reveal(line);
+    }
+};
+
+/**
+ * Puts the PC's mark on a line, or takes it off.
+ * @param {number} line From 1, or 0 for none.
+ * @param {boolean} on
+ */
+asmtab.markPc = function(line, on) {
+    if (!line) {
+        return;
+    }
+    [['asm-highlight', 'asm-line', 'asm-line-pc'],
+     ['asm-gutter', 'asm-gutter-line', 'asm-gutter-pc'],
+     ['asm-listing', 'asm-listing-line', 'asm-listing-pc']]
+        .forEach(function(part) {
+            var elem = document.getElementById(part[0])
+                .getElementsByClassName(part[1])[line - 1];
+            if (elem) {
+                elem.classList.toggle(part[2], on);
+            }
+        });
+};
+
+/**
+ * Scrolls the editor so that a line is in view, if it is not already;
+ * it stays where it is if it is.
+ * @param {number} line From 1.
+ */
+asmtab.reveal = function(line) {
+    var source = asmtab.source();
+    var lineHeight = parseFloat(getComputedStyle(source).lineHeight) || 26;
+    var top = (line - 1) * lineHeight;
+    if (top < source.scrollTop ||
+        top + lineHeight > source.scrollTop + source.clientHeight) {
+        source.scrollTop = Math.max(0, top - source.clientHeight / 3);
+    }
+};
+
+/**
+ * When an error in the list is pressed: the cursor goes to its line.
+ * @param {Event} event The click.
+ */
+asmtab.onErrorClick = function(event) {
+    var button = event.target.closest ? event.target.closest('.asm-error') :
+        null;
+    if (!button) {
+        return;
+    }
+    asmtab.goToLine(parseInt(button.dataset.line, 10));
+};
+
+/**
+ * Puts the cursor at the start of a line, and the line in view.
+ * @param {number} line From 1.
+ */
+asmtab.goToLine = function(line) {
+    var source = asmtab.source();
+    var lines = source.value.split('\n');
+    var at = 0;
+    for (let i = 0; i < line - 1 && i < lines.length; i++) {
+        at += lines[i].length + 1;
+    }
+    source.focus({preventScroll: true});
+    source.setSelectionRange(at, at + (lines[line - 1] || '').length);
+    var lineHeight = parseFloat(getComputedStyle(source).lineHeight) || 26;
+    var top = (line - 1) * lineHeight;
+    if (top < source.scrollTop ||
+        top > source.scrollTop + source.clientHeight - 2 * lineHeight) {
+        source.scrollTop = Math.max(0, top - source.clientHeight / 3);
+    }
+};
+
+/**
+ * The spaces Tab inserts: up to the next stop, every eight columns, the
+ * field layout of the manual's listings. A tab already in the text
+ * counts as reaching its own stop.
+ * @param {string} text The source.
+ * @param {number} at Where the cursor is.
+ * @return {string} One to eight spaces.
+ */
+asmtab.spacesToStop = function(text, at) {
+    var start = text.lastIndexOf('\n', at - 1) + 1;
+    var column = asmtab.columnOf(text.slice(start, at));
+    return ' '.repeat(asmtab.TAB_STOP - column % asmtab.TAB_STOP);
+};
+
+/**
+ * How many columns the start of a line takes on screen, its tabs
+ * expanded to their stops.
+ * @param {string} text Part of one line, from its start.
+ * @return {number}
+ */
+asmtab.columnOf = function(text) {
+    var column = 0;
+    for (let i = 0; i < text.length; i++) {
+        column = text[i] == '\t' ?
+            column + asmtab.TAB_STOP - column % asmtab.TAB_STOP : column + 1;
+    }
+    return column;
+};
+
+/**
+ * What Tab does to the text: with nothing selected, or a selection in
+ * one line, the spaces to the next stop take its place, as typing
+ * would; a selection across lines indents each of them one stop, and
+ * stays selected. Nothing is lost either way.
+ * @param {string} text The source.
+ * @param {number} start The selection's start.
+ * @param {number} end The selection's end.
+ * @return {{from: number, to: number, text: string,
+ *     selectStart: number, selectEnd: number}} The range to replace,
+ *     what goes there, and the selection after.
+ */
+asmtab.tabEdit = function(text, start, end) {
+    var selected = text.slice(start, end);
+    if (selected.indexOf('\n') < 0) {
+        var spaces = asmtab.spacesToStop(text, start);
+        return {from: start, to: end, text: spaces,
+                selectStart: start + spaces.length,
+                selectEnd: start + spaces.length};
+    }
+    var from = text.lastIndexOf('\n', start - 1) + 1;
+    // A selection ending at the start of a line does not take that line.
+    var last = text[end - 1] == '\n' ? end - 1 : end;
+    var to = text.indexOf('\n', last);
+    if (to < 0) to = text.length;
+    var indent = ' '.repeat(asmtab.TAB_STOP);
+    var block = text.slice(from, to).split('\n').map(function(line) {
+        return indent + line;
+    }).join('\n');
+    return {from: from, to: to, text: block,
+            selectStart: from, selectEnd: from + block.length};
+};
+
+/**
+ * Replaces part of the text area's text as typing would, so that Undo
+ * takes it back; a browser that will not do it so is given the text
+ * directly.
+ */
+asmtab.replaceText = function(source, from, to, text) {
+    source.focus();
+    source.setSelectionRange(from, to);
+    var done = false;
+    try {
+        done = document.execCommand('insertText', false, text);
+    } catch (e) {
+        done = false;
+    }
+    if (!done || source.value.slice(from, from + text.length) !== text) {
+        source.setRangeText(text, from, to, 'end');
+        asmtab.onEdit();
+    }
+};
+
+/** Columns between tab stops, in the editor. @type {number} */
+asmtab.TAB_STOP = 8;
+
+/**
+ * The editor's keys: Tab inserts spaces to the next stop, as editors
+ * do, unless Escape came just before, so the keyboard is never trapped;
+ * Ctrl+Enter (Cmd+Enter on a Mac) assembles (U3).
+ * @param {Event} event The keydown event.
+ */
+asmtab.onKey = function(event) {
+    if (event.key == 'Enter' && (event.ctrlKey || event.metaKey)) {
+        event.preventDefault();
+        asmtab.onAssemble();
+        return;
+    }
+    if (event.key == 'Escape') {
+        asmtab.tabLeaves = true;
+        return;
+    }
+    if (event.key == 'Tab' && !event.shiftKey && !event.altKey &&
+        !event.ctrlKey && !event.metaKey && !asmtab.tabLeaves) {
+        event.preventDefault();
+        var source = event.target;
+        var edit = asmtab.tabEdit(source.value, source.selectionStart,
+                                  source.selectionEnd);
+        asmtab.replaceText(source, edit.from, edit.to, edit.text);
+        source.setSelectionRange(edit.selectStart, edit.selectEnd);
+        asmtab.requestCaret();
+        return;
+    }
+    asmtab.tabLeaves = false;
+};
+
+/**
+ * When Assemble is pressed: assembles the source and, if it has no
+ * error, puts it into the machine as every other load does (U4).
+ */
+asmtab.onAssemble = function() {
+    window.clearTimeout(asmtab.assembleTimer);
+    asmtab.refresh();
+    var result = asmtab.result;
+    if (!result.ok) {
+        panel.setStatus('asm-has-errors', {count: result.errors.length},
+                        'error');
+        return;
+    }
+    if (!result.size) {
+        panel.setStatus('asm-empty', {}, 'warn');
+        return;
+    }
+    var loaded = asmtab.load(result);
+    // What the machine now holds, and the text it came from: the PC is
+    // followed through this, and only while both still hold (U7).
+    asmtab.loaded = {text: asmtab.source().value,
+                     rows: asmtab.pcRows(result),
+                     memLoads: panel.sim.memLoads};
+    asmtab.requestPc(true);
+    var params = {bytes: result.size, start: Asm8080.hex(result.start, 4),
+                  end: Asm8080.hex(result.end, 4),
+                  entry: Asm8080.hex(result.entry, 4)};
+    panel.setStatus(result.entry ? 'asm-loaded-at' : 'asm-loaded', params, '',
+                    loaded.poweredOn, loaded.unprotected);
+};
+
+/**
+ * Puts an assembled program into the machine: switched on if it was
+ * off, unprotected, cleared, the bytes written and RESET pressed; and
+ * a program that does not start at 0000H examined at its start, so
+ * that PC is there, as an owner would have with EXAMINE.
+ * @param {!Object} result An assembly with no error.
+ * @return {{poweredOn: boolean, unprotected: boolean}} Whether the
+ *     machine had to be switched on, and memory unprotected.
+ */
+asmtab.load = function(result) {
+    var poweredOn = panel.ensurePoweredOn();
+    var unprotected = panel.sim.unprotectAll();
+    panel.sim.initMem(false);
+    panel.sim.loadMap(result.memory);
+    panel.sim.reset();
+    if (result.entry) {
+        CPU8080.set('PC', result.entry);
+        panel.sim.lastAddress = result.entry;
+        panel.sim.endResetFlash();
+        panel.sim.showAddressAndData();
+    }
+    panel.sim.flushDump(true);
+    panel.updateMemoryControls();
+    return {poweredOn: poweredOn, unprotected: unprotected};
+};
+
+/**
+ * On a phone, the source and the listing take turns: this shows the
+ * other one (U2).
+ */
+asmtab.onViewToggle = function() {
+    var tab = document.getElementById('tab-asm');
+    var source = asmtab.source();
+    var listing = document.getElementById('asm-listing');
+    // The one shown next opens where the other was.
+    if (asmtab.showingListing()) {
+        var top = listing.scrollTop;
+        tab.classList.remove('show-listing');
+        source.scrollTop = top;
+        asmtab.syncScroll();
+    } else {
+        var from = source.scrollTop;
+        tab.classList.add('show-listing');
+        listing.scrollTop = from;
+    }
+    asmtab.refreshViewToggle();
+};
+
+/** Whether a phone is showing the listing in place of the source. */
+asmtab.showingListing = function() {
+    return document.getElementById('tab-asm').classList
+        .contains('show-listing');
+};
+
+/** Names the phone's toggle after what it would show. */
+asmtab.refreshViewToggle = function() {
+    var listing = asmtab.showingListing();
+    var toggle = document.getElementById('asm-view-toggle');
+    toggle.textContent =
+        l10n.getMessage(listing ? 'asm-show-source' : 'asm-show-listing');
+    toggle.setAttribute('aria-pressed', listing ? 'true' : 'false');
+};
+
+/**
+ * Before the Examples menu opens: the examples are read, the first
+ * time, and offered. They are the Load menu's: the same files, read
+ * once by the panel for both (U5).
+ */
+asmtab.onExamplesOpen = function() {
+    asmtab.examplesMenu.setItems(asmtab.exampleItems());
+    panel.fetchExamples().then(function() {
+        if (asmtab.examplesMenu.isOpen()) {
+            asmtab.examplesMenu.setItems(asmtab.exampleItems());
+        }
+    });
+};
+
+/**
+ * The Examples menu's items: grouped by where to watch, as the Load
+ * menu's are, and in its order.
+ * @return {!Array<Object>}
+ */
+asmtab.exampleItems = function() {
+    var msg = l10n.getMessage;
+    if (panel.examplesProblem) {
+        return [{value: 'unavailable', disabled: true,
+                 label: msg(panel.SHORT_REASONS[panel.examplesProblem] ||
+                            panel.examplesProblem)}];
+    }
+    if (panel.examplesLoading || !panel.exampleOrder) {
+        return [{value: 'loading', label: msg('examples-loading'),
+                 disabled: true}];
+    }
+    var items = [];
+    [['panel', 'examples-heading-panel'],
+     ['teletype', 'examples-heading-tty']].forEach(function(group) {
+        items.push({heading: true, label: msg(group[1])});
+        panel.exampleOrder.forEach(function(id) {
+            var example = panel.examplePrograms[id];
+            if ((example.device == 'teletype') == (group[0] == 'teletype')) {
+                items.push({value: id, label: example.name});
+            }
+        });
+    });
+    return items;
+};
+
+/**
+ * When an example is chosen. Text in the editor that is not an
+ * unchanged example would be lost, so a dialog asks first (U5).
+ * @param {string} id The example.
+ */
+asmtab.onExampleChosen = function(id) {
+    var example = panel.examplePrograms && panel.examplePrograms[id];
+    if (!example) {
+        return;
+    }
+    var text = asmtab.source().value;
+    if (text.trim() && !asmtab.isExample(text)) {
+        asmtab.pendingExample = id;
+        asmtab.replaceDialog.open();
+        return;
+    }
+    asmtab.useExample(id);
+};
+
+/**
+ * Whether a text is one of the examples, unchanged: nothing would be
+ * lost by putting another in its place. Any example, not only the one
+ * last chosen, so that it holds after a reload brings the text back.
+ * @param {string} text The editor's text.
+ * @return {boolean} Whether it is an example's text.
+ */
+asmtab.isExample = function(text) {
+    var examples = panel.examplePrograms || {};
+    return Object.keys(examples).some(function(id) {
+        return examples[id].text == text;
+    });
+};
+
+/** Names the example the dialog is about to put in. */
+asmtab.onReplaceOpen = function() {
+    var example = panel.examplePrograms[asmtab.pendingExample];
+    document.getElementById('asm-replace-desc').textContent = asmtab.fill(
+        l10n.getMessage('asm-replace-desc'), {name: example.name});
+};
+
+/** When Replace is pressed in the dialog. */
+asmtab.onReplaceConfirmed = function() {
+    asmtab.replaceDialog.close();
+    asmtab.useExample(asmtab.pendingExample);
+};
+
+/**
+ * Puts an example in the editor, in place of what was there.
+ * @param {string} id The example.
+ */
+asmtab.useExample = function(id) {
+    var example = panel.examplePrograms[id];
+    var source = asmtab.source();
+    source.value = example.text;
+    source.scrollTop = 0;
+    source.scrollLeft = 0;
+    asmtab.save();
+    window.clearTimeout(asmtab.assembleTimer);
+    asmtab.refresh();
+    panel.setStatus('asm-example-loaded', {name: example.name});
+};
+
+/**
+ * Text set at runtime, again after a change of language. Called from
+ * panel.refreshPlaceholders().
+ */
+asmtab.refreshText = function() {
+    var msg = l10n.getMessage;
+    var ctrl = {ctrl: asmtab.ctrlKey(navigator.platform || '')};
+    // The Tutorial's step names the shortcut too.
+    var step = document.getElementById('asm-tutorial-3');
+    if (step) {
+        step.textContent = asmtab.fill(msg('asm-tutorial-3'), ctrl);
+    }
+    if (!asmtab.result) {
+        return;
+    }
+    asmtab.renderErrors();
+    asmtab.refreshViewToggle();
+    asmtab.source().setAttribute('aria-label', msg('asm-source-label'));
+    document.getElementById('asm-listing').setAttribute(
+        'aria-label', msg('asm-listing-label'));
+    document.getElementById('asm-assemble').title =
+        asmtab.fill(msg('asm-assemble-title'), ctrl);
+    var copy = document.getElementById('asm-copy');
+    copy.title = msg('asm-copy-title');
+    copy.setAttribute('aria-label', msg('asm-copy-title'));
+    var clear = document.getElementById('asm-clear');
+    clear.title = msg('asm-clear-title');
+    clear.setAttribute('aria-label', msg('asm-clear-title'));
+};
+
+// Exports the namespace for unit tests when running in Node.js. This
+// has no effect when the script is loaded in a browser.
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = asmtab;
+}
