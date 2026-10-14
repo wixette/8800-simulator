@@ -100,7 +100,6 @@ a {
     color: #eee;
     cursor: pointer;
     display: flex;
-    font-family: inherit;
     font-size: 14px;
     gap: 6px;
     line-height: 20px;
@@ -251,7 +250,6 @@ a {
     border-radius: 8px;
     box-sizing: border-box;
     color: #eee;
-    font-family: inherit;
     font-size: 14px;
     line-height: 1.5;
     padding: 8px 10px;
@@ -320,7 +318,6 @@ a {
     border-radius: 8px;
     color: #eee;
     cursor: pointer;
-    font-family: inherit;
     font-size: 14px;
     padding: 7px 16px;
 }
@@ -337,8 +334,9 @@ a {
     color: #222;
 }
 
+/* A shade darker, as .button:hover makes Assemble's. */
 .dialog-button.primary:hover {
-    background-color: #ffad33;
+    background-color: #e08700;
 }
 
 /* Copy Link while there is nothing to copy: it still answers. */
@@ -388,7 +386,6 @@ a {
     color: #222;
     cursor: pointer;
     display: flex;
-    font-family: inherit;
     font-size: 14px;
     /* Roomier on the right so the arrow is not against the edge. */
     gap: 10px;
@@ -665,17 +662,19 @@ a {
     width: 2px;
 }
 
-/* A little narrower, and the levers close up to keep to one line. The
-   address row has room to spare, and keeps its octal groups apart. */
 /* Just above a phone's width the five names and icons only just fit:
-   a little less room around each, so that they do. */
-@media (min-width: 701px) and (max-width: 820px) {
+   a little less room around each, so that they do. Wider than 700px,
+   rather than from 701px, so that no width between the two (at a zoom)
+   is left out. */
+@media (width > 700px) and (width <= 820px) {
     .dock-tab {
         padding: 0 9px;
     }
 }
 
-@media (min-width: 701px) and (max-width: 1100px) {
+/* A little narrower, and the levers close up to keep to one line. The
+   address row has room to spare, and keeps its octal groups apart. */
+@media (width > 700px) and (width <= 1100px) {
     .strip-row:not(.strip-address) {
         gap: 6px 6px;
     }
@@ -1383,7 +1382,6 @@ a {
 .asm-highlight,
 .asm-source {
     border: 0;
-    font-family: inherit;
     font-size: inherit;
     height: 100%;
     inset: 0;
@@ -1527,7 +1525,8 @@ a {
     color: transparent;
 }
 
-.asm-line-error {
+.asm-line-error,
+.asm-listing-error {
     background-color: rgba(176, 0, 32, 0.08);
 }
 
@@ -1559,10 +1558,6 @@ a {
     width: 27ch;
 }
 
-.asm-listing-error {
-    background-color: rgba(176, 0, 32, 0.08);
-}
-
 /* The line the program counter is on, in the green the Debugger's dump
    marks the PC with (U7): the line tinted, its number marked, its
    bytes in the listing filled. */
@@ -1570,11 +1565,7 @@ a {
     background-color: rgba(31, 157, 69, 0.15);
 }
 
-.asm-gutter-line.asm-gutter-pc {
-    background-color: #157a35;
-    color: #eee;
-}
-
+.asm-gutter-line.asm-gutter-pc,
 .asm-listing-line.asm-listing-pc {
     background-color: #157a35;
     color: #eee;
@@ -1592,10 +1583,9 @@ a {
 .asm-error {
     background: none;
     border: 0;
-    color: #ff8a80;
+    color: #ffb4b4;
     cursor: pointer;
     display: block;
-    font-family: inherit;
     font-size: 13px;
     padding: 2px 4px;
     text-align: left;
@@ -1668,7 +1658,7 @@ a {
 
 #status-bar.status-error {
     background-color: #5a2323;
-    color: #ffc2c2;
+    color: #ffb4b4;
 }
 
 #mem-window-label {
@@ -1708,11 +1698,6 @@ a {
 
     /* Five tabs across a phone: the icons alone. The names stay for
        screen readers, and as each tab's tooltip. */
-    .dock-tab {
-        font-size: 13px;
-        padding: 0 14px;
-    }
-
     .dock-tab .icon {
         margin-right: 0;
     }
