@@ -6,8 +6,28 @@
  * in the last stretch of scrolling.
  */
 export default async function(h) {
+    await editorCaret(h, true);
+}
+
+/** The same, where scrollbars take no room, as on a Mac with a trackpad. */
+export async function overlayScrollbars(h) {
+    await editorCaret(h, false);
+}
+
+/**
+ * @param {boolean} roomy Whether scrollbars take room from the view, as
+ *     they do with a mouse on a Mac and on most other systems. Which kind
+ *     a browser draws follows the system, so it is set here rather than
+ *     left to the machine the checks happen to run on.
+ */
+async function editorCaret(h, roomy) {
     const {js, send, viewport, fresh, press, verify, setSource, sleep} = h;
     await viewport(1280, 860); await fresh();
+    if (roomy) {
+        await js(`(() => { const st = document.createElement('style');
+            st.textContent = '::-webkit-scrollbar { width: 15px; height: 15px; background: #ddd; } ::-webkit-scrollbar-thumb { background: #999; }';
+            document.head.appendChild(st); })()`);
+    }
     await press('#nav-asm'); await sleep(300);
     await press('#asm-examples-button'); await sleep(500);
     await press('#asm-examples-list li[data-value="guess-letter"]'); await sleep(400);
@@ -37,7 +57,10 @@ export default async function(h) {
         return {top: c.top, hidden: document.getElementById('asm-caret').hidden}; })()`);
 
     let m = await layers();
-    verify('the text area has a horizontal scrollbar here, as on the reported machine', m.bar > 0, JSON.stringify(m));
+    if (roomy) {
+        verify('the text area\'s scrollbar takes room, as on the reported machine', m.bar > 0, JSON.stringify(m));
+    }
+    verify('the example is in the editor', (await js(`document.getElementById('asm-source').value`)).includes('Guess my letter'));
     for (const [where, frac] of [['top', 0], ['middle', 0.5], ['very end', 1]]) {
         await js(`(() => { const s = document.getElementById('asm-source'); s.scrollTop = (s.scrollHeight - s.clientHeight) * ${frac}; s.dispatchEvent(new Event('scroll')); })()`);
         await sleep(200);
