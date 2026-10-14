@@ -1088,6 +1088,9 @@ test('memLoads counts whole loads, and onHandWrite each byte put in by hand', ()
     grew('clearing memory');
     sim.loadData(0, [0x76]);
     grew('a load');
+    sim.loadMap(new Map([[0x10, 0x3e], [0x40, 0x76]]));
+    grew('a load of an assembly');
+    assert.deepStrictEqual([sim.mem[0x10], sim.mem[0x40]], [0x3e, 0x76]);
     sim.powerOff();
     sim.powerOn();
     flushTimers();

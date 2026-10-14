@@ -592,6 +592,72 @@ test('every way of putting a program in owns up to unprotecting memory', () => {
     }
 });
 
+test('only the simulator writes memory, so it can count every load (U7)', () => {
+    // The Assembler marks the PC only while memory still holds what it
+    // assembled. It knows by the simulator's count of whole loads
+    // (memLoads) and its reports of bytes put in by hand (onHandWrite):
+    // a page that wrote memory itself would slip past both.
+    const jsDir = path.join(__dirname, '..', 'js');
+    for (const file of fs.readdirSync(jsDir)) {
+        if (!file.endsWith('.js') || file == 'sim8800.js') {
+            continue;
+        }
+        const source = fs.readFileSync(path.join(jsDir, file), 'utf8');
+        assert.doesNotMatch(source, /\.mem\[[^\]]*\]\s*=[^=]|\.mem\.fill|\.mem\s*=[^=]/,
+                            file + ' writes memory itself, past the simulator');
+    }
+    // And the simulator counts each whole load, and reports each byte
+    // put in by hand.
+    const sim = sourceOf('js/sim8800.js');
+    for (const name of ['initMem', 'loadData', 'loadMap']) {
+        const body = sim.match(new RegExp('\\n    ' + name + '\\([^)]*\\) \\{([\\s\\S]*?)\\n    \\}'));
+        assert.ok(body, 'Sim8800.' + name + ' is missing');
+        assert.match(body[1], /this\.memLoads\+\+/, name + ' does not count as a load');
+    }
+    for (const name of ['deposit', 'editByte']) {
+        const body = sim.match(new RegExp('\\n    ' + name + '\\([^)]*\\) \\{([\\s\\S]*?)\\n    \\}'));
+        assert.match(body[1], /onHandWrite/, name + ' does not report its byte');
+    }
+});
+
+test('every way of loading memory goes through a counted load (U7)', () => {
+    // Each must end the Assembler's sync, even with the very same bytes.
+    // These want a document, so they are read rather than run.
+    const direct = {
+        loadImage: /initMem\(|loadData\(/,       // the Load menu's examples, files, BASIC, links
+        debugLoadData: /loadData\(/,              // Hex Bytes
+        onFillZero: /initMem\(/,                  // Zero All Memory
+        onSetMemSize: /setMemSize\(/,             // new memory boards
+    };
+    for (const [name, call] of Object.entries(direct)) {
+        assert.match(panel[name].toString(), call, name + ' loads past the count');
+    }
+    for (const name of ['loadExample', 'onLoadBasic', 'onBinaryFileChosen',
+                        'applyLinkState']) {
+        assert.match(panel[name].toString(), /loadImage\(/,
+                     name + ' does not load through loadImage');
+    }
+    // Power on fills memory as a real machine's comes up: counted too.
+    assert.match(sourceOf('js/sim8800.js'),
+                 /powerOn\(\) \{[\s\S]*?this\.initMem\(\)/);
+    // setMemSize fills the new boards the same way.
+    assert.match(sourceOf('js/sim8800.js'),
+                 /setMemSize\(memSize\) \{[\s\S]*?this\.initMem\(\)/);
+});
+
+test('the page hands every byte put in by hand to the Assembler (U7)', () => {
+    // panel.init() wires the simulator's report to asmtab.onHandWrite.
+    const source = panel.init.toString();
+    assert.match(source, /sim\.onHandWrite = function\(address, value\) \{[\s\S]*?asmtab\.onHandWrite\(address, value\)/);
+    // And Assemble takes the count only once its own load is done, so
+    // that load is the one it is in sync with.
+    const assemble = sourceOf('js/asmtab.js')
+        .match(/asmtab\.onAssemble = function\(\) \{([\s\S]*?)\n\};/)[1];
+    assert.ok(assemble.indexOf('asmtab.load(') <
+              assemble.indexOf('memLoads: panel.sim.memLoads'),
+              'the count is taken before the load it should include');
+});
+
 test('every lamp the simulator reports is drawn on the panel', () => {
     const drawn = panel.LED_INFO.map((info) => info.id);
     for (const id of ['prot', 'hlta', 'm1', 'inte']) {

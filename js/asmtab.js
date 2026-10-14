@@ -914,9 +914,7 @@ asmtab.load = function(result) {
     var poweredOn = panel.ensurePoweredOn();
     var unprotected = panel.sim.unprotectAll();
     panel.sim.initMem(false);
-    for (const [address, byte] of result.memory) {
-        panel.sim.mem[address] = byte;
-    }
+    panel.sim.loadMap(result.memory);
     panel.sim.reset();
     if (result.entry) {
         CPU8080.set('PC', result.entry);

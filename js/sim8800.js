@@ -288,6 +288,25 @@ class Sim8800 {
     }
 
     /**
+     * Loads bytes that each have an address of their own, as an
+     * assembly gives them: in any order, with gaps between. A whole
+     * load, counted as loadData's is.
+     * @param {!Iterable<!Array<number>>} pairs [address, byte] pairs,
+     *     such as a Map from address to byte.
+     */
+    loadMap(pairs) {
+        if (!this.isPoweredOn)
+            return;
+        this.memLoads++;
+        for (const [address, byte] of pairs) {
+            if (address >= 0 && address < this.mem.length) {
+                this.mem[address] = byte & 0xff;
+            }
+        }
+        this.requestDump();
+    }
+
+    /**
      * Loads data into memory from a hex string. The page parses its own
      * input (see panel.parseBytes); this is a shorthand for tests.
      * @param {number} address The start address to load the data/program.
