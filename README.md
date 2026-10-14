@@ -109,25 +109,25 @@ simulator's **Tutorial**, under the panel, to follow as you go.
                    ; 00 000 000
 ```
 
- 1. Turn on Altair 8800 by clicking OFF/ON switch.
- 1. Set switches A7-A0 to 00 111 010 (up for 1, down for 0).
- 1. Click "DEPOSIT".
- 1. Set switches A7-A0 to 10 000 000.
- 1. Click "DEPOSIT NEXT".
- 1. Repeat step 4-5 to input the following bytes one by one: 00 000 000, 01 000 111, 00 111 010, 10 000 001, 00 000 000, 10 000 000, 00 110 010, 10 000 010, 00 000 000, 11 000 011, 00 000 000, 00 000 000.
- 1. Set switches A7-A0 to 10 000 000.
- 1. Click "EXAMINE".
- 1. Set switches A7-A0 to 00 000 001 (the first number to be added, or 1 in decimal).
- 1. Click "DEPOSIT".
- 1. Set switches A7-A0 to 00 000 010 (the second number to be added, or 2 in decimal).
- 1. Click "DEPOSIT NEXT".
- 1. Click "RESET".
- 1. Click "RUN" and wait for a few seconds.
- 1. Click "STOP".
- 1. Set switches A7-A0 to 10 000 010 (the address that holds the sum).
- 1. Click "EXAMINE".
- 1. The LEDs D7-D0 show the result 00 000 011 (3 in decimal).
- 1. Turn off Altair 8800.
+ 1. Turn on the Altair 8800 with the OFF/ON switch.
+ 1. Set switches A7–A0 to 00 111 010 (up for 1, down for 0).
+ 1. Click **DEPOSIT**.
+ 1. Set switches A7–A0 to 10 000 000.
+ 1. Click **DEPOSIT NEXT**.
+ 1. Repeat steps 4–5 to enter the following bytes one by one: 00 000 000, 01 000 111, 00 111 010, 10 000 001, 00 000 000, 10 000 000, 00 110 010, 10 000 010, 00 000 000, 11 000 011, 00 000 000, 00 000 000.
+ 1. Set switches A7–A0 to 10 000 000.
+ 1. Click **EXAMINE**.
+ 1. Set switches A7–A0 to 00 000 001 (the first number to be added, or 1 in decimal).
+ 1. Click **DEPOSIT**.
+ 1. Set switches A7–A0 to 00 000 010 (the second number to be added, or 2 in decimal).
+ 1. Click **DEPOSIT NEXT**.
+ 1. Click **RESET**.
+ 1. Click **RUN** and wait for a few seconds.
+ 1. Click **STOP**.
+ 1. Set switches A7–A0 to 10 000 010 (the address that holds the sum).
+ 1. Click **EXAMINE**.
+ 1. The data lamps D7–D0 show the result 00 000 011 (3 in decimal).
+ 1. Turn off the Altair 8800.
 
 At step 18 the panel looks like the picture in
 [section 2](#2-meet-the-front-panel): A7 and A1 lit for the address
@@ -138,18 +138,18 @@ At step 18 the panel looks like the picture in
 Everything is on one screen: the panel, a toolbar above it, a dock of
 tools below it, and a status line along the foot.
 
-- **The toolbar.** *Load* puts a program in. *Memory* installs 256
-  bytes, as the Altair shipped, or 4 KB or 8 KB, as if you had fitted
-  one or two 88-4MCS boards. Fitting a board meant opening the case, so
-  this switches the machine off. On the right are *Share*, the
-  language (ten of them), and *About*.
+- **The toolbar.** **Load** puts a program in. **Memory** installs
+  256 bytes, as the Altair shipped, or 4 KB or 8 KB, as if you had
+  fitted one or two 88-4MCS boards. Fitting a board meant opening the
+  case, so this switches the machine off. On the right are **Share**,
+  the language (ten of them), and **About**.
 - **The dock** holds five tabs, one at a time: the **Teletype**, the
   **Assembler**, the **Debugger**, the **Tutorial**, and the
   **References** (the source code and further reading). On a phone the
   tabs are icons. Click a tab to open it, ▾ to fold the dock away,
-  and drag the handle above it to
-  share the height with the panel. Whatever you load, the dock opens
-  on the Debugger to show it arriving.
+  and drag the handle above it to share the height with the panel.
+  Whatever you load, the dock opens on the Debugger to show it
+  arriving.
 - **The status line** says what just happened, and why a greyed-out
   control is greyed out.
 
@@ -225,7 +225,7 @@ OK
 name means. Load it and look at the memory map in the Debugger before
 pressing RUN, and you can see BASIC filling fifteen of the sixteen
 pages. The Tutorial walks through it, including what loading it here
-skips: toggling in a 28 byte boot loader by hand, then waiting seven
+skips: toggling in a 28-byte boot loader by hand, then waiting seven
 minutes for the paper tape.
 
 The BASIC tape is in [roms/](./roms/), and [roms/NOTICE](./roms/NOTICE)
@@ -349,8 +349,7 @@ Node.js 24, nothing to install. The suite covers the 8080 CPU, the
 front panel, the serial boards and the Teletype, the page's own logic
 and translations, the link format, the assembler against Intel's
 manual, every program in [examples/](examples/), and 4K BASIC booting
-and running end to end. It
-runs on each push and pull request.
+and running end to end. It runs on each push and pull request.
 
 The page itself - clicks, menus, the Assembler's editor, the layout -
 is checked in a headless Chrome:
@@ -362,7 +361,7 @@ npm run test:browser -- sync clear
 
 It takes a minute or so and needs Chrome installed (or `CHROME` set to
 its path, Chromium too), so it is not part of CI: run it by hand
-before a release. The checks are in [tests/browser/](tests/browser/run.mjs).
+before a release. The checks are in [tests/browser/](tests/browser/).
 
 ### The link format
 
@@ -395,7 +394,7 @@ Every field is optional:
 | `mem` | Installed memory: `256`, `4096` or `8192` (decimal) |
 | `pc`, `sp` | The 16-bit registers, in hex |
 | `a`, `b`, `c`, `d`, `e`, `h`, `l`, `f` | The 8-bit registers, in hex, `f` being the flags |
-| `sw` | The address switches, A15-A0, as a 16-bit hex word |
+| `sw` | The address switches, A15–A0, as a 16-bit hex word |
 
 A linked machine always opens stopped. The Teletype's paper and the
 interrupt enable are not in the link. The format is a promise to

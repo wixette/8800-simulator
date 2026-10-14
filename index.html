@@ -266,25 +266,25 @@ JMP 0000H  ; 11 000 011
            ; 00 000 000
            ; 00 000 000</pre>
           <ol class="steps">
-            <li><span id="tutorial-1" class="l10n">Turn on Altair 8800 by clicking OFF/ON switch.</span></li>
-            <li><span id="tutorial-2" class="l10n">Set switches A7-A0 to 00 111 010 (up for 1, down for 0).</span></li>
+            <li><span id="tutorial-1" class="l10n">Turn on the Altair 8800 with the OFF/ON switch.</span></li>
+            <li><span id="tutorial-2" class="l10n">Set switches A7–A0 to 00 111 010 (up for 1, down for 0).</span></li>
             <li><span id="tutorial-3" class="l10n">Click "DEPOSIT".</span></li>
-            <li><span id="tutorial-4" class="l10n">Set switches A7-A0 to 10 000 000.</span></li>
+            <li><span id="tutorial-4" class="l10n">Set switches A7–A0 to 10 000 000.</span></li>
             <li><span id="tutorial-5" class="l10n">Click "DEPOSIT NEXT".</span></li>
-            <li><span id="tutorial-6" class="l10n">Repeat step 4-5 to input the following bytes one by one: 00 000 000, 01 000 111, 00 111 010, 10 000 001, 00 000 000, 10 000 000, 00 110 010, 10 000 010, 00 000 000, 11 000 011, 00 000 000, 00 000 000.</span></li>
-            <li><span id="tutorial-7" class="l10n">Set switches A7-A0 to 10 000 000.</span></li>
+            <li><span id="tutorial-6" class="l10n">Repeat steps 4–5 to enter the following bytes one by one: 00 000 000, 01 000 111, 00 111 010, 10 000 001, 00 000 000, 10 000 000, 00 110 010, 10 000 010, 00 000 000, 11 000 011, 00 000 000, 00 000 000.</span></li>
+            <li><span id="tutorial-7" class="l10n">Set switches A7–A0 to 10 000 000.</span></li>
             <li><span id="tutorial-8" class="l10n">Click "EXAMINE".</span></li>
-            <li><span id="tutorial-9" class="l10n">Set switches A7-A0 to 00 000 001 (the first number to be added, or 1 in decimal).</span></li>
+            <li><span id="tutorial-9" class="l10n">Set switches A7–A0 to 00 000 001 (the first number to be added, or 1 in decimal).</span></li>
             <li><span id="tutorial-10" class="l10n">Click "DEPOSIT".</span></li>
-            <li><span id="tutorial-11" class="l10n">Set switches A7-A0 to 00 000 010 (the second number to be added, or 2 in decimal).</span></li>
+            <li><span id="tutorial-11" class="l10n">Set switches A7–A0 to 00 000 010 (the second number to be added, or 2 in decimal).</span></li>
             <li><span id="tutorial-12" class="l10n">Click "DEPOSIT NEXT".</span></li>
             <li><span id="tutorial-13" class="l10n">Click "RESET".</span></li>
             <li><span id="tutorial-14" class="l10n">Click "RUN" and wait for a few seconds.</span></li>
             <li><span id="tutorial-15" class="l10n">Click "STOP".</span></li>
-            <li><span id="tutorial-16" class="l10n">Set switches A7-A0 to 10 000 010 (the address that holds the sum).</span></li>
+            <li><span id="tutorial-16" class="l10n">Set switches A7–A0 to 10 000 010 (the address that holds the sum).</span></li>
             <li><span id="tutorial-17" class="l10n">Click "EXAMINE".</span></li>
-            <li><span id="tutorial-18" class="l10n">The LEDs D7-D0 show the result 00 000 011 (3 in decimal).</span></li>
-            <li><span id="tutorial-19" class="l10n">Turn off Altair 8800.</span></li>
+            <li><span id="tutorial-18" class="l10n">The data lamps D7–D0 show the result 00 000 011 (3 in decimal).</span></li>
+            <li><span id="tutorial-19" class="l10n">Turn off the Altair 8800.</span></li>
           </ol>
         </div>
 
@@ -301,7 +301,7 @@ JMP 0000H  ; 11 000 011
             </li>
             <li><span id="asm-tutorial-2" class="l10n">Beside each line, the listing shows its address and the bytes it makes: IN 0FFH is DB FF, at 0000H. A mistake is marked on its line, with what is wrong under the source.</span></li>
             <li><span id="asm-tutorial-3" class="l10n">Click Assemble, or press Ctrl+Enter. The machine is switched on if it was off, the program goes into memory, and RESET is pressed.</span></li>
-            <li><span id="asm-tutorial-4" class="l10n">Click RUN on the front panel, then flip the switches A15-A8: the data lamps follow them.</span></li>
+            <li><span id="asm-tutorial-4" class="l10n">Click RUN on the front panel, then flip the switches A15–A8: the data lamps follow them.</span></li>
           </ol>
           <p id="asm-tutorial-note" class="tutorial-note l10n">More to try: the Assembler's Examples menu has fourteen programs, from lamps on the front panel to a game on the Teletype, macros included. Intel's own manual, in References, describes the whole language.</p>
         </div>
@@ -315,7 +315,7 @@ JMP 0000H  ; 11 000 011
             <li><span id="basic-1" class="l10n">In the Memory menu, choose 4 KB (or 8 KB, for room to write longer programs). Installing memory switches the machine off, which is what opening the case would have done.</span></li>
             <li><span id="basic-2" class="l10n">In the Load menu, choose Microsoft 4K BASIC. The machine powers up, the tape is read for you, RESET is pressed, and the Debugger opens to show what arrived.</span></li>
             <li><span id="basic-3" class="l10n">Before going any further, look at the memory map above the dump. Fifteen of the sixteen pages of a 4 KB machine are full: that is BASIC, and the one page left over is all the room you have for a program. This is what "4K BASIC" means.</span></li>
-            <li><span id="basic-4" class="l10n">The address switches A15-A8 tell BASIC which terminal board to use: all down is the 88-SIO at ports 00H and 01H, switch A11 up is the 88-2SIO at 10H and 11H. The teletype here is wired to both slots, so either setting works - a real Altair would have had only one of the two boards fitted, and the wrong setting left it silent.</span></li>
+            <li><span id="basic-4" class="l10n">The address switches A15–A8 tell BASIC which terminal board to use: all down is the 88-SIO at ports 00H and 01H, switch A11 up is the 88-2SIO at 10H and 11H. The teletype here is wired to both slots, so either setting works - a real Altair would have had only one of the two boards fitted, and the wrong setting left it silent.</span></li>
             <li><span id="basic-5" class="l10n">Click RUN on the front panel.</span></li>
             <li><span id="basic-6" class="l10n">Open the Teletype, under the panel. BASIC asks MEMORY SIZE? - press Enter to take everything it found. Press Enter again for TERMINAL WIDTH?, then Y for WANT SIN? to keep the maths functions.</span></li>
             <li><span id="basic-7" class="l10n">It prints how many bytes are free, then OK. Try PRINT 22/7 for an answer straight away. To enter a program, type these lines one at a time, pressing Enter after each:</span>
