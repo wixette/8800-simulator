@@ -537,16 +537,16 @@ l10n.MESSAGES = {
     },
 
     'about-desc': {
-        'en': 'An Altair 8800 you can switch on in a web page: its front panel, a teletype running Microsoft\'s 4K BASIC, and a debugger the real one never had.',
-        'es': 'Un Altair 8800 que puedes encender en una página web: su panel frontal, un teletipo con el 4K BASIC de Microsoft y un depurador que el auténtico nunca tuvo.',
-        'fr': 'Un Altair 8800 qu\'on allume dans une page web : sa façade, un téléscripteur qui fait tourner le 4K BASIC de Microsoft, et un débogueur que le vrai n\'a jamais eu.',
-        'de': 'Ein Altair 8800, den man in einer Webseite einschalten kann: seine Frontplatte, ein Fernschreiber mit Microsofts 4K BASIC und ein Debugger, den das Original nie hatte.',
-        'it': 'Un Altair 8800 da accendere in una pagina web: il suo pannello frontale, una telescrivente con il 4K BASIC di Microsoft e un debugger che quello vero non ha mai avuto.',
-        'pt-BR': 'Um Altair 8800 que você liga numa página web: o painel frontal, um teletipo rodando o 4K BASIC da Microsoft e um depurador que o original nunca teve.',
-        'zh': '一台能在网页里开机的 Altair 8800：它的前面板、一台运行微软 4K BASIC 的电传打字机，以及真机从未有过的调试器。',
-        'zh-TW': '一台能在網頁裡開機的 Altair 8800：它的前面板、一台執行微軟 4K BASIC 的電傳打字機，以及真機從未有過的除錯器。',
-        'ja': 'Web ページの中で電源を入れられる Altair 8800。フロントパネル、Microsoft の 4K BASIC が動くテレタイプ、そして本物にはなかったデバッガーを備えています。',
-        'ko': '웹 페이지에서 켤 수 있는 Altair 8800: 앞판, 마이크로소프트 4K BASIC이 돌아가는 텔레타이프, 그리고 진짜에는 없던 디버거.',
+        'en': 'An Altair 8800 you can switch on in a web page: its front panel, a teletype running Microsoft\'s 4K BASIC, an 8080 assembler, and a debugger the real one never had.',
+        'es': 'Un Altair 8800 que puedes encender en una página web: su panel frontal, un teletipo con el 4K BASIC de Microsoft, un ensamblador del 8080 y un depurador que el auténtico nunca tuvo.',
+        'fr': 'Un Altair 8800 qu\'on allume dans une page web : sa façade, un téléscripteur qui fait tourner le 4K BASIC de Microsoft, un assembleur 8080, et un débogueur que le vrai n\'a jamais eu.',
+        'de': 'Ein Altair 8800, den man in einer Webseite einschalten kann: seine Frontplatte, ein Fernschreiber mit Microsofts 4K BASIC, ein 8080-Assembler und ein Debugger, den das Original nie hatte.',
+        'it': 'Un Altair 8800 da accendere in una pagina web: il suo pannello frontale, una telescrivente con il 4K BASIC di Microsoft, un assembler 8080 e un debugger che quello vero non ha mai avuto.',
+        'pt-BR': 'Um Altair 8800 que você liga numa página web: o painel frontal, um teletipo rodando o 4K BASIC da Microsoft, um montador 8080 e um depurador que o original nunca teve.',
+        'zh': '一台能在网页里开机的 Altair 8800：它的前面板、一台运行微软 4K BASIC 的电传打字机、一个 8080 汇编器，以及真机从未有过的调试器。',
+        'zh-TW': '一台能在網頁裡開機的 Altair 8800：它的前面板、一台執行微軟 4K BASIC 的電傳打字機、一個 8080 組譯器，以及真機從未有過的除錯器。',
+        'ja': 'Web ページの中で電源を入れられる Altair 8800。フロントパネル、Microsoft の 4K BASIC が動くテレタイプ、8080 のアセンブラ、そして本物にはなかったデバッガーを備えています。',
+        'ko': '웹 페이지에서 켤 수 있는 Altair 8800: 앞판, 마이크로소프트 4K BASIC이 돌아가는 텔레타이프, 8080 어셈블러, 그리고 진짜에는 없던 디버거.',
     },
 
     'about-source': {
