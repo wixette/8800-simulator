@@ -551,7 +551,15 @@ What makes it work, and what the tests check:
   width and border on both, and no wrapping on either; long lines
   scroll sideways.
 - **The same scroll:** the `<pre>` follows the text area's scroll, on
-  every scroll event.
+  every scroll event - and can always scroll as far. The text area's
+  scrollbars take room from its view, so it scrolls further than a
+  `<pre>` without them, by a scrollbar's width; in that last stretch
+  the text seen and the text clicked on would part, by over half a
+  line. So the `<pre>`, the line numbers and the listing get that room
+  at their ends, measured from the text area (it depends on the system,
+  and the horizontal bar comes and goes with the longest line), and
+  each coloured line is as wide as its text, so the room counts at the
+  end of a long one too. `npm run test:browser -- caret` checks it.
 - **The same text:** the `<pre>` is redrawn from the text area's value
   on every change, at most once a frame, with a trailing newline so
   that its last line is not shorter.

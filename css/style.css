@@ -1293,6 +1293,15 @@ a {
     padding-top: 8px;
 }
 
+/* The text area's scrollbars take room from its view, so it scrolls
+   further than the layers beside and behind it; they get that room at
+   their ends instead, measured by asmtab.matchScrollbars (H1). */
+.asm-gutter,
+.asm-listing,
+.asm-highlight {
+    padding-bottom: calc(8px + var(--asm-bar-below, 0px));
+}
+
 .asm-gutter {
     background-color: #bdbdbd;
     color: #666;
@@ -1347,7 +1356,16 @@ a {
 .asm-highlight {
     color: #222;
     overflow: hidden;
+    padding-right: calc(10px + var(--asm-bar-beside, 0px));
     pointer-events: none;
+}
+
+/* As wide as its text, so a long line ends with the padding above, and
+   the coloured copy scrolls as far right as the text area does; never
+   narrower than the editor, so a mark across a line still spans it. */
+.asm-highlight .asm-line {
+    min-width: 100%;
+    width: max-content;
 }
 
 .asm-source {

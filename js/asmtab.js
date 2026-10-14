@@ -88,6 +88,12 @@ asmtab.init = function() {
         asmtab.charWidth = 0;
         asmtab.requestCaret();
     }, false);
+    // Opening the tab, moving the dock's edge or resizing the window
+    // changes the text area's size, and so its scrollbars, with no
+    // scroll to say so.
+    if (window.ResizeObserver) {
+        new ResizeObserver(asmtab.syncScroll).observe(source);
+    }
     document.getElementById('asm-copy').addEventListener(
         'click', asmtab.onCopy, false);
     document.getElementById('asm-clear').addEventListener(
@@ -292,12 +298,41 @@ asmtab.escape = function(text) {
  */
 asmtab.syncScroll = function() {
     var source = asmtab.source();
+    asmtab.matchScrollbars();
     var highlight = document.getElementById('asm-highlight');
     highlight.scrollTop = source.scrollTop;
     highlight.scrollLeft = source.scrollLeft;
     document.getElementById('asm-gutter').scrollTop = source.scrollTop;
     document.getElementById('asm-listing').scrollTop = source.scrollTop;
     asmtab.requestCaret();
+};
+
+/**
+ * Lets the coloured copy, the line numbers and the listing scroll as far
+ * as the text area does. The text area's scrollbars take room from its
+ * view, so it scrolls further than they would by that much, and at the
+ * very end its text - where clicks land, and where the caret is drawn -
+ * would part from the text that is seen (H1). They get that much more
+ * room at the end instead. Scrollbars are as wide as the system makes
+ * them, or take no room at all, and the horizontal one comes and goes
+ * with the longest line, so they are measured each time.
+ */
+asmtab.matchScrollbars = function() {
+    var source = asmtab.source();
+    if (!source.offsetHeight) {
+        return;  // Not on screen: nothing to measure.
+    }
+    var below = source.offsetHeight - source.clientHeight -
+        2 * source.clientTop;
+    var beside = source.offsetWidth - source.clientWidth -
+        2 * source.clientLeft;
+    var pane = document.getElementById('tab-asm');
+    var key = below + ',' + beside;
+    if (pane.dataset.scrollbars !== key) {
+        pane.dataset.scrollbars = key;
+        pane.style.setProperty('--asm-bar-below', below + 'px');
+        pane.style.setProperty('--asm-bar-beside', beside + 'px');
+    }
 };
 
 /**
