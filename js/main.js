@@ -21,5 +21,6 @@
 import {panel} from './app.js';
 
 // Running after all, so a server is not needed: see index.html.
+document.documentElement.classList.remove('needs-server');
 document.getElementById('file-notice').hidden = true;
 panel.init();

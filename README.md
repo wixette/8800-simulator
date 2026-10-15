@@ -312,9 +312,10 @@ Then open <http://localhost:8000/>. To deploy, copy the whole
 directory to a web server; there is nothing to build, and no
 dependencies.
 
-Opening `index.html` straight off the disk does not work: the page's
-scripts are ES modules, and a browser runs no module in a `file://`
-page. The page says so, and gives the command above.
+Opening `index.html` straight off the disk does not work, since
+v1.7.0: the page's scripts are ES modules, and a browser runs no module
+in a `file://` page. Opened that way, the page shows only a notice that
+says so and gives the command above.
 
 ### Deploying behind a cache
 

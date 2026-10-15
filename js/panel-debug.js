@@ -52,11 +52,9 @@ panel.debugControlReasons = function() {
     var memSize = panel.sim.mem.length;
     var reasons = {};
     // The loaders switch the machine on for you, so only BASIC can be
-    // unavailable: it needs its tape to be fetchable, then enough memory.
-    reasons['load-basic'] = panel.needsServer() ?
-        {id: 'needs-server', params: {}} :
-        (memSize < panel.MIN_BASIC_MEM ?
-             {id: 'rom-needs-memory', params: {}} : null);
+    // unavailable: it needs enough memory.
+    reasons['load-basic'] = memSize < panel.MIN_BASIC_MEM ?
+        {id: 'rom-needs-memory', params: {}} : null;
     reasons['examples'] = panel.examplesProblem ?
         {id: panel.examplesProblem, params: {}} : null;
     // The dump controls act on the memory dump. With the machine off

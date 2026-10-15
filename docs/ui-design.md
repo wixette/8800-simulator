@@ -333,16 +333,16 @@ popups. The second follows P10:
   address bar being rewritten.
 - **About is a dialog**, with the version - read from package.json
   as it opens, the one place the version is kept, since the page has
-  no build step to copy it anywhere; a page opened off the disk shows
-  none rather than a wrong one - the source code, problems and
+  no build step to copy it anywhere; if the file cannot be read it
+  shows none rather than a wrong one - the source code, problems and
   contributors,
   and the licences: Apache 2.0 for the simulator, Microsoft's for the
   4K BASIC tape (roms/NOTICE), BSD for the 8080 core (8080js by Martin
   Maly), Apache 2.0 for the icons. The credit line left the status line
   for it.
 - **The icons are Material Icons, inline SVG**, not Google's icon font:
-  the font would make the page need the network, fail offline and from
-  `file://`, and show the word "share" until it loads.
+  the font would make the page need the network, fail offline, and show
+  the word "share" until it loads.
 
 *The keyboard.* The teletype has it while nothing else needs it. Not
 while a menu or a dialog is open - so that Escape there is not KILL

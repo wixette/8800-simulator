@@ -38,8 +38,8 @@ export default async function(h) {
 }
 
 /**
- * Opened off the disk, the page cannot run its modules, and says so;
- * served, it never shows that (#19).
+ * Opened off the disk, the page cannot run its modules, and shows only
+ * a notice that says so; served, it never shows that (#19).
  */
 export async function fileNotice(h) {
     const {js, send, viewport, fresh, verify, sleep} = h;
@@ -47,11 +47,18 @@ export async function fileNotice(h) {
         return !!n && !n.hidden && getComputedStyle(n).display != 'none'; })()`);
     await viewport(1280, 860); await fresh();
     verify('served, there is no notice', (await shown()) === false);
+    verify('and nothing is hidden for it', !(await js(`document.documentElement.classList.contains('needs-server')`)));
     verify('and the panel is built', (await js(`document.querySelectorAll('#panel .led, #panel image').length`)) > 40,
            await js(`document.querySelectorAll('#panel .led, #panel image').length`));
     await send('Page.navigate', {url: pathToFileURL(ROOT + '/index.html').href}); await sleep(1200);
     verify('opened as a file, the notice says why nothing works', await shown());
     verify('and gives the command', /python3 -m http\.server 8000/.test(await js(`document.getElementById('file-notice').textContent`)));
+    const visible = await js(`[...document.body.querySelectorAll('*')]
+        .filter((e) => e.getClientRects().length && !e.closest('#file-notice'))
+        .map((e) => e.id || e.tagName)`);
+    verify('and is all the page shows: no panel that does nothing', visible.length === 0, visible.slice(0, 8).join(' '));
+    verify('with nothing to scroll', await js(`document.documentElement.scrollHeight <= innerHeight &&
+        document.documentElement.scrollWidth <= innerWidth`));
 }
 
 /**

@@ -1651,19 +1651,28 @@ a {
 }
 
 
-/* Over everything, since nothing else works: see index.html. */
+/* Opened off the disk, where nothing else can work, the page is this
+   alone (see index.html). */
+.needs-server #app,
+.needs-server dialog {
+    display: none !important;
+}
+
+.needs-server body {
+    box-sizing: border-box;
+    padding: 15vh 16px 0;
+}
+
 #file-notice {
     background-color: #5a4a1a;
+    border-radius: 10px;
+    box-sizing: border-box;
     color: #ffd98a;
     font-size: 16px;
-    left: 0;
-    line-height: 1.5;
-    margin: 0;
-    padding: 16px 20px;
-    position: fixed;
-    right: 0;
-    top: 0;
-    z-index: 100;
+    line-height: 1.6;
+    margin: 0 auto;
+    max-width: 36em;
+    padding: 20px 24px;
 }
 
 #file-notice a,

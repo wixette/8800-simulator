@@ -836,6 +836,16 @@ This is [D19](#d19--a-greyed-control-still-answers) doing the work it
 was built for: the reader is not left guessing, and the fix is in the
 message.
 
+> *Since v1.7.0* the whole page wants a web server, not two of its
+> files. Its scripts are ES modules (#19), and a browser runs no module
+> in a `file://` page. So opened off the disk the page shows only a
+> notice saying so, with the command to run, rather than a panel that
+> does nothing; the notice is a few lines of plain script in
+> index.html, the one thing that still runs there. `panel.needsServer()`
+> went with it, since the two controls it greyed out are never seen. A
+> browser set to run modules from files reads the files beside them as
+> well, and if one could not be read the ordinary errors say so.
+
 *Also covered:* a menu with nothing in it now declines to open.
 Previously it opened as a box of nothing, which told the reader less
 than not opening would have.

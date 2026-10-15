@@ -226,19 +226,6 @@ l10n.MESSAGES = {
         'ko': '4 KB 필요',
     },
 
-    'needs-server-short': {
-        'en': 'needs a web server',
-        'es': 'necesita un servidor web',
-        'fr': 'exige un serveur web',
-        'de': 'braucht einen Webserver',
-        'it': 'richiede un server web',
-        'pt-BR': 'requer um servidor web',
-        'zh': '需要 Web 服务器',
-        'zh-TW': '需要 Web 伺服器',
-        'ja': 'Web サーバーが必要',
-        'ko': '웹 서버 필요',
-    },
-
     'examples-unreadable-short': {
         'en': 'could not be read',
         'es': 'no se pudieron leer',
@@ -1176,19 +1163,6 @@ l10n.MESSAGES = {
         'zh-TW': 'Microsoft 4K BASIC',
         'ja': 'Microsoft 4K BASIC',
         'ko': 'Microsoft 4K BASIC',
-    },
-
-    'needs-server': {
-        'en': 'This page was opened straight off the disk, so the browser will not let it read the example programs or the BASIC tape. Serve the folder instead: run "python3 -m http.server 8000" in it and open http://localhost:8000/.',
-        'es': 'Esta página se abrió directamente desde el disco, así que el navegador no le deja leer los programas de ejemplo ni la cinta de BASIC. Sirve la carpeta: ejecuta "python3 -m http.server 8000" en ella y abre http://localhost:8000/.',
-        'fr': 'Cette page a été ouverte directement depuis le disque, le navigateur ne la laisse donc pas lire les programmes d’exemple ni la bande BASIC. Servez le dossier : lancez-y « python3 -m http.server 8000 » et ouvrez http://localhost:8000/.',
-        'de': 'Diese Seite wurde direkt von der Festplatte geöffnet, daher lässt der Browser sie die Beispielprogramme und das BASIC-Band nicht lesen. Stellen Sie den Ordner bereit: Führen Sie darin "python3 -m http.server 8000" aus und öffnen Sie http://localhost:8000/.',
-        'it': 'Questa pagina è stata aperta direttamente dal disco, quindi il browser non le lascia leggere i programmi di esempio né il nastro BASIC. Servi la cartella: esegui "python3 -m http.server 8000" al suo interno e apri http://localhost:8000/.',
-        'pt-BR': 'Esta página foi aberta direto do disco, então o navegador não a deixa ler os programas de exemplo nem a fita do BASIC. Abra-a por um servidor web: execute "python3 -m http.server 8000" na pasta e abra http://localhost:8000/.',
-        'zh': '这个页面是直接从磁盘打开的，浏览器不允许它读取示例程序或 BASIC 纸带。请改用服务器：在该目录下运行 "python3 -m http.server 8000"，然后打开 http://localhost:8000/。',
-        'zh-TW': '這個頁面是直接從磁碟開啟的，瀏覽器不允許它讀取範例程式或 BASIC 紙帶。請改用伺服器：在該目錄下執行 "python3 -m http.server 8000"，然後開啟 http://localhost:8000/。',
-        'ja': 'このページはディスクから直接開かれているため、ブラウザーはサンプルのプログラムや BASIC の紙テープを読み込ませてくれません。フォルダーを配信してください。その中で "python3 -m http.server 8000" を実行し、http://localhost:8000/ を開きます。',
-        'ko': '이 페이지는 디스크에서 바로 열렸기 때문에 브라우저가 예제 프로그램이나 BASIC 종이테이프를 읽지 못하게 합니다. 폴더를 서버로 제공하세요. 그 안에서 "python3 -m http.server 8000"을 실행하고 http://localhost:8000/ 을 여세요.',
     },
 
     'examples-unreadable': {

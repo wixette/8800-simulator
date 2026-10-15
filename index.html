@@ -56,9 +56,11 @@
   <body>
 
     <!-- Opened straight off the disk, the page's scripts cannot run: a
-         browser loads no module into a file:// page. This says so, and
-         how to serve it instead. It is the one script that is not a
-         module, so that it runs there; js/main.js hides it again. -->
+         browser loads no module into a file:// page. Then this is all
+         the page shows - not a panel that does nothing - with how to
+         serve it instead. It is the one script that is not a module, so
+         that it runs there, and it runs before the rest of the page is
+         drawn. Should the modules run after all, js/main.js undoes it. -->
     <p id="file-notice" hidden>
       This page needs a web server: a browser does not run its scripts
       from a file opened off the disk. In this folder, run
@@ -67,6 +69,7 @@
     </p>
     <script>
       if (location.protocol == 'file:') {
+        document.documentElement.classList.add('needs-server');
         document.getElementById('file-notice').hidden = false;
       }
     </script>

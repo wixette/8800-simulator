@@ -79,20 +79,6 @@ panel.EXAMPLES = [
 ];
 
 /**
- * Whether the page was opened straight off the disk.
- *
- * A browser will not let a file:// page fetch the files beside it, so
- * the example programs and the BASIC tape need the folder to be served.
- * Checked up front rather than by letting the fetch fail, so that those
- * controls are greyed out before they are pressed and give the real
- * reason. See D22 in docs/ms-basic-4k.md.
- * @return {boolean} True if the page cannot read its own folder.
- */
-panel.needsServer = function() {
-    return window.location.protocol == 'file:';
-};
-
-/**
  * Reads one example: its header, and its source assembled. Both menus
  * offer the same programs from the same files: the Load menu loads the
  * bytes, and the Assembler's Examples menu shows the source (U5 in
@@ -136,11 +122,6 @@ panel.fetchExamples = function() {
     }
     panel.examplesFetched = true;
     panel.examplePrograms = {};
-    if (panel.needsServer()) {
-        panel.examplesProblem = 'needs-server';
-        panel.examplesPromise = Promise.resolve();
-        return panel.examplesPromise;
-    }
     panel.examplesLoading = true;
     // Fetched together, but listed in the order panel.EXAMPLES gives.
     var fetches = panel.EXAMPLES.map(function(id) {
@@ -191,7 +172,6 @@ panel.MENU_CONTROLS = ['load-basic', 'examples'];
  * @type {Object<string, string>}
  */
 panel.SHORT_REASONS = {
-    'needs-server': 'needs-server-short',
     'rom-needs-memory': 'basic-needs-memory',
     'examples-unreadable': 'examples-unreadable-short',
 };

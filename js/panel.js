@@ -265,9 +265,9 @@ panel.versionFrom = function(text) {
 };
 
 /**
- * Puts the version in the About dialog, the first time it opens. A
- * page opened straight off the disk cannot read package.json (D22), and
- * shows no version rather than a wrong one.
+ * Puts the version in the About dialog, the first time it opens. If
+ * package.json cannot be read, it shows no version rather than a wrong
+ * one.
  */
 panel.showVersion = function() {
     if (panel.versionAsked) {
@@ -277,9 +277,6 @@ panel.showVersion = function() {
     var line = document.querySelector('.about-version');
     var shown = document.getElementById('app-version');
     line.hidden = true;
-    if (panel.needsServer()) {
-        return;
-    }
     window.fetch('package.json', panel.FETCH).then(function(response) {
         return response.ok ? response.text() : '';
     }).then(function(text) {
