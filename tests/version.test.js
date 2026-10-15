@@ -102,9 +102,9 @@ test('every file the page names carries the version, for caches (#19)', () => {
                        'index.html is not stamped with ' + VERSION +
                        ': set versions with npm version, or run npm run stamp');
     // Read here without the stamp's own code, as a second opinion.
-    const local = [...html.matchAll(/\b(?:src|href)="([^"]+)"/g)].map((m) => m[1])
+    const local = [...html.matchAll(/\b(?:src|href|srcset)="([^"]+)"/g)].map((m) => m[1])
           .filter((url) => !/^([a-z]+:|\/\/|#)/i.test(url));
-    assert.ok(local.length >= 14, 'the stylesheet, images, sounds and script: ' + local.length);
+    assert.ok(local.length >= 17, 'the stylesheet, icons, images, sounds and script: ' + local.length);
     for (const url of local) {
         assert.match(url, new RegExp('\\?v=' + VERSION.replace(/\./g, '\\.') + '$'), url);
         assert.ok(fs.existsSync(path.join(ROOT, url.replace(/\?.*/, ''))), url + ' exists');

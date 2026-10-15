@@ -10,8 +10,9 @@
  * edits index.html in place - there is no build, and no second copy of
  * the page:
  *
- * - each file it names by src or href gets ?v=<version>: the
- *   stylesheet, the images, the sounds, and js/main.js;
+ * - each file it names by src, href or srcset gets ?v=<version>: the
+ *   stylesheet, the icons and images, the sounds, and js/main.js (a
+ *   srcset of one file, as the page's are);
  * - its import map gives every module in js/ the same: the modules
  *   import one another by their plain names, and the map turns each
  *   into the versioned one, for the page alone.
@@ -44,7 +45,7 @@ export function stamp(html, version, modules) {
     const v = '?v=' + version;
     // A file of the site's own: not a link to elsewhere, nor a fragment.
     const local = /^(?![a-z]+:|\/\/|#)([^?#"]+\.[a-z0-9]+)(\?v=[^"#]*)?$/i;
-    let out = html.replace(/\b(src|href)="([^"]*)"/g, (whole, attr, url) => {
+    let out = html.replace(/\b(src|href|srcset)="([^"]*)"/g, (whole, attr, url) => {
         const m = url.match(local);
         return m ? attr + '="' + m[1] + v + '"' : whole;
     });

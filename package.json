@@ -9,6 +9,7 @@
     "test": "node --test",
     "test:browser": "node tests/browser/run.mjs",
     "stamp": "node tools/stamp.mjs",
+    "icons": "node tools/icons.mjs",
     "version": "node tools/stamp.mjs",
     "typecheck": "npx --yes -p typescript@5.9.3 tsc -p tsconfig.json"
   }

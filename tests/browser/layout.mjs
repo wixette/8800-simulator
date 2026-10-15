@@ -88,3 +88,45 @@ export async function versioned(h) {
     verify('and the examples are fetched too, without a version',
            files.some((f) => /^examples\/[\w-]+\.asm$/.test(f)), files.filter(fetched).join(' '));
 }
+
+/**
+ * The logo: the machine and its name on a wide screen, the machine
+ * alone on a phone, none where a phone has no room, and the toolbar
+ * one row at every width (v1.7.0). The icons the page offers exist.
+ */
+export async function logo(h) {
+    const {js, viewport, fresh, verify, sleep} = h;
+    const seen = () => js(`(() => { const l = document.getElementById('header-logo'),
+        t = document.getElementById('toolbar'), r = l.getBoundingClientRect();
+        // On one row, every item overlaps every other from top to bottom.
+        // (Not the spacer between the two groups, which has no height.)
+        const boxes = [...t.children].filter((e) => e.getClientRects().length)
+            .map((e) => e.getBoundingClientRect()).filter((b) => b.height > 0);
+        const oneRow = Math.max(...boxes.map((b) => b.top)) < Math.min(...boxes.map((b) => b.bottom));
+        return {file: l.currentSrc.replace(/^.*\\//, '').replace(/\\?.*/, ''),
+                shown: r.width > 0, height: Math.round(r.height), oneRow: oneRow}; })()`);
+    for (const [width, file, shown] of [[1280, '8800-simulator-logo-text-white.svg', true],
+                                        [760, '8800-simulator-logo-text-white.svg', true],
+                                        [700, '8800-simulator-logo.svg', true],
+                                        [375, '8800-simulator-logo.svg', true],
+                                        [360, '8800-simulator-logo.svg', false]]) {
+        await viewport(width, 860); await fresh();
+        const bad = [];
+        for (const locale of ['en', 'de', 'fr', 'ja', 'pt-BR']) {
+            await js(`l10n.setLocale('${locale}')`); await sleep(120);
+            const m = await seen();
+            if (m.file != file || m.shown != shown || (shown && m.height < 20)) bad.push(locale + ' ' + JSON.stringify(m));
+            if (!m.oneRow) bad.push(locale + ' wraps onto two rows');
+        }
+        verify(width + 'px: ' + (shown ? file : 'no logo') + ', toolbar on one row', bad.length == 0, bad.join('; '));
+    }
+    verify('the alt text is the translated title', (await js(`document.getElementById('header-logo').alt`)) == (await js(`l10n.getMessage('header-title')`)));
+    const icons = await js(`Promise.all([...document.querySelectorAll('link[rel=icon], link[rel=apple-touch-icon], link[rel=manifest]')]
+        .map((l) => fetch(l.href).then((r) => l.getAttribute('rel') + ' ' + r.status + ' ' + r.headers.get('content-type'))))`);
+    verify('every icon and the manifest are there', icons.length == 4 && icons.every((s) => / 200 /.test(s)), icons.join(', '));
+    const manifest = await js(`fetch('manifest.webmanifest').then((r) => r.json())`);
+    const sizes = await js(`Promise.all(${JSON.stringify((manifest && manifest.icons) || [])}.map((i) =>
+        new Promise((done) => { const img = new Image(); img.onload = () => done(i.sizes == img.naturalWidth + 'x' + img.naturalHeight);
+            img.onerror = () => done(false); img.src = i.src; })))`);
+    verify("the manifest's icons are the sizes it says", sizes && sizes.length == 2 && sizes.every(Boolean), JSON.stringify(sizes));
+}

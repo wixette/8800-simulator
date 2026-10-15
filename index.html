@@ -19,8 +19,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title id="title" class="l10n">Sim-8800: Altair 8800 Simulator</title>
-    <link rel="icon" href="favicon.ico?v=1.6.1" sizes="48x48 32x32 16x16">
-    <link rel="icon" href="images/led-on.svg?v=1.6.1" type="image/svg+xml">
+    <!-- The icons, all drawn from images/8800-simulator-logo.svg by npm
+         run icons (tools/icons.mjs). A browser that takes an SVG icon
+         takes the second; sizes="32x32" on the first keeps Chrome from
+         picking the .ico over it. -->
+    <link rel="icon" href="favicon.ico?v=1.6.1" sizes="32x32">
+    <link rel="icon" href="images/favicon.svg?v=1.6.1" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png?v=1.6.1">
+    <link rel="manifest" href="manifest.webmanifest?v=1.6.1">
     <link rel="stylesheet" href="css/style.css?v=1.6.1">
     <!-- Every file name here carries the version (?v=), and so does each
          module the scripts import, through this map: a release asks for
@@ -84,11 +90,16 @@
            right. Icons are Material Icons (Apache License 2.0), inline
            so that the page needs nothing from the network. -->
       <header id="toolbar">
-        <!-- The name, in the lettering of the panel's own nameplate. Its
-             alt text is the translated title (panel.refreshPlaceholders). -->
+        <!-- The logo: the machine and its name, in the lettering of the
+             panel's own nameplate; on a phone, the machine alone. Its alt
+             text is the translated title (panel.refreshPlaceholders). -->
         <div id="header-title">
-          <img id="header-logo" src="images/8800-simulator-logo-white.svg?v=1.6.1"
-               alt="Altair 8800 Simulator">
+          <picture>
+            <source media="(max-width: 700px)"
+                    srcset="images/8800-simulator-logo.svg?v=1.6.1">
+            <img id="header-logo" src="images/8800-simulator-logo-text-white.svg?v=1.6.1"
+                 alt="Altair 8800 Simulator">
+          </picture>
         </div>
 
         <div id="load-dropdown" class="dropdown">

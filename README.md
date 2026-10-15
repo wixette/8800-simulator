@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="images/8800-simulator-logo-text-white.svg">
+    <img src="images/8800-simulator-logo-text-black.svg" alt="8800 Simulator logo" width="560">
+  </picture>
+</p>
+
 # Altair 8800 Simulator
 
 [![Tests](https://github.com/wixette/8800-simulator/actions/workflows/test.yml/badge.svg)](https://github.com/wixette/8800-simulator/actions/workflows/test.yml)
@@ -353,6 +360,28 @@ commit. Commit the two files as usual. A version changed any other way,
 by hand in `package.json`, needs `npm run stamp` after it; until then
 `npm test` fails and says so, so a release cannot go out half stamped.
 
+### The logo and icons
+
+The logo is in [images/](images/) in three forms: the machine alone, 16:9
+(`8800-simulator-logo.svg`), and the machine with its name, 8:1, in
+white for dark backgrounds and black for light ones
+(`8800-simulator-logo-text-white.svg`, `-text-black.svg`). The toolbar
+shows the one with the name, and on a phone the machine alone; this
+README shows the name in whichever colour suits the reader's theme.
+
+The favicons and home screen icons are drawn from the 16:9 one:
+`favicon.ico` (16, 32 and 48 pixels), `images/favicon.svg`, and the
+180, 192 and 512 pixel PNGs that `index.html` and
+[manifest.webmanifest](manifest.webmanifest) name. After a change to
+the logo, draw them again (it needs Chrome, as the browser checks do):
+
+```
+npm run icons
+```
+
+`npm test` fails until they have been, since it checks that the SVG
+favicon still has the logo's drawing.
+
 ### How it is built
 
 | File | What it is |
@@ -371,6 +400,7 @@ by hand in `package.json`, needs `npm run stamp` after it; until then
 | [js/asm8080.js](js/asm8080.js), [js/asmtab.js](js/asmtab.js) | The 8080 assembler, and its tab |
 | [js/dropdown.js](js/dropdown.js), [js/dialog.js](js/dialog.js) | The menus and the dialogs |
 | [js/l10n.js](js/l10n.js) | Every message, in ten languages |
+| [tools/stamp.mjs](tools/stamp.mjs), [tools/icons.mjs](tools/icons.mjs) | Not part of the page: the version stamp, and drawing the icons from the logo |
 
 The design notes say why things are the way they are:
 [docs/ui-design.md](docs/ui-design.md) for the layout and its

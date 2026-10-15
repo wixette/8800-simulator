@@ -71,18 +71,19 @@ a {
     margin-right: 8px;
 }
 
-/* The logo carries its own margin inside its 800 by 90 box, so it is
-   drawn a little taller than the lettering it shows. */
+/* The logo carries its own margin inside its 8:1 box, so it is drawn
+   as tall as the buttons beside it, its lettering a little less. */
 #header-logo {
     display: block;
-    height: 26px;
+    height: 32px;
     width: auto;
 }
 
-/* Just wider than a phone, the menus need the room. */
+/* Just wider than a phone, the menus need the room: as wide as the
+   longest language leaves room for, at 701px. */
 @media (max-width: 900px) {
     #header-logo {
-        height: 20px;
+        height: 22px;
     }
 }
 
@@ -1651,6 +1652,14 @@ a {
 }
 
 
+/* The narrowest phones have no room to spare in the toolbar, so the
+   logo goes, as it did on every phone before v1.7.0. */
+@media (max-width: 374px) {
+    #header-title {
+        display: none;
+    }
+}
+
 /* Opened off the disk, where nothing else can work, the page is this
    alone (see index.html). */
 .needs-server #app,
@@ -1772,8 +1781,15 @@ a {
 
     /* The artwork says ALTAIR 8800 already, and the toolbar's row is
        worth more to the dock. */
+    /* The machine alone, from the <picture> (index.html): the name
+       would take the room the menus need. 39px across, the room the
+       toolbar has to spare at 375px. */
+    #header-logo {
+        height: 22px;
+    }
+
     #header-title {
-        display: none;
+        margin-right: 0;
     }
 
     /* The strip packed tight, so the dock keeps some room: the levers
