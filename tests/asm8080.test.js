@@ -495,6 +495,11 @@ test('without END START, a program starts at its first instruction (L8, #20)', (
                              ' GO'), 0x41, 'an instruction in an expansion counts');
     assert.strictEqual(entry(' ORG 10H', ' IF 0', ' NOP', ' ENDIF', ' DB 5', ' HLT'),
                        0x11, 'an instruction IF skips does not');
+    // First in the source, not lowest in memory: code written at 0040H
+    // above code at 0000H starts at 0040H, and END says otherwise.
+    assert.strictEqual(entry(' ORG 0040H', ' NOP', ' ORG 0000H', 'MAIN: NOP'), 0x40);
+    assert.strictEqual(entry(' ORG 0040H', ' NOP', ' ORG 0000H', 'MAIN: NOP',
+                             ' END MAIN'), 0x00);
     // A program that is all data starts at its first byte, as before.
     assert.strictEqual(entry(' ORG 50H', ' DB 0C3H,00H,01H'), 0x50);
     // END START still decides, wherever it points.
