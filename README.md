@@ -367,6 +367,18 @@ It takes a minute or so and needs Chrome installed (or `CHROME` set to
 its path, Chromium too), so it is not part of CI: run it by hand
 before a release. The checks are in [tests/browser/](tests/browser/).
 
+The JSDoc types are checked against the code by TypeScript's checker,
+which `npx` fetches for the run; nothing is compiled, and the page
+runs the files as they are. CI runs it after the tests:
+
+```
+npm run typecheck
+```
+
+Only the files that start with `// @ts-check` are checked, so far
+`js/asm8080.js` and `js/sim8800.js`; [tsconfig.json](tsconfig.json)
+says how strictly.
+
 ### The link format
 
 A link opens the simulator with a program loaded at 0000H, ready to

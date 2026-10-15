@@ -1,3 +1,4 @@
+// @ts-check
 /**
  *   Copyright 2020-2026 wixette@gmail.com
  *
@@ -26,19 +27,19 @@ export class Sim8800 {
     /**
      * @param {number} memSize The memory size, in bytes.
      * @param {number} clockRate The clock rate.
-     * @param {function(Array<number>)?} setAddressLedsCallback The
+     * @param {?function(Array<number>): void} setAddressLedsCallback The
      *     callback to set address LEDs.
-     * @param {function(Array<number>)?} setDataLedsCallback The
+     * @param {?function(Array<number>): void} setDataLedsCallback The
      *     callback to set data LEDs.
-     * @param {function(boolean)?} setWaitLedCallback The callback to
+     * @param {?function(boolean): void} setWaitLedCallback The callback to
      *     set the WAIT LED.
-     * @param {function(boolean)?} setStatusLedsCallback The callback to
+     * @param {?function(boolean): void} setStatusLedsCallback The callback to
      *     set the STATUS LEDs.
-     * @param {function():number?} getInputAddressCallback The
+     * @param {?function(): number} getInputAddressCallback The
      *     callback to get the input word from address/data switches.
-     * @param {function(string)?} dumpCpuCallback The callback to receive
+     * @param {?function(string): void} dumpCpuCallback The callback to receive
      *     CPU status dump, in HTML string.
-     * @param {function(string, ?Array<Object>, Object=)?} dumpMemCallback
+     * @param {?function(string, ?Array<Object>, Object=): void} dumpMemCallback
      *     The callback to receive the memory dump as an HTML string,
      *     the memory map as data - see getMemMap() - or null on a
      *     machine small enough not to need a map, and the instruction
@@ -104,13 +105,13 @@ export class Sim8800 {
         this.firstBlockedAddress = null;
         /**
          * Called with the address of the first write refused in a run.
-         * @type {?function(number)}
+         * @type {?function(number): void}
          */
         this.onProtectedWrite = null;
         /**
          * Called with what the lamps that report the machine's state
          * should show. See updateLamps().
-         * @type {?function(Object<string, boolean>)}
+         * @type {?function(Object<string, boolean>): void}
          */
         this.setLampsCallback = null;
         this.lastTickTime = 0;
@@ -125,7 +126,7 @@ export class Sim8800 {
          * Coalesces the debugger dumps. A UI that repaints on its own
          * schedule sets dumpScheduler; without one the dumps happen
          * inline, as they always did. See requestDump().
-         * @type {?function(function())}
+         * @type {?function(function(): void): void}
          */
         this.dumpScheduler = null;
         /**
@@ -166,7 +167,7 @@ export class Sim8800 {
         /**
          * Called after a byte is put in by hand - DEPOSIT, or the
          * Debugger's memory dump - with its address and value.
-         * @type {?function(number, number)}
+         * @type {?function(number, number): void}
          */
         this.onHandWrite = null;
         this.initMem();
@@ -579,9 +580,8 @@ export class Sim8800 {
     getInstructionAtPc(pc) {
         var bytes = [0, 1, 2].map((i) => this.readByte((pc + i) & 0xffff));
         var instr = Sim8800.decodeInstruction(bytes[0], bytes[1], bytes[2]);
-        instr.address = pc;
-        instr.bytes = bytes.slice(0, instr.length);
-        return instr;
+        return Object.assign(instr, {address: pc,
+                                     bytes: bytes.slice(0, instr.length)});
     }
 
     /**
@@ -1083,7 +1083,8 @@ export class Sim8800 {
         // Each step is a run of its own, so a write it makes to
         // protected memory is reported every time.
         this.clearBlockedWrites();
-        var address = this.step(1);
+        // Switched on, so step() gives the address it stopped at.
+        var address = /** @type {number} */ (this.step(1));
         if (this.setDataLedsCallback) {
             this.setDataLedsCallback(
                 Sim8800.parseBits(this.readByte(address), 8));
@@ -1139,8 +1140,9 @@ export class Sim8800 {
 
     /**
      * Writes a byte to the given address.
-     * @return {boolean} False if the board there is protected, so the
-     *     byte did not go in.
+     * @return {?boolean} False if the board there is protected, so the
+     *     byte did not go in; null while the machine runs, when the
+     *     switch does nothing.
      */
     deposit() {
         // Like the real panel, only a stopped machine takes it.
@@ -1199,7 +1201,8 @@ export class Sim8800 {
 
     /**
      * Writes a byte to the next address.
-     * @return {boolean} False if the board there is protected.
+     * @return {?boolean} False if the board there is protected; null
+     *     while the machine runs.
      */
     depositNext() {
         // Like the real panel, only a stopped machine takes it.

@@ -7,6 +7,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "test": "node --test",
-    "test:browser": "node tests/browser/run.mjs"
+    "test:browser": "node tests/browser/run.mjs",
+    "typecheck": "npx --yes -p typescript@5.9.3 tsc -p tsconfig.json"
   }
 }
