@@ -1651,6 +1651,30 @@ a {
 }
 
 
+/* Over everything, since nothing else works: see index.html. */
+#file-notice {
+    background-color: #5a4a1a;
+    color: #ffd98a;
+    font-size: 16px;
+    left: 0;
+    line-height: 1.5;
+    margin: 0;
+    padding: 16px 20px;
+    position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 100;
+}
+
+#file-notice a,
+#file-notice code {
+    color: #fff;
+}
+
+#file-notice code {
+    white-space: nowrap;
+}
+
 #status-bar.status-warn {
     background-color: #5a4a1a;
     color: #ffd98a;

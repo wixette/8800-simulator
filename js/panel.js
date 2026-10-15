@@ -16,11 +16,22 @@
  * @fileoverview The main logic to control the front panel UI.
  */
 
+import {Asm8080} from './asm8080.js';
+import {asmtab} from './asmtab.js';
+import {CPU8080} from './8080.js';
+import {Dialog} from './dialog.js';
+import {Dropdown} from './dropdown.js';
+import {l10n} from './l10n.js';
+import {Link} from './link.js';
+import {Sim8800} from './sim8800.js';
+import {Sio} from './sio.js';
+import {Teletype} from './teletype.js';
+
 /**
  * Simple namespace.
  * @type {Object}
  */
-panel = {};
+export const panel = {};
 
 /**
  * Whether the dock is open on the Debugger. The dumps are expensive, so
@@ -97,9 +108,7 @@ panel.onSingle = function() {
  * @param {boolean} scroll Whether the reader caused this.
  */
 panel.followPc = function(scroll) {
-    if (typeof asmtab !== 'undefined' && asmtab.requestPc) {
-        asmtab.requestPc(scroll);
-    }
+    asmtab.requestPc(scroll);
 };
 
 /**
@@ -659,7 +668,7 @@ panel.refreshPlaceholders = function() {
             nav.title = l10n.getMessage('nav-' + panel.TABS[i] + '-name');
         }
     }
-    if (typeof asmtab !== 'undefined' && document.getElementById('asm-source')) {
+    if (document.getElementById('asm-source')) {
         asmtab.refreshText();
     }
     // How to edit the dump, for the pointer and for a screen reader.
@@ -2348,9 +2357,7 @@ panel.init = function() {
     panel.sim.setLampsCallback = panel.setLampsCallback;
     // A byte put in by hand may undo what the Assembler loaded (U7).
     panel.sim.onHandWrite = function(address, value) {
-        if (typeof asmtab !== 'undefined' && asmtab.onHandWrite) {
-            asmtab.onHandWrite(address, value);
-        }
+        asmtab.onHandWrite(address, value);
     };
     panel.sim.onProtectedWrite = panel.onProtectedWrite;
 

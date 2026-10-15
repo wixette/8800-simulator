@@ -32,7 +32,7 @@
  * switches as a word. Functions that need to know which memory sizes
  * the machine offers take them as memSizes, smallest first.
  */
-class Link {
+export class Link {
     /**
      * Turns hex text into bytes. This is both the hex= field of a link
      * and the page's Load Data box.
@@ -390,6 +390,3 @@ Link.MAX_BYTES = 65536;
 
 // Exports the class for unit tests when running in Node.js. This has
 // no effect when the script is loaded in a browser.
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Link;
-}

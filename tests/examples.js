@@ -10,11 +10,11 @@
  */
 'use strict';
 
-const fs = require('node:fs');
-const path = require('node:path');
-const Asm8080 = require('../js/asm8080.js');
+import fs from 'node:fs';
+import path from 'node:path';
+import {Asm8080} from '../js/asm8080.js';
 
-const EXAMPLES_DIR = path.join(__dirname, '..', 'examples');
+const EXAMPLES_DIR = path.join(import.meta.dirname, '..', 'examples');
 
 /**
  * Reads one example.
@@ -70,8 +70,8 @@ function loadExample(id) {
     return example;
 }
 
-module.exports = {
-    EXAMPLES_DIR: EXAMPLES_DIR,
-    loadExamples: loadExamples,
-    loadExample: loadExample,
+export {
+    EXAMPLES_DIR,
+    loadExamples,
+    loadExample,
 };

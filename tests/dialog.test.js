@@ -6,8 +6,9 @@
  */
 'use strict';
 
-const test = require('node:test');
-const assert = require('node:assert');
+import test from 'node:test';
+import assert from 'node:assert';
+import {Dialog} from '../js/dialog.js';
 
 /**
  * A stand-in <dialog>, with a text box inside it, that can be sent
@@ -42,7 +43,6 @@ function openDialog(t) {
     const savedDocument = global.document;
     global.document = {getElementById: () => fake.elem};
     t.after(() => { global.document = savedDocument; });
-    const Dialog = require('../js/dialog.js');
     const dialog = new Dialog('d');
     dialog.open();
     return {dialog: dialog, fake: fake};

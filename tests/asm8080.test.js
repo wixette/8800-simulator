@@ -7,11 +7,13 @@
  */
 'use strict';
 
-const test = require('node:test');
-const assert = require('node:assert');
-const Asm8080 = require('../js/asm8080.js');
-global.CPU8080 = require('../js/8080.js');
-const Sim8800 = require('../js/sim8800.js');
+import test from 'node:test';
+import assert from 'node:assert';
+import fs from 'node:fs';
+import {Asm8080} from '../js/asm8080.js';
+import {CPUD8080} from '../js/8080.js';
+import {l10n} from '../js/l10n.js';
+import {Sim8800} from '../js/sim8800.js';
 
 /** Assembles, and gives the bytes from the lowest address, in hex. */
 function hexOf(source, options) {
@@ -46,7 +48,7 @@ test('every documented opcode assembles back to itself', () => {
         if (Sim8800.UNDOCUMENTED_OPCODES[op] !== undefined) {
             continue;
         }
-        const [text, length] = CPU8080.disasm(op, 0x34, 0x12);
+        const [text, length] = CPUD8080.disasm(op, 0x34, 0x12);
         const source = ' ' + text.replace(/,\s*/, ',')
               .replace(/\$([0-9A-F]+)/, (_, h) => '0' + h + 'H');
         const expected = [op, 0x34, 0x12].slice(0, length)
@@ -629,18 +631,13 @@ test('the tokens give the line back, and say what each piece is', () => {
 
 test('every error the assembler can report has its message', () => {
     // The page says each error as the message 'asm-' + its id (L14).
-    const fs = require('node:fs');
-    const vm = require('node:vm');
-    vm.runInThisContext(fs.readFileSync(
-        require.resolve('../js/l10n.js'), 'utf8'), {filename: 'l10n.js'});
-    const l10n = globalThis.l10n;
     for (const id of Asm8080.ERRORS) {
         assert.ok(l10n.MESSAGES['asm-' + id], 'no message for ' + id);
     }
     // And every id the code can raise is in the list: the first id
     // after error: or id:, and in an error() or fail() call each quoted
     // word that is not the far side of a comparison.
-    const code = fs.readFileSync(require.resolve('../js/asm8080.js'), 'utf8');
+    const code = fs.readFileSync(new URL('../js/asm8080.js', import.meta.url), 'utf8');
     const raised = new Set();
     for (const m of code.matchAll(/(?:error|id): '([a-z][a-z0-9-]+)'/g)) {
         raised.add(m[1]);

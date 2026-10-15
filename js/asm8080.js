@@ -33,7 +33,7 @@
  * them in the reader's language; the ids are the l10n message ids,
  * each prefixed 'asm-'.
  */
-class Asm8080 {
+export class Asm8080 {
     /**
      * Assembles a program.
      * @param {string} source The program.
@@ -1460,6 +1460,3 @@ Asm8080.Expression = class {
 
 // Exports the class for unit tests when running in Node.js. This has
 // no effect when the script is loaded in a browser.
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Asm8080;
-}

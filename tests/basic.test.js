@@ -13,15 +13,15 @@
  */
 'use strict';
 
-const test = require('node:test');
-const assert = require('node:assert');
-const fs = require('node:fs');
-const path = require('node:path');
-const {createSim, flushTimers} = require('./fixture.js');
-const Sio = require('../js/sio.js');
-const Teletype = require('../js/teletype.js');
+import test from 'node:test';
+import assert from 'node:assert';
+import fs from 'node:fs';
+import path from 'node:path';
+import {createSim, flushTimers} from './fixture.js';
+import {Sio} from '../js/sio.js';
+import {Teletype} from '../js/teletype.js';
 
-const ROM_PATH = path.join(__dirname, '..', 'roms', '4kbas32.bin');
+const ROM_PATH = path.join(import.meta.dirname, '..', 'roms', '4kbas32.bin');
 const HAVE_ROM = fs.existsSync(ROM_PATH);
 const SKIP = HAVE_ROM ? false : 'roms/4kbas32.bin is not present';
 

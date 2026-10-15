@@ -35,7 +35,7 @@
  * and optionally an element with the class dropdown-label inside the
  * button for setLabel(). See index.html.
  */
-class Dropdown {
+export class Dropdown {
     /**
      * @param {string} rootId Id of the element holding the button and
      *     the list.
@@ -308,6 +308,3 @@ Dropdown.all = [];
 
 // Exports the class for unit tests when running in Node.js. This has
 // no effect when the script is loaded in a browser.
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Dropdown;
-}

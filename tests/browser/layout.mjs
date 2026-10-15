@@ -3,6 +3,9 @@
  * at every width and language, and a dialog taller than the window
  * scrolls its body, keeping its title and close button in reach.
  */
+import {pathToFileURL} from 'node:url';
+import {ROOT} from './harness.mjs';
+
 export default async function(h) {
     const {js, viewport, fresh, press, verify, sleep} = h;
     await viewport(1280, 860); await fresh();
@@ -32,4 +35,21 @@ export default async function(h) {
     const end = await js(`(() => { const b = document.querySelector('#about-dialog .dialog-body'); return b.scrollTop > 0; })()`);
     verify('down to its end', end);
     await js(`l10n.setLocale('en')`);
+}
+
+/**
+ * Opened off the disk, the page cannot run its modules, and says so;
+ * served, it never shows that (#19).
+ */
+export async function fileNotice(h) {
+    const {js, send, viewport, fresh, verify, sleep} = h;
+    const shown = () => js(`(() => { const n = document.getElementById('file-notice');
+        return !!n && !n.hidden && getComputedStyle(n).display != 'none'; })()`);
+    await viewport(1280, 860); await fresh();
+    verify('served, there is no notice', (await shown()) === false);
+    verify('and the panel is built', (await js(`document.querySelectorAll('#panel .led, #panel image').length`)) > 40,
+           await js(`document.querySelectorAll('#panel .led, #panel image').length`));
+    await send('Page.navigate', {url: pathToFileURL(ROOT + '/index.html').href}); await sleep(1200);
+    verify('opened as a file, the notice says why nothing works', await shown());
+    verify('and gives the command', /python3 -m http\.server 8000/.test(await js(`document.getElementById('file-notice').textContent`)));
 }

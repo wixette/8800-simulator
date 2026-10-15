@@ -8,13 +8,15 @@
  */
 'use strict';
 
-const test = require('node:test');
-const assert = require('node:assert');
-const path = require('node:path');
-const {execFileSync} = require('node:child_process');
+import test from 'node:test';
+import assert from 'node:assert';
+import fs from 'node:fs';
+import path from 'node:path';
+import {execFileSync} from 'node:child_process';
+import {panel} from '../js/panel.js';
 
-const ROOT = path.join(__dirname, '..');
-const VERSION = require('../package.json').version;
+const ROOT = path.join(import.meta.dirname, '..');
+const VERSION = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')).version;
 
 /**
  * The release tags, newest first. Only vN.N.N is a release: the repo
@@ -80,13 +82,10 @@ test('the About dialog reads the version from package.json', () => {
     // The page has no build step to stamp a copy of the version in, so
     // About reads this file itself (panel.showVersion), and index.html
     // must not carry a copy that could fall behind.
-    const fs = require('node:fs');
-    const vm = require('node:vm');
-    vm.runInThisContext(fs.readFileSync(path.join(ROOT, 'js', 'panel.js'), 'utf8'));
     const text = fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8');
-    assert.strictEqual(globalThis.panel.versionFrom(text), VERSION);
-    assert.strictEqual(globalThis.panel.versionFrom('not json'), null);
-    assert.strictEqual(globalThis.panel.versionFrom('{"version": "two"}'), null);
+    assert.strictEqual(panel.versionFrom(text), VERSION);
+    assert.strictEqual(panel.versionFrom('not json'), null);
+    assert.strictEqual(panel.versionFrom('{"version": "two"}'), null);
     const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
     assert.match(html, /id="app-version"><\/span>/,
                  'index.html should leave the version to package.json');

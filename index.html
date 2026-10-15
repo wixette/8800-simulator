@@ -25,6 +25,22 @@
   </head>
   <body>
 
+    <!-- Opened straight off the disk, the page's scripts cannot run: a
+         browser loads no module into a file:// page. This says so, and
+         how to serve it instead. It is the one script that is not a
+         module, so that it runs there; js/main.js hides it again. -->
+    <p id="file-notice" hidden>
+      This page needs a web server: a browser does not run its scripts
+      from a file opened off the disk. In this folder, run
+      <code>python3 -m http.server 8000</code>, then open
+      <a href="http://localhost:8000/">http://localhost:8000/</a>.
+    </p>
+    <script>
+      if (location.protocol == 'file:') {
+        document.getElementById('file-notice').hidden = false;
+      }
+    </script>
+
     <!-- One frame the height of the window: the toolbar, the front panel,
          the dock of tools under it, and the status line. The panel is the
          one primary surface and takes whatever room the dock leaves
@@ -467,25 +483,6 @@ RUN</pre>
     <audio id="sound-switch" src="audio/switch.mp3"></audio>
     <audio id="sound-toggle" src="audio/toggle.mp3"></audio>
 
-    <script src="js/l10n.js"></script>
-    <script src="js/8080.js"></script>
-    <script src="js/sim8800.js"></script>
-    <script src="js/dropdown.js"></script>
-    <script src="js/dialog.js"></script>
-    <script src="js/link.js"></script>
-    <script src="js/asm8080.js"></script>
-    <script src="js/sio.js"></script>
-    <script src="js/teletype.js"></script>
-    <script src="js/asmtab.js"></script>
-    <script src="js/panel.js"></script>
-    <script>
-     (function() {
-       if (document.readyState !== 'loading') {
-         panel.init();
-       } else {
-         document.addEventListener('DOMContentLoaded', panel.init);
-       }
-     })();
-    </script>
+    <script type="module" src="js/main.js"></script>
   </body>
 </html>

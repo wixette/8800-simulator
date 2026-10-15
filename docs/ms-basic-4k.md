@@ -45,7 +45,12 @@ this machine.
 which passes the 8080 exerciser. It is also — verified by diff — **the
 same file that <https://s2js.com/altair/> uses to run this exact ROM**.
 Byte-identical after stripping our file-overview header and one extra
-`inte` field that s2js added to `status()`.
+`inte` field that s2js added to `status()`, as it stood in v1.6.1. Since
+v1.7.0 (#19) the file is an ES module, which changed four places: the
+two objects it fills are declared and exported, rather than made as
+globals, and one unused global assignment (`T=0`) is gone, since a
+module runs in strict mode. Each is marked "Changed for this
+simulator".
 
 - All 256 opcodes have `case` labels; the `default:` branch is a NOP,
   so an undefined opcode cannot crash the machine.

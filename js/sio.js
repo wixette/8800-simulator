@@ -37,7 +37,7 @@
  * keeps working whether or not a terminal is on screen. See
  * docs/ms-basic-4k.md.
  */
-class Sio {
+export class Sio {
     /**
      * @param {function(number)?} onTx Called with each byte the CPU
      *     sends, as the CPU wrote it. The eighth bit is left alone;
@@ -199,6 +199,3 @@ Sio.STATUS_2SIO_OUTPUT_READY = 0x02;
 
 // Exports the class for unit tests when running in Node.js. This has
 // no effect when the script is loaded in a browser.
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Sio;
-}

@@ -10,11 +10,11 @@
  */
 'use strict';
 
-const test = require('node:test');
-const assert = require('node:assert');
-const fs = require('node:fs');
-const path = require('node:path');
-const Link = require('../js/link.js');
+import test from 'node:test';
+import assert from 'node:assert';
+import fs from 'node:fs';
+import path from 'node:path';
+import {Link} from '../js/link.js';
 
 // The memory sizes the page offers (panel.MEM_SIZES), which Link is told
 // rather than knowing. Each helper below passes them on.
@@ -82,7 +82,7 @@ test('a run of hex digits that is not whole bytes is reported', () => {
 });
 
 // The 4K BASIC tape is optional (see roms/NOTICE), as in basic.test.js.
-const BASIC_ROM = path.join(__dirname, '..', 'roms', '4kbas32.bin');
+const BASIC_ROM = path.join(import.meta.dirname, '..', 'roms', '4kbas32.bin');
 const SKIP_WITHOUT_ROM = fs.existsSync(BASIC_ROM) ?
     false : 'roms/4kbas32.bin is not present';
 

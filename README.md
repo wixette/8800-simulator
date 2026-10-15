@@ -312,16 +312,16 @@ Then open <http://localhost:8000/>. To deploy, copy the whole
 directory to a web server; there is nothing to build, and no
 dependencies.
 
-Opening `index.html` straight off the disk mostly works, but a browser
-will not let a `file://` page read the files beside it. So the example
-programs and the BASIC tape, which the page reads from `examples/` and
-`roms/`, grey out and say why.
+Opening `index.html` straight off the disk does not work: the page's
+scripts are ES modules, and a browser runs no module in a `file://`
+page. The page says so, and gives the command above.
 
 ### How it is built
 
 | File | What it is |
 | --- | --- |
 | [index.html](index.html), [css/style.css](css/style.css) | The page: toolbar, panel, dock, dialogs |
+| [js/main.js](js/main.js) | The page's one script; every other file is an ES module it imports |
 | [js/8080.js](js/8080.js) | The Intel 8080 CPU core, [maly/8080js](https://github.com/maly/8080js) |
 | [js/sim8800.js](js/sim8800.js) | The machine: memory, the front panel's logic, the ports |
 | [js/sio.js](js/sio.js), [js/teletype.js](js/teletype.js) | The serial boards, and the Teletype's paper |

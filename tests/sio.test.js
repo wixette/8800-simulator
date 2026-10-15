@@ -6,11 +6,11 @@
  */
 'use strict';
 
-const test = require('node:test');
-const assert = require('node:assert');
-const {createSim, flushTimers} = require('./fixture.js');
-const Sio = require('../js/sio.js');
-const Teletype = require('../js/teletype.js');
+import test from 'node:test';
+import assert from 'node:assert';
+import {createSim, flushTimers} from './fixture.js';
+import {Sio} from '../js/sio.js';
+import {Teletype} from '../js/teletype.js';
 
 /** A powered-on machine with a zeroed memory and an SIO plugged in. */
 function simWithSio(memSize = 256) {

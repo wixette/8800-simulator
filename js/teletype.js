@@ -31,7 +31,7 @@
  *
  * No DOM here: this turns bytes into text, and the page displays it.
  */
-class Teletype {
+export class Teletype {
     /**
      * @param {number=} columns The carriage width. An ASR-33 is 72.
      * @param {number=} maxLines How much paper to keep before the top
@@ -175,6 +175,3 @@ Teletype.KILL_LINE = 0x40;
 
 // Exports the class for unit tests when running in Node.js. This has
 // no effect when the script is loaded in a browser.
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Teletype;
-}

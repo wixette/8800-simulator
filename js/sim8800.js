@@ -16,11 +16,13 @@
  * @fileoverview Altair 8800 front panel simulator.
  */
 
+import {CPU8080, CPUD8080} from './8080.js';
+
 
 /**
  * The simulator.
  */
-class Sim8800 {
+export class Sim8800 {
     /**
      * @param {number} memSize The memory size, in bytes.
      * @param {number} clockRate The clock rate.
@@ -210,10 +212,7 @@ class Sim8800 {
     static decodeInstruction(opcode, lo, hi) {
         var undocumented = Sim8800.UNDOCUMENTED_OPCODES[opcode];
         var real = undocumented !== undefined ? undocumented : opcode;
-        // The same file defines both under one name in Node.js, and
-        // under two in the browser.
-        var cpud = typeof CPUD8080 !== 'undefined' ? CPUD8080 : CPU8080;
-        var decoded = cpud.disasm(real, lo, hi);
+        var decoded = CPUD8080.disasm(real, lo, hi);
         var length = decoded[1];
         // "MVI B, $8C" and "MVI C,$8C" are both in the table.
         var text = decoded[0].replace(/,\s*/, ',');
@@ -1250,6 +1249,3 @@ Sim8800.UNDOCUMENTED_OPCODES = {
 
 // Exports the class for unit tests when running in Node.js. This has
 // no effect when the script is loaded in a browser.
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Sim8800;
-}

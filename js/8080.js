@@ -43,6 +43,12 @@
 
 /* jshint sub: true */
 
+// Changed for this simulator: the two parts below fill these objects,
+// which the module exports, where they used to make globals (or fill
+// CommonJS's exports).
+const CPUD8080 = {};
+const CPU8080 = {};
+
 
   (function(exports){
   var ds = [["NOP",1],["LXI B,#1",3],["STAX B",1],["INX B",1],["INR B",1],["DCR B",1],["MVI B, %1",2],["RLC",1],["-",0],["DAD B",1],["LDAX B",1],
@@ -88,7 +94,7 @@
       return [s,sx[1]];
     };
 
-  })(typeof exports === 'undefined'? this['CPUD8080']={}: exports);
+  })(CPUD8080);
 
 (function(exports) {
   var flagTable = [70,2,2,6,2,6,6,2,2,6,6,2,6,2,2,6,2,6,6,2,6,2,2,6,6,2,2,6,2,6,6,2,2,6,6,2,6,2,2,6,6,2,2,6,2,6,6,2,6,2,2,6,2,6,6,2,2,6,6,2,6,2,2,6,2,6,6,2,6,2,2,6,6,2,2,6,2,6,6,2,6,2,2,6,2,6,6,2,2,6,6,2,6,2,2,6,6,2,2,6,2,6,6,2,2,6,6,2,6,2,2,6,2,6,6,2,6,2,2,6,6,2,2,6,2,6,6,2,130,134,134,130,134,130,130,134,134,130,130,134,130,134,134,130,134,130,130,134,130,134,134,130,130,134,134,130,134,130,130,134,134,130,130,134,130,134,134,130,130,134,134,130,134,130,130,134,130,134,134,130,134,130,130,134,134,130,130,134,130,134,134,130,134,130,130,134,130,134,134,130,130,134,134,130,134,130,130,134,130,134,134,130,134,130,130,134,134,130,130,134,130,134,134,130,130,134,134,130,134,130,130,134,134,130,130,134,130,134,134,130,134,130,130,134,130,134,134,130,130,134,134,130,134,130,130,134];
@@ -2349,7 +2355,8 @@ var goTrace = function(proc){
 
 exports["trace"] = function(stat) {tracer = stat;};
 exports["steps"] = function(Ts){
-    T=0;
+    // Changed for this simulator: "T=0;" was here, setting a global that
+    // nothing reads. A module runs in strict mode, which refuses it.
 
 
     while (Ts>0){
@@ -2422,4 +2429,6 @@ exports["set"] = function(reg,value) {
   };
 
 
-})(typeof exports === 'undefined'? this['CPU8080']={}: exports);
+})(CPU8080);
+
+export {CPU8080, CPUD8080};

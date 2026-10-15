@@ -16,11 +16,13 @@
  * @fileoverview Localization utilities and message translations.
  */
 
+import {Dropdown} from './dropdown.js';
+
 /**
  * Simple namespace.
  * @type {Object}
  */
-l10n = {};
+export const l10n = {};
 
 /**
  * Pre-defined locales.

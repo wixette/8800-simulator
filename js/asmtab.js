@@ -16,6 +16,13 @@
  * @fileoverview The dock's Assembler tab.
  */
 
+import {Asm8080} from './asm8080.js';
+import {CPU8080} from './8080.js';
+import {Dialog} from './dialog.js';
+import {Dropdown} from './dropdown.js';
+import {l10n} from './l10n.js';
+import {panel} from './panel.js';
+
 
 /**
  * The Assembler tab: an editor for 8080 source, highlighted, with the
@@ -27,7 +34,7 @@
  * It reaches the machine through what js/panel.js already uses to load
  * a program.
  */
-asmtab = {};
+export const asmtab = {};
 
 /**
  * Where the source is kept between visits, in this browser only (U3).
@@ -1220,6 +1227,3 @@ asmtab.refreshText = function() {
 
 // Exports the namespace for unit tests when running in Node.js. This
 // has no effect when the script is loaded in a browser.
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = asmtab;
-}
