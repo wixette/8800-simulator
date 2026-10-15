@@ -70,3 +70,33 @@ export default async function(h) {
     m = await marked();
     verify('opening the tab brings the line into view', m.src === 41 && m.top > 0, JSON.stringify(m));
 }
+
+/**
+ * A program with its data written first starts at its first
+ * instruction, not at the data (#20): the PC, the lamps and the mark.
+ */
+export async function dataFirst(h) {
+    const {js, viewport, fresh, press, verify, setSource, sleep, statusText} = h;
+    const pcLine = () => js(`[...document.querySelectorAll('#asm-highlight .asm-line')].findIndex(e => e.classList.contains('asm-line-pc')) + 1`);
+    await viewport(1280, 860); await fresh();
+    await press('#nav-asm'); await sleep(300);
+    // The program from #20, as the student wrote it.
+    await setSource(['ORG 0030H', 'db "t"', 'db "a"', 'db "C"\t', 'ORG 0000H',
+                     '\tLXI\tSP, 0040H', '\tLXI\tH, 0030H', '', 'loopo:\t\t',
+                     '\tPUSH\tH', '        MOV A,M', '\tINX\tH ', 'ORA A',
+                     'JNZ\tloopo', 'POP\tH', 'LXI\tB, 0030H', 'loopt:\t\t',
+                     '\tMOV\tA, M', '\tSTAX\tB ', '\tINX\tB', '\tDCR\tH',
+                     'ORA A', 'JNZ\tloopt', 'HLT\t'].join('\n'));
+    await sleep(300);
+    await press('#asm-assemble'); await sleep(300);
+    verify('Assemble leaves the PC at 0000H', (await js(`panel.linkCpu().pc`)) === 0, await js(`panel.linkCpu().pc`));
+    verify('and says nothing was examined elsewhere', !/examined/.test(await statusText()), await statusText());
+    verify('the mark is on LXI SP, not on the data', (await pcLine()) === 6, await pcLine());
+    await press('#s-sw-single'); await sleep(200);
+    verify('SINGLE STEP runs LXI SP: the PC is at 0003H', (await js(`panel.linkCpu().pc`)) === 3, await js(`panel.linkCpu().pc`));
+    verify('and the mark follows it', (await pcLine()) === 7, await pcLine());
+    // With END START, as before: the PC goes where it says.
+    await setSource(' ORG 0030H\nMSG: DB 1\n ORG 0000H\n NOP\nSTART: HLT\n END START'); await sleep(300);
+    await press('#asm-assemble'); await sleep(300);
+    verify('END START still decides', (await js(`panel.linkCpu().pc`)) === 1 && /examined 0001H/.test(await statusText()), await statusText());
+}

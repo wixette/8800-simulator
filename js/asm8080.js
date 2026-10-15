@@ -42,7 +42,7 @@ class Asm8080 {
      * @return {!Object} {ok, memory: Map<address, byte>, start, end,
      *     entry, size, rows, errors, symbols}: whether it assembled
      *     without error; the bytes; the lowest and highest address
-     *     written, the address of the first byte, and how many bytes;
+     *     written, where the program starts (L8), and how many bytes;
      *     the listing; the errors; and the global symbols.
      */
     static assemble(source, options = {}) {
@@ -376,6 +376,7 @@ Asm8080.Pass = class {
         this.rows = [];
         this.errors = [];
         this.first = null;
+        this.firstCode = null;
         this.entry = null;
         this.ended = false;
     }
@@ -679,6 +680,11 @@ Asm8080.Pass = class {
         default:
             if (Asm8080.INSTRUCTIONS[code]) {
                 bytes = this.instruction(stmt, entry, scope);
+                // Where a program with no END START starts (L8): its
+                // first instruction, not data written above it.
+                if (this.firstCode === null && bytes && bytes.length) {
+                    this.firstCode = at;
+                }
             } else if (this.macros.has(code)) {
                 this.row(entry, scope, null, []);
                 this.expand(stmt, entry, scope);
@@ -1196,7 +1202,8 @@ Asm8080.Pass = class {
             memory: this.memory,
             start: keys.length ? Math.min.apply(null, keys) : null,
             end: keys.length ? Math.max.apply(null, keys) : null,
-            entry: this.entry !== null ? this.entry : this.first,
+            entry: this.entry !== null ? this.entry :
+                this.firstCode !== null ? this.firstCode : this.first,
             size: keys.length,
             rows: this.rows,
             errors: this.errors,

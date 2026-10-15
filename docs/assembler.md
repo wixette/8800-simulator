@@ -180,15 +180,32 @@ its first byte, or its first two (first byte high) when used as a
 
 ### L8 — `ORG`, `END`
 
-- **`ORG exp`** sets the address of the next statement. Without one, a
-  program starts at 0000H. The expression must be known when it is
-  reached (L13).
+- **`ORG exp`** sets the address of the next statement. Without one,
+  the program's bytes begin at 0000H. The expression must be known
+  when it is reached (L13).
 - **`END`** ends the program; anything after it is ignored. The manual
   says it must be there. We do not require it, since its absence
   changes nothing, but a program that has one still works as written.
-- **`END exp`**, as in the manual, names where the program starts:
-  Assemble sets the PC there. Without it, the program starts at its
+
+**Where a program starts.** The manual does not say: its `END` takes no
+operand, and its assembler's work ends with the bytes. Where to begin
+was the operator's choice, made on the front panel - RESET for 0000H,
+or EXAMINE an address. Assemble makes that choice for you, so that the
+PC is ready and its line marked (U4, U7):
+
+- **`END exp`** names the start, and Assemble sets the PC there. It is
+  not in the 1975 manual; Intel's later assemblers and CP/M's ASM take
+  it (L12).
+- **Without it**, the program starts at its first instruction **in the
+  order of the source**, not at the lowest address. `DB` and `DW` are
+  data, so a program that writes its data first, above its code, still
+  starts at the code (#20). An instruction made by a macro counts; one
+  that `IF` skips does not. A program that is all data starts at its
   first byte.
+- **Only the writer knows** which block is the main program when the
+  code is in more than one place. Code written at `ORG 0040H` above
+  code at `ORG 0000H` starts at 0040H. If 0000H is meant, `END` with
+  that block's label says so.
 
 ### L9 — `EQU`, `SET`
 
@@ -230,6 +247,8 @@ AS, CP/M's ASM - paste in without edits:
   the printed listing.
 - Strings may be in double quotes as well as single.
 - A colon after an `EQU` or `SET` name is accepted (L1).
+- `END` may name the program's start, `END START`, as in Intel's later
+  assemblers and CP/M's ASM (L8).
 - **`INCLUDE`**, whatever follows it, is the one we deliberately
   refuse, with this error:
   *INCLUDE is not part of Intel's 8080 language. Paste the file's text
@@ -510,8 +529,8 @@ and the error marks; that touches nothing in the machine.
 3. Clears memory, writes the program's bytes, and presses RESET, the
    same as every other way of loading a program (D14 in
    [ms-basic-4k.md](ms-basic-4k.md)).
-4. If the program does not start at 0000H, examines its start, so that
-   PC is there, as an Altair owner would have with EXAMINE.
+4. If the program does not start at 0000H (L8), examines its start, so
+   that PC is there, as an Altair owner would have with EXAMINE.
 5. Says so on the status line: *Assembled 12 bytes at 0000H-000BH and
    pressed RESET. Click RUN on the front panel.*
 

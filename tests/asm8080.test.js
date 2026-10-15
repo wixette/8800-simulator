@@ -474,6 +474,87 @@ test('END names where the program starts (L8)', () => {
     assert.deepStrictEqual(errorsOf(program(' NOP', ' END 1+')), ['bad-expression']);
 });
 
+test('without END START, a program starts at its first instruction (L8, #20)', () => {
+    const entry = (...lines) => {
+        const r = Asm8080.assemble(program(...lines));
+        assert.deepStrictEqual(r.errors, []);
+        return r.entry;
+    };
+    // The program from #20: its data first, at 0030H, then its code
+    // from 0000H. It starts at the code, not the data above it.
+    assert.strictEqual(entry(' ORG 0030H', ' DB "t"', ' DB "a"', ' DB "C"',
+                             ' ORG 0000H', ' LXI SP,0040H', ' LXI H,0030H',
+                             ' HLT'), 0x0000);
+    assert.strictEqual(entry(' ORG 100H', 'MSG: DB 1,2', ' DW MSG', 'START: NOP'),
+                       0x104, 'DB and DW are data');
+    assert.strictEqual(entry(' ORG 100H', ' DS 3', ' NOP'), 0x103,
+                       'DS makes no bytes, so is not a start either');
+    assert.strictEqual(entry(' ORG 20H', ' DB (ADD C)', ' NOP'), 0x21,
+                       'an instruction in parentheses is a value, so data');
+    assert.strictEqual(entry('GO MACRO', ' MVI A,1', ' ENDM', ' ORG 40H', ' DB 0',
+                             ' GO'), 0x41, 'an instruction in an expansion counts');
+    assert.strictEqual(entry(' ORG 10H', ' IF 0', ' NOP', ' ENDIF', ' DB 5', ' HLT'),
+                       0x11, 'an instruction IF skips does not');
+    // First in the source, not lowest in memory: code written at 0040H
+    // above code at 0000H starts at 0040H, and END says otherwise.
+    assert.strictEqual(entry(' ORG 0040H', ' NOP', ' ORG 0000H', 'MAIN: NOP'), 0x40);
+    assert.strictEqual(entry(' ORG 0040H', ' NOP', ' ORG 0000H', 'MAIN: NOP',
+                             ' END MAIN'), 0x00);
+    // A program that is all data starts at its first byte, as before.
+    assert.strictEqual(entry(' ORG 50H', ' DB 0C3H,00H,01H'), 0x50);
+    // END START still decides, wherever it points.
+    assert.strictEqual(entry(' ORG 0030H', ' DB 1', ' ORG 0000H', ' NOP',
+                             ' END 0030H'), 0x30);
+});
+
+/**
+ * The program from #20, as the student wrote it, with its code at
+ * another address or an END after it.
+ */
+function studentProgram(codeOrg = '0000H', end = null) {
+    return ['ORG 0030H', 'db "t"', 'db "a"', 'db "C"\t', 'ORG ' + codeOrg,
+            '\tLXI\tSP, 0040H', '\tLXI\tH, 0030H', '', 'loopo:\t\t',
+            '\tPUSH\tH', '        MOV A,M', '\tINX\tH ', 'ORA A',
+            'JNZ\tloopo', 'POP\tH', 'LXI\tB, 0030H', 'loopt:\t\t',
+            '\tMOV\tA, M', '\tSTAX\tB ', '\tINX\tB', '\tDCR\tH',
+            'ORA A', 'JNZ\tloopt', 'HLT\t'].concat(end ? [end] : []).join('\n');
+}
+
+test('the program from #20, moved, and with an END: where it starts (L8)', () => {
+    const start = (codeOrg, end) => {
+        const r = Asm8080.assemble(studentProgram(codeOrg, end));
+        assert.deepStrictEqual(r.errors, [], codeOrg + ' ' + end);
+        return r;
+    };
+    // As written: the code at 0000H, its labels where they fall.
+    let r = start('0000H');
+    assert.strictEqual(r.entry, 0x0000);
+    assert.strictEqual(r.symbols.LOOPO, 0x0006);
+    assert.strictEqual(r.symbols.LOOPT, 0x0011);
+    // The code moved to 0003H: it starts there, LXI SP and all, and
+    // nothing is put below it.
+    r = start('0003H');
+    assert.strictEqual(r.entry, 0x0003);
+    assert.strictEqual(r.memory.get(0x0003), 0x31, 'LXI SP at 0003H');
+    assert.ok(![0, 1, 2].some((a) => r.memory.has(a)), 'nothing at 0000H-0002H');
+    assert.strictEqual(r.symbols.LOOPO, 0x0009, 'the labels move with it');
+    // END decides, as a number or a label, at the first instruction or
+    // inside the code; END 0000H too, though 0 is also the RESET value.
+    for (const [end, at] of [['END 0000H', 0x0000], ['END 0003H', 0x0003],
+                             ['END 0006H', 0x0006], ['END loopo', 0x0006],
+                             ['END loopt', 0x0011], ['END 0030H', 0x0030]]) {
+        assert.strictEqual(start('0000H', end).entry, at, end);
+    }
+    // With the code at 0003H, END 0000H still wins over the first
+    // instruction, as END 0006H wins over it, and END loopo follows the
+    // label.
+    assert.strictEqual(start('0003H', 'END 0000H').entry, 0x0000);
+    assert.strictEqual(start('0003H', 'END 0006H').entry, 0x0006);
+    assert.strictEqual(start('0003H', 'END loopo').entry, 0x0009);
+    // A plain END changes nothing.
+    assert.strictEqual(start('0003H', 'END').entry, 0x0003);
+});
+
 test('an instruction in parentheses: its names, its parenthesis, its width (L7)', () => {
     assert.deepStrictEqual(errorsOf(' DB (ADD X)'), ['undefined']);
     assert.deepStrictEqual(errorsOf(' DB (ADD C'), ['bad-expression']);
