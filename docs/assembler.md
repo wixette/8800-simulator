@@ -188,6 +188,10 @@ its first byte, or its first two (first byte high) when used as a
   changes nothing, but a program that has one still works as written.
 - **`END exp`**, as in the manual, names where the program starts:
   Assemble sets the PC there. Without it, the program starts at its
+  first instruction, in the order of the source: `DB` and `DW` are
+  data, so a program that writes its data first, above its code, still
+  starts at the code (#20). An instruction made by a macro counts; one
+  that `IF` skips does not. A program that is all data starts at its
   first byte.
 
 ### L9 — `EQU`, `SET`
@@ -510,8 +514,8 @@ and the error marks; that touches nothing in the machine.
 3. Clears memory, writes the program's bytes, and presses RESET, the
    same as every other way of loading a program (D14 in
    [ms-basic-4k.md](ms-basic-4k.md)).
-4. If the program does not start at 0000H, examines its start, so that
-   PC is there, as an Altair owner would have with EXAMINE.
+4. If the program does not start at 0000H (L8), examines its start, so
+   that PC is there, as an Altair owner would have with EXAMINE.
 5. Says so on the status line: *Assembled 12 bytes at 0000H-000BH and
    pressed RESET. Click RUN on the front panel.*
 

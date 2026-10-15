@@ -474,6 +474,34 @@ test('END names where the program starts (L8)', () => {
     assert.deepStrictEqual(errorsOf(program(' NOP', ' END 1+')), ['bad-expression']);
 });
 
+test('without END START, a program starts at its first instruction (L8, #20)', () => {
+    const entry = (...lines) => {
+        const r = Asm8080.assemble(program(...lines));
+        assert.deepStrictEqual(r.errors, []);
+        return r.entry;
+    };
+    // The program from #20: its data first, at 0030H, then its code
+    // from 0000H. It starts at the code, not the data above it.
+    assert.strictEqual(entry(' ORG 0030H', ' DB "t"', ' DB "a"', ' DB "C"',
+                             ' ORG 0000H', ' LXI SP,0040H', ' LXI H,0030H',
+                             ' HLT'), 0x0000);
+    assert.strictEqual(entry(' ORG 100H', 'MSG: DB 1,2', ' DW MSG', 'START: NOP'),
+                       0x104, 'DB and DW are data');
+    assert.strictEqual(entry(' ORG 100H', ' DS 3', ' NOP'), 0x103,
+                       'DS makes no bytes, so is not a start either');
+    assert.strictEqual(entry(' ORG 20H', ' DB (ADD C)', ' NOP'), 0x21,
+                       'an instruction in parentheses is a value, so data');
+    assert.strictEqual(entry('GO MACRO', ' MVI A,1', ' ENDM', ' ORG 40H', ' DB 0',
+                             ' GO'), 0x41, 'an instruction in an expansion counts');
+    assert.strictEqual(entry(' ORG 10H', ' IF 0', ' NOP', ' ENDIF', ' DB 5', ' HLT'),
+                       0x11, 'an instruction IF skips does not');
+    // A program that is all data starts at its first byte, as before.
+    assert.strictEqual(entry(' ORG 50H', ' DB 0C3H,00H,01H'), 0x50);
+    // END START still decides, wherever it points.
+    assert.strictEqual(entry(' ORG 0030H', ' DB 1', ' ORG 0000H', ' NOP',
+                             ' END 0030H'), 0x30);
+});
+
 test('an instruction in parentheses: its names, its parenthesis, its width (L7)', () => {
     assert.deepStrictEqual(errorsOf(' DB (ADD X)'), ['undefined']);
     assert.deepStrictEqual(errorsOf(' DB (ADD C'), ['bad-expression']);
