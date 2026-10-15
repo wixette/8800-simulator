@@ -337,15 +337,21 @@ not to), and should be told to purge `index.html` on each deploy.
 GitHub Pages sets no headers you can change and keeps everything for 10
 minutes, so there a release reaches everyone within 10 minutes.
 
-The version comes from `package.json`. After changing it, run
+The version is kept in one place, `package.json`; the names in
+`index.html` are copies, written from it and never by hand. Set it with
+npm, which writes them too:
 
 ```
-npm run stamp
+npm version 1.7.0        # or: npm version patch | minor | major
 ```
 
-which writes it into `index.html`'s file names and import map
-([tools/stamp.mjs](tools/stamp.mjs)). The tests fail until it has been
-run, so a release cannot go out half stamped.
+It sets the version, then runs `npm run stamp`
+([tools/stamp.mjs](tools/stamp.mjs)) to write it into `index.html`'s
+file names and import map, and stops there: it does not commit or tag
+([.npmrc](.npmrc)), since a release is tagged on GitHub, on its merge
+commit. Commit the two files as usual. A version changed any other way,
+by hand in `package.json`, needs `npm run stamp` after it; until then
+`npm test` fails and says so, so a release cannot go out half stamped.
 
 ### How it is built
 

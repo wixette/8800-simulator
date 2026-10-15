@@ -94,11 +94,13 @@ test('the About dialog reads the version from package.json', () => {
 
 test('every file the page names carries the version, for caches (#19)', () => {
     // A release asks for new names, so that no cache - the browser's or
-    // a CDN's - gives an old file to the new page. npm run stamp writes
-    // them; after a version bump this fails until it has been run.
+    // a CDN's - gives an old file to the new page. npm version writes
+    // them as it sets the version; a version changed any other way, by
+    // hand in package.json, fails here until npm run stamp has been run.
     const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
     assert.strictEqual(stamp(html, VERSION, moduleFiles()), html,
-                       'index.html is not stamped with ' + VERSION + ': run npm run stamp');
+                       'index.html is not stamped with ' + VERSION +
+                       ': set versions with npm version, or run npm run stamp');
     // Read here without the stamp's own code, as a second opinion.
     const local = [...html.matchAll(/\b(?:src|href)="([^"]+)"/g)].map((m) => m[1])
           .filter((url) => !/^([a-z]+:|\/\/|#)/i.test(url));
@@ -146,4 +148,16 @@ test('what the page fetches itself, it checks with the server first (#19)', () =
         }
     }
     assert.strictEqual(calls, 3, 'package.json, the examples and the BASIC tape');
+});
+
+test('npm version stamps the page as it sets the version, and stops there', () => {
+    // One command for a version bump: npm runs package.json's "version"
+    // script between setting the version and committing. Its own commit
+    // and tag are off (.npmrc): a release is tagged on GitHub, on the
+    // merge commit.
+    const pkg = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8'));
+    assert.strictEqual(pkg.scripts.version, 'node tools/stamp.mjs');
+    assert.strictEqual(pkg.scripts.stamp, 'node tools/stamp.mjs');
+    const npmrc = fs.readFileSync(path.join(ROOT, '.npmrc'), 'utf8');
+    assert.match(npmrc, /^git-tag-version=false$/m);
 });

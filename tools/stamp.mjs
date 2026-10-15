@@ -3,11 +3,12 @@
  * cache - the browser's, or a CDN's - can keep each file as long as it
  * likes: a new release asks for new names (#19).
  *
- *     npm run stamp
+ *     npm version 1.7.0     (sets the version, then runs this)
+ *     npm run stamp         (after a version set any other way)
  *
- * Run it whenever package.json's version changes; the unit tests fail
- * until it has been. It edits index.html in place - there is no build,
- * and no second copy of the page:
+ * The unit tests fail while index.html and package.json disagree. It
+ * edits index.html in place - there is no build, and no second copy of
+ * the page:
  *
  * - each file it names by src or href gets ?v=<version>: the
  *   stylesheet, the images, the sounds, and js/main.js;
