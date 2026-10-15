@@ -144,7 +144,8 @@ panel.fetchExamples = function() {
     panel.examplesLoading = true;
     // Fetched together, but listed in the order panel.EXAMPLES gives.
     var fetches = panel.EXAMPLES.map(function(id) {
-        return window.fetch('examples/' + id + '.asm').then(function(response) {
+        var url = 'examples/' + id + '.asm';
+        return window.fetch(url, panel.FETCH).then(function(response) {
             if (!response.ok) {
                 throw new Error('HTTP ' + response.status);
             }
@@ -339,7 +340,7 @@ panel.onLoadBasic = function() {
     if (panel.reportIfUnavailable('load-basic')) {
         return;
     }
-    window.fetch(panel.ROM_URL).then(function(response) {
+    window.fetch(panel.ROM_URL, panel.FETCH).then(function(response) {
         if (!response.ok) {
             throw new Error('HTTP ' + response.status);
         }

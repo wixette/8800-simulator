@@ -53,3 +53,31 @@ export async function fileNotice(h) {
     verify('opened as a file, the notice says why nothing works', await shown());
     verify('and gives the command', /python3 -m http\.server 8000/.test(await js(`document.getElementById('file-notice').textContent`)));
 }
+
+/**
+ * Every file the page loads carries the version, modules included, and
+ * no module is loaded twice under two names (#19). The files it
+ * fetches itself have none, and are checked with the server instead.
+ */
+export async function versioned(h) {
+    const {js, viewport, fresh, press, verify, sleep} = h;
+    await viewport(1280, 860); await fresh();
+    await press('#load-button'); await sleep(800);
+    await js(`panel.sim`);
+    const version = await js(`fetch('package.json').then((r) => r.json()).then((p) => p.version)`);
+    const files = await js(`performance.getEntriesByType('resource')
+        .map((e) => new URL(e.name)).filter((u) => u.origin == location.origin)
+        .map((u) => u.pathname.slice(1) + u.search)`);
+    const fetched = (f) => /^(package\.json|examples\/|roms\/)/.test(f);
+    const unversioned = files.filter((f) => !fetched(f) && !f.endsWith('?v=' + version));
+    verify('every file is asked for with ?v=' + version, unversioned.length == 0, unversioned.join(' '));
+    const modules = files.filter((f) => f.startsWith('js/'));
+    const mapped = await js(`Object.keys(JSON.parse(document.querySelector(
+        'script[type=importmap]').textContent).imports).length`);
+    verify('every module in the import map is loaded', modules.length == mapped,
+           modules.length + ' of ' + mapped);
+    const names = modules.map((f) => f.replace(/\?.*/, ''));
+    verify('each once, by one name', new Set(names).size == names.length, names.join(' '));
+    verify('and the examples are fetched too, without a version',
+           files.some((f) => /^examples\/[\w-]+\.asm$/.test(f)), files.filter(fetched).join(' '));
+}

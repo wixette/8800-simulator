@@ -316,6 +316,36 @@ Opening `index.html` straight off the disk does not work: the page's
 scripts are ES modules, and a browser runs no module in a `file://`
 page. The page says so, and gives the command above.
 
+### Deploying behind a cache
+
+Every file `index.html` names carries the version, `css/style.css?v=1.7.0`,
+and so does every module the scripts import, through the page's import
+map. A release asks for new names, so a cache can keep each file as long
+as it likes and still never give an old one to the new page. Only
+`index.html` itself must not be kept. On a server or a CDN that lets you
+set the headers:
+
+| What | `Cache-Control` |
+| --- | --- |
+| `index.html` (and `/`) | `no-cache`: kept, but checked with the server each time, which costs a reply with no body when nothing changed |
+| Everything asked for with `?v=` | `public, max-age=31536000, immutable` |
+| `package.json`, `examples/`, `roms/` | `no-cache`; the page fetches these itself, and asks for a check anyway |
+
+A CDN must count the query string in its cache key (most do unless told
+not to), and should be told to purge `index.html` on each deploy.
+GitHub Pages sets no headers you can change and keeps everything for 10
+minutes, so there a release reaches everyone within 10 minutes.
+
+The version comes from `package.json`. After changing it, run
+
+```
+npm run stamp
+```
+
+which writes it into `index.html`'s file names and import map
+([tools/stamp.mjs](tools/stamp.mjs)). The tests fail until it has been
+run, so a release cannot go out half stamped.
+
 ### How it is built
 
 | File | What it is |

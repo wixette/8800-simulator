@@ -19,9 +19,39 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title id="title" class="l10n">Sim-8800: Altair 8800 Simulator</title>
-    <link rel="icon" href="favicon.ico" sizes="48x48 32x32 16x16">
-    <link rel="icon" href="images/led-on.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="favicon.ico?v=1.6.1" sizes="48x48 32x32 16x16">
+    <link rel="icon" href="images/led-on.svg?v=1.6.1" type="image/svg+xml">
+    <link rel="stylesheet" href="css/style.css?v=1.6.1">
+    <!-- Every file name here carries the version (?v=), and so does each
+         module the scripts import, through this map: a release asks for
+         new names, so no cache can serve an old file to a new page.
+         npm run stamp writes them (tools/stamp.mjs); do not edit by
+         hand. -->
+    <script type="importmap">
+    {
+      "imports": {
+        "./js/8080.js": "./js/8080.js?v=1.6.1",
+        "./js/app.js": "./js/app.js?v=1.6.1",
+        "./js/asm8080.js": "./js/asm8080.js?v=1.6.1",
+        "./js/asmtab.js": "./js/asmtab.js?v=1.6.1",
+        "./js/dialog.js": "./js/dialog.js?v=1.6.1",
+        "./js/dropdown.js": "./js/dropdown.js?v=1.6.1",
+        "./js/l10n.js": "./js/l10n.js?v=1.6.1",
+        "./js/link.js": "./js/link.js?v=1.6.1",
+        "./js/main.js": "./js/main.js?v=1.6.1",
+        "./js/panel-debug.js": "./js/panel-debug.js?v=1.6.1",
+        "./js/panel-dock.js": "./js/panel-dock.js?v=1.6.1",
+        "./js/panel-front.js": "./js/panel-front.js?v=1.6.1",
+        "./js/panel-link.js": "./js/panel-link.js?v=1.6.1",
+        "./js/panel-load.js": "./js/panel-load.js?v=1.6.1",
+        "./js/panel-tty.js": "./js/panel-tty.js?v=1.6.1",
+        "./js/panel.js": "./js/panel.js?v=1.6.1",
+        "./js/sim8800.js": "./js/sim8800.js?v=1.6.1",
+        "./js/sio.js": "./js/sio.js?v=1.6.1",
+        "./js/teletype.js": "./js/teletype.js?v=1.6.1"
+      }
+    }
+    </script>
   </head>
   <body>
 
@@ -54,7 +84,7 @@
         <!-- The name, in the lettering of the panel's own nameplate. Its
              alt text is the translated title (panel.refreshPlaceholders). -->
         <div id="header-title">
-          <img id="header-logo" src="images/8800-simulator-logo-white.svg"
+          <img id="header-logo" src="images/8800-simulator-logo-white.svg?v=1.6.1"
                alt="Altair 8800 Simulator">
         </div>
 
@@ -102,14 +132,14 @@
       <main id="stage">
         <svg id="panel" width="100%" height="100%" viewBox="0 0 1440 644" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
           <!-- Panel artwork. Edit images/panel.svg to change it. -->
-          <image x="0" y="0" width="1440" height="644" href="images/panel.svg"/>
+          <image x="0" y="0" width="1440" height="644" href="images/panel.svg?v=1.6.1"/>
 
           <!-- Sprites cloned by panel.js for every LED and switch. -->
-          <image id="led-on" x="0" y="0" width="20" height="20" href="images/led-on.svg"/>
-          <image id="led-off" x="0" y="0" width="20" height="20" href="images/led-off.svg"/>
-          <image id="switch-up" x="0" y="0" width="20" height="30" href="images/switch-up.svg"/>
-          <image id="switch-mid" x="0" y="0" width="20" height="30" href="images/switch-mid.svg"/>
-          <image id="switch-down" x="0" y="0" width="20" height="30" href="images/switch-down.svg"/>
+          <image id="led-on" x="0" y="0" width="20" height="20" href="images/led-on.svg?v=1.6.1"/>
+          <image id="led-off" x="0" y="0" width="20" height="20" href="images/led-off.svg?v=1.6.1"/>
+          <image id="switch-up" x="0" y="0" width="20" height="30" href="images/switch-up.svg?v=1.6.1"/>
+          <image id="switch-mid" x="0" y="0" width="20" height="30" href="images/switch-mid.svg?v=1.6.1"/>
+          <image id="switch-down" x="0" y="0" width="20" height="30" href="images/switch-down.svg?v=1.6.1"/>
         </svg>
 
         <!-- The Switch Board Helper: the panel's switches again, large
@@ -479,10 +509,10 @@ RUN</pre>
       </div>
     </dialog>
 
-    <audio id="sound-beepbeep" src="audio/beepbeep.mp3"></audio>
-    <audio id="sound-switch" src="audio/switch.mp3"></audio>
-    <audio id="sound-toggle" src="audio/toggle.mp3"></audio>
+    <audio id="sound-beepbeep" src="audio/beepbeep.mp3?v=1.6.1"></audio>
+    <audio id="sound-switch" src="audio/switch.mp3?v=1.6.1"></audio>
+    <audio id="sound-toggle" src="audio/toggle.mp3?v=1.6.1"></audio>
 
-    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/main.js?v=1.6.1"></script>
   </body>
 </html>

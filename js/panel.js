@@ -39,6 +39,16 @@ import {Teletype} from './teletype.js';
 export const panel = {};
 
 /**
+ * How the page fetches the files it reads itself - package.json, the
+ * examples, the BASIC tape - rather than names in index.html. Their
+ * names carry no version (tools/stamp.mjs), so a cache must check with
+ * the server before giving one back: a new release's are never the old
+ * ones. Unchanged, the check costs a reply with no body.
+ * @type {!RequestInit}
+ */
+panel.FETCH = {cache: 'no-cache'};
+
+/**
  * Whether the dock is open on the Debugger. The dumps are expensive, so
  * they are not built while it is not.
  * @type {boolean}
@@ -270,7 +280,7 @@ panel.showVersion = function() {
     if (panel.needsServer()) {
         return;
     }
-    window.fetch('package.json').then(function(response) {
+    window.fetch('package.json', panel.FETCH).then(function(response) {
         return response.ok ? response.text() : '';
     }).then(function(text) {
         var version = panel.versionFrom(text);
