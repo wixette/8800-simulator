@@ -141,8 +141,9 @@ through zeros, NOPs, to reach the program. The Assembler's
 **Assemble** follows both (U5 in [../docs/assembler.md](../docs/assembler.md)).
 
 To offer it in the simulator's menus, add its name to `panel.EXAMPLES`
-in [../js/panel.js](../js/panel.js), in its place in the order; both
-the *Load* menu and the Assembler's *Examples* menu read that list.
+in [../js/panel-load.js](../js/panel-load.js), in its place in the
+order; both the *Load* menu and the Assembler's *Examples* menu read
+that list.
 
 `npm test` then checks, for every program here, that it assembles
 without an error, that it fits in 256 bytes, that it says where to

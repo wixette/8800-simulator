@@ -1,10 +1,10 @@
 /**
- * The parts of the front panel page (js/panel.js) that are plain logic
- * rather than drawing.
+ * The page's own logic (js/panel.js and the js/panel-*.js parts) that
+ * is plain logic rather than drawing.
  *
- * panel.js is written for the browser and most of it reaches for the
- * document, so it is loaded here into a sandbox and only the functions
- * that touch nothing else are exercised.
+ * It is written for the browser and much of it reaches for the
+ * document, so the functions are run here with a stand-in for what
+ * they touch, or read as source where only the page could run them.
  *
  * Run with: npm test
  */
@@ -19,7 +19,7 @@ import {asmtab} from '../js/asmtab.js';
 import {Dialog} from '../js/dialog.js';
 import {l10n} from '../js/l10n.js';
 import {Link} from '../js/link.js';
-import {panel} from '../js/panel.js';
+import {panel} from '../js/app.js';
 import {Teletype} from '../js/teletype.js';
 import {loadExample} from './examples.js';
 import {stub} from './stub.js';
@@ -37,6 +37,13 @@ function locales() {
 /** The source of one of the page's scripts, or of index.html. */
 function sourceOf(file) {
     return fs.readFileSync(path.join(import.meta.dirname, '..', file), 'utf8');
+}
+
+/** The source of the panel namespace: js/panel.js and its parts. */
+function panelSource() {
+    return fs.readdirSync(path.join(import.meta.dirname, '..', 'js'))
+        .filter((f) => /^panel(-\w+)?\.js$/.test(f)).sort()
+        .map((f) => sourceOf('js/' + f)).join('\n');
 }
 
 test('every message is translated into every locale', () => {
@@ -91,18 +98,18 @@ test('every label the page marks for translation has a message', () => {
 test('every message the panel asks for by name exists', () => {
     // Catches a message renamed or retired out from under its caller,
     // which shows up in the app as a control that says nothing at all.
-    const panelSource = sourceOf('js/panel.js');
+    const code = panelSource();
     const asked = new Set();
     // What goes wrong with a link or with typed hex comes back from
     // js/link.js as an id, for the panel to put on the status line.
     for (const m of sourceOf('js/link.js').matchAll(/error:\s*'([^']+)'/g)) {
         asked.add(m[1]);
     }
-    for (const m of panelSource.matchAll(/setStatus\(\s*'([^']+)'/g)) {
+    for (const m of code.matchAll(/setStatus\(\s*'([^']+)'/g)) {
         asked.add(m[1]);
     }
     // A whole id, not the front of one being built with +.
-    for (const m of panelSource.matchAll(/(?:getMessage|msg)\(\s*'([^']+)'\s*\)/g)) {
+    for (const m of code.matchAll(/(?:getMessage|msg)\(\s*'([^']+)'\s*\)/g)) {
         asked.add(m[1]);
     }
     // Ids kept in tables rather than written at a call.
@@ -113,7 +120,7 @@ test('every message the panel asks for by name exists', () => {
         asked.add('mem-size-' + size);
     }
     // The reasons a control gives for being unavailable.
-    for (const m of panelSource.matchAll(/\{id:\s*'([^']+)',\s*params:/g)) {
+    for (const m of code.matchAll(/\{id:\s*'([^']+)',\s*params:/g)) {
         asked.add(m[1]);
     }
     assert.ok(asked.size > 15, 'expected to find plenty of these');
@@ -126,7 +133,7 @@ test('every message the panel asks for by name exists', () => {
 test('every Debugger control that can be unavailable can say why', () => {
     // The greying out and the explanation come from one function, so
     // a control cannot be greyed with nothing to say for itself.
-    const source = sourceOf('js/panel.js');
+    const source = panelSource();
     const body = source.slice(
         source.indexOf('panel.debugControlReasons = function'),
         source.indexOf('panel.reportIfUnavailable = function'));
@@ -317,7 +324,7 @@ test('the references have a tab of their own, which About opens', () => {
     assert.ok(links.includes('id="reference-title"') &&
               links.includes('github.com/wixette/8800-simulator'),
               'the References tab has the source and the reading');
-    const handler = sourceOf('js/panel.js').match(
+    const handler = panelSource().match(
         /panel\.onAboutReferences = function\(\) \{[\s\S]*?\n\};/)[0];
     assert.ok(handler.includes("panel.showTab('links')"),
               "About's References button opens the References tab");

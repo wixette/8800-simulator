@@ -321,11 +321,15 @@ page. The page says so, and gives the command above.
 | File | What it is |
 | --- | --- |
 | [index.html](index.html), [css/style.css](css/style.css) | The page: toolbar, panel, dock, dialogs |
-| [js/main.js](js/main.js) | The page's one script; every other file is an ES module it imports |
+| [js/main.js](js/main.js), [js/app.js](js/app.js) | The page's one script, and the app it starts; every file is an ES module |
 | [js/8080.js](js/8080.js) | The Intel 8080 CPU core, [maly/8080js](https://github.com/maly/8080js) |
 | [js/sim8800.js](js/sim8800.js) | The machine: memory, the front panel's logic, the ports |
 | [js/sio.js](js/sio.js), [js/teletype.js](js/teletype.js) | The serial boards, and the Teletype's paper |
-| [js/panel.js](js/panel.js) | The page's own logic: panel drawing, menus, dock, debugger |
+| [js/panel.js](js/panel.js) | The page's own logic, at its core: the status line, About, and building the page |
+| [js/panel-front.js](js/panel-front.js) | The front panel: its switches, lamps and sounds, and the big switches under it |
+| [js/panel-load.js](js/panel-load.js) | Putting a program in: Load, the examples, 4K BASIC, files, the Memory menu |
+| [js/panel-debug.js](js/panel-debug.js) | The Debugger: the memory dump and its editing, the next instruction, the memory map |
+| [js/panel-link.js](js/panel-link.js), [js/panel-tty.js](js/panel-tty.js), [js/panel-dock.js](js/panel-dock.js) | Program links and Share; the Teletype; the dock and its tabs |
 | [js/link.js](js/link.js) | The program link format |
 | [js/asm8080.js](js/asm8080.js), [js/asmtab.js](js/asmtab.js) | The 8080 assembler, and its tab |
 | [js/dropdown.js](js/dropdown.js), [js/dialog.js](js/dialog.js) | The menus and the dialogs |

@@ -31,7 +31,7 @@ import {panel} from './panel.js';
  * and H1 to H3 in docs/assembler.md.
  *
  * The assembling is js/asm8080.js's; this is only the page around it.
- * It reaches the machine through what js/panel.js already uses to load
+ * It reaches the machine through what the panel already uses to load
  * a program.
  */
 export const asmtab = {};

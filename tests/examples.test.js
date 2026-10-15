@@ -54,12 +54,12 @@ test('examples/README.md lists every program and its bytes', () => {
     }
 });
 
-/** The example ids js/panel.js offers, read out of the source. */
+/** The example ids js/panel-load.js offers, read out of the source. */
 function offeredExamples() {
     const panel = fs.readFileSync(
-        path.join(import.meta.dirname, '..', 'js', 'panel.js'), 'utf8');
+        path.join(import.meta.dirname, '..', 'js', 'panel-load.js'), 'utf8');
     const block = panel.match(/panel\.EXAMPLES = \[([^\]]*)\]/);
-    assert.ok(block, 'panel.js should declare panel.EXAMPLES');
+    assert.ok(block, 'panel-load.js should declare panel.EXAMPLES');
     return [...block[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
 }
 

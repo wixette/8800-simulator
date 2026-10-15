@@ -18,7 +18,7 @@
  * once.
  */
 
-import {panel} from './panel.js';
+import {panel} from './app.js';
 
 // Running after all, so a server is not needed: see index.html.
 document.getElementById('file-notice').hidden = true;
