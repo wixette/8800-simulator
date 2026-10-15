@@ -272,6 +272,69 @@ test('Assemble lifts protection, loads, and is in sync with its own load (U4, U7
     asmtab.loaded = null;
 });
 
+test('Assemble puts the PC where the program starts, and says so (U4, L8, #20)', (t) => {
+    // The program from #20, with its code moved and an END added, as
+    // the cases were tried by hand. RESET puts the PC at 0000H; only a
+    // program that starts elsewhere is examined there, lamps and all.
+    const data = ['ORG 0030H', 'db "t"', 'db "a"', 'db "C"'];
+    const code = ['\tLXI\tSP, 0040H', '\tLXI\tH, 0030H', 'loopo:', '\tPUSH\tH',
+                  '\tMOV A,M', '\tINX\tH', 'ORA A', 'JNZ\tloopo', 'HLT'];
+    const saved = {panel: global.panel, cpu: global.CPU8080, window: global.window};
+    t.after(() => {
+        global.panel = saved.panel; global.CPU8080 = saved.cpu; global.window = saved.window;
+        asmtab.loaded = null;
+    });
+    global.window = {clearTimeout() {}};
+    let source = '';
+    t.mock.method(asmtab, 'source', () => ({value: source}));
+    t.mock.method(asmtab, 'refresh', () => { asmtab.result = Asm8080.assemble(source); });
+    t.mock.method(asmtab, 'requestPc', () => {});
+    for (const [org, end, pc] of [['0000H', null, 0x0000], ['0003H', null, 0x0003],
+                                  ['0000H', 'END 0000H', 0x0000],
+                                  ['0000H', 'END 0003H', 0x0003],
+                                  ['0000H', 'END 0006H', 0x0006],
+                                  ['0000H', 'END loopo', 0x0006],
+                                  ['0003H', 'END 0000H', 0x0000],
+                                  ['0003H', 'END loopo', 0x0009]]) {
+        const sim = {
+            mem: new Array(256).fill(0), memLoads: 0, pc: 0x1234, lamps: 0,
+            unprotectAll() { return false; },
+            initMem() { this.memLoads++; this.mem.fill(0); },
+            loadMap(pairs) {
+                this.memLoads++;
+                for (const [a, b] of pairs) this.mem[a] = b;
+            },
+            reset() { this.pc = 0; },
+            flushDump() {}, endResetFlash() {},
+            showAddressAndData() { this.lamps = this.pc; },
+            lastAddress: 0,
+        };
+        const said = [];
+        global.panel = Object.assign({}, saved.panel, {
+            sim: sim,
+            ensurePoweredOn: () => false,
+            updateMemoryControls: () => {},
+            setStatus: (...args) => said.push(args),
+        });
+        global.CPU8080 = {set: (reg, value) => { if (reg == 'PC') sim.pc = value; }};
+        source = data.concat(['ORG ' + org], code, end ? [end] : []).join('\n');
+        const what = 'code at ' + org + (end ? ', ' + end : '');
+        asmtab.onAssemble();
+        assert.strictEqual(sim.pc, pc, what + ': the PC');
+        assert.strictEqual(sim.lastAddress, pc, what + ': where EXAMINE NEXT goes on');
+        const [id, params] = said[said.length - 1];
+        if (pc) {
+            assert.strictEqual(sim.lamps, pc, what + ': the lamps show it');
+            assert.strictEqual(id, 'asm-loaded-at', what);
+            assert.strictEqual(params.entry, Asm8080.hex(pc, 4), what);
+        } else {
+            assert.strictEqual(id, 'asm-loaded', what + ': RESET is the start, so no EXAMINE');
+        }
+        assert.strictEqual(sim.mem[0x30], 0x74, what + ': the data at 0030H');
+        assert.strictEqual(sim.mem[org == '0000H' ? 0 : 3], 0x31, what + ': LXI SP');
+    }
+});
+
 test('choosing an example asks first only if text would be lost (U5)', (t) => {
     // An unchanged example is not lost, whichever example it is and
     // however it came back - after a reload too, when nothing in the
