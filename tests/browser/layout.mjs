@@ -205,3 +205,38 @@ export async function controls(h) {
     verify('in Share, selecting everything takes the question, not the choices or the button',
            /What should the link open/.test(selected) && !/The program, at RESET|Copy Link/.test(selected), selected);
 }
+
+/**
+ * A switch throws only the ways the panel prints a function for:
+ * SINGLE STEP and the two AUX switches only up, wherever the lever is
+ * pressed; EXAMINE, with a function each way, down from its lower half.
+ */
+export async function switches(h) {
+    const {js, send, viewport, fresh, verify, sleep, statusText} = h;
+    await viewport(1280, 860); await fresh();
+    await js(`panel.onPowerOn()`); await sleep(200);
+    /** Presses a lever's upper or lower half; which ways did it show? */
+    const throwOf = async (id, half) => {
+        const at = await js(`(() => { const info = panel.STATELESS_SWITCH_INFO.find((s) => s.id == '${id}');
+            const svg = document.getElementById('panel'), p = svg.createSVGPoint();
+            p.x = info.x + 10; p.y = info.y + ('${half}' == 'lower' ? 30 : 0);
+            const q = p.matrixTransform(svg.getScreenCTM());
+            window.thrown = new Set();
+            const look = () => ['up', 'down'].forEach((way) => {
+                if (document.getElementById('${id}-' + way).style.display == 'inline') window.thrown.add(way); });
+            window.watching = setInterval(look, 20);
+            return {x: q.x, y: q.y}; })()`);
+        for (const type of ['mousePressed', 'mouseReleased']) {
+            await send('Input.dispatchMouseEvent', {type, x: at.x, y: at.y, button: 'left', clickCount: 1});
+        }
+        await sleep(800);
+        return js(`(() => { clearInterval(window.watching); return [...window.thrown].join(','); })()`);
+    };
+    for (const id of ['single', 'aux1', 'aux2']) {
+        const lower = await throwOf(id, 'lower');
+        verify(id + ': its lower half throws it up, not down', lower == 'up', lower);
+    }
+    verify('AUX still says it is spare', /AUX is not connected to anything/.test(await statusText()), await statusText());
+    verify('examine: its lower half throws it down, to EXAMINE NEXT', (await throwOf('examine', 'lower')) == 'down');
+    verify('examine: and its upper half up', (await throwOf('examine', 'upper')) == 'up');
+}

@@ -591,9 +591,10 @@ panel.STATELESS_SWITCH_INFO = [
             callback: panel.onUnprotect,
         },
     },
-    // The AUX switches throw both ways, but only the upper position has
-    // a label to click; the lower is reached through the lever. Neither
-    // has a button on the strip, since neither does anything.
+    // The AUX switches are labelled above only, so, like SINGLE STEP,
+    // they throw only up: the panel's printing is the rule for which
+    // way a switch goes. Neither has a button on the strip, since
+    // neither does anything.
     {
         id: 'aux1',
         x: 957,
@@ -606,7 +607,7 @@ panel.STATELESS_SWITCH_INFO = [
             height: 13.87,
             callback: panel.onAux,
         },
-        lowerCmd: {id: 'sw-aux1-down', callback: panel.onAux},
+        lowerCmd: null,
     },
     {
         id: 'aux2',
@@ -620,7 +621,7 @@ panel.STATELESS_SWITCH_INFO = [
             height: 13.87,
             callback: panel.onAux,
         },
-        lowerCmd: {id: 'sw-aux2-down', callback: panel.onAux},
+        lowerCmd: null,
     },
 ];
 
@@ -803,8 +804,8 @@ panel.createSwitch = function(id, type, x, y, upperCmd, lowerCmd) {
             panel.createCmdLabel(lowerCmd, lower);
         }
         // The lever's top half throws it up and its bottom half down,
-        // as on the metal. SINGLE STEP only goes one way, so all of its
-        // lever is that way.
+        // as on the metal. SINGLE STEP and the AUX switches only go one
+        // way, so all of the lever is that way.
         if (upper) {
             panel.createHitArea(x - 15, y - 8, 50, lower ? 23 : 46, upper);
         }
