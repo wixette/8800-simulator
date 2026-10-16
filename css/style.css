@@ -39,6 +39,26 @@ button, input, select, textarea, pre, code, kbd, samp {
     font-family: inherit;
 }
 
+/* Controls are pressed, not read. Dragging across one, or pressing it
+   twice, selects none of its words, as in any app: buttons, the dock's
+   tabs, the menus and their items, the front panel and its switches,
+   Share's choices, the logo. What they act on - the editor, the
+   Teletype's paper, the dumps, a dialog's text and its link field -
+   can still be selected and copied, and links keep the browser's own
+   ways, selected or dragged like any link. */
+button,
+[role="button"],
+[role="tab"],
+[role="option"],
+.button,
+.dropdown-heading,
+.dialog-option,
+.logo,
+#panel {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
 div, img, pre {
     border: 0;
     margin: 0;
@@ -71,13 +91,11 @@ a {
     margin-right: 8px;
 }
 
-/* The logo, wherever it is shown: a picture to look at, not text to
-   select or an image to drag. */
+/* The logo, wherever it is shown: a picture to look at, not an image
+   to drag off (Firefox takes draggable="false" on the <img> instead). */
 .logo {
     -webkit-user-drag: none;
-    -webkit-user-select: none;
     display: block;
-    user-select: none;
 }
 
 /* In the toolbar, one size wider than a phone: as wide as the longest
@@ -106,10 +124,6 @@ a {
     gap: 6px;
     line-height: 20px;
     padding: 5px 10px;
-    user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
     white-space: nowrap;
 }
 
@@ -424,10 +438,6 @@ a {
     /* The same 32px the buttons beside it come to. */
     height: 32px;
     padding: 0 14px;
-    user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
 }
 
 .dropdown-arrow {
@@ -570,10 +580,6 @@ a {
 #panel {
     flex: 1 1 0;
     min-height: 0;
-    user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
     width: 100%;
 }
 
@@ -601,10 +607,6 @@ a {
     height: 14px;
     justify-content: center;
     width: 44px;
-    user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
 }
 
 .strip-tab:hover,
@@ -817,10 +819,6 @@ a {
     padding: 0 14px;
     /* For the activity dot below. */
     position: relative;
-    user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
     white-space: nowrap;
 }
 
@@ -842,10 +840,6 @@ a {
     font-size: 14px;
     justify-content: center;
     min-width: 36px;
-    user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
 }
 
 .dock-tool:hover {
@@ -1050,10 +1044,6 @@ a {
     line-height: 2em;
     padding: 2px 10px;
     text-align: center;
-    user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
 }
 
 /* Every light button answers the pointer, as the toolbar, the dock and

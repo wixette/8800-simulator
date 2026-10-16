@@ -172,3 +172,36 @@ export async function about(h) {
     verify('the logo in About cannot be selected or dragged', await js(`(() => { const l = document.getElementById('about-logo');
         return l.draggable === false && getComputedStyle(l).userSelect == 'none'; })()`));
 }
+
+/**
+ * Controls are pressed, not read: no button, tab, menu item, switch or
+ * choice has words to select, and no picture can be dragged off. What
+ * they act on - the editor, the paper, the dumps, the dialogs' text
+ * and the link field - can still be selected (v1.7.0).
+ */
+export async function controls(h) {
+    const {js, viewport, fresh, press, verify, sleep} = h;
+    await viewport(1280, 860); await fresh();
+    await js(`panel.onPowerOn()`); await sleep(200);
+    // The menus build their items as they open.
+    for (const b of ['#load-button', '#memory-button', '#switch-locale']) {
+        await press(b); await sleep(400); await press(b); await sleep(200);
+    }
+    const selectable = await js(`[...document.querySelectorAll('button, [role=button], [role=tab], [role=option], ' +
+        '.button, .dropdown li, label, #panel *')]
+        .filter((e) => getComputedStyle(e).userSelect != 'none')
+        .map((e) => e.id || e.className.baseVal || e.className || e.tagName)`);
+    verify('no control has words to select', selectable.length === 0, selectable.slice(0, 8).join(' '));
+    const draggable = await js(`[...document.querySelectorAll('img, [draggable=true]')].filter((e) => e.draggable).map((e) => e.id || e.src)`);
+    verify('no picture can be dragged off', draggable.length === 0, draggable.join(' '));
+    const content = await js(`['asm-source', 'tty-paper', 'mem-dump', 'cpu-dump', 'share-link', 'debug-data-input',
+        'status-text', 'about-desc', 'tutorial-desc'].filter((id) => getComputedStyle(document.getElementById(id)).userSelect == 'none')`);
+    verify('what they act on can still be selected', content.length === 0, content.join(' '));
+    // Share, where it was seen: selecting all of the dialog takes its
+    // words, but not its choices' or its button's.
+    await press('#share-button'); await sleep(500);
+    const selected = await js(`(() => { getSelection().selectAllChildren(document.getElementById('share-dialog'));
+        const text = getSelection().toString(); getSelection().removeAllRanges(); return text; })()`);
+    verify('in Share, selecting everything takes the question, not the choices or the button',
+           /What should the link open/.test(selected) && !/The program, at RESET|Copy Link/.test(selected), selected);
+}
