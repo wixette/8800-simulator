@@ -61,6 +61,19 @@ test('the listing has a cell per line: address and bytes, or a value', () => {
     // A row too long to hold is whole in its tooltip.
     assert.match(cells[3].title, /48 45 4C 4C 4F 2C 20 57 4F 52 4C 44/);
     assert.strictEqual(cells[2].title, '');
+    // In parts to colour (H2): an address, the bytes, a name's value
+    // after its =; what the parts say is the text, nothing added.
+    assert.deepStrictEqual(cells.map((c) => c.parts), [
+        [],
+        [['addr', '='], ['', ' '], ['bytes', '00FF']],
+        [['addr', '0000'], ['', '  '], ['bytes', 'DB FF']],
+        [['addr', '0002'], ['', '  '], ['bytes', '48 45 4C 4C 4F 2C …']],
+        [['addr', '000E']],
+        [['addr', '000E'], ['', '  '], ['bytes', 'C3 00 00']],
+    ]);
+    for (const c of cells) {
+        assert.strictEqual(c.parts.map((part) => part[1]).join(''), c.text);
+    }
 });
 
 test('a macro\'s use lists its expansion, line by line, in its tooltip', () => {

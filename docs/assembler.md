@@ -492,7 +492,16 @@ two tabs on its top edge, **Source** and **Bytes**:
 - **The listing** on the right: for each source line, on the same row,
   its address and the bytes it made, in hex; for an `EQU` or `SET`,
   its value. The two scroll together, so a line's bytes are always
-  beside it. A row shows up to six bytes, then `…`.
+  beside it. A row shows up to six bytes, then `…`. *Since v1.7.0*:
+  - the line the caret is on is banded, lighter, across the line
+    numbers, the source and the listing, so that a line's bytes can be
+    followed across the gap to it (the PC's green line keeps its
+    green). It stays where the caret last was when the editor loses the
+    keyboard, since that is when the bytes are read;
+  - on a phone, where the bytes are shown instead of the code (below),
+    the source's own line numbers stay beside them, scrolled with them:
+    line 12's bytes are on line 12. The wide screen does not repeat
+    them, as the rows already line up with the source.
 - **A macro's expansion** is listed on the row of the line that used
   it: the address and the bytes it made. Its tooltip gives the whole
   expansion, a line each with its address and bytes (L22). *As built:*
@@ -686,6 +695,12 @@ On the light background the dump and the paper already use, each
 colour meets 4.5:1 contrast, on the tinted rows of the PC's line and
 an error's too. Colour is never the only sign: errors are also marked
 in the gutter and listed.
+
+The listing is coloured too (*since v1.7.0*): its addresses in the grey
+of the line numbers, positions rather than data, and the bytes, and a
+name's value after its `=`, in the colour of numbers. The band on the
+caret's line (U2) is lighter, not darker, so that every colour on it
+gains contrast rather than losing it.
 
 ### H3 — Cost
 

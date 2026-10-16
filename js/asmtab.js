@@ -71,6 +71,14 @@ asmtab.loaded = null;
 /** The source line marked as the PC's, or 0 for none. @type {number} */
 asmtab.pcLine = 0;
 
+/**
+ * The line the caret is on, banded across the line numbers, the source
+ * and the listing, so that a line's bytes can be followed across to it
+ * (U2); 0 until the editor has first had the keyboard.
+ * @type {number}
+ */
+asmtab.currentLine = 0;
+
 /** Whether the next Tab moves the focus on, after an Escape (U3). */
 asmtab.tabLeaves = false;
 
@@ -110,6 +118,15 @@ asmtab.init = function() {
     document.getElementById('asm-clear').addEventListener(
         'click', asmtab.onClear, false);
     // The listing scrolls with the source, never by itself.
+    // On a phone, the bytes are shown beside the line numbers, which
+    // follow them as they scroll (U2).
+    document.getElementById('asm-listing').addEventListener(
+        'scroll', function() {
+            if (asmtab.showingListing()) {
+                document.getElementById('asm-gutter').scrollTop =
+                    document.getElementById('asm-listing').scrollTop;
+            }
+        }, false);
     document.getElementById('asm-listing').addEventListener(
         'wheel', function(event) {
             if (asmtab.showingListing()) {
@@ -231,6 +248,7 @@ asmtab.renderText = function() {
     document.getElementById('asm-gutter').innerHTML = gutter.join('');
     asmtab.pcLine = 0;
     asmtab.requestPc(false);
+    asmtab.markCurrent(asmtab.currentLine, true);
     asmtab.syncScroll();
 };
 
@@ -418,6 +436,11 @@ asmtab.renderCaret = function() {
     var source = asmtab.source();
     var caret = document.getElementById('asm-caret');
     var at = source.selectionStart;
+    // The band stays where the caret last was, after the editor has
+    // lost the keyboard too: it is what the bytes are followed by.
+    if (document.activeElement === source) {
+        asmtab.markCurrent(source.value.slice(0, at).split('\n').length);
+    }
     if (document.activeElement !== source ||
         at !== source.selectionEnd) {
         caret.hidden = true;
@@ -553,8 +576,10 @@ asmtab.onClear = function() {
  * and the bytes it made, in hex. A macro's use shows its expansion's.
  * @param {!Object} result An assembly.
  * @param {number} count How many lines the source has.
- * @return {!Array<{text: string, title: string, error: boolean}>} One
- *     cell per line, from line 1.
+ * @return {!Array<{text: string, parts: !Array<!Array<string>>,
+ *     title: string, error: boolean}>} One cell per line, from line 1.
+ *     Its parts are its text in pieces, each with what it is - 'addr',
+ *     'bytes', or '' for the space between - to be coloured by (H2).
  */
 asmtab.listingCells = function(result, count) {
     var byLine = [];
@@ -569,7 +594,7 @@ asmtab.listingCells = function(result, count) {
     var errors = new Set(result.errors.map(function(e) { return e.line; }));
     var hex = Asm8080.hex;
     return byLine.map(function(rows, i) {
-        var cell = {text: '', title: '', error: errors.has(i + 1)};
+        var cell = {text: '', parts: [], title: '', error: errors.has(i + 1)};
         var own = rows[0];
         if (!own || own.skipped) {
             return cell;
@@ -586,13 +611,16 @@ asmtab.listingCells = function(result, count) {
             let shown = bytes.slice(0, asmtab.LISTING_BYTES).map(function(b) {
                 return hex(b, 2);
             }).join(' ');
-            cell.text = hex(address, 4) + '  ' + shown +
-                (bytes.length > asmtab.LISTING_BYTES ? ' …' : '');
+            cell.parts = [['addr', hex(address, 4)], ['', '  '],
+                          ['bytes', shown +
+                           (bytes.length > asmtab.LISTING_BYTES ? ' …' : '')]];
         } else if (own.value !== null) {
-            cell.text = '= ' + hex(own.value, 4);
+            // A name's value, from EQU or SET: a number, not an address.
+            cell.parts = [['addr', '='], ['', ' '], ['bytes', hex(own.value, 4)]];
         } else if (own.address !== null) {
-            cell.text = hex(own.address, 4);
+            cell.parts = [['addr', hex(own.address, 4)]];
         }
+        cell.text = cell.parts.map(function(part) { return part[1]; }).join('');
         // The whole of it, where a row could not hold it all: a long
         // DB, or a macro's expansion, line by line.
         if (rows.length > 1 || bytes.length > asmtab.LISTING_BYTES) {
@@ -618,10 +646,14 @@ asmtab.renderListing = function() {
         return '<span class="asm-listing-line' +
             (c.error ? ' asm-listing-error' : '') + '"' +
             (c.title ? ' title="' + asmtab.escape(c.title) + '"' : '') + '>' +
-            asmtab.escape(c.text) + '</span>';
+            c.parts.map(function(part) {
+                return part[0] ? '<span class="asm-' + part[0] + '">' +
+                    asmtab.escape(part[1]) + '</span>' : part[1];
+            }).join('') + '</span>';
     }).join('');
     asmtab.pcLine = 0;
     asmtab.requestPc(false);
+    asmtab.markCurrent(asmtab.currentLine, true);
     asmtab.syncScroll();
 };
 
@@ -813,6 +845,30 @@ asmtab.renderPc = function(scroll) {
     if (scroll && line && panel.dock.tab == 'asm' && panel.dock.open) {
         asmtab.reveal(line);
     }
+};
+
+/**
+ * Moves the band of the line the caret is on (asmtab.currentLine).
+ * @param {number} line From 1, or 0 for none.
+ * @param {boolean=} again Draws it even if it is on that line already,
+ *     after the lines were drawn anew.
+ */
+asmtab.markCurrent = function(line, again) {
+    if (line == asmtab.currentLine && !again) {
+        return;
+    }
+    [['asm-highlight', 'asm-line'], ['asm-gutter', 'asm-gutter-line'],
+     ['asm-listing', 'asm-listing-line']].forEach(function(part) {
+        var lines = document.getElementById(part[0]).getElementsByClassName(part[1]);
+        var was = asmtab.currentLine && lines[asmtab.currentLine - 1];
+        if (was) {
+            was.classList.remove('asm-current');
+        }
+        if (line && lines[line - 1]) {
+            lines[line - 1].classList.add('asm-current');
+        }
+    });
+    asmtab.currentLine = line;
 };
 
 /**
@@ -1074,6 +1130,7 @@ asmtab.showView = function(listing) {
         var from = source.scrollTop;
         tab.classList.add('show-listing');
         bytes.scrollTop = from;
+        document.getElementById('asm-gutter').scrollTop = bytes.scrollTop;
     } else {
         var top = bytes.scrollTop;
         tab.classList.remove('show-listing');

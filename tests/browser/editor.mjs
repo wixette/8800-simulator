@@ -136,7 +136,7 @@ export async function views(h) {
         const tabs = [...t.querySelectorAll('[role=tab]')].map((e) => ({name: e.textContent.trim(),
             whole: e.scrollWidth <= e.clientWidth, open: e.getAttribute('aria-selected') == 'true'}));
         return {shown: r.height > 0, onTop: Math.abs(r.bottom - b.top) < 1 && Math.abs(r.left - b.left) < 1 && Math.abs(r.right - b.right) < 1,
-                tabs, source: getComputedStyle(document.getElementById('asm-editor')).display != 'none',
+                tabs, source: getComputedStyle(document.querySelector('.asm-code')).display != 'none',
                 bytes: getComputedStyle(document.getElementById('asm-listing')).display != 'none'}; })()`);
     for (const width of [320, 375, 700]) {
         await viewport(width, 800); await fresh();
@@ -166,4 +166,70 @@ export async function views(h) {
         m = await look();
         verify(width + 'px: no tabs, the source and its bytes side by side', !m.shown && m.source && m.bytes, JSON.stringify(m));
     }
+}
+
+/**
+ * The listing, read beside the source: its addresses and bytes in the
+ * editor's colours; the caret's line banded across all three columns,
+ * so that a line's bytes can be followed across; and on a phone the
+ * bytes beside the source's own line numbers (U2, H2).
+ */
+export async function bytes(h) {
+    const {js, viewport, fresh, press, verify, sleep} = h;
+    const current = () => js(`[...document.querySelectorAll('.asm-current')].map((e) =>
+        e.parentElement.id + ':' + ([...e.parentElement.children].indexOf(e) + 1))`);
+    /** Puts the caret at the start of a line, as a click there would. */
+    const caretTo = (line) => js(`(() => { const s = document.getElementById('asm-source'); s.focus();
+        const at = s.value.split('\\n').slice(0, ${line} - 1).join('\\n').length + 1; s.setSelectionRange(at, at);
+        document.dispatchEvent(new Event('selectionchange')); })()`);
+    await viewport(1280, 860); await fresh();
+    await press('#nav-asm'); await sleep(300);
+    await press('#asm-examples-button'); await sleep(500);
+    await press('#asm-examples-list li[data-value="adder"]'); await sleep(400);
+    await press('#asm-assemble'); await sleep(400);
+    const colours = await js(`(() => { const row = document.querySelectorAll('#asm-listing .asm-listing-line')[15];
+        const a = row.querySelector('.asm-addr'), b = row.querySelector('.asm-bytes');
+        return {addr: a && a.textContent, bytes: b && b.textContent,
+                differ: !!(a && b) && getComputedStyle(a).color != getComputedStyle(b).color,
+                value: document.querySelectorAll('#asm-listing .asm-listing-line')[10].textContent}; })()`);
+    verify('a row is its address and its bytes, each in its colour', colours.addr == '0003' && colours.bytes == '47' && colours.differ, JSON.stringify(colours));
+    verify("and a name's value is shown after its =", colours.value == '= 0080', colours.value);
+    verify('no line is banded before the editor has had the keyboard', (await current()).length == 0, (await current()).join(' '));
+    await caretTo(19); await sleep(200);
+    verify("the caret's line is banded across numbers, source and bytes",
+           JSON.stringify(await current()) == JSON.stringify(['asm-gutter:19', 'asm-highlight:19', 'asm-listing:19']), (await current()).join(' '));
+    verify('lighter, under the text', await js(`getComputedStyle(document.querySelectorAll('#asm-listing .asm-listing-line')[18]).boxShadow.includes('inset')`));
+    await caretTo(16); await sleep(200);
+    verify('it follows the caret', JSON.stringify(await current()) == JSON.stringify(['asm-gutter:16', 'asm-highlight:16', 'asm-listing:16']), (await current()).join(' '));
+    await js(`document.getElementById('asm-assemble').focus()`); await sleep(200);
+    verify('and stays when the editor loses the keyboard', (await current()).length == 3 && (await current())[2] == 'asm-listing:16', (await current()).join(' '));
+    await caretTo(16);
+    await js(`(() => { const s = document.getElementById('asm-source'); s.setRangeText(' ', s.selectionStart, s.selectionStart, 'end'); s.dispatchEvent(new Event('input')); })()`);
+    // At once, while only the source is drawn anew, and once the pause
+    // after typing has assembled it and drawn the listing too.
+    await sleep(30);
+    const typing = (await current()).join(' ');
+    await sleep(500);
+    verify('and is drawn again on the lines drawn anew, as you type and after',
+           typing == 'asm-gutter:16 asm-highlight:16 asm-listing:16' &&
+           (await current()).join(' ') == 'asm-gutter:16 asm-highlight:16 asm-listing:16', typing + ' / ' + (await current()).join(' '));
+    // The PC's line (15, START) keeps its green, with no band over it.
+    await js(`document.getElementById('asm-source').setRangeText('', document.getElementById('asm-source').selectionStart - 1, document.getElementById('asm-source').selectionStart, 'end'); document.getElementById('asm-source').dispatchEvent(new Event('input'))`); await sleep(400);
+    await press('#asm-assemble'); await sleep(400);
+    await caretTo(15); await sleep(300);
+    const pc = await js(`(() => { const row = document.querySelectorAll('#asm-listing .asm-listing-line')[14];
+        return {pc: row.classList.contains('asm-listing-pc'), current: row.classList.contains('asm-current'), shadow: getComputedStyle(row).boxShadow}; })()`);
+    verify("the PC's line keeps its green, unbanded", pc.pc && pc.current && pc.shadow == 'none', JSON.stringify(pc));
+    // A phone: the bytes beside the source's own line numbers.
+    await viewport(390, 844); await sleep(400);
+    await press('#asm-view-bytes'); await sleep(300);
+    await js(`document.getElementById('asm-listing').scrollTop = 26 * 6; document.getElementById('asm-listing').dispatchEvent(new Event('scroll'))`); await sleep(200);
+    const side = await js(`(() => { const g = document.getElementById('asm-gutter'), l = document.getElementById('asm-listing');
+        const gl = g.querySelectorAll('.asm-gutter-line')[11].getBoundingClientRect(), ll = l.querySelectorAll('.asm-listing-line')[11].getBoundingClientRect();
+        return {numbers: g.getBoundingClientRect().width > 20, code: getComputedStyle(document.querySelector('.asm-code')).display,
+                scrolled: g.scrollTop == l.scrollTop && l.scrollTop > 0, aligned: Math.abs(gl.top - ll.top) < 1,
+                beside: g.getBoundingClientRect().right <= l.getBoundingClientRect().left + 1}; })()`);
+    verify('on a phone, Bytes shows the line numbers beside the bytes, row for row', side.numbers && side.code == 'none' && side.beside && side.scrolled && side.aligned, JSON.stringify(side));
+    await press('#asm-view-source'); await sleep(300);
+    verify('and Source shows the code again beside them', await js(`getComputedStyle(document.querySelector('.asm-code')).display != 'none'`));
 }

@@ -1580,6 +1580,26 @@ a {
     width: 27ch;
 }
 
+/* A row's parts as the source colours them (H2): the address in the
+   grey of the line numbers, a position rather than data; the bytes,
+   and a name's value after its =, in the colour of numbers. */
+.asm-listing .asm-addr {
+    color: #4a4a4a;
+}
+
+.asm-listing .asm-bytes {
+    color: #505000;
+}
+
+/* The line the caret is on, across the line numbers, the source and
+   the listing, so that a line's bytes can be followed across to it
+   (U2): lighter, over whatever the line already shows - an error's
+   red too - so that its dark text only gains contrast. The PC's line
+   is marked already, in green, and keeps it. */
+.asm-current:not(.asm-line-pc):not(.asm-gutter-pc):not(.asm-listing-pc) {
+    box-shadow: inset 0 0 0 100vmax rgba(255, 255, 255, 0.4);
+}
+
 /* The line the program counter is on, in the green the Debugger's dump
    marks the PC with (U7): the line tinted, its number marked, its
    bytes in the listing filled. */
@@ -1591,6 +1611,12 @@ a {
 .asm-listing-line.asm-listing-pc {
     background-color: #157a35;
     color: #eee;
+}
+
+/* On the PC's green, the parts are its light text, as the rest is. */
+.asm-listing-pc .asm-addr,
+.asm-listing-pc .asm-bytes {
+    color: inherit;
 }
 
 .asm-errors {
@@ -1786,7 +1812,13 @@ a {
         width: auto;
     }
 
+    /* The bytes keep the source's line numbers beside them, the same
+       column, scrolled with them: line 12's bytes are on line 12. */
     #tab-asm.show-listing .asm-editor {
+        flex: none;
+    }
+
+    #tab-asm.show-listing .asm-code {
         display: none;
     }
 
