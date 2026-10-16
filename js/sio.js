@@ -64,7 +64,7 @@ export class Sio {
 
     /**
      * Plugs the board into a simulator, on both of its ports.
-     * @param {Sim8800} sim The simulator.
+     * @param {import('./sim8800.js').Sim8800} sim The simulator.
      * @param {number=} basePort The status port; the data port is the
      *     next one up. The 88-SIO sits at 00h, the 88-2SIO at 10h.
      * @param {boolean=} activeLow Whether a clear status bit means

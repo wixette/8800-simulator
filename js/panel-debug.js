@@ -13,8 +13,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  *
- * @fileoverview The Debugger: its controls, the memory dump and a byte edited in
- * it, the next instruction, and the memory map. Part of the
+ * @fileoverview The Debugger: its controls, the memory dump and a byte
+ * edited in it, the next instruction, and the memory map. Part of the
  * panel namespace, which js/panel.js declares (see there).
  */
 
@@ -219,11 +219,6 @@ panel.onMemDumpClick = function(event) {
     var target = event.target && event.target.closest ?
         event.target.closest('span[data-a]') : null;
     if (!target) {
-        // A running machine's bytes are not elements of their own (see
-        // Sim8800.dumpMem), but a click on them still deserves the why.
-        if (panel.sim.isRunning) {
-            panel.setStatus('mem-edit-running', {}, 'warn');
-        }
         return;
     }
     var selection = window.getSelection ? window.getSelection() : null;
@@ -231,6 +226,18 @@ panel.onMemDumpClick = function(event) {
         return;
     }
     panel.selectMemByte(parseInt(target.dataset.a, 10));
+};
+
+/**
+ * A press on the dump while the machine runs says why nothing can be
+ * edited. On the press, not the click: a running machine's dump is drawn
+ * anew every frame, so the press and the release are seldom on the
+ * same element, and a click may never come.
+ */
+panel.onMemDumpPress = function() {
+    if (panel.sim.isRunning) {
+        panel.setStatus('mem-edit-running', {}, 'warn');
+    }
 };
 
 /**

@@ -13,9 +13,9 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  *
- * @fileoverview The Teletype: its paper, and the keyboard and keys that type at
- * the machine. Part of the
- * panel namespace, which js/panel.js declares (see there).
+ * @fileoverview The Teletype: its paper, and the keyboard and keys that
+ * type at the machine. Part of the panel namespace, which js/panel.js
+ * declares (see there).
  */
 
 import {Dialog} from './dialog.js';

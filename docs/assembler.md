@@ -719,8 +719,9 @@ is kept up, which is cheap.
 
 - **`js/asm8080.js`**: the assembler, with no page in it. It takes
   source text and gives back the bytes (by address), the listing rows,
-  the symbols and the errors. Loaded by the page as a plain script, and
-  by the tests in Node, like `js/link.js`. The instruction encodings
+  the symbols and the errors. An ES module, imported by the page and by
+  the tests in Node alike, like `js/link.js` (*since v1.7.0*; it was a
+  plain script, with a second export for Node). The instruction encodings
   are its own table, written from the manual's Appendix A, and checked
   by a test against the CPU core's disassembler (T2).
 - **`js/asmtab.js`**: the tab: editor, highlighting, listing, errors,

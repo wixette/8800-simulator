@@ -372,3 +372,13 @@ test('choosing an example asks first only if text would be lost (U5)', (t) => {
     }
     asmtab.replaceDialog = null;
 });
+
+test('the Assembler knows a phone by the width the stylesheet does (U2)', () => {
+    // Its two panes take turns below this width; the code that keeps
+    // them scrolled together must agree with the CSS that lays them out.
+    const css = fs.readFileSync(path.join(import.meta.dirname, '..', 'css', 'style.css'), 'utf8');
+    assert.match(asmtab.PHONE, /^\(max-width: \d+px\)$/);
+    assert.ok(css.includes('@media ' + asmtab.PHONE + ' {'), asmtab.PHONE + ' is not in css/style.css');
+    assert.ok(css.indexOf('#tab-asm.show-listing .asm-code') > css.indexOf('@media ' + asmtab.PHONE),
+              'the panes take turns inside that query');
+});

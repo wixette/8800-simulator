@@ -880,6 +880,20 @@ test('the arrows move the pick, turning the page at its edges', (t) => {
     assert.strictEqual(tab.defaultPrevented, false);
 });
 
+test('a press on a running machine\'s dump says why, without waiting for a click', (t) => {
+    // The dump is drawn anew every frame while it runs, so a click,
+    // pressed on one drawing and released on the next, may never come.
+    const sim = stubMemEditor(t);
+    const said = [];
+    t.mock.method(panel, 'setStatus', (...args) => said.push(args));
+    sim.isRunning = true;
+    panel.onMemDumpPress();
+    assert.deepStrictEqual(said, [['mem-edit-running', {}, 'warn']]);
+    sim.isRunning = false;
+    panel.onMemDumpPress();
+    assert.strictEqual(said.length, 1, 'a stopped machine says nothing on a press');
+});
+
 test('a byte is edited only on a stopped machine, and not on a protected board', (t) => {
     const sim = stubMemEditor(t);
     const said = [];

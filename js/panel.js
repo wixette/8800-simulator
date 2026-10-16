@@ -496,6 +496,8 @@ panel.init = function() {
     var memInput = document.getElementById('mem-input');
     document.getElementById('mem-dump').addEventListener(
         'click', panel.onMemDumpClick, false);
+    document.getElementById('mem-dump').addEventListener(
+        'pointerdown', panel.onMemDumpPress, false);
     memInput.addEventListener('keydown', panel.onMemKey, false);
     memInput.addEventListener('input', panel.onMemInput, false);
     memInput.addEventListener('blur', panel.clearMemSelection, false);

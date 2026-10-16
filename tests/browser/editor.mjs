@@ -166,6 +166,21 @@ export async function views(h) {
         m = await look();
         verify(width + 'px: no tabs, the source and its bytes side by side', !m.shown && m.source && m.bytes, JSON.stringify(m));
     }
+    // A phone showing Bytes, turned on its side past 700px: both are
+    // shown, and the colours, numbers and bytes follow the source as it
+    // scrolls; turned back, it is on Bytes again.
+    await viewport(390, 844); await sleep(300);
+    await press('#asm-examples-button'); await sleep(500);
+    await press('#asm-examples-list li[data-value="guess-letter"]'); await sleep(400);
+    if (await js(`document.getElementById('asm-replace-dialog').open`)) { await press('#asm-replace-ok'); await sleep(300); }
+    await press('#asm-view-bytes'); await sleep(300);
+    await viewport(844, 390); await sleep(400);
+    await js(`(() => { const s = document.getElementById('asm-source'); s.scrollTop = 400; s.dispatchEvent(new Event('scroll')); })()`); await sleep(300);
+    const turned = await js(`['asm-highlight', 'asm-gutter', 'asm-listing'].map((id) => document.getElementById(id).scrollTop)`);
+    verify('turned on its side, all follow the source again', turned.every((top) => top == 400), turned.join(' '));
+    await viewport(390, 844); await sleep(400);
+    m = await look();
+    verify('and turned back, it is on Bytes, as it was left', m.bytes && !m.source && m.tabs[1].open, JSON.stringify(m));
 }
 
 /**

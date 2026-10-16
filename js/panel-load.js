@@ -13,8 +13,8 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  *
- * @fileoverview Putting a program in: the Load menu, the examples, 4K BASIC, a
- * binary file or hex bytes, and the Memory menu. Part of the
+ * @fileoverview Putting a program in: the Load menu, the examples, 4K
+ * BASIC, a binary file or hex bytes, and the Memory menu. Part of the
  * panel namespace, which js/panel.js declares (see there).
  */
 

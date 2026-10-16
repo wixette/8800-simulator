@@ -140,6 +140,16 @@ asmtab.init = function() {
         'click', asmtab.onAssemble, false);
     document.getElementById('asm-errors').addEventListener(
         'click', asmtab.onErrorClick, false);
+    // Across the phone's width, the panes are laid out anew; the lines
+    // behind the text, the numbers and the listing follow it again.
+    window.matchMedia(asmtab.PHONE).addEventListener('change', function() {
+        if (asmtab.showingListing()) {
+            document.getElementById('asm-gutter').scrollTop =
+                document.getElementById('asm-listing').scrollTop;
+        } else {
+            asmtab.syncScroll();
+        }
+    });
     for (const [id, listing] of [['asm-view-source', false], ['asm-view-bytes', true]]) {
         let tab = document.getElementById(id);
         tab.addEventListener('click', function() {
@@ -1120,7 +1130,7 @@ asmtab.load = function(result) {
  * @param {boolean} listing The bytes, rather than the source.
  */
 asmtab.showView = function(listing) {
-    if (listing == asmtab.showingListing()) {
+    if (listing == document.getElementById('tab-asm').classList.contains('show-listing')) {
         return;
     }
     var tab = document.getElementById('tab-asm');
@@ -1155,10 +1165,21 @@ asmtab.onViewKey = function(event) {
     document.getElementById(to ? 'asm-view-bytes' : 'asm-view-source').focus();
 };
 
-/** Whether a phone is showing the listing in place of the source. */
+/**
+ * The layout in which the source and its bytes take turns: css/style.css
+ * draws a phone's below this width.
+ * @type {string}
+ */
+asmtab.PHONE = '(max-width: 700px)';
+
+/**
+ * Whether a phone is showing the listing in place of the source. The
+ * choice is kept when the page grows wider - a phone turned on its
+ * side - but there both are shown, and neither is in the other's place.
+ */
 asmtab.showingListing = function() {
     return document.getElementById('tab-asm').classList
-        .contains('show-listing');
+        .contains('show-listing') && window.matchMedia(asmtab.PHONE).matches;
 };
 
 /**

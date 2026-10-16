@@ -13,9 +13,9 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  *
- * @fileoverview Program links: one opened with the page, and the Share dialog
- * that copies one. Part of the
- * panel namespace, which js/panel.js declares (see there).
+ * @fileoverview Program links: one opened with the page, and the Share
+ * dialog that copies one. Part of the panel namespace, which
+ * js/panel.js declares (see there).
  */
 
 import {CPU8080} from './8080.js';

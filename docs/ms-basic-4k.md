@@ -1380,14 +1380,16 @@ Phase 1 is worth doing whatever we decide about BASIC.
 
 Every claim in [Part 1](#part-1--what-was-verified) came from running
 the ROM. So can you. Put `4kbas32.bin` at `roms/4kbas32.bin`, save the
-following as `basic-smoke.js` in the repository root, and run
-`node basic-smoke.js` — no dependencies, same Node the test suite uses.
+following as `basic-smoke.mjs` in the repository root, and run
+`node basic-smoke.mjs` — no dependencies, same Node the test suite uses.
+(*Since v1.7.0* the page's scripts are ES modules, so this imports the
+CPU core rather than requiring it.)
 
 ```js
 // Boots 4K BASIC on this repo's CPU core.
-// Run from the repository root:  node basic-smoke.js [ramBytes]
-const fs = require('fs');
-const CPU8080 = require('./js/8080.js');
+// Run from the repository root:  node basic-smoke.mjs [ramBytes]
+import fs from 'node:fs';
+import {CPU8080} from './js/8080.js';
 
 const RAM = parseInt(process.argv[2] || '8192', 10);
 const mem = new Array(RAM).fill(0);

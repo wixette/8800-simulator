@@ -13,9 +13,9 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  *
- * @fileoverview The dock of tools under the panel: its tabs, its height, and
- * folding it away. Part of the
- * panel namespace, which js/panel.js declares (see there).
+ * @fileoverview The dock of tools under the panel: its tabs, its
+ * height, and folding it away. Part of the panel namespace, which
+ * js/panel.js declares (see there).
  */
 
 import {l10n} from './l10n.js';

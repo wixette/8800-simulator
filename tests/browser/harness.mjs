@@ -210,7 +210,7 @@ export async function start(chromePath, url) {
     // A browser that goes away fails what was waiting on it, rather
     // than leaving the run hung.
     ws.addEventListener('close', () => {
-        for (const [n, call] of pending) {
+        for (const call of pending.values()) {
             call.reject(new Error('the browser went away during ' + call.method));
         }
         pending.clear();

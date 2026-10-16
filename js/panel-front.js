@@ -13,9 +13,9 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  *
- * @fileoverview The front panel: its switches and what they do, its lamps, the
- * big switches under it, and the sounds they make. Part of the
- * panel namespace, which js/panel.js declares (see there).
+ * @fileoverview The front panel: its switches and what they do, its
+ * lamps, the big switches under it, and the sounds they make. Part of
+ * the panel namespace, which js/panel.js declares (see there).
  */
 
 import {asmtab} from './asmtab.js';
