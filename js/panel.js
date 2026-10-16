@@ -133,10 +133,13 @@ panel.refreshPlaceholders = function() {
             elem.setAttribute('aria-label', l10n.getMessage(panel.LIST_LABELS[id]));
         }
     }
-    // The title is the logo; its words are its alt text.
-    var logo = document.getElementById('header-logo');
-    if (logo) {
-        logo.alt = l10n.getMessage('header-title');
+    // The title is the logo, in the toolbar and in About; its words are
+    // its alt text.
+    for (const id of ['header-logo', 'about-logo']) {
+        let logo = document.getElementById(id);
+        if (logo) {
+            logo.alt = l10n.getMessage('header-title');
+        }
     }
     // A tab's name is its tooltip too: on a phone only its icon shows.
     for (let i = 0; i < panel.TABS.length; i++) {

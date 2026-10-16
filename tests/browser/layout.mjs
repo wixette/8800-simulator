@@ -145,3 +145,30 @@ export async function logo(h) {
             img.onerror = () => done(false); img.src = i.src; })))`);
     verify("the manifest's icons are the sizes it says", sizes && sizes.length == 2 && sizes.every(Boolean), JSON.stringify(sizes));
 }
+
+/**
+ * About: headed by the logo, its licences one line each on a wide
+ * screen, and no taller than before the logo was added (v1.7.0).
+ */
+export async function about(h) {
+    const {js, viewport, fresh, press, verify, sleep} = h;
+    await viewport(1280, 860); await fresh();
+    for (const [locale, before] of [['en', 570], ['de', 591]]) {
+        await js(`l10n.setLocale('${locale}')`); await sleep(150);
+        await press('#about-button'); await sleep(500);
+        const m = await js(`(() => { const d = document.getElementById('about-dialog'), l = document.getElementById('about-logo');
+            const rows = [...d.querySelectorAll('.about-licences dd')].map((e) => Math.round(e.getBoundingClientRect().height));
+            const r = l.getBoundingClientRect(), body = d.querySelector('.dialog-body').getBoundingClientRect();
+            return {height: Math.round(d.getBoundingClientRect().height), logo: l.complete && l.naturalWidth > 0,
+                    centred: Math.abs((r.left + r.right) / 2 - (body.left + body.right) / 2) < 2,
+                    alt: l.alt, rows: rows, title: document.getElementById('about-title').textContent}; })()`);
+        verify(locale + ': the logo heads About, centred', m.logo && m.centred, JSON.stringify(m));
+        verify(locale + ': its alt text is the translated name', m.alt == await js(`l10n.getMessage('header-title')`), m.alt);
+        verify(locale + ': the title band says About', m.title == await js(`l10n.getMessage('about-button')`), m.title);
+        verify(locale + ': each licence on one line', m.rows.length == 4 && m.rows.every((r) => r == m.rows[0]), m.rows.join(' '));
+        verify(locale + ': no taller than the ' + before + 'px it was', m.height <= before, m.height);
+        await press('#about-ok'); await sleep(300);
+    }
+    verify('the logo in About cannot be selected or dragged', await js(`(() => { const l = document.getElementById('about-logo');
+        return l.draggable === false && getComputedStyle(l).userSelect == 'none'; })()`));
+}

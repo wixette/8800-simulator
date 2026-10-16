@@ -344,7 +344,10 @@ popups. The second follows P10:
   and the licences: Apache 2.0 for the simulator, Microsoft's for the
   4K BASIC tape (roms/NOTICE), BSD for the 8080 core (8080js by Martin
   Maly), Apache 2.0 for the icons. The credit line left the status line
-  for it.
+  for it. *Since v1.7.0* the logo heads it, with the version under it,
+  and the title band says only About; the licences are a table, a line
+  each - what, then whose - so that with the logo the dialog is no
+  taller than before.
 - **The icons are Material Icons, inline SVG**, not Google's icon font:
   the font would make the page need the network, fail offline, and show
   the word "share" until it loads.

@@ -71,16 +71,20 @@ a {
     margin-right: 8px;
 }
 
-/* The logo, one size wider than a phone: as wide as the longest
-   language leaves room for at 701px, the narrowest it is drawn at (at
-   24px, French and Portuguese wrap the toolbar up to 712px). It is a
-   picture to look at, not text to select or an image to drag. */
-#header-logo {
+/* The logo, wherever it is shown: a picture to look at, not text to
+   select or an image to drag. */
+.logo {
     -webkit-user-drag: none;
     -webkit-user-select: none;
     display: block;
-    height: 22px;
     user-select: none;
+}
+
+/* In the toolbar, one size wider than a phone: as wide as the longest
+   language leaves room for at 701px, the narrowest it is drawn at (at
+   24px, French and Portuguese wrap the toolbar up to 712px). */
+#header-logo {
+    height: 22px;
     width: auto;
 }
 
@@ -344,12 +348,20 @@ a {
     color: #999;
 }
 
-.about-version {
-    color: #999;
+/* The logo heads About, the version under it, both centred. */
+#about-logo {
+    height: auto;
+    margin: 4px auto 8px;
+    max-width: 100%;
+    width: 320px;
 }
 
-.about-links,
-.about-licences {
+.about-version {
+    color: #999;
+    text-align: center;
+}
+
+.about-links {
     font-size: 14px;
     line-height: 1.5;
     list-style: none;
@@ -357,13 +369,35 @@ a {
     padding: 0;
 }
 
-.about-links li,
-.about-licences li {
+.about-links li {
     padding: 4px 0;
 }
 
-.about-licences li {
+/* What, then whose: a label column as wide as the longest label. */
+.about-licences {
     color: #ccc;
+    column-gap: 14px;
+    display: grid;
+    font-size: 14px;
+    grid-template-columns: max-content 1fr;
+    line-height: 1.5;
+    margin: 0;
+    row-gap: 4px;
+}
+
+.about-licences dt {
+    color: #999;
+}
+
+.about-licences dd {
+    margin: 0;
+}
+
+/* A name or a licence is never broken across two lines; the line
+   breaks between them instead. */
+.about-licences dd a,
+.about-licences dd span {
+    white-space: nowrap;
 }
 
 /* A drop down the page draws itself: a button, and a list under it.
