@@ -247,7 +247,7 @@ Intel's answer, the same year, was assembly language: you write
 tab, under the panel, takes the language exactly as Intel's *8080
 Assembly Language Programming Manual* defines it, macros and all.
 
-![The Assembler tab holding the Macros example: highlighted source with line numbers on the left, and on the right each line's address and bytes, a macro's use showing the bytes of its expansion](./screenshots/assembler.png)
+![The Assembler tab holding the Macros example, assembled: highlighted source with line numbers on the left, and on the right each line's address and bytes, a macro's use showing the bytes of its expansion. Line 35, where the program counter is, is marked in green across the line number, the source and its bytes; line 37, where the caret is, is banded lighter across to its bytes](./screenshots/assembler.png)
 
 Here is section 3's program again, with names for its addresses
 instead of the numbers. It makes exactly the bytes you toggled in:
@@ -280,9 +280,13 @@ instruction, labels, `EQU` and `SET`, `DB`, `DW` and `DS`, expressions
 and `$`, `IF` and `ENDIF`, and macros, whose labels are local to each
 use as Intel specified. Its **Examples** menu has every example
 program, from switches to lamps to macros ([examples/](examples/README.md)).
-In the editor's corner, **Copy** takes the source with you, and
-**Clear** starts afresh (Undo brings it back). The
-design and its decisions are in [docs/assembler.md](docs/assembler.md).
+Once a program is assembled, the line the program counter is on is
+marked in green as you SINGLE STEP or STOP, and the line the caret is
+on is banded across to its bytes. In the editor's corner, **Copy**
+takes the source with you, and **Clear** starts afresh (Undo brings it
+back). On a phone, the source and its bytes take turns, under the
+**Source** and **Bytes** tabs. The design and its decisions are in
+[docs/assembler.md](docs/assembler.md).
 
 ## 8. More programs
 
