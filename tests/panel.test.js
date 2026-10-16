@@ -1090,3 +1090,16 @@ test('a link pasted into an open page reads only the fragment', async (t) => {
     await panel.onHashChange();
     assert.deepStrictEqual(seen[1].bytes, [0x3e]);
 });
+
+test('the page has a title and a description for search results', () => {
+    // A search result shows about 60 characters of the title, and about
+    // 160 of the description under it.
+    const html = sourceOf('index.html');
+    const title = html.match(/<title id="title" class="l10n">([^<]+)<\/title>/)[1];
+    assert.strictEqual(title, l10n.MESSAGES.title.en, 'the title is the English message');
+    assert.ok(title.length <= 70 && !title.includes('Sim-8800'), title);
+    const description = html.match(/<meta name="description" content="([^"]+)">/);
+    assert.ok(description, 'index.html has a description');
+    const text = description[1].replace(/&#39;/g, "'");
+    assert.ok(text.length >= 70 && text.length <= 160, text.length + ': ' + text);
+});
