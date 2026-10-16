@@ -11,8 +11,11 @@
  *
  * - images/favicon.svg: the logo in a square, cropped close, for the
  *   browsers that take an SVG icon - sharp at any size;
- * - favicon.ico: 16, 32 and 48 pixels, for those that do not, and for
- *   anything that asks for /favicon.ico by name;
+ * - images/favicon.ico: 16, 32 and 48 pixels, for those that do not.
+ *   It is with the others rather than at the site's root, where a
+ *   browser looks for one that a page does not name: the page names
+ *   its icons, and on GitHub Pages the site's root is not this
+ *   project's anyway;
  * - images/apple-touch-icon.png (180) and images/icon-192.png and
  *   icon-512.png (manifest.webmanifest): on the page's own dark grey,
  *   since a home screen gives an icon no background of its own.
@@ -108,14 +111,14 @@ async function main() {
         for (const size of [16, 32, 48]) {
             ico.push({size, png: await draw(h, square, size)});
         }
-        fs.writeFileSync(path.join(ROOT, 'favicon.ico'), icoOf(ico));
+        fs.writeFileSync(path.join(ROOT, 'images', 'favicon.ico'), icoOf(ico));
         // A home screen crops its own corners: the logo kept inside them.
         for (const [file, size] of [['apple-touch-icon.png', 180],
                                     ['icon-192.png', 192], ['icon-512.png', 512]]) {
             fs.writeFileSync(path.join(ROOT, 'images', file),
                              await draw(h, square, size, {background: BACKGROUND, fill: 0.84}));
         }
-        console.log('Drew images/favicon.svg, favicon.ico (16, 32, 48), and the ' +
+        console.log('Drew images/favicon.svg, images/favicon.ico (16, 32, 48), and the ' +
                     'home screen icons (180, 192, 512) from the logo.');
     } finally {
         await h.stop();

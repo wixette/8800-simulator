@@ -316,10 +316,12 @@ popups. The second follows P10:
   Share sits in most editors. The title before them is the logo: the
   machine and its name, in the lettering of the panel's nameplate
   (`images/8800-simulator-logo-text-white.svg`), with the translated
-  title as its alt text; just above phone width it is drawn smaller.
-  On a phone the names go and the size stays, and the logo is the
-  machine alone (`images/8800-simulator-logo.svg`), small enough to
-  keep one row; below 375px, where the row has no room left, it goes.
+  title as its alt text, at one size: as large as the longest
+  languages leave room for at 701px. It is a picture, not text to
+  select. On a phone the names go and the size stays, and the logo is
+  the machine alone (`images/8800-simulator-logo.svg`), small enough
+  to keep one row; below 375px, where the row has no room left, it
+  goes.
   *Since v1.7.0*: before, the logo was the name alone, too wide for a
   phone, which showed none.
 - **Load is a menu.** The ways in that never change come first - *Hex

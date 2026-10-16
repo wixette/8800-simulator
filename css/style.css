@@ -71,20 +71,17 @@ a {
     margin-right: 8px;
 }
 
-/* The logo carries its own margin inside its 8:1 box, so it is drawn
-   as tall as the buttons beside it, its lettering a little less. */
+/* The logo, one size wider than a phone: as wide as the longest
+   language leaves room for at 701px, the narrowest it is drawn at (at
+   24px, French and Portuguese wrap the toolbar up to 712px). It is a
+   picture to look at, not text to select or an image to drag. */
 #header-logo {
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
     display: block;
-    height: 32px;
+    height: 22px;
+    user-select: none;
     width: auto;
-}
-
-/* Just wider than a phone, the menus need the room: as wide as the
-   longest language leaves room for, at 701px. */
-@media (max-width: 900px) {
-    #header-logo {
-        height: 22px;
-    }
 }
 
 .toolbar-spacer {
@@ -1779,15 +1776,10 @@ a {
         display: none;
     }
 
-    /* The artwork says ALTAIR 8800 already, and the toolbar's row is
-       worth more to the dock. */
     /* The machine alone, from the <picture> (index.html): the name
-       would take the room the menus need. 39px across, the room the
-       toolbar has to spare at 375px. */
-    #header-logo {
-        height: 22px;
-    }
-
+       would take the room the menus need. At the same height, it is
+       39px across, and with no margin past the toolbar's gap it fits
+       the room the toolbar has to spare at 375px. */
     #header-title {
         margin-right: 0;
     }

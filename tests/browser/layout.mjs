@@ -95,7 +95,7 @@ export async function versioned(h) {
  * one row at every width (v1.7.0). The icons the page offers exist.
  */
 export async function logo(h) {
-    const {js, viewport, fresh, verify, sleep} = h;
+    const {js, send, viewport, fresh, verify, sleep} = h;
     const seen = () => js(`(() => { const l = document.getElementById('header-logo'),
         t = document.getElementById('toolbar'), r = l.getBoundingClientRect();
         // On one row, every item overlaps every other from top to bottom.
@@ -107,6 +107,8 @@ export async function logo(h) {
                 shown: r.width > 0, height: Math.round(r.height), oneRow: oneRow}; })()`);
     for (const [width, file, shown] of [[1280, '8800-simulator-logo-text-white.svg', true],
                                         [760, '8800-simulator-logo-text-white.svg', true],
+                                        // The narrowest the name is shown at, the longest languages.
+                                        [701, '8800-simulator-logo-text-white.svg', true],
                                         [700, '8800-simulator-logo.svg', true],
                                         [375, '8800-simulator-logo.svg', true],
                                         [360, '8800-simulator-logo.svg', false]]) {
@@ -121,6 +123,19 @@ export async function logo(h) {
         verify(width + 'px: ' + (shown ? file : 'no logo') + ', toolbar on one row', bad.length == 0, bad.join('; '));
     }
     verify('the alt text is the translated title', (await js(`document.getElementById('header-logo').alt`)) == (await js(`l10n.getMessage('header-title')`)));
+    // A picture, not text to select or an image to drag: selecting all
+    // of the page leaves it as it was, with no highlight over it.
+    await viewport(1280, 860); await fresh();
+    verify('the logo cannot be dragged', await js(`document.getElementById('header-logo').draggable === false &&
+        getComputedStyle(document.getElementById('header-logo')).userSelect == 'none'`));
+    const clip = await js(`(() => { const r = document.getElementById('header-logo').getBoundingClientRect();
+        return {x: r.x, y: r.y, width: r.width, height: r.height, scale: 1}; })()`);
+    const pixels = async () => (await send('Page.captureScreenshot', {format: 'png', clip})).result.data;
+    const before = await pixels();
+    await js(`getSelection().selectAllChildren(document.body)`); await sleep(150);
+    const selected = await pixels();
+    await js(`getSelection().removeAllRanges()`);
+    verify('selecting all of the page does not highlight the logo', before === selected);
     const icons = await js(`Promise.all([...document.querySelectorAll('link[rel=icon], link[rel=apple-touch-icon], link[rel=manifest]')]
         .map((l) => fetch(l.href).then((r) => l.getAttribute('rel') + ' ' + r.status + ' ' + r.headers.get('content-type'))))`);
     verify('every icon and the manifest are there', icons.length == 4 && icons.every((s) => / 200 /.test(s)), icons.join(', '));

@@ -37,7 +37,7 @@ test('the SVG favicon is the logo, in a square', () => {
 });
 
 test('favicon.ico holds the logo at 16, 32 and 48 pixels', () => {
-    const ico = read('favicon.ico');
+    const ico = read('images/favicon.ico');
     assert.strictEqual(ico.readUInt16LE(2), 1, 'an icon');
     const count = ico.readUInt16LE(4);
     const sizes = [];
@@ -62,7 +62,7 @@ test('the home screen icons are the sizes the page and manifest say', () => {
         assert.strictEqual(icon.sizes, w + 'x' + h);
     }
     const html = read('index.html').toString();
-    for (const link of ['rel="icon" href="favicon.ico', 'rel="icon" href="images/favicon.svg',
+    for (const link of ['rel="icon" href="images/favicon.ico', 'rel="icon" href="images/favicon.svg',
                         'rel="apple-touch-icon" href="images/apple-touch-icon.png',
                         'rel="manifest" href="manifest.webmanifest']) {
         assert.ok(html.includes(link), link);

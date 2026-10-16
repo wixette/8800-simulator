@@ -369,9 +369,9 @@ white for dark backgrounds and black for light ones
 shows the one with the name, and on a phone the machine alone; this
 README shows the name in whichever colour suits the reader's theme.
 
-The favicons and home screen icons are drawn from the 16:9 one:
-`favicon.ico` (16, 32 and 48 pixels), `images/favicon.svg`, and the
-180, 192 and 512 pixel PNGs that `index.html` and
+The favicons and home screen icons are drawn from the 16:9 one, and
+kept with it in `images/`: `favicon.svg`, `favicon.ico` (16, 32 and 48
+pixels), and the 180, 192 and 512 pixel PNGs that `index.html` and
 [manifest.webmanifest](manifest.webmanifest) name. After a change to
 the logo, draw them again (it needs Chrome, as the browser checks do):
 
