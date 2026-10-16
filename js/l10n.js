@@ -1750,20 +1750,20 @@ l10n.MESSAGES = {
         'ko': '리스팅',
     },
 
-    'asm-show-listing': {
-        'en': 'Listing',
-        'es': 'Listado',
-        'fr': 'Listage',
-        'de': 'Listing',
-        'it': 'Listato',
-        'pt-BR': 'Listagem',
-        'zh': '列表',
-        'zh-TW': '列表',
-        'ja': 'リスト',
-        'ko': '리스팅',
+    'asm-view-bytes': {
+        'en': 'Bytes',
+        'es': 'Bytes',
+        'fr': 'Octets',
+        'de': 'Bytes',
+        'it': 'Byte',
+        'pt-BR': 'Bytes',
+        'zh': '字节',
+        'zh-TW': '位元組',
+        'ja': 'バイト',
+        'ko': '바이트',
     },
 
-    'asm-show-source': {
+    'asm-view-source': {
         'en': 'Source',
         'es': 'Código fuente',
         'fr': 'Source',

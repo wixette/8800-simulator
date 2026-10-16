@@ -248,11 +248,19 @@
                 <ul id="asm-examples-list" role="listbox" hidden></ul>
               </div>
               <button id="asm-assemble" class="button asm-assemble l10n" type="button">Assemble</button>
-              <div class="toolbar-spacer"></div>
-              <button id="asm-view-toggle" class="button" type="button" aria-pressed="false">Listing</button>
+            </div>
+            <!-- On a phone the source and its bytes take turns in the one
+                 box, and these tabs, the top edge of that box, say which
+                 is open and switch between them (U2). Wider, the two are
+                 side by side, and the tabs are not shown. -->
+            <div id="asm-views" class="asm-views" role="tablist">
+              <button id="asm-view-source" class="asm-view l10n" type="button" role="tab"
+                      aria-selected="true" aria-controls="asm-editor">Source</button>
+              <button id="asm-view-bytes" class="asm-view l10n" type="button" role="tab"
+                      aria-selected="false" aria-controls="asm-listing" tabindex="-1">Bytes</button>
             </div>
             <div class="asm-work">
-              <div class="asm-editor">
+              <div id="asm-editor" class="asm-editor">
                 <div id="asm-gutter" class="asm-gutter" aria-hidden="true"></div>
                 <div class="asm-code">
                   <pre id="asm-highlight" class="asm-highlight" aria-hidden="true"></pre>

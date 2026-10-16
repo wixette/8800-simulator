@@ -453,8 +453,31 @@ phone's width, so, as agreed in #12:
  Line 3: …                                         the errors, when there are any
 ```
 
-On a phone the toolbar gains **[Listing]** at its right, and the source
-and the listing take turns in the one pane.
+On a phone the source and the listing take turns in the one box, under
+two tabs on its top edge, **Source** and **Bytes**:
+
+```
+ [Examples ▾] [Assemble]
+┌──────────────────┬───────────────────┐
+│      Source      │       Bytes       │
+│                  └───────────────────┤
+│  1        ORG  0000H                 │
+```
+
+- **Both are always there**, the open one marked, so it is plain which
+  is showing and the way back is one press. *Since v1.7.0*: before, the
+  toolbar had one button, named after the view it would show, and a
+  reader who pressed **[Listing]** did not see **[Source]** as the way
+  back; nor was it plain what a listing is. **Bytes** says what it
+  shows: each line's address and bytes.
+- **They are the box's own edge**, cut from its greys, square and
+  flush, the open one the pane under it carried up into the tab: part
+  of the editor, not to be taken for the dock's tabs above it or the
+  toolbar's buttons beside it. On the toolbar there was no room for a
+  pair of tabs in German at 375px.
+- They work as tabs do: Tab reaches the open one, the arrow keys move
+  between them, and each opens where the other was scrolled to. Wider
+  than a phone there are none, since both are side by side.
 
 - **A toolbar** across the top. **Examples** opens a menu of example
   sources (T3); **Assemble**, beside it in the order they are used, is

@@ -1318,8 +1318,8 @@ a {
     color: #222;
 }
 
-/* Only a phone needs it. */
-#asm-view-toggle {
+/* The tabs on the editor's top edge: only a phone has them (U2). */
+.asm-views {
     display: none;
 }
 
@@ -1790,8 +1790,68 @@ a {
         display: none;
     }
 
-    #asm-view-toggle {
-        display: block;
+    /* Which of the two is open, as the top edge of the editor's box:
+       cut from its own greys, square and flush, so that they read as
+       part of the editor - not as the dock's tabs above, nor the
+       toolbar's buttons beside. The open one is the pane under it,
+       carried up into the tab, its name in bold; the other is the
+       darker grey of the gutter, behind. */
+    .asm-views {
+        border-radius: 10px 10px 0 0;
+        display: flex;
+        flex: none;
+        overflow: hidden;
+    }
+
+    .asm-view {
+        background-color: #a8a8a8;
+        border: 0;
+        border-bottom: 1px solid #949494;
+        color: #333;
+        cursor: pointer;
+        flex: 1 1 0;
+        font-size: 14px;
+        line-height: 20px;
+        margin: 0;
+        min-width: 0;
+        overflow: hidden;
+        padding: 6px 8px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .asm-view + .asm-view {
+        border-left: 1px solid #949494;
+    }
+
+    .asm-view:hover {
+        background-color: #b4b4b4;
+    }
+
+    .asm-view[aria-selected="true"] {
+        border-bottom-color: transparent;
+        color: #111;
+        cursor: default;
+        font-weight: bold;
+    }
+
+    #asm-view-source[aria-selected="true"] {
+        background-color: #ccc;
+    }
+
+    #asm-view-bytes[aria-selected="true"] {
+        background-color: #d6d6d6;
+    }
+
+    .asm-view:focus-visible {
+        outline: 2px solid #f90;
+        outline-offset: -2px;
+    }
+
+    /* The box's top corners are the tabs'. */
+    #tab-asm .asm-work {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
     }
 
     /* The labels go, the icons and the installed size stay. */

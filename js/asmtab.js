@@ -123,8 +123,13 @@ asmtab.init = function() {
         'click', asmtab.onAssemble, false);
     document.getElementById('asm-errors').addEventListener(
         'click', asmtab.onErrorClick, false);
-    document.getElementById('asm-view-toggle').addEventListener(
-        'click', asmtab.onViewToggle, false);
+    for (const [id, listing] of [['asm-view-source', false], ['asm-view-bytes', true]]) {
+        let tab = document.getElementById(id);
+        tab.addEventListener('click', function() {
+            asmtab.showView(listing);
+        }, false);
+        tab.addEventListener('keydown', asmtab.onViewKey, false);
+    }
     asmtab.examplesMenu = new Dropdown('asm-examples-dropdown',
                                        asmtab.onExampleChosen,
                                        asmtab.onExamplesOpen);
@@ -1053,25 +1058,44 @@ asmtab.load = function(result) {
 };
 
 /**
- * On a phone, the source and the listing take turns: this shows the
- * other one (U2).
+ * On a phone, the source and its bytes take turns in the one box, and
+ * the tabs on its top edge choose (U2). The one shown opens where the
+ * other was.
+ * @param {boolean} listing The bytes, rather than the source.
  */
-asmtab.onViewToggle = function() {
+asmtab.showView = function(listing) {
+    if (listing == asmtab.showingListing()) {
+        return;
+    }
     var tab = document.getElementById('tab-asm');
     var source = asmtab.source();
-    var listing = document.getElementById('asm-listing');
-    // The one shown next opens where the other was.
-    if (asmtab.showingListing()) {
-        var top = listing.scrollTop;
+    var bytes = document.getElementById('asm-listing');
+    if (listing) {
+        var from = source.scrollTop;
+        tab.classList.add('show-listing');
+        bytes.scrollTop = from;
+    } else {
+        var top = bytes.scrollTop;
         tab.classList.remove('show-listing');
         source.scrollTop = top;
         asmtab.syncScroll();
-    } else {
-        var from = source.scrollTop;
-        tab.classList.add('show-listing');
-        listing.scrollTop = from;
     }
-    asmtab.refreshViewToggle();
+    asmtab.refreshViewTabs();
+};
+
+/**
+ * The arrow keys, Home and End move between the two tabs, as in any
+ * row of tabs, taking the focus to the one they open.
+ * @param {!KeyboardEvent} event The key, on either tab.
+ */
+asmtab.onViewKey = function(event) {
+    var to = {ArrowLeft: false, Home: false, ArrowRight: true, End: true}[event.key];
+    if (to === undefined) {
+        return;
+    }
+    event.preventDefault();
+    asmtab.showView(to);
+    document.getElementById(to ? 'asm-view-bytes' : 'asm-view-source').focus();
 };
 
 /** Whether a phone is showing the listing in place of the source. */
@@ -1080,13 +1104,17 @@ asmtab.showingListing = function() {
         .contains('show-listing');
 };
 
-/** Names the phone's toggle after what it would show. */
-asmtab.refreshViewToggle = function() {
+/**
+ * Marks the open tab: selected, and the one the Tab key reaches, as in
+ * any row of tabs.
+ */
+asmtab.refreshViewTabs = function() {
     var listing = asmtab.showingListing();
-    var toggle = document.getElementById('asm-view-toggle');
-    toggle.textContent =
-        l10n.getMessage(listing ? 'asm-show-source' : 'asm-show-listing');
-    toggle.setAttribute('aria-pressed', listing ? 'true' : 'false');
+    [['asm-view-source', !listing], ['asm-view-bytes', listing]].forEach(function(pair) {
+        var tab = document.getElementById(pair[0]);
+        tab.setAttribute('aria-selected', pair[1] ? 'true' : 'false');
+        tab.tabIndex = pair[1] ? 0 : -1;
+    });
 };
 
 /**
@@ -1211,7 +1239,7 @@ asmtab.refreshText = function() {
         return;
     }
     asmtab.renderErrors();
-    asmtab.refreshViewToggle();
+    asmtab.refreshViewTabs();
     asmtab.source().setAttribute('aria-label', msg('asm-source-label'));
     document.getElementById('asm-listing').setAttribute(
         'aria-label', msg('asm-listing-label'));
