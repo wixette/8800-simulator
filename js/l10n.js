@@ -84,16 +84,16 @@ l10n.LOCALE_SHORT = {
  */
 l10n.MESSAGES = {
     'title': {
-        'en': 'Sim-8800: Altair 8800 Simulator',
-        'es': 'Sim-8800: simulador de Altair 8800',
-        'fr': 'Sim-8800 : simulateur Altair 8800',
-        'de': 'Sim-8800: Altair-8800-Simulator',
-        'it': 'Sim-8800: simulatore Altair 8800',
-        'pt-BR': 'Sim-8800: simulador do Altair 8800',
-        'zh': 'Sim-8800: Altair 8800 模拟器',
-        'zh-TW': 'Sim-8800: Altair 8800 模擬器',
-        'ja': 'Sim-8800: Altair 8800 シミュレーター',
-        'ko': 'Sim-8800: Altair 8800 시뮬레이터',
+        'en': 'Altair 8800 Simulator: Front Panel, 8080 Assembler and 4K BASIC',
+        'es': 'Simulador de Altair 8800: panel frontal, ensamblador 8080 y 4K BASIC',
+        'fr': 'Simulateur Altair 8800 : façade, assembleur 8080 et 4K BASIC',
+        'de': 'Altair-8800-Simulator: Frontplatte, 8080-Assembler und 4K BASIC',
+        'it': 'Simulatore Altair 8800: pannello frontale, assembler 8080 e 4K BASIC',
+        'pt-BR': 'Simulador do Altair 8800: painel frontal, montador 8080 e 4K BASIC',
+        'zh': 'Altair 8800 模拟器：前面板、8080 汇编器和 4K BASIC',
+        'zh-TW': 'Altair 8800 模擬器：前面板、8080 組譯器和 4K BASIC',
+        'ja': 'Altair 8800 シミュレーター：フロントパネル、8080 アセンブラー、4K BASIC',
+        'ko': 'Altair 8800 시뮬레이터: 앞판, 8080 어셈블러, 4K BASIC',
     },
 
     'header-title': {
