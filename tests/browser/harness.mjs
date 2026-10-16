@@ -14,6 +14,27 @@ import {tmpdir} from 'node:os';
 import {extname, join, normalize, resolve, sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
+/**
+ * Gives a check's expressions the page's own modules by name - panel,
+ * asmtab, l10n and CPU8080 - the way the console would reach them. The
+ * app keeps no globals, so they are imported into the page. An import
+ * of a file the page already has returns the very same module, state
+ * and all. Not while the page is still parsing, before its import map.
+ */
+const HANDLES = `(async () => {
+    // Not window.panel: the page's <svg id="panel"> already answers to it.
+    if (window.modulesForChecks || document.readyState == 'loading' ||
+        location.protocol == 'about:') return;
+    try {
+        const [p, a, l, c] = await Promise.all(['panel', 'asmtab', 'l10n', '8080']
+            .map((name) => import('./js/' + name + '.js')));
+        Object.assign(window, {panel: p.panel, asmtab: a.asmtab, l10n: l.l10n,
+                               CPU8080: c.CPU8080, modulesForChecks: true});
+    } catch (e) {
+        // Not the simulator's page; the check's own expression says so.
+    }
+})()`;
+
 export const ROOT = resolve(fileURLToPath(import.meta.url), '..', '..', '..');
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -23,6 +44,7 @@ const TYPES = {
     '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.md': 'text/plain',
     '.asm': 'text/plain', '.txt': 'text/plain', '.bin': 'application/octet-stream',
     '.pdf': 'application/pdf', '.woff2': 'font/woff2', '.mp3': 'audio/mpeg',
+    '.webmanifest': 'application/manifest+json',
 };
 
 /**
@@ -188,7 +210,7 @@ export async function start(chromePath, url) {
     // A browser that goes away fails what was waiting on it, rather
     // than leaving the run hung.
     ws.addEventListener('close', () => {
-        for (const [n, call] of pending) {
+        for (const call of pending.values()) {
             call.reject(new Error('the browser went away during ' + call.method));
         }
         pending.clear();
@@ -211,6 +233,8 @@ export async function start(chromePath, url) {
 
     /** Evaluates an expression in the page, awaiting a promise. */
     const js = async (expr) => {
+        await send('Runtime.evaluate', {expression: HANDLES,
+            awaitPromise: true, returnByValue: true});
         const r = await send('Runtime.evaluate', {expression: expr,
             awaitPromise: true, returnByValue: true});
         if (r.result?.exceptionDetails) {

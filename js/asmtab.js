@@ -16,6 +16,13 @@
  * @fileoverview The dock's Assembler tab.
  */
 
+import {Asm8080} from './asm8080.js';
+import {CPU8080} from './8080.js';
+import {Dialog} from './dialog.js';
+import {Dropdown} from './dropdown.js';
+import {l10n} from './l10n.js';
+import {panel} from './panel.js';
+
 
 /**
  * The Assembler tab: an editor for 8080 source, highlighted, with the
@@ -24,10 +31,10 @@
  * and H1 to H3 in docs/assembler.md.
  *
  * The assembling is js/asm8080.js's; this is only the page around it.
- * It reaches the machine through what js/panel.js already uses to load
+ * It reaches the machine through what the panel already uses to load
  * a program.
  */
-asmtab = {};
+export const asmtab = {};
 
 /**
  * Where the source is kept between visits, in this browser only (U3).
@@ -63,6 +70,14 @@ asmtab.loaded = null;
 
 /** The source line marked as the PC's, or 0 for none. @type {number} */
 asmtab.pcLine = 0;
+
+/**
+ * The line the caret is on, banded across the line numbers, the source
+ * and the listing, so that a line's bytes can be followed across to it
+ * (U2); 0 until the editor has first had the keyboard.
+ * @type {number}
+ */
+asmtab.currentLine = 0;
 
 /** Whether the next Tab moves the focus on, after an Escape (U3). */
 asmtab.tabLeaves = false;
@@ -103,6 +118,15 @@ asmtab.init = function() {
     document.getElementById('asm-clear').addEventListener(
         'click', asmtab.onClear, false);
     // The listing scrolls with the source, never by itself.
+    // On a phone, the bytes are shown beside the line numbers, which
+    // follow them as they scroll (U2).
+    document.getElementById('asm-listing').addEventListener(
+        'scroll', function() {
+            if (asmtab.showingListing()) {
+                document.getElementById('asm-gutter').scrollTop =
+                    document.getElementById('asm-listing').scrollTop;
+            }
+        }, false);
     document.getElementById('asm-listing').addEventListener(
         'wheel', function(event) {
             if (asmtab.showingListing()) {
@@ -116,8 +140,23 @@ asmtab.init = function() {
         'click', asmtab.onAssemble, false);
     document.getElementById('asm-errors').addEventListener(
         'click', asmtab.onErrorClick, false);
-    document.getElementById('asm-view-toggle').addEventListener(
-        'click', asmtab.onViewToggle, false);
+    // Across the phone's width, the panes are laid out anew; the lines
+    // behind the text, the numbers and the listing follow it again.
+    window.matchMedia(asmtab.PHONE).addEventListener('change', function() {
+        if (asmtab.showingListing()) {
+            document.getElementById('asm-gutter').scrollTop =
+                document.getElementById('asm-listing').scrollTop;
+        } else {
+            asmtab.syncScroll();
+        }
+    });
+    for (const [id, listing] of [['asm-view-source', false], ['asm-view-bytes', true]]) {
+        let tab = document.getElementById(id);
+        tab.addEventListener('click', function() {
+            asmtab.showView(listing);
+        }, false);
+        tab.addEventListener('keydown', asmtab.onViewKey, false);
+    }
     asmtab.examplesMenu = new Dropdown('asm-examples-dropdown',
                                        asmtab.onExampleChosen,
                                        asmtab.onExamplesOpen);
@@ -219,6 +258,7 @@ asmtab.renderText = function() {
     document.getElementById('asm-gutter').innerHTML = gutter.join('');
     asmtab.pcLine = 0;
     asmtab.requestPc(false);
+    asmtab.markCurrent(asmtab.currentLine, true);
     asmtab.syncScroll();
 };
 
@@ -406,6 +446,11 @@ asmtab.renderCaret = function() {
     var source = asmtab.source();
     var caret = document.getElementById('asm-caret');
     var at = source.selectionStart;
+    // The band stays where the caret last was, after the editor has
+    // lost the keyboard too: it is what the bytes are followed by.
+    if (document.activeElement === source) {
+        asmtab.markCurrent(source.value.slice(0, at).split('\n').length);
+    }
     if (document.activeElement !== source ||
         at !== source.selectionEnd) {
         caret.hidden = true;
@@ -541,8 +586,10 @@ asmtab.onClear = function() {
  * and the bytes it made, in hex. A macro's use shows its expansion's.
  * @param {!Object} result An assembly.
  * @param {number} count How many lines the source has.
- * @return {!Array<{text: string, title: string, error: boolean}>} One
- *     cell per line, from line 1.
+ * @return {!Array<{text: string, parts: !Array<!Array<string>>,
+ *     title: string, error: boolean}>} One cell per line, from line 1.
+ *     Its parts are its text in pieces, each with what it is - 'addr',
+ *     'bytes', or '' for the space between - to be coloured by (H2).
  */
 asmtab.listingCells = function(result, count) {
     var byLine = [];
@@ -557,7 +604,7 @@ asmtab.listingCells = function(result, count) {
     var errors = new Set(result.errors.map(function(e) { return e.line; }));
     var hex = Asm8080.hex;
     return byLine.map(function(rows, i) {
-        var cell = {text: '', title: '', error: errors.has(i + 1)};
+        var cell = {text: '', parts: [], title: '', error: errors.has(i + 1)};
         var own = rows[0];
         if (!own || own.skipped) {
             return cell;
@@ -574,13 +621,16 @@ asmtab.listingCells = function(result, count) {
             let shown = bytes.slice(0, asmtab.LISTING_BYTES).map(function(b) {
                 return hex(b, 2);
             }).join(' ');
-            cell.text = hex(address, 4) + '  ' + shown +
-                (bytes.length > asmtab.LISTING_BYTES ? ' …' : '');
+            cell.parts = [['addr', hex(address, 4)], ['', '  '],
+                          ['bytes', shown +
+                           (bytes.length > asmtab.LISTING_BYTES ? ' …' : '')]];
         } else if (own.value !== null) {
-            cell.text = '= ' + hex(own.value, 4);
+            // A name's value, from EQU or SET: a number, not an address.
+            cell.parts = [['addr', '='], ['', ' '], ['bytes', hex(own.value, 4)]];
         } else if (own.address !== null) {
-            cell.text = hex(own.address, 4);
+            cell.parts = [['addr', hex(own.address, 4)]];
         }
+        cell.text = cell.parts.map(function(part) { return part[1]; }).join('');
         // The whole of it, where a row could not hold it all: a long
         // DB, or a macro's expansion, line by line.
         if (rows.length > 1 || bytes.length > asmtab.LISTING_BYTES) {
@@ -606,10 +656,14 @@ asmtab.renderListing = function() {
         return '<span class="asm-listing-line' +
             (c.error ? ' asm-listing-error' : '') + '"' +
             (c.title ? ' title="' + asmtab.escape(c.title) + '"' : '') + '>' +
-            asmtab.escape(c.text) + '</span>';
+            c.parts.map(function(part) {
+                return part[0] ? '<span class="asm-' + part[0] + '">' +
+                    asmtab.escape(part[1]) + '</span>' : part[1];
+            }).join('') + '</span>';
     }).join('');
     asmtab.pcLine = 0;
     asmtab.requestPc(false);
+    asmtab.markCurrent(asmtab.currentLine, true);
     asmtab.syncScroll();
 };
 
@@ -801,6 +855,30 @@ asmtab.renderPc = function(scroll) {
     if (scroll && line && panel.dock.tab == 'asm' && panel.dock.open) {
         asmtab.reveal(line);
     }
+};
+
+/**
+ * Moves the band of the line the caret is on (asmtab.currentLine).
+ * @param {number} line From 1, or 0 for none.
+ * @param {boolean=} again Draws it even if it is on that line already,
+ *     after the lines were drawn anew.
+ */
+asmtab.markCurrent = function(line, again) {
+    if (line == asmtab.currentLine && !again) {
+        return;
+    }
+    [['asm-highlight', 'asm-line'], ['asm-gutter', 'asm-gutter-line'],
+     ['asm-listing', 'asm-listing-line']].forEach(function(part) {
+        var lines = document.getElementById(part[0]).getElementsByClassName(part[1]);
+        var was = asmtab.currentLine && lines[asmtab.currentLine - 1];
+        if (was) {
+            was.classList.remove('asm-current');
+        }
+        if (line && lines[line - 1]) {
+            lines[line - 1].classList.add('asm-current');
+        }
+    });
+    asmtab.currentLine = line;
 };
 
 /**
@@ -1046,40 +1124,75 @@ asmtab.load = function(result) {
 };
 
 /**
- * On a phone, the source and the listing take turns: this shows the
- * other one (U2).
+ * On a phone, the source and its bytes take turns in the one box, and
+ * the tabs on its top edge choose (U2). The one shown opens where the
+ * other was.
+ * @param {boolean} listing The bytes, rather than the source.
  */
-asmtab.onViewToggle = function() {
+asmtab.showView = function(listing) {
+    if (listing == document.getElementById('tab-asm').classList.contains('show-listing')) {
+        return;
+    }
     var tab = document.getElementById('tab-asm');
     var source = asmtab.source();
-    var listing = document.getElementById('asm-listing');
-    // The one shown next opens where the other was.
-    if (asmtab.showingListing()) {
-        var top = listing.scrollTop;
+    var bytes = document.getElementById('asm-listing');
+    if (listing) {
+        var from = source.scrollTop;
+        tab.classList.add('show-listing');
+        bytes.scrollTop = from;
+        document.getElementById('asm-gutter').scrollTop = bytes.scrollTop;
+    } else {
+        var top = bytes.scrollTop;
         tab.classList.remove('show-listing');
         source.scrollTop = top;
         asmtab.syncScroll();
-    } else {
-        var from = source.scrollTop;
-        tab.classList.add('show-listing');
-        listing.scrollTop = from;
     }
-    asmtab.refreshViewToggle();
+    asmtab.refreshViewTabs();
 };
 
-/** Whether a phone is showing the listing in place of the source. */
+/**
+ * The arrow keys, Home and End move between the two tabs, as in any
+ * row of tabs, taking the focus to the one they open.
+ * @param {!KeyboardEvent} event The key, on either tab.
+ */
+asmtab.onViewKey = function(event) {
+    var to = {ArrowLeft: false, Home: false, ArrowRight: true, End: true}[event.key];
+    if (to === undefined) {
+        return;
+    }
+    event.preventDefault();
+    asmtab.showView(to);
+    document.getElementById(to ? 'asm-view-bytes' : 'asm-view-source').focus();
+};
+
+/**
+ * The layout in which the source and its bytes take turns: css/style.css
+ * draws a phone's below this width.
+ * @type {string}
+ */
+asmtab.PHONE = '(max-width: 700px)';
+
+/**
+ * Whether a phone is showing the listing in place of the source. The
+ * choice is kept when the page grows wider - a phone turned on its
+ * side - but there both are shown, and neither is in the other's place.
+ */
 asmtab.showingListing = function() {
     return document.getElementById('tab-asm').classList
-        .contains('show-listing');
+        .contains('show-listing') && window.matchMedia(asmtab.PHONE).matches;
 };
 
-/** Names the phone's toggle after what it would show. */
-asmtab.refreshViewToggle = function() {
+/**
+ * Marks the open tab: selected, and the one the Tab key reaches, as in
+ * any row of tabs.
+ */
+asmtab.refreshViewTabs = function() {
     var listing = asmtab.showingListing();
-    var toggle = document.getElementById('asm-view-toggle');
-    toggle.textContent =
-        l10n.getMessage(listing ? 'asm-show-source' : 'asm-show-listing');
-    toggle.setAttribute('aria-pressed', listing ? 'true' : 'false');
+    [['asm-view-source', !listing], ['asm-view-bytes', listing]].forEach(function(pair) {
+        var tab = document.getElementById(pair[0]);
+        tab.setAttribute('aria-selected', pair[1] ? 'true' : 'false');
+        tab.tabIndex = pair[1] ? 0 : -1;
+    });
 };
 
 /**
@@ -1204,7 +1317,7 @@ asmtab.refreshText = function() {
         return;
     }
     asmtab.renderErrors();
-    asmtab.refreshViewToggle();
+    asmtab.refreshViewTabs();
     asmtab.source().setAttribute('aria-label', msg('asm-source-label'));
     document.getElementById('asm-listing').setAttribute(
         'aria-label', msg('asm-listing-label'));
@@ -1220,6 +1333,3 @@ asmtab.refreshText = function() {
 
 // Exports the namespace for unit tests when running in Node.js. This
 // has no effect when the script is loaded in a browser.
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = asmtab;
-}

@@ -16,11 +16,13 @@
  * @fileoverview Localization utilities and message translations.
  */
 
+import {Dropdown} from './dropdown.js';
+
 /**
  * Simple namespace.
  * @type {Object}
  */
-l10n = {};
+export const l10n = {};
 
 /**
  * Pre-defined locales.
@@ -82,16 +84,16 @@ l10n.LOCALE_SHORT = {
  */
 l10n.MESSAGES = {
     'title': {
-        'en': 'Sim-8800: Altair 8800 Simulator',
-        'es': 'Sim-8800: simulador de Altair 8800',
-        'fr': 'Sim-8800 : simulateur Altair 8800',
-        'de': 'Sim-8800: Altair-8800-Simulator',
-        'it': 'Sim-8800: simulatore Altair 8800',
-        'pt-BR': 'Sim-8800: simulador do Altair 8800',
-        'zh': 'Sim-8800: Altair 8800 模拟器',
-        'zh-TW': 'Sim-8800: Altair 8800 模擬器',
-        'ja': 'Sim-8800: Altair 8800 シミュレーター',
-        'ko': 'Sim-8800: Altair 8800 시뮬레이터',
+        'en': 'Altair 8800 Simulator: Front Panel, 8080 Assembler and 4K BASIC',
+        'es': 'Simulador de Altair 8800: panel frontal, ensamblador 8080 y 4K BASIC',
+        'fr': 'Simulateur Altair 8800 : façade, assembleur 8080 et 4K BASIC',
+        'de': 'Altair-8800-Simulator: Frontplatte, 8080-Assembler und 4K BASIC',
+        'it': 'Simulatore Altair 8800: pannello frontale, assembler 8080 e 4K BASIC',
+        'pt-BR': 'Simulador do Altair 8800: painel frontal, montador 8080 e 4K BASIC',
+        'zh': 'Altair 8800 模拟器：前面板、8080 汇编器和 4K BASIC',
+        'zh-TW': 'Altair 8800 模擬器：前面板、8080 組譯器和 4K BASIC',
+        'ja': 'Altair 8800 シミュレーター：フロントパネル、8080 アセンブラー、4K BASIC',
+        'ko': 'Altair 8800 시뮬레이터: 앞판, 8080 어셈블러, 4K BASIC',
     },
 
     'header-title': {
@@ -222,19 +224,6 @@ l10n.MESSAGES = {
         'zh-TW': '需要 4 KB',
         'ja': '4 KB が必要',
         'ko': '4 KB 필요',
-    },
-
-    'needs-server-short': {
-        'en': 'needs a web server',
-        'es': 'necesita un servidor web',
-        'fr': 'exige un serveur web',
-        'de': 'braucht einen Webserver',
-        'it': 'richiede un server web',
-        'pt-BR': 'requer um servidor web',
-        'zh': '需要 Web 服务器',
-        'zh-TW': '需要 Web 伺服器',
-        'ja': 'Web サーバーが必要',
-        'ko': '웹 서버 필요',
     },
 
     'examples-unreadable-short': {
@@ -511,16 +500,16 @@ l10n.MESSAGES = {
     },
 
     'about-title': {
-        'en': 'Altair 8800 Simulator',
-        'es': 'Simulador de Altair 8800',
-        'fr': 'Simulateur Altair 8800',
-        'de': 'Altair-8800-Simulator',
-        'it': 'Simulatore Altair 8800',
-        'pt-BR': 'Simulador do Altair 8800',
-        'zh': 'Altair 8800 模拟器',
-        'zh-TW': 'Altair 8800 模擬器',
-        'ja': 'Altair 8800 シミュレーター',
-        'ko': 'Altair 8800 시뮬레이터',
+        'en': 'About',
+        'es': 'Acerca de',
+        'fr': 'À propos',
+        'de': 'Über',
+        'it': 'Informazioni',
+        'pt-BR': 'Sobre',
+        'zh': '关于',
+        'zh-TW': '關於',
+        'ja': 'このアプリについて',
+        'ko': '정보',
     },
 
     'about-version': {
@@ -602,55 +591,55 @@ l10n.MESSAGES = {
     },
 
     'about-license-app': {
-        'en': 'The simulator:',
-        'es': 'El simulador:',
-        'fr': 'Le simulateur :',
-        'de': 'Der Simulator:',
-        'it': 'Il simulatore:',
-        'pt-BR': 'O simulador:',
-        'zh': '本模拟器：',
-        'zh-TW': '本模擬器：',
-        'ja': 'このシミュレーター：',
-        'ko': '이 시뮬레이터:',
+        'en': 'Simulator',
+        'es': 'Simulador',
+        'fr': 'Simulateur',
+        'de': 'Simulator',
+        'it': 'Simulatore',
+        'pt-BR': 'Simulador',
+        'zh': '模拟器',
+        'zh-TW': '模擬器',
+        'ja': 'シミュレーター',
+        'ko': '시뮬레이터',
     },
 
     'about-license-rom': {
-        'en': 'The 4K BASIC tape is Microsoft\'s, and not covered by that licence:',
-        'es': 'La cinta de 4K BASIC es de Microsoft y esa licencia no la cubre:',
-        'fr': 'La bande 4K BASIC appartient à Microsoft et cette licence ne la couvre pas :',
-        'de': 'Das 4K-BASIC-Band gehört Microsoft und fällt nicht unter diese Lizenz:',
-        'it': 'Il nastro di 4K BASIC è di Microsoft e quella licenza non lo copre:',
-        'pt-BR': 'A fita do 4K BASIC é da Microsoft e não está coberta por essa licença:',
-        'zh': '4K BASIC 纸带归微软所有，不在该许可证范围内：',
-        'zh-TW': '4K BASIC 紙帶歸微軟所有，不在該授權範圍內：',
-        'ja': '4K BASIC のテープは Microsoft のもので、このライセンスの対象外です：',
-        'ko': '4K BASIC 테이프는 마이크로소프트의 것이며 이 라이선스가 적용되지 않습니다:',
+        'en': '4K BASIC tape',
+        'es': 'Cinta de 4K BASIC',
+        'fr': 'Bande 4K BASIC',
+        'de': '4K-BASIC-Band',
+        'it': 'Nastro di 4K BASIC',
+        'pt-BR': 'Fita do 4K BASIC',
+        'zh': '4K BASIC 纸带',
+        'zh-TW': '4K BASIC 紙帶',
+        'ja': '4K BASIC のテープ',
+        'ko': '4K BASIC 테이프',
     },
 
     'about-license-cpu': {
-        'en': 'The 8080 CPU core is 8080js by Martin Maly, under a BSD licence:',
-        'es': 'El núcleo de la CPU 8080 es 8080js, de Martin Maly, con licencia BSD:',
-        'fr': 'Le cœur du processeur 8080 est 8080js, de Martin Maly, sous licence BSD :',
-        'de': 'Der 8080-CPU-Kern ist 8080js von Martin Maly, unter einer BSD-Lizenz:',
-        'it': 'Il nucleo della CPU 8080 è 8080js di Martin Maly, con licenza BSD:',
-        'pt-BR': 'O núcleo da CPU 8080 é o 8080js, de Martin Maly, sob uma licença BSD:',
-        'zh': '8080 CPU 内核是 Martin Maly 的 8080js，采用 BSD 许可证：',
-        'zh-TW': '8080 CPU 核心是 Martin Maly 的 8080js，採用 BSD 授權：',
-        'ja': '8080 CPU コアは Martin Maly による 8080js で、BSD ライセンスです：',
-        'ko': '8080 CPU 코어는 Martin Maly의 8080js이며 BSD 라이선스입니다:',
+        'en': '8080 CPU core',
+        'es': 'Núcleo de CPU 8080',
+        'fr': 'Cœur du processeur 8080',
+        'de': '8080-CPU-Kern',
+        'it': 'Nucleo della CPU 8080',
+        'pt-BR': 'Núcleo da CPU 8080',
+        'zh': '8080 CPU 内核',
+        'zh-TW': '8080 CPU 核心',
+        'ja': '8080 CPU コア',
+        'ko': '8080 CPU 코어',
     },
 
     'about-license-icons': {
-        'en': 'The icons are Google\'s Material Icons:',
-        'es': 'Los iconos son los Material Icons de Google:',
-        'fr': 'Les icônes sont les Material Icons de Google :',
-        'de': 'Die Symbole sind Googles Material Icons:',
-        'it': 'Le icone sono i Material Icons di Google:',
-        'pt-BR': 'Os ícones são os Material Icons do Google:',
-        'zh': '图标来自 Google 的 Material Icons：',
-        'zh-TW': '圖示來自 Google 的 Material Icons：',
-        'ja': 'アイコンは Google の Material Icons です：',
-        'ko': '아이콘은 Google의 Material Icons입니다:',
+        'en': 'Icons',
+        'es': 'Iconos',
+        'fr': 'Icônes',
+        'de': 'Symbole',
+        'it': 'Icone',
+        'pt-BR': 'Ícones',
+        'zh': '图标',
+        'zh-TW': '圖示',
+        'ja': 'アイコン',
+        'ko': '아이콘',
     },
 
     'about-references': {
@@ -1174,19 +1163,6 @@ l10n.MESSAGES = {
         'zh-TW': 'Microsoft 4K BASIC',
         'ja': 'Microsoft 4K BASIC',
         'ko': 'Microsoft 4K BASIC',
-    },
-
-    'needs-server': {
-        'en': 'This page was opened straight off the disk, so the browser will not let it read the example programs or the BASIC tape. Serve the folder instead: run "python3 -m http.server 8000" in it and open http://localhost:8000/.',
-        'es': 'Esta página se abrió directamente desde el disco, así que el navegador no le deja leer los programas de ejemplo ni la cinta de BASIC. Sirve la carpeta: ejecuta "python3 -m http.server 8000" en ella y abre http://localhost:8000/.',
-        'fr': 'Cette page a été ouverte directement depuis le disque, le navigateur ne la laisse donc pas lire les programmes d’exemple ni la bande BASIC. Servez le dossier : lancez-y « python3 -m http.server 8000 » et ouvrez http://localhost:8000/.',
-        'de': 'Diese Seite wurde direkt von der Festplatte geöffnet, daher lässt der Browser sie die Beispielprogramme und das BASIC-Band nicht lesen. Stellen Sie den Ordner bereit: Führen Sie darin "python3 -m http.server 8000" aus und öffnen Sie http://localhost:8000/.',
-        'it': 'Questa pagina è stata aperta direttamente dal disco, quindi il browser non le lascia leggere i programmi di esempio né il nastro BASIC. Servi la cartella: esegui "python3 -m http.server 8000" al suo interno e apri http://localhost:8000/.',
-        'pt-BR': 'Esta página foi aberta direto do disco, então o navegador não a deixa ler os programas de exemplo nem a fita do BASIC. Abra-a por um servidor web: execute "python3 -m http.server 8000" na pasta e abra http://localhost:8000/.',
-        'zh': '这个页面是直接从磁盘打开的，浏览器不允许它读取示例程序或 BASIC 纸带。请改用服务器：在该目录下运行 "python3 -m http.server 8000"，然后打开 http://localhost:8000/。',
-        'zh-TW': '這個頁面是直接從磁碟開啟的，瀏覽器不允許它讀取範例程式或 BASIC 紙帶。請改用伺服器：在該目錄下執行 "python3 -m http.server 8000"，然後開啟 http://localhost:8000/。',
-        'ja': 'このページはディスクから直接開かれているため、ブラウザーはサンプルのプログラムや BASIC の紙テープを読み込ませてくれません。フォルダーを配信してください。その中で "python3 -m http.server 8000" を実行し、http://localhost:8000/ を開きます。',
-        'ko': '이 페이지는 디스크에서 바로 열렸기 때문에 브라우저가 예제 프로그램이나 BASIC 종이테이프를 읽지 못하게 합니다. 폴더를 서버로 제공하세요. 그 안에서 "python3 -m http.server 8000"을 실행하고 http://localhost:8000/ 을 여세요.',
     },
 
     'examples-unreadable': {
@@ -1774,20 +1750,20 @@ l10n.MESSAGES = {
         'ko': '리스팅',
     },
 
-    'asm-show-listing': {
-        'en': 'Listing',
-        'es': 'Listado',
-        'fr': 'Listage',
-        'de': 'Listing',
-        'it': 'Listato',
-        'pt-BR': 'Listagem',
-        'zh': '列表',
-        'zh-TW': '列表',
-        'ja': 'リスト',
-        'ko': '리스팅',
+    'asm-view-bytes': {
+        'en': 'Bytes',
+        'es': 'Bytes',
+        'fr': 'Octets',
+        'de': 'Bytes',
+        'it': 'Byte',
+        'pt-BR': 'Bytes',
+        'zh': '字节',
+        'zh-TW': '位元組',
+        'ja': 'バイト',
+        'ko': '바이트',
     },
 
-    'asm-show-source': {
+    'asm-view-source': {
         'en': 'Source',
         'es': 'Código fuente',
         'fr': 'Source',

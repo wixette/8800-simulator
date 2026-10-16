@@ -1,0 +1,20 @@
+// The type check, `npm run typecheck` (#19). It reads the JSDoc the code
+// already has and checks it against the code; nothing is compiled, and
+// the page runs the files as they are. Only a file that starts with
+// "// @ts-check" is checked, so files join one at a time, as each is
+// made to pass.
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "noEmit": true,
+    "target": "es2022",
+    "module": "es2022",
+    "moduleResolution": "bundler",
+    "lib": ["es2022", "dom"],
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true
+  },
+  "include": ["js/*.js"]
+}

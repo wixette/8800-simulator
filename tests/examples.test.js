@@ -9,17 +9,16 @@
  */
 'use strict';
 
-const test = require('node:test');
-const assert = require('node:assert');
-const {createSim, flushTimers, bitsToNumber, highAddressLeds} =
-      require('./fixture.js');
-const {EXAMPLES_DIR, loadExamples, loadExample} = require('./examples.js');
-const Asm8080 = require('../js/asm8080.js');
-const cpu = require('../js/8080.js');
-const Sio = require('../js/sio.js');
-const Teletype = require('../js/teletype.js');
-const fs = require('node:fs');
-const path = require('node:path');
+import test from 'node:test';
+import assert from 'node:assert';
+import {createSim, flushTimers, bitsToNumber, highAddressLeds} from './fixture.js';
+import {EXAMPLES_DIR, loadExamples, loadExample} from './examples.js';
+import {Asm8080} from '../js/asm8080.js';
+import {CPU8080 as cpu} from '../js/8080.js';
+import {Sio} from '../js/sio.js';
+import {Teletype} from '../js/teletype.js';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const EXAMPLES = loadExamples();
 
@@ -55,12 +54,12 @@ test('examples/README.md lists every program and its bytes', () => {
     }
 });
 
-/** The example ids js/panel.js offers, read out of the source. */
+/** The example ids js/panel-load.js offers, read out of the source. */
 function offeredExamples() {
     const panel = fs.readFileSync(
-        path.join(__dirname, '..', 'js', 'panel.js'), 'utf8');
+        path.join(import.meta.dirname, '..', 'js', 'panel-load.js'), 'utf8');
     const block = panel.match(/panel\.EXAMPLES = \[([^\]]*)\]/);
-    assert.ok(block, 'panel.js should declare panel.EXAMPLES');
+    assert.ok(block, 'panel-load.js should declare panel.EXAMPLES');
     return [...block[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
 }
 
@@ -71,7 +70,7 @@ test('both menus offer every example, and only real ones', () => {
     assert.deepStrictEqual([...offered].sort(), [...onDisk].sort(),
                            'panel.EXAMPLES and examples/*.asm must match');
     assert.doesNotMatch(fs.readFileSync(
-        path.join(__dirname, '..', 'js', 'asmtab.js'), 'utf8'),
+        path.join(import.meta.dirname, '..', 'js', 'asmtab.js'), 'utf8'),
                         /asmtab\.EXAMPLES = \[/,
                         'the Assembler keeps no list of its own');
 });
@@ -477,7 +476,7 @@ test('macros: a lamp walks right, one place per delay', () => {
 test('the README\'s assembly program makes exactly section 3\'s bytes', () => {
     // Section 7 says so of the program it shows, which is the adder.
     const readme = fs.readFileSync(
-        path.join(__dirname, '..', 'README.md'), 'utf8');
+        path.join(import.meta.dirname, '..', 'README.md'), 'utf8');
     const section = readme.slice(readme.indexOf('## 7. Write it in assembly'));
     const code = section.match(/```\n([\s\S]*?)```/)[1];
     const r = Asm8080.assemble(code);

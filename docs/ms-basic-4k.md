@@ -45,7 +45,12 @@ this machine.
 which passes the 8080 exerciser. It is also — verified by diff — **the
 same file that <https://s2js.com/altair/> uses to run this exact ROM**.
 Byte-identical after stripping our file-overview header and one extra
-`inte` field that s2js added to `status()`.
+`inte` field that s2js added to `status()`, as it stood in v1.6.1. Since
+v1.7.0 (#19) the file is an ES module, which changed four places: the
+two objects it fills are declared and exported, rather than made as
+globals, and one unused global assignment (`T=0`) is gone, since a
+module runs in strict mode. Each is marked "Changed for this
+simulator".
 
 - All 256 opcodes have `case` labels; the `default:` branch is a NOP,
   so an undefined opcode cannot crash the machine.
@@ -831,6 +836,16 @@ This is [D19](#d19--a-greyed-control-still-answers) doing the work it
 was built for: the reader is not left guessing, and the fix is in the
 message.
 
+> *Since v1.7.0* the whole page wants a web server, not two of its
+> files. Its scripts are ES modules (#19), and a browser runs no module
+> in a `file://` page. So opened off the disk the page shows only a
+> notice saying so, with the command to run, rather than a panel that
+> does nothing; the notice is a few lines of plain script in
+> index.html, the one thing that still runs there. `panel.needsServer()`
+> went with it, since the two controls it greyed out are never seen. A
+> browser set to run modules from files reads the files beside them as
+> well, and if one could not be read the ordinary errors say so.
+
 *Also covered:* a menu with nothing in it now declines to open.
 Previously it opened as a box of nothing, which told the reader less
 than not opening would have.
@@ -1365,14 +1380,16 @@ Phase 1 is worth doing whatever we decide about BASIC.
 
 Every claim in [Part 1](#part-1--what-was-verified) came from running
 the ROM. So can you. Put `4kbas32.bin` at `roms/4kbas32.bin`, save the
-following as `basic-smoke.js` in the repository root, and run
-`node basic-smoke.js` — no dependencies, same Node the test suite uses.
+following as `basic-smoke.mjs` in the repository root, and run
+`node basic-smoke.mjs` — no dependencies, same Node the test suite uses.
+(*Since v1.7.0* the page's scripts are ES modules, so this imports the
+CPU core rather than requiring it.)
 
 ```js
 // Boots 4K BASIC on this repo's CPU core.
-// Run from the repository root:  node basic-smoke.js [ramBytes]
-const fs = require('fs');
-const CPU8080 = require('./js/8080.js');
+// Run from the repository root:  node basic-smoke.mjs [ramBytes]
+import fs from 'node:fs';
+import {CPU8080} from './js/8080.js';
 
 const RAM = parseInt(process.argv[2] || '8192', 10);
 const mem = new Array(RAM).fill(0);

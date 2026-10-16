@@ -7,18 +7,16 @@
  */
 'use strict';
 
-const test = require('node:test');
-const assert = require('node:assert');
-const fs = require('node:fs');
-const path = require('node:path');
-const vm = require('node:vm');
-
-global.Asm8080 = require('../js/asm8080.js');
-vm.runInThisContext(fs.readFileSync(
-    path.join(__dirname, '..', 'js', 'l10n.js'), 'utf8'), {filename: 'l10n.js'});
-global.panel = {formatMemSize: (bytes) => (bytes < 1024 ? bytes + ' B' :
-                                           bytes / 1024 + ' KB')};
-const asmtab = require('../js/asmtab.js');
+import test from 'node:test';
+import assert from 'node:assert';
+import fs from 'node:fs';
+import path from 'node:path';
+import {Asm8080} from '../js/asm8080.js';
+import {asmtab} from '../js/asmtab.js';
+import {CPU8080} from '../js/8080.js';
+import {l10n} from '../js/l10n.js';
+import {panel} from '../js/panel.js';
+import {stub} from './stub.js';
 
 /** The classes a line's words are coloured with, in order. */
 function colours(line, macros = new Set()) {
@@ -63,6 +61,19 @@ test('the listing has a cell per line: address and bytes, or a value', () => {
     // A row too long to hold is whole in its tooltip.
     assert.match(cells[3].title, /48 45 4C 4C 4F 2C 20 57 4F 52 4C 44/);
     assert.strictEqual(cells[2].title, '');
+    // In parts to colour (H2): an address, the bytes, a name's value
+    // after its =; what the parts say is the text, nothing added.
+    assert.deepStrictEqual(cells.map((c) => c.parts), [
+        [],
+        [['addr', '='], ['', ' '], ['bytes', '00FF']],
+        [['addr', '0000'], ['', '  '], ['bytes', 'DB FF']],
+        [['addr', '0002'], ['', '  '], ['bytes', '48 45 4C 4C 4F 2C …']],
+        [['addr', '000E']],
+        [['addr', '000E'], ['', '  '], ['bytes', 'C3 00 00']],
+    ]);
+    for (const c of cells) {
+        assert.strictEqual(c.parts.map((part) => part[1]).join(''), c.text);
+    }
 });
 
 test('a macro\'s use lists its expansion, line by line, in its tooltip', () => {
@@ -100,7 +111,7 @@ test('Tab inserts spaces to the next eight-column stop', () => {
 
 test('the Tutorial\'s program assembles to what the Tutorial says', () => {
     // "IN 0FFH is DB FF, at 0000H" - and the rest of it runs.
-    const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+    const html = fs.readFileSync(path.join(import.meta.dirname, '..', 'index.html'), 'utf8');
     const step = html.slice(html.indexOf('id="asm-tutorial-1"'));
     const code = step.match(/<pre class="tutorial-code">([\s\S]*?)<\/pre>/)[1];
     const r = Asm8080.assemble(code);
@@ -245,19 +256,15 @@ test('Assemble lifts protection, loads, and is in sync with its own load (U4, U7
         lastAddress: 0,
     };
     const source = 'MSG: DB 1\nSTART: MVI A,1\n HLT\n END START';
-    const saved = {panel: global.panel, cpu: global.CPU8080, window: global.window};
-    t.after(() => {
-        global.panel = saved.panel; global.CPU8080 = saved.cpu; global.window = saved.window;
-    });
-    global.window = {clearTimeout() {}};
+    stub(t, global, {window: {clearTimeout() {}}});
     const said = [];
-    global.panel = Object.assign({}, saved.panel, {
+    stub(t, panel, {
         sim: sim,
         ensurePoweredOn: () => false,
         updateMemoryControls: () => {},
         setStatus: (...args) => said.push(args),
     });
-    global.CPU8080 = {set: (reg, value) => { if (reg == 'PC') sim.pc = value; }};
+    stub(t, CPU8080, {set: (reg, value) => { if (reg == 'PC') sim.pc = value; }});
     t.mock.method(asmtab, 'source', () => ({value: source}));
     t.mock.method(asmtab, 'refresh', () => { asmtab.result = Asm8080.assemble(source); });
     t.mock.method(asmtab, 'requestPc', () => {});
@@ -279,12 +286,18 @@ test('Assemble puts the PC where the program starts, and says so (U4, L8, #20)',
     const data = ['ORG 0030H', 'db "t"', 'db "a"', 'db "C"'];
     const code = ['\tLXI\tSP, 0040H', '\tLXI\tH, 0030H', 'loopo:', '\tPUSH\tH',
                   '\tMOV A,M', '\tINX\tH', 'ORA A', 'JNZ\tloopo', 'HLT'];
-    const saved = {panel: global.panel, cpu: global.CPU8080, window: global.window};
-    t.after(() => {
-        global.panel = saved.panel; global.CPU8080 = saved.cpu; global.window = saved.window;
-        asmtab.loaded = null;
+    t.after(() => { asmtab.loaded = null; });
+    stub(t, global, {window: {clearTimeout() {}}});
+    // A machine and a status line of its own for each case, below.
+    let sim = null;
+    let said = [];
+    stub(t, panel, {
+        sim: null,
+        ensurePoweredOn: () => false,
+        updateMemoryControls: () => {},
+        setStatus: (...args) => said.push(args),
     });
-    global.window = {clearTimeout() {}};
+    stub(t, CPU8080, {set: (reg, value) => { if (reg == 'PC') sim.pc = value; }});
     let source = '';
     t.mock.method(asmtab, 'source', () => ({value: source}));
     t.mock.method(asmtab, 'refresh', () => { asmtab.result = Asm8080.assemble(source); });
@@ -296,7 +309,7 @@ test('Assemble puts the PC where the program starts, and says so (U4, L8, #20)',
                                   ['0000H', 'END loopo', 0x0006],
                                   ['0003H', 'END 0000H', 0x0000],
                                   ['0003H', 'END loopo', 0x0009]]) {
-        const sim = {
+        sim = {
             mem: new Array(256).fill(0), memLoads: 0, pc: 0x1234, lamps: 0,
             unprotectAll() { return false; },
             initMem() { this.memLoads++; this.mem.fill(0); },
@@ -309,14 +322,8 @@ test('Assemble puts the PC where the program starts, and says so (U4, L8, #20)',
             showAddressAndData() { this.lamps = this.pc; },
             lastAddress: 0,
         };
-        const said = [];
-        global.panel = Object.assign({}, saved.panel, {
-            sim: sim,
-            ensurePoweredOn: () => false,
-            updateMemoryControls: () => {},
-            setStatus: (...args) => said.push(args),
-        });
-        global.CPU8080 = {set: (reg, value) => { if (reg == 'PC') sim.pc = value; }};
+        said = [];
+        panel.sim = sim;
         source = data.concat(['ORG ' + org], code, end ? [end] : []).join('\n');
         const what = 'code at ' + org + (end ? ', ' + end : '');
         asmtab.onAssemble();
@@ -339,9 +346,7 @@ test('choosing an example asks first only if text would be lost (U5)', (t) => {
     // An unchanged example is not lost, whichever example it is and
     // however it came back - after a reload too, when nothing in the
     // page remembers having put it there.
-    const saved = {panel: global.panel};
-    t.after(() => { global.panel = saved.panel; });
-    global.panel = Object.assign({}, saved.panel, {
+    stub(t, panel, {
         examplePrograms: {
             a: {name: 'A', text: ' MVI A,1\n HLT\n'},
             b: {name: 'B', text: ' NOP\n'},
@@ -366,4 +371,14 @@ test('choosing an example asks first only if text would be lost (U5)', (t) => {
                                [expectAsk, !expectAsk], JSON.stringify(text));
     }
     asmtab.replaceDialog = null;
+});
+
+test('the Assembler knows a phone by the width the stylesheet does (U2)', () => {
+    // Its two panes take turns below this width; the code that keeps
+    // them scrolled together must agree with the CSS that lays them out.
+    const css = fs.readFileSync(path.join(import.meta.dirname, '..', 'css', 'style.css'), 'utf8');
+    assert.match(asmtab.PHONE, /^\(max-width: \d+px\)$/);
+    assert.ok(css.includes('@media ' + asmtab.PHONE + ' {'), asmtab.PHONE + ' is not in css/style.css');
+    assert.ok(css.indexOf('#tab-asm.show-listing .asm-code') > css.indexOf('@media ' + asmtab.PHONE),
+              'the panes take turns inside that query');
 });

@@ -453,8 +453,31 @@ phone's width, so, as agreed in #12:
  Line 3: …                                         the errors, when there are any
 ```
 
-On a phone the toolbar gains **[Listing]** at its right, and the source
-and the listing take turns in the one pane.
+On a phone the source and the listing take turns in the one box, under
+two tabs on its top edge, **Source** and **Bytes**:
+
+```
+ [Examples ▾] [Assemble]
+┌──────────────────┬───────────────────┐
+│      Source      │       Bytes       │
+│                  └───────────────────┤
+│  1        ORG  0000H                 │
+```
+
+- **Both are always there**, the open one marked, so it is plain which
+  is showing and the way back is one press. *Since v1.7.0*: before, the
+  toolbar had one button, named after the view it would show, and a
+  reader who pressed **[Listing]** did not see **[Source]** as the way
+  back; nor was it plain what a listing is. **Bytes** says what it
+  shows: each line's address and bytes.
+- **They are the box's own edge**, cut from its greys, square and
+  flush, the open one the pane under it carried up into the tab: part
+  of the editor, not to be taken for the dock's tabs above it or the
+  toolbar's buttons beside it. On the toolbar there was no room for a
+  pair of tabs in German at 375px.
+- They work as tabs do: Tab reaches the open one, the arrow keys move
+  between them, and each opens where the other was scrolled to. Wider
+  than a phone there are none, since both are side by side.
 
 - **A toolbar** across the top. **Examples** opens a menu of example
   sources (T3); **Assemble**, beside it in the order they are used, is
@@ -469,7 +492,16 @@ and the listing take turns in the one pane.
 - **The listing** on the right: for each source line, on the same row,
   its address and the bytes it made, in hex; for an `EQU` or `SET`,
   its value. The two scroll together, so a line's bytes are always
-  beside it. A row shows up to six bytes, then `…`.
+  beside it. A row shows up to six bytes, then `…`. *Since v1.7.0*:
+  - the line the caret is on is banded, lighter, across the line
+    numbers, the source and the listing, so that a line's bytes can be
+    followed across the gap to it (the PC's green line keeps its
+    green). It stays where the caret last was when the editor loses the
+    keyboard, since that is when the bytes are read;
+  - on a phone, where the bytes are shown instead of the code (below),
+    the source's own line numbers stay beside them, scrolled with them:
+    line 12's bytes are on line 12. The wide screen does not repeat
+    them, as the rows already line up with the source.
 - **A macro's expansion** is listed on the row of the line that used
   it: the address and the bytes it made. Its tooltip gives the whole
   expansion, a line each with its address and bytes (L22). *As built:*
@@ -556,9 +588,8 @@ their addresses, with zeros below them, and an `END` start address is
 not used. **Assemble** follows both. None of the fourteen examples has
 either.
 
-Both menus read the files once, when either first needs them, so like
-the rest of the page's files they need it served, not opened from the
-disk. Choosing one here replaces the editor's text. If the editor holds
+Both menus read the files once, when either first needs them.
+Choosing one here replaces the editor's text. If the editor holds
 anything that is not an unchanged example, a dialog asks first, since
 that text is otherwise lost. Any example counts, not only the one last
 chosen, so an example the page brought back after a reload is replaced
@@ -665,6 +696,12 @@ colour meets 4.5:1 contrast, on the tinted rows of the PC's line and
 an error's too. Colour is never the only sign: errors are also marked
 in the gutter and listed.
 
+The listing is coloured too (*since v1.7.0*): its addresses in the grey
+of the line numbers, positions rather than data, and the bytes, and a
+name's value after its `=`, in the colour of numbers. The band on the
+caret's line (U2) is lighter, not darker, so that every colour on it
+gains contrast rather than losing it.
+
 ### H3 — Cost
 
 The whole source is tokenized and redrawn on each change, and
@@ -682,8 +719,9 @@ is kept up, which is cheap.
 
 - **`js/asm8080.js`**: the assembler, with no page in it. It takes
   source text and gives back the bytes (by address), the listing rows,
-  the symbols and the errors. Loaded by the page as a plain script, and
-  by the tests in Node, like `js/link.js`. The instruction encodings
+  the symbols and the errors. An ES module, imported by the page and by
+  the tests in Node alike, like `js/link.js` (*since v1.7.0*; it was a
+  plain script, with a second export for Node). The instruction encodings
   are its own table, written from the manual's Appendix A, and checked
   by a test against the CPU core's disassembler (T2).
 - **`js/asmtab.js`**: the tab: editor, highlighting, listing, errors,

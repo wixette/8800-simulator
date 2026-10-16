@@ -1,3 +1,4 @@
+// @ts-check
 /**
  *   Copyright 2020-2026 wixette@gmail.com
  *
@@ -33,11 +34,11 @@
  * them in the reader's language; the ids are the l10n message ids,
  * each prefixed 'asm-'.
  */
-class Asm8080 {
+export class Asm8080 {
     /**
      * Assembles a program.
      * @param {string} source The program.
-     * @param {{memSize: (number|undefined)}=} options The memory the
+     * @param {{memSize?: number}=} options The memory the
      *     program must fit in, if any (L15).
      * @return {!Object} {ok, memory: Map<address, byte>, start, end,
      *     entry, size, rows, errors, symbols}: whether it assembled
@@ -518,8 +519,13 @@ Asm8080.Pass = class {
         var tokens = all.filter(function(t) {
             return t.type != 'space' && t.type != 'comment';
         });
+        /** @type {{label: ?Object, global: boolean, name: ?string,
+         *     code: ?string, codeToken: (Object|undefined),
+         *     operands: !Array<!Array<Object>>, tokens: !Array<Object>,
+         *     bad: ?Object, text: (string|undefined)}} */
         var stmt = {label: null, global: false, name: null, code: null,
-                    operands: [], tokens: tokens, bad: null};
+                    codeToken: undefined, operands: [], tokens: tokens,
+                    bad: null, text: undefined};
         var k = 0;
         var bad = tokens.find(function(t) { return t.type == 'bad'; });
         if (bad) {
@@ -1241,8 +1247,9 @@ Asm8080.Expression = class {
     /**
      * @param {!Array<Object>} tokens The operand's tokens.
      * @param {function(string): ?Object} lookup Finds a name's symbol.
-     * @param {function(string): ?Array<number>} encode Assembles an
-     *     instruction written in parentheses (L7).
+     * @param {function(string): ?{bytes: !Array<number>, missing: ?string}}
+     *     encode Assembles an instruction written in parentheses (L7):
+     *     its bytes, and the first name it needed but could not find.
      * @param {number} here The value of $.
      * @param {boolean=} narrow An 8-bit operand: an instruction in
      *     parentheses gives its first byte (L7).
@@ -1460,6 +1467,3 @@ Asm8080.Expression = class {
 
 // Exports the class for unit tests when running in Node.js. This has
 // no effect when the script is loaded in a browser.
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Asm8080;
-}

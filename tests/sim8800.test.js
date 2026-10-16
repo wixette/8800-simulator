@@ -7,11 +7,11 @@
  */
 'use strict';
 
-const test = require('node:test');
-const assert = require('node:assert');
-const {Sim8800, createSim, flushTimers, bitsToNumber} =
-      require('./fixture.js');
-const {loadExample} = require('./examples.js');
+import test from 'node:test';
+import assert from 'node:assert';
+import {Sim8800, createSim, flushTimers, bitsToNumber} from './fixture.js';
+import {loadExample} from './examples.js';
+import {CPU8080} from '../js/8080.js';
 
 /**
  * Programs used here to drive the simulator. What each one does is

@@ -39,6 +39,26 @@ button, input, select, textarea, pre, code, kbd, samp {
     font-family: inherit;
 }
 
+/* Controls are pressed, not read. Dragging across one, or pressing it
+   twice, selects none of its words, as in any app: buttons, the dock's
+   tabs, the menus and their items, the front panel and its switches,
+   Share's choices, the logo. What they act on - the editor, the
+   Teletype's paper, the dumps, a dialog's text and its link field -
+   can still be selected and copied, and links keep the browser's own
+   ways, selected or dragged like any link. */
+button,
+[role="button"],
+[role="tab"],
+[role="option"],
+.button,
+.dropdown-heading,
+.dialog-option,
+.logo,
+#panel {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
 div, img, pre {
     border: 0;
     margin: 0;
@@ -71,19 +91,19 @@ a {
     margin-right: 8px;
 }
 
-/* The logo carries its own margin inside its 800 by 90 box, so it is
-   drawn a little taller than the lettering it shows. */
-#header-logo {
+/* The logo, wherever it is shown: a picture to look at, not an image
+   to drag off (Firefox takes draggable="false" on the <img> instead). */
+.logo {
+    -webkit-user-drag: none;
     display: block;
-    height: 26px;
-    width: auto;
 }
 
-/* Just wider than a phone, the menus need the room. */
-@media (max-width: 900px) {
-    #header-logo {
-        height: 20px;
-    }
+/* In the toolbar, one size wider than a phone: as wide as the longest
+   language leaves room for at 701px, the narrowest it is drawn at (at
+   24px, French and Portuguese wrap the toolbar up to 712px). */
+#header-logo {
+    height: 22px;
+    width: auto;
 }
 
 .toolbar-spacer {
@@ -104,10 +124,6 @@ a {
     gap: 6px;
     line-height: 20px;
     padding: 5px 10px;
-    user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
     white-space: nowrap;
 }
 
@@ -346,12 +362,20 @@ a {
     color: #999;
 }
 
-.about-version {
-    color: #999;
+/* The logo heads About, the version under it, both centred. */
+#about-logo {
+    height: auto;
+    margin: 4px auto 8px;
+    max-width: 100%;
+    width: 320px;
 }
 
-.about-links,
-.about-licences {
+.about-version {
+    color: #999;
+    text-align: center;
+}
+
+.about-links {
     font-size: 14px;
     line-height: 1.5;
     list-style: none;
@@ -359,13 +383,35 @@ a {
     padding: 0;
 }
 
-.about-links li,
-.about-licences li {
+.about-links li {
     padding: 4px 0;
 }
 
-.about-licences li {
+/* What, then whose: a label column as wide as the longest label. */
+.about-licences {
     color: #ccc;
+    column-gap: 14px;
+    display: grid;
+    font-size: 14px;
+    grid-template-columns: max-content 1fr;
+    line-height: 1.5;
+    margin: 0;
+    row-gap: 4px;
+}
+
+.about-licences dt {
+    color: #999;
+}
+
+.about-licences dd {
+    margin: 0;
+}
+
+/* A name or a licence is never broken across two lines; the line
+   breaks between them instead. */
+.about-licences dd a,
+.about-licences dd span {
+    white-space: nowrap;
 }
 
 /* A drop down the page draws itself: a button, and a list under it.
@@ -392,10 +438,6 @@ a {
     /* The same 32px the buttons beside it come to. */
     height: 32px;
     padding: 0 14px;
-    user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
 }
 
 .dropdown-arrow {
@@ -538,10 +580,6 @@ a {
 #panel {
     flex: 1 1 0;
     min-height: 0;
-    user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
     width: 100%;
 }
 
@@ -569,10 +607,6 @@ a {
     height: 14px;
     justify-content: center;
     width: 44px;
-    user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
 }
 
 .strip-tab:hover,
@@ -785,10 +819,6 @@ a {
     padding: 0 14px;
     /* For the activity dot below. */
     position: relative;
-    user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
     white-space: nowrap;
 }
 
@@ -810,10 +840,6 @@ a {
     font-size: 14px;
     justify-content: center;
     min-width: 36px;
-    user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
 }
 
 .dock-tool:hover {
@@ -1018,10 +1044,6 @@ a {
     line-height: 2em;
     padding: 2px 10px;
     text-align: center;
-    user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -webkit-user-select: none;
 }
 
 /* Every light button answers the pointer, as the toolbar, the dock and
@@ -1296,8 +1318,8 @@ a {
     color: #222;
 }
 
-/* Only a phone needs it. */
-#asm-view-toggle {
+/* The tabs on the editor's top edge: only a phone has them (U2). */
+.asm-views {
     display: none;
 }
 
@@ -1558,6 +1580,26 @@ a {
     width: 27ch;
 }
 
+/* A row's parts as the source colours them (H2): the address in the
+   grey of the line numbers, a position rather than data; the bytes,
+   and a name's value after its =, in the colour of numbers. */
+.asm-listing .asm-addr {
+    color: #4a4a4a;
+}
+
+.asm-listing .asm-bytes {
+    color: #505000;
+}
+
+/* The line the caret is on, across the line numbers, the source and
+   the listing, so that a line's bytes can be followed across to it
+   (U2): lighter, over whatever the line already shows - an error's
+   red too - so that its dark text only gains contrast. The PC's line
+   is marked already, in green, and keeps it. */
+.asm-current:not(.asm-line-pc):not(.asm-gutter-pc):not(.asm-listing-pc) {
+    box-shadow: inset 0 0 0 100vmax rgba(255, 255, 255, 0.4);
+}
+
 /* The line the program counter is on, in the green the Debugger's dump
    marks the PC with (U7): the line tinted, its number marked, its
    bytes in the listing filled. */
@@ -1569,6 +1611,12 @@ a {
 .asm-listing-line.asm-listing-pc {
     background-color: #157a35;
     color: #eee;
+}
+
+/* On the PC's green, the parts are its light text, as the rest is. */
+.asm-listing-pc .asm-addr,
+.asm-listing-pc .asm-bytes {
+    color: inherit;
 }
 
 .asm-errors {
@@ -1651,6 +1699,47 @@ a {
 }
 
 
+/* The narrowest phones have no room to spare in the toolbar, so the
+   logo goes, as it did on every phone before v1.7.0. */
+@media (max-width: 374px) {
+    #header-title {
+        display: none;
+    }
+}
+
+/* Opened off the disk, where nothing else can work, the page is this
+   alone (see index.html). */
+.needs-server #app,
+.needs-server dialog {
+    display: none !important;
+}
+
+.needs-server body {
+    box-sizing: border-box;
+    padding: 15vh 16px 0;
+}
+
+#file-notice {
+    background-color: #5a4a1a;
+    border-radius: 10px;
+    box-sizing: border-box;
+    color: #ffd98a;
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0 auto;
+    max-width: 36em;
+    padding: 20px 24px;
+}
+
+#file-notice a,
+#file-notice code {
+    color: #fff;
+}
+
+#file-notice code {
+    white-space: nowrap;
+}
+
 #status-bar.status-warn {
     background-color: #5a4a1a;
     color: #ffd98a;
@@ -1723,12 +1812,78 @@ a {
         width: auto;
     }
 
+    /* The bytes keep the source's line numbers beside them, the same
+       column, scrolled with them: line 12's bytes are on line 12. */
     #tab-asm.show-listing .asm-editor {
+        flex: none;
+    }
+
+    #tab-asm.show-listing .asm-code {
         display: none;
     }
 
-    #asm-view-toggle {
-        display: block;
+    /* Which of the two is open, as the top edge of the editor's box:
+       cut from its own greys, square and flush, so that they read as
+       part of the editor - not as the dock's tabs above, nor the
+       toolbar's buttons beside. The open one is the pane under it,
+       carried up into the tab, its name in bold; the other is the
+       darker grey of the gutter, behind. */
+    .asm-views {
+        border-radius: 10px 10px 0 0;
+        display: flex;
+        flex: none;
+        overflow: hidden;
+    }
+
+    .asm-view {
+        background-color: #a8a8a8;
+        border: 0;
+        border-bottom: 1px solid #949494;
+        color: #333;
+        cursor: pointer;
+        flex: 1 1 0;
+        font-size: 14px;
+        line-height: 20px;
+        margin: 0;
+        min-width: 0;
+        overflow: hidden;
+        padding: 6px 8px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .asm-view + .asm-view {
+        border-left: 1px solid #949494;
+    }
+
+    .asm-view:hover {
+        background-color: #b4b4b4;
+    }
+
+    .asm-view[aria-selected="true"] {
+        border-bottom-color: transparent;
+        color: #111;
+        cursor: default;
+        font-weight: bold;
+    }
+
+    #asm-view-source[aria-selected="true"] {
+        background-color: #ccc;
+    }
+
+    #asm-view-bytes[aria-selected="true"] {
+        background-color: #d6d6d6;
+    }
+
+    .asm-view:focus-visible {
+        outline: 2px solid #f90;
+        outline-offset: -2px;
+    }
+
+    /* The box's top corners are the tabs'. */
+    #tab-asm .asm-work {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
     }
 
     /* The labels go, the icons and the installed size stay. */
@@ -1737,10 +1892,12 @@ a {
         display: none;
     }
 
-    /* The artwork says ALTAIR 8800 already, and the toolbar's row is
-       worth more to the dock. */
+    /* The machine alone, from the <picture> (index.html): the name
+       would take the room the menus need. At the same height, it is
+       39px across, and with no margin past the toolbar's gap it fits
+       the room the toolbar has to spare at 375px. */
     #header-title {
-        display: none;
+        margin-right: 0;
     }
 
     /* The strip packed tight, so the dock keeps some room: the levers

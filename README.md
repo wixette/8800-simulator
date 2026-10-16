@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="images/8800-simulator-logo-text-white.svg">
+    <img src="images/8800-simulator-logo-text-black.svg" alt="8800 Simulator logo" width="560">
+  </picture>
+</p>
+
 # Altair 8800 Simulator
 
 [![Tests](https://github.com/wixette/8800-simulator/actions/workflows/test.yml/badge.svg)](https://github.com/wixette/8800-simulator/actions/workflows/test.yml)
@@ -240,7 +247,7 @@ Intel's answer, the same year, was assembly language: you write
 tab, under the panel, takes the language exactly as Intel's *8080
 Assembly Language Programming Manual* defines it, macros and all.
 
-![The Assembler tab holding the Macros example: highlighted source with line numbers on the left, and on the right each line's address and bytes, a macro's use showing the bytes of its expansion](./screenshots/assembler.png)
+![The Assembler tab holding the Macros example, assembled: highlighted source with line numbers on the left, and on the right each line's address and bytes, a macro's use showing the bytes of its expansion. Line 35, where the program counter is, is marked in green across the line number, the source and its bytes; line 37, where the caret is, is banded lighter across to its bytes](./screenshots/assembler.png)
 
 Here is section 3's program again, with names for its addresses
 instead of the numbers. It makes exactly the bytes you toggled in:
@@ -273,9 +280,13 @@ instruction, labels, `EQU` and `SET`, `DB`, `DW` and `DS`, expressions
 and `$`, `IF` and `ENDIF`, and macros, whose labels are local to each
 use as Intel specified. Its **Examples** menu has every example
 program, from switches to lamps to macros ([examples/](examples/README.md)).
-In the editor's corner, **Copy** takes the source with you, and
-**Clear** starts afresh (Undo brings it back). The
-design and its decisions are in [docs/assembler.md](docs/assembler.md).
+Once a program is assembled, the line the program counter is on is
+marked in green as you SINGLE STEP or STOP, and the line the caret is
+on is banded across to its bytes. In the editor's corner, **Copy**
+takes the source with you, and **Clear** starts afresh (Undo brings it
+back). On a phone, the source and its bytes take turns, under the
+**Source** and **Bytes** tabs. The design and its decisions are in
+[docs/assembler.md](docs/assembler.md).
 
 ## 8. More programs
 
@@ -312,24 +323,88 @@ Then open <http://localhost:8000/>. To deploy, copy the whole
 directory to a web server; there is nothing to build, and no
 dependencies.
 
-Opening `index.html` straight off the disk mostly works, but a browser
-will not let a `file://` page read the files beside it. So the example
-programs and the BASIC tape, which the page reads from `examples/` and
-`roms/`, grey out and say why.
+Opening `index.html` straight off the disk does not work, since
+v1.7.0: the page's scripts are ES modules, and a browser runs no module
+in a `file://` page. Opened that way, the page shows only a notice that
+says so and gives the command above.
+
+### Deploying behind a cache
+
+Every file `index.html` names carries the version, `css/style.css?v=1.7.0`,
+and so does every module the scripts import, through the page's import
+map. A release asks for new names, so a cache can keep each file as long
+as it likes and still never give an old one to the new page. Only
+`index.html` itself must not be kept. On a server or a CDN that lets you
+set the headers:
+
+| What | `Cache-Control` |
+| --- | --- |
+| `index.html` (and `/`) | `no-cache`: kept, but checked with the server each time, which costs a reply with no body when nothing changed |
+| Everything asked for with `?v=` | `public, max-age=31536000, immutable` |
+| `package.json`, `examples/`, `roms/` | `no-cache`; the page fetches these itself, and asks for a check anyway |
+
+A CDN must count the query string in its cache key (most do unless told
+not to), and should be told to purge `index.html` on each deploy.
+GitHub Pages sets no headers you can change and keeps everything for 10
+minutes, so there a release reaches everyone within 10 minutes.
+
+The version is kept in one place, `package.json`; the names in
+`index.html` are copies, written from it and never by hand. Set it with
+npm, which writes them too:
+
+```
+npm version 1.7.0        # or: npm version patch | minor | major
+```
+
+It sets the version, then runs `npm run stamp`
+([tools/stamp.mjs](tools/stamp.mjs)) to write it into `index.html`'s
+file names and import map, and stops there: it does not commit or tag
+([.npmrc](.npmrc)), since a release is tagged on GitHub, on its merge
+commit. Commit the two files as usual. A version changed any other way,
+by hand in `package.json`, needs `npm run stamp` after it; until then
+`npm test` fails and says so, so a release cannot go out half stamped.
+
+### The logo and icons
+
+The logo is in [images/](images/) in three forms: the machine alone, 16:9
+(`8800-simulator-logo.svg`), and the machine with its name, 8:1, in
+white for dark backgrounds and black for light ones
+(`8800-simulator-logo-text-white.svg`, `-text-black.svg`). The toolbar
+shows the one with the name, and on a phone the machine alone; this
+README shows the name in whichever colour suits the reader's theme.
+
+The favicons and home screen icons are drawn from the 16:9 one, and
+kept with it in `images/`: `favicon.svg`, `favicon.ico` (16, 32 and 48
+pixels), and the 180, 192 and 512 pixel PNGs that `index.html` and
+[manifest.webmanifest](manifest.webmanifest) name. After a change to
+the logo, draw them again (it needs Chrome, as the browser checks do):
+
+```
+npm run icons
+```
+
+`npm test` fails until they have been, since it checks that the SVG
+favicon still has the logo's drawing.
 
 ### How it is built
 
 | File | What it is |
 | --- | --- |
 | [index.html](index.html), [css/style.css](css/style.css) | The page: toolbar, panel, dock, dialogs |
+| [js/main.js](js/main.js), [js/app.js](js/app.js) | The page's one script, and the app it starts; every file is an ES module |
 | [js/8080.js](js/8080.js) | The Intel 8080 CPU core, [maly/8080js](https://github.com/maly/8080js) |
 | [js/sim8800.js](js/sim8800.js) | The machine: memory, the front panel's logic, the ports |
 | [js/sio.js](js/sio.js), [js/teletype.js](js/teletype.js) | The serial boards, and the Teletype's paper |
-| [js/panel.js](js/panel.js) | The page's own logic: panel drawing, menus, dock, debugger |
+| [js/panel.js](js/panel.js) | The page's own logic, at its core: the status line, About, and building the page |
+| [js/panel-front.js](js/panel-front.js) | The front panel: its switches, lamps and sounds, and the big switches under it |
+| [js/panel-load.js](js/panel-load.js) | Putting a program in: Load, the examples, 4K BASIC, files, the Memory menu |
+| [js/panel-debug.js](js/panel-debug.js) | The Debugger: the memory dump and its editing, the next instruction, the memory map |
+| [js/panel-link.js](js/panel-link.js), [js/panel-tty.js](js/panel-tty.js), [js/panel-dock.js](js/panel-dock.js) | Program links and Share; the Teletype; the dock and its tabs |
 | [js/link.js](js/link.js) | The program link format |
 | [js/asm8080.js](js/asm8080.js), [js/asmtab.js](js/asmtab.js) | The 8080 assembler, and its tab |
 | [js/dropdown.js](js/dropdown.js), [js/dialog.js](js/dialog.js) | The menus and the dialogs |
 | [js/l10n.js](js/l10n.js) | Every message, in ten languages |
+| [tools/stamp.mjs](tools/stamp.mjs), [tools/icons.mjs](tools/icons.mjs) | Not part of the page: the version stamp, and drawing the icons from the logo |
 
 The design notes say why things are the way they are:
 [docs/ui-design.md](docs/ui-design.md) for the layout and its
@@ -362,6 +437,18 @@ npm run test:browser -- sync clear
 It takes a minute or so and needs Chrome installed (or `CHROME` set to
 its path, Chromium too), so it is not part of CI: run it by hand
 before a release. The checks are in [tests/browser/](tests/browser/).
+
+The JSDoc types are checked against the code by TypeScript's checker,
+which `npx` fetches for the run; nothing is compiled, and the page
+runs the files as they are. CI runs it after the tests:
+
+```
+npm run typecheck
+```
+
+Only the files that start with `// @ts-check` are checked, so far
+`js/asm8080.js` and `js/sim8800.js`; [tsconfig.json](tsconfig.json)
+says how strictly.
 
 ### The link format
 

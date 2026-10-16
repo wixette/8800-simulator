@@ -18,12 +18,70 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title id="title" class="l10n">Sim-8800: Altair 8800 Simulator</title>
-    <link rel="icon" href="favicon.ico" sizes="48x48 32x32 16x16">
-    <link rel="icon" href="images/led-on.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="css/style.css">
+    <!-- What a search result shows under the title. In English only, as
+         the page is before any script runs, which is how it is read. -->
+    <meta name="description" content="The 1975 Altair 8800 in your browser: toggle programs in on its front panel, write them in 8080 assembly, and run Microsoft&#39;s original 4K BASIC on a Teletype.">
+    <title id="title" class="l10n">Altair 8800 Simulator: Front Panel, 8080 Assembler and 4K BASIC</title>
+    <!-- The icons, all drawn from images/8800-simulator-logo.svg by npm
+         run icons (tools/icons.mjs). A browser that takes an SVG icon
+         takes the second; sizes="32x32" on the first keeps Chrome from
+         picking the .ico over it. -->
+    <link rel="icon" href="images/favicon.ico?v=1.7.0" sizes="32x32">
+    <link rel="icon" href="images/favicon.svg?v=1.7.0" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png?v=1.7.0">
+    <link rel="manifest" href="manifest.webmanifest?v=1.7.0">
+    <link rel="stylesheet" href="css/style.css?v=1.7.0">
+    <!-- Every file name here carries the version (?v=), and so does each
+         module the scripts import, through this map: a release asks for
+         new names, so no cache can serve an old file to a new page.
+         npm version writes them with the version, or npm run stamp
+         (tools/stamp.mjs); do not edit them by hand. -->
+    <script type="importmap">
+    {
+      "imports": {
+        "./js/8080.js": "./js/8080.js?v=1.7.0",
+        "./js/app.js": "./js/app.js?v=1.7.0",
+        "./js/asm8080.js": "./js/asm8080.js?v=1.7.0",
+        "./js/asmtab.js": "./js/asmtab.js?v=1.7.0",
+        "./js/dialog.js": "./js/dialog.js?v=1.7.0",
+        "./js/dropdown.js": "./js/dropdown.js?v=1.7.0",
+        "./js/l10n.js": "./js/l10n.js?v=1.7.0",
+        "./js/link.js": "./js/link.js?v=1.7.0",
+        "./js/main.js": "./js/main.js?v=1.7.0",
+        "./js/panel-debug.js": "./js/panel-debug.js?v=1.7.0",
+        "./js/panel-dock.js": "./js/panel-dock.js?v=1.7.0",
+        "./js/panel-front.js": "./js/panel-front.js?v=1.7.0",
+        "./js/panel-link.js": "./js/panel-link.js?v=1.7.0",
+        "./js/panel-load.js": "./js/panel-load.js?v=1.7.0",
+        "./js/panel-tty.js": "./js/panel-tty.js?v=1.7.0",
+        "./js/panel.js": "./js/panel.js?v=1.7.0",
+        "./js/sim8800.js": "./js/sim8800.js?v=1.7.0",
+        "./js/sio.js": "./js/sio.js?v=1.7.0",
+        "./js/teletype.js": "./js/teletype.js?v=1.7.0"
+      }
+    }
+    </script>
   </head>
   <body>
+
+    <!-- Opened straight off the disk, the page's scripts cannot run: a
+         browser loads no module into a file:// page. Then this is all
+         the page shows - not a panel that does nothing - with how to
+         serve it instead. It is the one script that is not a module, so
+         that it runs there, and it runs before the rest of the page is
+         drawn. Should the modules run after all, js/main.js undoes it. -->
+    <p id="file-notice" hidden>
+      This page needs a web server: a browser does not run its scripts
+      from a file opened off the disk. In this folder, run
+      <code>python3 -m http.server 8000</code>, then open
+      <a href="http://localhost:8000/">http://localhost:8000/</a>.
+    </p>
+    <script>
+      if (location.protocol == 'file:') {
+        document.documentElement.classList.add('needs-server');
+        document.getElementById('file-notice').hidden = false;
+      }
+    </script>
 
     <!-- One frame the height of the window: the toolbar, the front panel,
          the dock of tools under it, and the status line. The panel is the
@@ -35,11 +93,16 @@
            right. Icons are Material Icons (Apache License 2.0), inline
            so that the page needs nothing from the network. -->
       <header id="toolbar">
-        <!-- The name, in the lettering of the panel's own nameplate. Its
-             alt text is the translated title (panel.refreshPlaceholders). -->
+        <!-- The logo: the machine and its name, in the lettering of the
+             panel's own nameplate; on a phone, the machine alone. Its alt
+             text is the translated title (panel.refreshPlaceholders). -->
         <div id="header-title">
-          <img id="header-logo" src="images/8800-simulator-logo-white.svg"
-               alt="Altair 8800 Simulator">
+          <picture>
+            <source media="(max-width: 700px)"
+                    srcset="images/8800-simulator-logo.svg?v=1.7.0">
+            <img id="header-logo" class="logo" src="images/8800-simulator-logo-text-white.svg?v=1.7.0"
+                 alt="Altair 8800 Simulator" draggable="false">
+          </picture>
         </div>
 
         <div id="load-dropdown" class="dropdown">
@@ -86,14 +149,14 @@
       <main id="stage">
         <svg id="panel" width="100%" height="100%" viewBox="0 0 1440 644" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
           <!-- Panel artwork. Edit images/panel.svg to change it. -->
-          <image x="0" y="0" width="1440" height="644" href="images/panel.svg"/>
+          <image x="0" y="0" width="1440" height="644" href="images/panel.svg?v=1.7.0"/>
 
           <!-- Sprites cloned by panel.js for every LED and switch. -->
-          <image id="led-on" x="0" y="0" width="20" height="20" href="images/led-on.svg"/>
-          <image id="led-off" x="0" y="0" width="20" height="20" href="images/led-off.svg"/>
-          <image id="switch-up" x="0" y="0" width="20" height="30" href="images/switch-up.svg"/>
-          <image id="switch-mid" x="0" y="0" width="20" height="30" href="images/switch-mid.svg"/>
-          <image id="switch-down" x="0" y="0" width="20" height="30" href="images/switch-down.svg"/>
+          <image id="led-on" x="0" y="0" width="20" height="20" href="images/led-on.svg?v=1.7.0"/>
+          <image id="led-off" x="0" y="0" width="20" height="20" href="images/led-off.svg?v=1.7.0"/>
+          <image id="switch-up" x="0" y="0" width="20" height="30" href="images/switch-up.svg?v=1.7.0"/>
+          <image id="switch-mid" x="0" y="0" width="20" height="30" href="images/switch-mid.svg?v=1.7.0"/>
+          <image id="switch-down" x="0" y="0" width="20" height="30" href="images/switch-down.svg?v=1.7.0"/>
         </svg>
 
         <!-- The Switch Board Helper: the panel's switches again, large
@@ -188,13 +251,21 @@
                 <ul id="asm-examples-list" role="listbox" hidden></ul>
               </div>
               <button id="asm-assemble" class="button asm-assemble l10n" type="button">Assemble</button>
-              <div class="toolbar-spacer"></div>
-              <button id="asm-view-toggle" class="button" type="button" aria-pressed="false">Listing</button>
+            </div>
+            <!-- On a phone the source and its bytes take turns in the one
+                 box, and these tabs, the top edge of that box, say which
+                 is open and switch between them (U2). Wider, the two are
+                 side by side, and the tabs are not shown. -->
+            <div id="asm-views" class="asm-views" role="tablist">
+              <button id="asm-view-source" class="asm-view l10n" type="button" role="tab"
+                      aria-selected="true" aria-controls="asm-code">Source</button>
+              <button id="asm-view-bytes" class="asm-view l10n" type="button" role="tab"
+                      aria-selected="false" aria-controls="asm-listing" tabindex="-1">Bytes</button>
             </div>
             <div class="asm-work">
               <div class="asm-editor">
                 <div id="asm-gutter" class="asm-gutter" aria-hidden="true"></div>
-                <div class="asm-code">
+                <div id="asm-code" class="asm-code">
                   <pre id="asm-highlight" class="asm-highlight" aria-hidden="true"></pre>
                   <textarea id="asm-source" class="asm-source" wrap="off"
                             spellcheck="false" autocapitalize="off"
@@ -434,10 +505,13 @@ RUN</pre>
 
     <dialog id="about-dialog" class="dialog" aria-labelledby="about-title">
       <div class="dialog-head">
-        <h2 id="about-title" class="dialog-title l10n">Altair 8800 Simulator</h2>
+        <h2 id="about-title" class="dialog-title l10n">About</h2>
         <button class="icon-button dialog-close" type="button" data-close><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
       </div>
       <div class="dialog-body">
+        <!-- The logo names the app, so the title band only says About. -->
+        <img id="about-logo" class="logo" src="images/8800-simulator-logo-text-white.svg?v=1.7.0"
+             alt="Altair 8800 Simulator" draggable="false">
         <p class="dialog-text about-version"><span id="about-version" class="l10n">Version</span> <span id="app-version"></span></p>
         <p id="about-desc" class="dialog-text l10n">An Altair 8800 you can switch on in a web page: its front panel, a teletype running Microsoft's 4K BASIC, an 8080 assembler, and a debugger the real one never had.</p>
         <ul class="about-links">
@@ -446,16 +520,18 @@ RUN</pre>
           <li><a href="https://github.com/wixette/8800-simulator/graphs/contributors" target="_blank" rel="noopener"><span id="about-contributors" class="l10n">Contributors</span></a></li>
         </ul>
         <h3 id="about-licences" class="dialog-subtitle l10n">Licences</h3>
-        <ul class="about-licences">
-          <li><span id="about-license-app" class="l10n">The simulator:</span>
-            <a href="https://github.com/wixette/8800-simulator/blob/master/LICENSE" target="_blank" rel="noopener">Apache License 2.0</a></li>
-          <li><span id="about-license-rom" class="l10n">The 4K BASIC tape is Microsoft's, and not covered by that licence:</span>
-            <a href="https://github.com/wixette/8800-simulator/blob/master/roms/NOTICE" target="_blank" rel="noopener">roms/NOTICE</a></li>
-          <li><span id="about-license-cpu" class="l10n">The 8080 CPU core is 8080js by Martin Maly, under a BSD licence:</span>
-            <a href="https://github.com/maly/8080js" target="_blank" rel="noopener">github.com/maly/8080js</a></li>
-          <li><span id="about-license-icons" class="l10n">The icons are Google's Material Icons:</span>
-            <a href="https://github.com/google/material-design-icons" target="_blank" rel="noopener">Apache License 2.0</a></li>
-        </ul>
+        <!-- One line each: what, then whose and under what licence. Only
+             the labels are words to translate; the rest are names. -->
+        <dl class="about-licences">
+          <dt id="about-license-app" class="l10n">Simulator</dt>
+          <dd><a href="https://github.com/wixette/8800-simulator/blob/master/LICENSE" target="_blank" rel="noopener">Apache License 2.0</a></dd>
+          <dt id="about-license-rom" class="l10n">4K BASIC tape</dt>
+          <dd><span>© Microsoft</span> · <a href="https://github.com/wixette/8800-simulator/blob/master/roms/NOTICE" target="_blank" rel="noopener">roms/NOTICE</a></dd>
+          <dt id="about-license-cpu" class="l10n">8080 CPU core</dt>
+          <dd><a href="https://github.com/maly/8080js" target="_blank" rel="noopener">8080js</a> <span>© Martin Maly</span> · <span>BSD</span></dd>
+          <dt id="about-license-icons" class="l10n">Icons</dt>
+          <dd><a href="https://github.com/google/material-design-icons" target="_blank" rel="noopener">Material Icons</a> <span>© Google</span> · <span>Apache 2.0</span></dd>
+        </dl>
         <div class="dialog-actions">
           <button id="about-references" class="dialog-button l10n" type="button">References</button>
           <button id="about-ok" class="dialog-button primary l10n" type="button" data-close autofocus>Close</button>
@@ -463,29 +539,10 @@ RUN</pre>
       </div>
     </dialog>
 
-    <audio id="sound-beepbeep" src="audio/beepbeep.mp3"></audio>
-    <audio id="sound-switch" src="audio/switch.mp3"></audio>
-    <audio id="sound-toggle" src="audio/toggle.mp3"></audio>
+    <audio id="sound-beepbeep" src="audio/beepbeep.mp3?v=1.7.0"></audio>
+    <audio id="sound-switch" src="audio/switch.mp3?v=1.7.0"></audio>
+    <audio id="sound-toggle" src="audio/toggle.mp3?v=1.7.0"></audio>
 
-    <script src="js/l10n.js"></script>
-    <script src="js/8080.js"></script>
-    <script src="js/sim8800.js"></script>
-    <script src="js/dropdown.js"></script>
-    <script src="js/dialog.js"></script>
-    <script src="js/link.js"></script>
-    <script src="js/asm8080.js"></script>
-    <script src="js/sio.js"></script>
-    <script src="js/teletype.js"></script>
-    <script src="js/asmtab.js"></script>
-    <script src="js/panel.js"></script>
-    <script>
-     (function() {
-       if (document.readyState !== 'loading') {
-         panel.init();
-       } else {
-         document.addEventListener('DOMContentLoaded', panel.init);
-       }
-     })();
-    </script>
+    <script type="module" src="js/main.js?v=1.7.0"></script>
   </body>
 </html>

@@ -6,8 +6,9 @@
  */
 'use strict';
 
-const test = require('node:test');
-const assert = require('node:assert');
+import test from 'node:test';
+import assert from 'node:assert';
+import {Dropdown} from '../js/dropdown.js';
 
 /**
  * A stand-in for one element: enough for Dropdown to wire itself up,
@@ -50,7 +51,6 @@ test('opening a menu closes whichever other menu is open', (t) => {
         addEventListener: () => {},
     };
     t.after(() => { global.document = savedDocument; });
-    const Dropdown = require('../js/dropdown.js');
     Dropdown.all.length = 0;
     const a = new Dropdown('a', () => {});
     const b = new Dropdown('b', () => {});

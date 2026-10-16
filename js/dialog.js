@@ -30,7 +30,7 @@
  * Expects a <dialog> whose padding is on an inner element, so that a
  * click whose target is the <dialog> itself can only be on the backdrop.
  */
-class Dialog {
+export class Dialog {
     /**
      * @param {string} id The <dialog>'s id.
      * @param {function()=} onOpen Called each time, just before it shows.
@@ -128,6 +128,3 @@ class Dialog {
 
 // Exports the class for unit tests when running in Node.js. This has
 // no effect when the script is loaded in a browser.
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Dialog;
-}

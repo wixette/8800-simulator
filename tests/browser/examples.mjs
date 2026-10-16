@@ -73,8 +73,7 @@ export default async function(h) {
             return {order: e.right <= a.left && Math.abs(e.top - a.top) < 2, shown};
         })()`);
         verify(width + 'px: Examples, then Assemble, on one row', bar.order, JSON.stringify(bar));
-        const expected = width < 700 ? ['asm-examples-dropdown', 'asm-assemble', 'asm-view-toggle']
-                                     : ['asm-examples-dropdown', 'asm-assemble'];
+        const expected = ['asm-examples-dropdown', 'asm-assemble'];
         verify(width + 'px: and no summary beside them', JSON.stringify(bar.shown) === JSON.stringify(expected), JSON.stringify(bar.shown));
     }
 }

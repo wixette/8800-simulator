@@ -1,51 +1,49 @@
 /**
- * The parts of the front panel page (js/panel.js) that are plain logic
- * rather than drawing.
+ * The page's own logic (js/panel.js and the js/panel-*.js parts) that
+ * is plain logic rather than drawing.
  *
- * panel.js is written for the browser and most of it reaches for the
- * document, so it is loaded here into a sandbox and only the functions
- * that touch nothing else are exercised.
+ * It is written for the browser and much of it reaches for the
+ * document, so the functions are run here with a stand-in for what
+ * they touch, or read as source where only the page could run them.
  *
  * Run with: npm test
  */
 'use strict';
 
-const test = require('node:test');
-const assert = require('node:assert');
-const fs = require('node:fs');
-const path = require('node:path');
-const vm = require('node:vm');
-
-/**
- * Runs one of the page's scripts here rather than in a context of its
- * own, so the arrays it builds are the same kind of array the
- * assertions below compare against. The scripts declare their
- * namespace as a bare global, which is how the page gets at them too.
- * @param {string} name The file in js/.
- * @return {Object} That file's namespace.
- */
-function loadScript(name) {
-    const source = fs.readFileSync(
-        path.join(__dirname, '..', 'js', name + '.js'), 'utf8');
-    vm.runInThisContext(source, {filename: name + '.js'});
-    return globalThis[name];
-}
-
-const panel = loadScript('panel');
+import test from 'node:test';
+import assert from 'node:assert';
+import fs from 'node:fs';
+import path from 'node:path';
+import {CPU8080} from '../js/8080.js';
+import {asmtab} from '../js/asmtab.js';
+import {Dialog} from '../js/dialog.js';
+import {l10n} from '../js/l10n.js';
+import {Link} from '../js/link.js';
+import {panel} from '../js/app.js';
+import {Teletype} from '../js/teletype.js';
+import {loadExample} from './examples.js';
+import {stub} from './stub.js';
 
 /** Every message id, with the locales it is translated into. */
 function messages() {
-    return loadScript('l10n').MESSAGES;
+    return l10n.MESSAGES;
 }
 
 /** The locales the app claims to support. */
 function locales() {
-    return Object.values(loadScript('l10n').LOCALES);
+    return Object.values(l10n.LOCALES);
 }
 
 /** The source of one of the page's scripts, or of index.html. */
 function sourceOf(file) {
-    return fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
+    return fs.readFileSync(path.join(import.meta.dirname, '..', file), 'utf8');
+}
+
+/** The source of the panel namespace: js/panel.js and its parts. */
+function panelSource() {
+    return fs.readdirSync(path.join(import.meta.dirname, '..', 'js'))
+        .filter((f) => /^panel(-\w+)?\.js$/.test(f)).sort()
+        .map((f) => sourceOf('js/' + f)).join('\n');
 }
 
 test('every message is translated into every locale', () => {
@@ -78,7 +76,6 @@ test('every translation keeps the placeholders of the English', () => {
 });
 
 test('every locale names itself in the menu and on the button', () => {
-    const l10n = loadScript('l10n');
     for (const locale of locales()) {
         assert.ok(l10n.LOCALE_NAMES[locale], locale + ' has no name in the menu');
         assert.ok(l10n.LOCALE_SHORT[locale], locale + ' has no short label');
@@ -101,18 +98,18 @@ test('every label the page marks for translation has a message', () => {
 test('every message the panel asks for by name exists', () => {
     // Catches a message renamed or retired out from under its caller,
     // which shows up in the app as a control that says nothing at all.
-    const panelSource = sourceOf('js/panel.js');
+    const code = panelSource();
     const asked = new Set();
     // What goes wrong with a link or with typed hex comes back from
     // js/link.js as an id, for the panel to put on the status line.
     for (const m of sourceOf('js/link.js').matchAll(/error:\s*'([^']+)'/g)) {
         asked.add(m[1]);
     }
-    for (const m of panelSource.matchAll(/setStatus\(\s*'([^']+)'/g)) {
+    for (const m of code.matchAll(/setStatus\(\s*'([^']+)'/g)) {
         asked.add(m[1]);
     }
     // A whole id, not the front of one being built with +.
-    for (const m of panelSource.matchAll(/(?:getMessage|msg)\(\s*'([^']+)'\s*\)/g)) {
+    for (const m of code.matchAll(/(?:getMessage|msg)\(\s*'([^']+)'\s*\)/g)) {
         asked.add(m[1]);
     }
     // Ids kept in tables rather than written at a call.
@@ -123,7 +120,7 @@ test('every message the panel asks for by name exists', () => {
         asked.add('mem-size-' + size);
     }
     // The reasons a control gives for being unavailable.
-    for (const m of panelSource.matchAll(/\{id:\s*'([^']+)',\s*params:/g)) {
+    for (const m of code.matchAll(/\{id:\s*'([^']+)',\s*params:/g)) {
         asked.add(m[1]);
     }
     assert.ok(asked.size > 15, 'expected to find plenty of these');
@@ -136,7 +133,7 @@ test('every message the panel asks for by name exists', () => {
 test('every Debugger control that can be unavailable can say why', () => {
     // The greying out and the explanation come from one function, so
     // a control cannot be greyed with nothing to say for itself.
-    const source = sourceOf('js/panel.js');
+    const source = panelSource();
     const body = source.slice(
         source.indexOf('panel.debugControlReasons = function'),
         source.indexOf('panel.reportIfUnavailable = function'));
@@ -327,7 +324,7 @@ test('the references have a tab of their own, which About opens', () => {
     assert.ok(links.includes('id="reference-title"') &&
               links.includes('github.com/wixette/8800-simulator'),
               'the References tab has the source and the reading');
-    const handler = sourceOf('js/panel.js').match(
+    const handler = panelSource().match(
         /panel\.onAboutReferences = function\(\) \{[\s\S]*?\n\};/)[0];
     assert.ok(handler.includes("panel.showTab('links')"),
               "About's References button opens the References tab");
@@ -355,8 +352,6 @@ test('the open tab, pressed again, does nothing', (t) => {
 test('both menus read an example the same way: its header, and its bytes', () => {
     // The Load menu loads the bytes; the Assembler's Examples menu shows
     // the text. One reader, panel.parseExample, for both.
-    global.Asm8080 = require('../js/asm8080.js');
-    const {loadExample} = require('./examples.js');
     const example = loadExample('macros');
     const parsed = panel.parseExample(example.text);
     assert.strictEqual(parsed.name, 'Macros');
@@ -474,6 +469,7 @@ test('a switch thrown on a dead machine does nothing, and says the machine is of
         name == 'isRunning' ? false : () => done.push(name)});
     t.after(() => { panel.sim = savedSim; panel.isPoweredOn = savedOn; });
     t.mock.method(panel, 'setStatus', (id) => said.push(id));
+    t.mock.method(asmtab, 'requestPc', () => {});
     const switches = ['onRun', 'onStop', 'onSingle', 'onExamine',
                       'onExamineNext', 'onDeposit', 'onDepositNext', 'onReset'];
     panel.isPoweredOn = false;
@@ -576,6 +572,7 @@ test('stopping after writes to protected memory says how many were refused', (t)
     t.after(() => { panel.sim = savedSim; panel.isPoweredOn = savedOn; });
     t.mock.method(panel, 'setStatus', (...args) => said.push(args));
     t.mock.method(panel, 'setLed', () => {});
+    t.mock.method(asmtab, 'requestPc', () => {});
     panel.sim = {blockedWrites: 3412, firstBlockedAddress: 0x0123,
                  halted: false, stop() {}};
     panel.isPoweredOn = true;
@@ -621,9 +618,9 @@ test('every way of putting a program in lifts protection first, and says so', (t
     // around a protected board would be worse than none - and when there
     // was any the status line says so first, as it does for a power-up.
     // Run, not read: the three that touch memory themselves.
-    const saved = {sim: panel.sim, doc: global.document, link: global.Link};
+    const saved = {sim: panel.sim, doc: global.document};
     t.after(() => {
-        panel.sim = saved.sim; global.document = saved.doc; global.Link = saved.link;
+        panel.sim = saved.sim; global.document = saved.doc;
     });
     let lifted = 0;
     panel.sim = {
@@ -632,7 +629,7 @@ test('every way of putting a program in lifts protection first, and says so', (t
         initMem() {}, loadData() {}, reset() {}, flushDump() {}, requestDump() {},
     };
     global.document = {getElementById: () => ({value: '3e 01'})};
-    global.Link = {parseBytes: () => ({bytes: [0x3e, 0x01]})};
+    stub(t, Link, {parseBytes: () => ({bytes: [0x3e, 0x01]})});
     const said = [];
     t.mock.method(panel, 'setStatus', (...args) => said.push(args));
     t.mock.method(panel, 'ensurePoweredOn', () => false);
@@ -661,7 +658,7 @@ test('only the simulator writes memory, so it can count every load (U7)', () => 
     // assembled. It knows by the simulator's count of whole loads
     // (memLoads) and its reports of bytes put in by hand (onHandWrite):
     // a page that wrote memory itself would slip past both.
-    const jsDir = path.join(__dirname, '..', 'js');
+    const jsDir = path.join(import.meta.dirname, '..', 'js');
     for (const file of fs.readdirSync(jsDir)) {
         if (!file.endsWith('.js') || file == 'sim8800.js') {
             continue;
@@ -720,7 +717,6 @@ test('the page hands every byte put in by hand to the Assembler (U7)', () => {
 test('a status value is put in as it is, $ patterns and all', (t) => {
     // A link's switch value or a file's name went through replace(),
     // which reads $' and $& as patterns and garbled the message.
-    loadScript('l10n');
     const text = {textContent: ''};
     const bar = {classList: {toggle() {}}};
     const saved = global.document;
@@ -884,6 +880,20 @@ test('the arrows move the pick, turning the page at its edges', (t) => {
     assert.strictEqual(tab.defaultPrevented, false);
 });
 
+test('a press on a running machine\'s dump says why, without waiting for a click', (t) => {
+    // The dump is drawn anew every frame while it runs, so a click,
+    // pressed on one drawing and released on the next, may never come.
+    const sim = stubMemEditor(t);
+    const said = [];
+    t.mock.method(panel, 'setStatus', (...args) => said.push(args));
+    sim.isRunning = true;
+    panel.onMemDumpPress();
+    assert.deepStrictEqual(said, [['mem-edit-running', {}, 'warn']]);
+    sim.isRunning = false;
+    panel.onMemDumpPress();
+    assert.strictEqual(said.length, 1, 'a stopped machine says nothing on a press');
+});
+
 test('a byte is edited only on a stopped machine, and not on a protected board', (t) => {
     const sim = stubMemEditor(t);
     const said = [];
@@ -952,19 +962,15 @@ test('the teletype has the keyboard while nothing else needs it', (t) => {
     // focused after a menu or a dialog must not swallow the reader's
     // typing either.
     const body = {};
-    const saved = {document: global.document, Dialog: global.Dialog,
-                   Teletype: global.Teletype, send: panel.ttySend,
+    const saved = {document: global.document, send: panel.ttySend,
                    visible: panel.isTtyTabVisible};
     global.document = {body: body, querySelector: () => null};
-    global.Dialog = {anyOpen: () => false};
-    global.Teletype = require('../js/teletype.js');
+    stub(t, Dialog, {anyOpen: () => false});
     const sent = [];
     panel.ttySend = (byte) => sent.push(byte);
     panel.isTtyTabVisible = true;
     t.after(() => {
         global.document = saved.document;
-        global.Dialog = saved.Dialog;
-        global.Teletype = saved.Teletype;
         panel.ttySend = saved.send;
         panel.isTtyTabVisible = saved.visible;
     });
@@ -988,7 +994,7 @@ test('the teletype has the keyboard while nothing else needs it', (t) => {
     press('E', control('debug-data-input', 'TEXTAREA'));
     press('F', control('', 'LI', 'option'));
     assert.strictEqual(sent.length, 4, 'not a text box\'s, nor a menu item\'s');
-    global.Dialog = {anyOpen: () => true};
+    Dialog.anyOpen = () => true;
     press('G', body);
     assert.strictEqual(sent.length, 4, 'nor while a dialog is open');
 });
@@ -1004,7 +1010,6 @@ test('both of the paper mechanisms can be driven by hand', () => {
     // An ASR-33 returns the carriage and advances the paper with two
     // separate keys (D25). RETURN is on every keyboard; LINE FEED is
     // not, which is what the helper row is for.
-    const Teletype = require('../js/teletype.js');
     assert.strictEqual(Teletype.keyToByte('Enter'), Teletype.CR,
                        'RETURN sends CR and nothing else');
     assert.match(sourceOf('index.html'), /id="tty-linefeed"/,
@@ -1012,10 +1017,6 @@ test('both of the paper mechanisms can be driven by hand', () => {
     assert.match(panel.initTeletypeUi.toString(), /ttySend\(Teletype\.LF\)/,
                  'which sends LF to the machine, like any other key');
 });
-
-// The page has these as globals; its link handling reaches for both.
-global.Link = require('../js/link.js');
-global.Sim8800 = require('../js/sim8800.js');
 
 /**
  * Stands in for the parts of the page that applyLinkState() drives, and
@@ -1028,16 +1029,11 @@ global.Sim8800 = require('../js/sim8800.js');
 function stubLinkLoader(t) {
     const calls = [];
     const regs = {pc: 0};
-    const saved = {cpu: global.CPU8080, panelSim: panel.sim};
-    global.CPU8080 = {
+    stub(t, CPU8080, {
         set: (name, value) => { regs[name.toLowerCase()] = value; },
         status: () => ({...regs}),
-    };
-    panel.sim = {flushDump() {}};
-    t.after(() => {
-        global.CPU8080 = saved.cpu;
-        panel.sim = saved.panelSim;
     });
+    stub(t, panel, {sim: {flushDump() {}}});
     t.mock.method(panel, 'onSetMemSize', (size) => calls.push(['mem', size]));
     t.mock.method(panel, 'loadImage', (bytes) => {
         calls.push(['load', bytes.length]);
@@ -1093,4 +1089,17 @@ test('a link pasted into an open page reads only the fragment', async (t) => {
     window.location.hash = '#hex=3E';
     await panel.onHashChange();
     assert.deepStrictEqual(seen[1].bytes, [0x3e]);
+});
+
+test('the page has a title and a description for search results', () => {
+    // A search result shows about 60 characters of the title, and about
+    // 160 of the description under it.
+    const html = sourceOf('index.html');
+    const title = html.match(/<title id="title" class="l10n">([^<]+)<\/title>/)[1];
+    assert.strictEqual(title, l10n.MESSAGES.title.en, 'the title is the English message');
+    assert.ok(title.length <= 70 && !title.includes('Sim-8800'), title);
+    const description = html.match(/<meta name="description" content="([^"]+)">/);
+    assert.ok(description, 'index.html has a description');
+    const text = description[1].replace(/&#39;/g, "'");
+    assert.ok(text.length >= 70 && text.length <= 160, text.length + ': ' + text);
 });

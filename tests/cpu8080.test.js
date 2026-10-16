@@ -6,9 +6,9 @@
  */
 'use strict';
 
-const test = require('node:test');
-const assert = require('node:assert');
-const CPU8080 = require('../js/8080.js');
+import test from 'node:test';
+import assert from 'node:assert';
+import {CPU8080} from '../js/8080.js';
 
 /**
  * Initializes the CPU singleton with a 64KB memory preloaded with the

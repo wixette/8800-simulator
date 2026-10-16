@@ -22,3 +22,7 @@ jobs:
           # so there is nothing to install and nothing to restore. For
           # the same reason there is no "npm ci" step below.
       - run: npm test
+      # TypeScript's checker, fetched for the run (npx) and read only by
+      # this step: the JSDoc in the files marked // @ts-check is checked
+      # against the code. Nothing is compiled, and nothing is shipped.
+      - run: npm run typecheck

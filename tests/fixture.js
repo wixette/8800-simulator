@@ -5,16 +5,15 @@
  */
 'use strict';
 
-// sim8800.js expects these browser globals.
-global.CPU8080 = require('../js/8080.js');
+import {Sim8800} from '../js/sim8800.js';
+
+// sim8800.js runs its clock on the browser's timers.
 global.window = {
     pendingTimers: [],
     setTimeout: function(callback, delay) {
         global.window.pendingTimers.push({callback: callback, delay: delay});
     },
 };
-
-const Sim8800 = require('../js/sim8800.js');
 
 /** Runs and clears all timers captured by the fake window.setTimeout. */
 function flushTimers() {
@@ -70,10 +69,10 @@ function highAddressLeds(state) {
     return bitsToNumber(state.addressLeds.slice(8));
 }
 
-module.exports = {
-    Sim8800: Sim8800,
-    createSim: createSim,
-    flushTimers: flushTimers,
-    bitsToNumber: bitsToNumber,
-    highAddressLeds: highAddressLeds,
+export {
+    Sim8800,
+    createSim,
+    flushTimers,
+    bitsToNumber,
+    highAddressLeds,
 };

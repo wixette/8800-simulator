@@ -37,7 +37,7 @@
  * keeps working whether or not a terminal is on screen. See
  * docs/ms-basic-4k.md.
  */
-class Sio {
+export class Sio {
     /**
      * @param {function(number)?} onTx Called with each byte the CPU
      *     sends, as the CPU wrote it. The eighth bit is left alone;
@@ -64,7 +64,7 @@ class Sio {
 
     /**
      * Plugs the board into a simulator, on both of its ports.
-     * @param {Sim8800} sim The simulator.
+     * @param {import('./sim8800.js').Sim8800} sim The simulator.
      * @param {number=} basePort The status port; the data port is the
      *     next one up. The 88-SIO sits at 00h, the 88-2SIO at 10h.
      * @param {boolean=} activeLow Whether a clear status bit means
@@ -199,6 +199,3 @@ Sio.STATUS_2SIO_OUTPUT_READY = 0x02;
 
 // Exports the class for unit tests when running in Node.js. This has
 // no effect when the script is loaded in a browser.
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Sio;
-}
