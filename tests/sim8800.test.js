@@ -252,6 +252,42 @@ test('RUN ends the RESET flash immediately', () => {
     sim.stop();
 });
 
+test('EXAMINE and DEPOSIT inside the RESET flash keep the lamps (#23)', () => {
+    // Each switch, straight after power-on and after RESET: what it
+    // shows must outlast the flash's pending timeout.
+    for (const after of ['powerOn', 'reset']) {
+        for (const action of ['examine', 'examineNext', 'deposit', 'depositNext']) {
+            const what = action + ' after ' + after;
+            const {sim, state} = createSim();
+            sim.powerOn();
+            if (after == 'reset') {
+                flushTimers();
+                sim.reset();
+            }
+            assert.strictEqual(bitsToNumber(state.dataLeds), 0xff, what + ': flash is on');
+            state.inputWord = 0x0083;
+            sim[action]();
+            const address = sim.lastAddress;
+            flushTimers();
+            assert.strictEqual(sim.resetFlashPending, false, what + ': flash over');
+            assert.strictEqual(bitsToNumber(state.addressLeds), address, what + ': address');
+            assert.strictEqual(bitsToNumber(state.dataLeds), sim.readByte(address),
+                               what + ': data');
+        }
+    }
+});
+
+test('EXAMINE after the RESET flash is shown as before', () => {
+    const {sim, state} = poweredOnSim();
+    sim.reset();
+    flushTimers();
+    assert.strictEqual(bitsToNumber(state.addressLeds), 0, 'flash over, lamps out');
+    state.inputWord = 0x0083;
+    sim.examine();
+    assert.strictEqual(bitsToNumber(state.addressLeds), 0x0083);
+    assert.strictEqual(bitsToNumber(state.dataLeds), sim.readByte(0x83));
+});
+
 test('a second RESET supersedes the first flash', () => {
     const {sim, state} = poweredOnSim();
     sim.reset();
