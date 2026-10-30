@@ -217,6 +217,20 @@ panel.open3d = function() {
 };
 
 /**
+ * The 3D view, once it is loaded: loading it if it is not.
+ * @return {!Promise<?Object>} The Stage, or null if it could not load.
+ */
+panel.whenStage3d = function() {
+    if (panel.stage3d) {
+        return Promise.resolve(panel.stage3d);
+    }
+    panel.open3d();
+    return (panel.stage3dLoading || Promise.resolve()).then(function() {
+        return panel.stage3d;
+    });
+};
+
+/**
  * Draws the toggle as things stand, in the reader's language.
  */
 panel.refreshViewSwitch = function() {

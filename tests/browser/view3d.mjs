@@ -167,3 +167,29 @@ export async function phone(h) {
     verify('the tools fit across the top', await js(`(() => { const t = document.getElementById('view-tools'); return t.scrollWidth <= t.clientWidth + 1 && t.getBoundingClientRect().height < 40; })()`));
     verify('nothing to scroll sideways', await js(`document.documentElement.scrollWidth <= innerWidth`));
 }
+
+/** The Tutorial's contents and its Show chips (V7). */
+export async function tutorial(h) {
+    const {js, viewport, fresh, verify, statusText, sleep} = h;
+    await viewport(1280, 860); await fresh();
+    const names = await js(`[...document.querySelectorAll('.tutorial-jump')].map((b) => b.textContent)`);
+    verify('the contents name the four chapters', names.length == 4 && names[0] == 'Meet the Machine', names.join(' | '));
+    await js(`document.querySelectorAll('.tutorial-jump')[2].click()`); await sleep(200);
+    const top = await js(`document.getElementById('chapter-asm').getBoundingClientRect().top - document.getElementById('dock-body').getBoundingClientRect().top`);
+    verify('a chapter\'s button scrolls to it', Math.abs(top) < 4, top);
+    const chip = (i) => js(`document.querySelectorAll('.show-chip')[${i}].click()`);
+    await chip(1); await sleep(200);
+    verify('a 2D Show outlines the data lamps', await js(`!!document.getElementById('tutorial-outline')`));
+    verify('and names them', (await statusText()) == 'Showing: the data lamps D7–D0.', await statusText());
+    await chip(6);
+    for (let i = 0; i < 60 && !(await js(`!!panel.stage3d`)); i++) await sleep(250);
+    await sleep(1200);
+    verify('a 3D Show opens the 3D view', await js(`panel.view`) === '3d');
+    verify('and points at the CPU card', await js(`[...panel.stage3d.boxBind.highlight].join()`) === 'card.cpu');
+    verify('saying so', (await statusText()).startsWith('Showing: CPU card'), await statusText());
+    await chip(7); await sleep(300);
+    verify('memory means the cards the Memory menu fitted', await js(`[...panel.stage3d.boxBind.highlight].join()`) === 'card.mem1k');
+    await js(`panel.stage3d.setView('whole')`);
+    verify('choosing a view stops pointing', await js(`panel.stage3d.boxBind.highlight`) === null);
+    verify('a Show never switched the machine on', !(await js(`panel.isPoweredOn`)));
+}

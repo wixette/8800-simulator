@@ -56,6 +56,7 @@
         "./js/panel-link.js": "./js/panel-link.js?v=1.7.0",
         "./js/panel-load.js": "./js/panel-load.js?v=1.7.0",
         "./js/panel-tty.js": "./js/panel-tty.js?v=1.7.0",
+        "./js/panel-tutorial.js": "./js/panel-tutorial.js?v=1.7.0",
         "./js/panel-view.js": "./js/panel-view.js?v=1.7.0",
         "./js/panel.js": "./js/panel.js?v=1.7.0",
         "./js/sim8800.js": "./js/sim8800.js?v=1.7.0",
@@ -371,6 +372,34 @@
           </div>
 
           <div id="tab-ref" class="dock-pane" role="tabpanel">
+        <!-- The chapters, and a row that jumps to each (docs/3d-view.md,
+             V7). A step's Show points at what it is about; it never
+             works the machine. -->
+        <nav id="tutorial-contents" class="tutorial-contents"></nav>
+        <section id="chapter-meet" class="tutorial-chapter">
+        <div class="subheader-bar">
+          <div id="tut-meet-title" class="l10n">Meet the Machine</div>
+        </div>
+        <div class="tutorial">
+          <p id="tut-meet-desc" class="tutorial-lead l10n">The Altair 8800 had no screen and no keyboard: its front panel was all there was. What it shows, and what is behind it. Each Show points it out.</p>
+          <ol class="steps">
+            <li><span id="tut-meet-1" class="l10n">The status lamps, top left, show what the 8080 is doing: reading memory (MEMR), fetching an instruction (M1), halted (HLTA).</span> <button class="show-chip" type="button" data-view="2d" data-outline="status"></button></li>
+            <li><span id="tut-meet-2" class="l10n">The data lamps D7–D0 show the byte on the data bus: lit is 1.</span> <button class="show-chip" type="button" data-view="2d" data-outline="data"></button></li>
+            <li><span id="tut-meet-3" class="l10n">The address lamps A15–A0 show the address the CPU is using. WAIT, beside them, is lit while the machine is stopped.</span> <button class="show-chip" type="button" data-view="2d" data-outline="address"></button></li>
+            <li><span id="tut-meet-4" class="l10n">The address/data switches set an address to examine, or a byte to deposit: up is 1. A program can read A15–A8 as its sense switches.</span> <button class="show-chip" type="button" data-view="2d" data-outline="switches"></button></li>
+            <li><span id="tut-meet-5" class="l10n">The control switches spring back after each throw: STOP and RUN, SINGLE STEP, EXAMINE, DEPOSIT, RESET. OFF/ON, at the far left, is the power.</span> <button class="show-chip" type="button" data-view="2d" data-outline="controls"></button></li>
+            <li><span id="tut-meet-6" class="l10n">Behind the panel is a box of cards on a bus. See it whole in 3D.</span> <button class="show-chip" type="button" data-view="3d" data-camera="whole"></button></li>
+            <li><span id="tut-meet-7" class="l10n">The CPU card: the Intel 8080, the one chip that runs every program.</span> <button class="show-chip" type="button" data-view="3d" data-camera="whole" data-parts="card.cpu"></button></li>
+            <li><span id="tut-meet-8" class="l10n">The memory card: what the Memory menu installs. More memory is more cards.</span> <button class="show-chip" type="button" data-view="3d" data-camera="whole" data-parts="memory"></button></li>
+            <li><span id="tut-meet-9" class="l10n">The serial cards: the way to the Teletype, where BASIC talks to you.</span> <button class="show-chip" type="button" data-view="3d" data-camera="whole" data-parts="card.sio card.sio2"></button></li>
+            <li><span id="tut-meet-10" class="l10n">The bus: every card plugs into the same 100 lines, so any card fits any slot.</span> <button class="show-chip" type="button" data-view="3d" data-camera="whole" data-parts="bus.board.0 bus.board.1"></button></li>
+            <li><span id="tut-meet-11" class="l10n">The power supply: three transformers and their board, making the voltages every card needs.</span> <button class="show-chip" type="button" data-view="3d" data-camera="rear" data-parts="psu.t1 psu.t2 psu.t3 psu.board"></button></li>
+            <li><span id="tut-meet-12" class="l10n">Now take it apart yourself: switch OFF, click the lid, then a card. Views ▸ Taken apart shows every part; any other view puts it back. Drag to turn it, scroll to zoom.</span></li>
+          </ol>
+        </div>
+        </section>
+
+        <section id="chapter-first" class="tutorial-chapter">
         <div class="subheader-bar">
           <div id="tutorial-title" class="l10n">Quick Tutorial</div>
         </div>
@@ -413,6 +442,9 @@ JMP 0000H  ; 11 000 011
           </ol>
         </div>
 
+        </section>
+
+        <section id="chapter-asm" class="tutorial-chapter">
         <div class="subheader-bar">
           <div id="asm-tutorial-title" class="l10n">Writing in Assembly</div>
         </div>
@@ -431,6 +463,9 @@ JMP 0000H  ; 11 000 011
           <p id="asm-tutorial-note" class="tutorial-note l10n">More to try: the Assembler's Examples menu has fourteen programs, from lamps on the front panel to a game on the Teletype, macros included. Intel's own manual, in References, describes the whole language.</p>
         </div>
 
+        </section>
+
+        <section id="chapter-basic" class="tutorial-chapter">
         <div class="subheader-bar">
           <div id="basic-title" class="l10n">Running Microsoft BASIC</div>
         </div>
@@ -453,6 +488,7 @@ RUN</pre>
           </ol>
           <p id="basic-note" class="tutorial-note l10n">What loading 4K BASIC skips: on a real Altair you first toggled a 28 byte boot loader in through the front panel, one byte at a time, then started the paper tape reader and waited about seven minutes while BASIC clattered in. Get one switch wrong and you did it again.</p>
         </div>
+        </section>
           </div>
 
           <!-- The source and the further reading, a tab of their own so

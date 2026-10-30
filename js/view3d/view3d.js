@@ -89,8 +89,10 @@ export class Stage {
     async load(url, onProgress) {
         this.root = await this.viewer.load(url, onProgress);
         const invalidate = () => this.viewer.invalidate();
-        this.panelBind = new PanelBinding(this.root, this.panel, invalidate);
+        // The box first: it gives every part materials of its own, which
+        // the panel's lamps then light.
         this.boxBind = new BoxBinding(this.root, this.panel.box);
+        this.panelBind = new PanelBinding(this.root, this.panel, invalidate);
         this.panel.box.onChange = () => {
             this.boxBind.pose();
             invalidate();
@@ -119,6 +121,7 @@ export class Stage {
 
     /** Hides the view: stops drawing. */
     hide() {
+        this.unpoint();
         this.hideLabel();
         this.viewer.stop();
     }
@@ -151,6 +154,7 @@ export class Stage {
      * @param {string} id The view.
      */
     setView(id) {
+        this.unpoint();
         if (id == 'apart') {
             if (this.panel.isPoweredOn) {
                 this.panel.setStatus('box-switch-off', {}, 'warn');
@@ -227,10 +231,53 @@ export class Stage {
      * @param {string} id The Show preset.
      */
     setShow(id) {
+        this.unpoint();
         this.boxBind.setShow(id);
         this.hideLabel();
         this.viewer.invalidate();
         this.refreshTools();
+    }
+
+    // ---- pointing at parts, for the Tutorial (V7) ----
+
+    /**
+     * Points at some parts: they glow, the rest fade, and the camera
+     * flies to frame them from a view's direction. What a Tutorial
+     * step's Show does; the next choice of view or Show ends it.
+     * @param {!Array<string>} names The parts, by their names in the
+     *     model; 'memory' is the memory cards the box holds now.
+     * @param {string} from The view whose direction to look from.
+     * @return {!Array<string>} The parts pointed at.
+     */
+    point(names, from) {
+        const parts = [];
+        for (const name of names) {
+            if (name == 'memory') {
+                parts.push(...this.panel.box.cards().filter((c) => /^mem/.test(c))
+                           .map((c) => 'card.' + c));
+            } else {
+                parts.push(name);
+            }
+        }
+        this.boxBind.setHighlight(parts);
+        const view = VIEWS.find((v) => v.id == from);
+        const points = corners(this.boxBind.boxes(
+            (node) => parts.includes(this.boxBind.modelName(node))));
+        const {width, height} = this.viewer.size();
+        const f = frame(points, view.dir, FOV, width, height,
+                        {top: GAP, right: GAP, bottom: GAP, left: GAP}, 0.5);
+        this.fitted = null;
+        this.viewer.flyTo(f.position, f.target);
+        this.viewer.invalidate();
+        return parts;
+    }
+
+    /** Stops pointing at parts. */
+    unpoint() {
+        if (this.boxBind.highlight) {
+            this.boxBind.setHighlight(null);
+            this.viewer.invalidate();
+        }
     }
 
     // ---- the camera, by keys and buttons (V2) ----

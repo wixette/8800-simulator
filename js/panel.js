@@ -515,6 +515,7 @@ panel.init = function() {
         panel.refreshDockToggle();
         panel.refreshStripTab();
         panel.refreshViewSwitch();
+        panel.refreshTutorial();
         if (panel.memoryMenu) {
             panel.memoryMenu.setItems(panel.memoryMenuItems());
             panel.updateMemoryControls();
@@ -552,6 +553,7 @@ panel.init = function() {
     panel.setStatus('status-off');
     // The 2D or the 3D view: a link's, or the reader's last.
     panel.initView();
+    panel.initTutorial();
     // A link to a program, or to a machine part way through one.
     panel.loadFromLink();
     // A link pasted into the address bar while the page is open only

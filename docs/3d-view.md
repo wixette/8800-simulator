@@ -11,7 +11,7 @@ table of dimensions, each with its source. This document covers how
 the model comes into this repository, how the view is built around the
 simulator's existing machine, and where it sits in the page.
 
-**Status.** DRAFT, for review. Nothing here is built yet. Decisions
+**Status.** Being built on branch `v1.8.0` (W1-W9 done; see Part 6). Decisions
 are numbered so that the code can cite them: **M** for the model and
 its sources, **V** for the view, **W** for the work plan. The questions
 the first draft left open are settled in
@@ -445,13 +445,18 @@ Show action.**
 
   The parts' names and one-line roles are the same strings as the
   hover labels (V4), so the tour and the labels can never disagree.
-- **Data, not hand-written HTML.** `js/tutorial.js` holds the
-  chapters as data (each step's l10n key, an optional code block, an
-  optional Show action) and renders them into the tab. The existing
-  `tutorial-*`, `asm-tutorial-*` and `basic-*` keys keep their names
-  and translations, so moving the three sections over changes no
-  words. A test checks that every Show names a view, preset and part
-  that exist in the model.
+- **The chapters stay markup in `index.html`**, each a
+  `<section class="tutorial-chapter">`, with the keys they had. A Show
+  is a `<button class="show-chip">` whose data says what it shows
+  (`data-view="2d" data-outline="status"`, or `data-view="3d"
+  data-camera="whole" data-parts="card.cpu"`; `memory` means the
+  memory cards fitted now). `js/panel-tutorial.js` builds the contents
+  row and runs the chips. *Changed while building:* the first draft
+  rendered the chapters from data in `js/tutorial.js`; keeping them as
+  markup changed no words or keys in the three chapters that were
+  already there, and the layout checks stayed as they were.
+  `tests/tutorial.test.js` checks that every chip names a region,
+  view and parts that exist, and that a Show never works the machine.
 - *Rejected:* the Leibniz step player and course mode (heavy for four
   short chapters, and it would make the three existing chapters work
   differently from the new one); a separate 3D tab in the dock (two

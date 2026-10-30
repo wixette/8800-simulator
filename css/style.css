@@ -553,6 +553,58 @@ a {
     right: 0;
 }
 
+/* The Tutorial's chapters, one button each, across its top (V7). */
+.tutorial-contents {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 6px 0 2px 0;
+}
+
+.tutorial-jump {
+    background: none;
+    border: 1px solid #555;
+    border-radius: 14px;
+    color: #ccc;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 3px 10px;
+}
+
+.tutorial-jump:hover,
+.tutorial-jump:focus-visible {
+    background-color: var(--hover-bg);
+    color: #fff;
+    outline: none;
+}
+
+/* A step's Show: it points at what the step is about. */
+.show-chip {
+    background: none;
+    border: 1px solid #c70;
+    border-radius: 12px;
+    color: #c60;
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: 6px;
+    padding: 0 8px;
+    vertical-align: 1px;
+}
+
+.show-chip:hover,
+.show-chip:focus-visible {
+    background-color: #f90;
+    color: #222;
+    outline: none;
+}
+
+/* What a Show points at on the 2D panel. */
+.tutorial-outline {
+    fill: none;
+    stroke: #f90;
+    stroke-width: 5;
+}
+
 /* The Tutorial's headings: it is a document, so it has them. */
 .subheader-bar {
     color: #eee;

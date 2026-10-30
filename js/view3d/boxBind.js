@@ -28,6 +28,10 @@ import {CARD_LIFT, REST_SLOT, SHOWS} from './views.js';
 /** A faded part's opacity. */
 const FADED_OPACITY = 0.16;
 
+/** The glow on a part a Tutorial step points at: the page's orange. */
+const HIGHLIGHT = new THREE.Color(0xff9900);
+const HIGHLIGHT_INTENSITY = 0.35;
+
 export class BoxBinding {
     /**
      * @param {!THREE.Object3D} root The model.
@@ -84,7 +88,9 @@ export class BoxBinding {
                 mesh.material = [].concat(mesh.material).map((m) => {
                     const own = m.clone();
                     this.looks.set(own, {transparent: m.transparent, opacity: m.opacity,
-                                         depthWrite: m.depthWrite});
+                                         depthWrite: m.depthWrite,
+                                         emissive: m.emissive ? m.emissive.clone() : null,
+                                         emissiveIntensity: m.emissiveIntensity});
                     return own;
                 });
                 if (mesh.material.length == 1) {
@@ -93,6 +99,8 @@ export class BoxBinding {
             }
         }
         this.show = 'all';
+        /** @type {?Set<string>} The parts a Tutorial step points at, if any. */
+        this.highlight = null;
         this.pose();
     }
 
@@ -185,12 +193,32 @@ export class BoxBinding {
      * @param {string} id The preset.
      */
     setShow(id) {
-        const preset = SHOWS.find((s) => s.id == id);
-        this.show = preset.id;
+        this.show = SHOWS.find((s) => s.id == id).id;
+        this.applyLooks();
+    }
+
+    /**
+     * Points at some parts, as a Tutorial step does (docs/3d-view.md,
+     * V7): they glow, shown even where the Show preset hides them, and
+     * every other part fades round them. Null stops pointing.
+     * @param {?Array<string>} names The parts, by their names in the model.
+     */
+    setHighlight(names) {
+        this.highlight = names ? new Set(names) : null;
+        this.applyLooks();
+    }
+
+    /** @private Draws every part as the Show preset and the highlight say. */
+    applyLooks() {
+        const preset = SHOWS.find((s) => s.id == this.show);
+        const lit = this.highlight;
         for (const node of this.parts.values()) {
             const name = this.modelName(node);
-            const faded = preset.faded.includes(name);
-            const hidden = preset.hidden.includes(name);
+            const glows = !!lit && lit.has(name);
+            // Lamps and switches belong to the panel, which keeps them.
+            const kept = /^panel\.(lamp|switch)\./.test(name);
+            const faded = !glows && !kept && (preset.faded.includes(name) || !!lit);
+            const hidden = !glows && preset.hidden.includes(name);
             node.userData.seeThrough = faded || hidden;
             for (const mesh of this.ownMeshes(node)) {
                 for (const m of [].concat(mesh.material)) {
@@ -199,6 +227,10 @@ export class BoxBinding {
                     m.transparent = faded || look.transparent;
                     m.opacity = faded ? FADED_OPACITY * look.opacity : look.opacity;
                     m.depthWrite = faded ? false : look.depthWrite;
+                    if (look.emissive && !kept) {
+                        m.emissive.copy(glows ? HIGHLIGHT : look.emissive);
+                        m.emissiveIntensity = glows ? HIGHLIGHT_INTENSITY : look.emissiveIntensity;
+                    }
                     m.needsUpdate = true;
                 }
                 if (mesh.userData.castsShadow === undefined) {

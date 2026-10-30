@@ -24,7 +24,7 @@ import * as THREE from 'three';
 
 /** A lit LED's glow, and how strongly, under the neutral tone mapping. */
 const LIT = new THREE.Color(0xff1606);
-const LIT_INTENSITY = 1.6;
+const LIT_INTENSITY = 2.5;
 const DARK = new THREE.Color(0x000000);
 
 /** How long a bat takes to swing to its stop, in seconds. */
@@ -66,7 +66,7 @@ export class PanelBinding {
         this.invalidate = invalidate;
         /** @type {!Map<string, !Object>} Each switch's bat and its motion. */
         this.bats = new Map();
-        /** @type {!Map<string, !Array<!THREE.Material>>} Each lamp's own materials. */
+        /** @type {!Map<string, !Array<!THREE.Mesh>>} Each lamp's meshes. */
         this.lamps = new Map();
         /** @type {!Map<string, boolean>} Lamps to draw at the next frame. */
         this.pendingLamps = new Map();
@@ -85,16 +85,15 @@ export class PanelBinding {
             }
             const lamp = o.userData.lamp_id;
             if (lamp) {
-                const materials = [];
+                // Lit through the materials the meshes draw with, which
+                // are each part's own (boxBind.js), so a lamp lights alone.
+                const meshes = [];
                 o.traverse((m) => {
                     if (m.isMesh) {
-                        // Each lamp gets its own, so that it can light alone.
-                        m.material = [].concat(m.material).map((x) => x.clone());
-                        m.material = m.material.length == 1 ? m.material[0] : m.material;
-                        materials.push(...[].concat(m.material));
+                        meshes.push(m);
                     }
                 });
-                this.lamps.set(lamp, materials);
+                this.lamps.set(lamp, meshes);
             }
         });
         // The panel as it stands now, then as it changes.
@@ -147,9 +146,11 @@ export class PanelBinding {
     update(dt) {
         let moved = false;
         for (const [id, on] of this.pendingLamps) {
-            for (const m of this.lamps.get(id)) {
-                m.emissive.copy(on ? LIT : DARK);
-                m.emissiveIntensity = on ? LIT_INTENSITY : 0;
+            for (const mesh of this.lamps.get(id)) {
+                for (const m of [].concat(mesh.material)) {
+                    m.emissive.copy(on ? LIT : DARK);
+                    m.emissiveIntensity = on ? LIT_INTENSITY : 0;
+                }
             }
             moved = true;
         }
@@ -187,8 +188,8 @@ export class PanelBinding {
      * @return {boolean} Whether it is drawn lit.
      */
     isLit(id) {
-        const m = this.lamps.get(id)[0];
-        return m.emissiveIntensity > 0;
+        const m = [].concat(this.lamps.get(id)[0].material)[0];
+        return m.emissiveIntensity > 0 && m.emissive.getHex() != 0;
     }
 
     /**
