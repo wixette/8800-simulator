@@ -10,47 +10,61 @@
 [![Tests](https://github.com/wixette/8800-simulator/actions/workflows/test.yml/badge.svg)](https://github.com/wixette/8800-simulator/actions/workflows/test.yml)
 
 The 1975 computer that started the personal computer revolution, in
-your browser. Toggle 8080 machine code in through a working front
-panel, watch it run on the lamps, then install a memory board and boot
-Microsoft's original 4K BASIC on a simulated Teletype - or write your
-own programs in Intel's 8080 assembly language, and assemble them
-straight into memory.
+your browser: its switches and lamps, its Teletype, Microsoft's first
+BASIC, and the whole machine in 3D, down to the cards inside.
 
-**[▶ Try it online](https://wixette.github.io/8800-simulator/)**, with
-nothing to install.
+**[▶ Try it online](https://wixette.github.io/8800-simulator/)** -
+nothing to install, on a desktop or a phone, in ten languages.
 
-![The simulator: the Altair 8800 front panel with its switch strip, Microsoft 4K BASIC answering on the Teletype in the dock below, and the toolbar above](./screenshots/app.png)
+![The simulator: the Altair 8800 in 3D above, and below it Microsoft 4K BASIC drawing a sine wave of stars on the Teletype](./screenshots/app.jpg)
 
-**The route through it:**
-[1. Try it](#1-try-it-in-a-minute) →
-[2. The front panel](#2-meet-the-front-panel) →
-[3. A program by hand](#3-your-first-program-by-hand) →
-[4. Around the simulator](#4-around-the-simulator) →
-[5. The Teletype](#5-the-teletype) →
-[6. 4K BASIC](#6-microsoft-4k-basic) →
-[7. Assembly](#7-write-it-in-assembly) →
-[8. More programs](#8-more-programs) →
-[9. For developers](#9-for-developers)
+## What you can do
 
-## 1. Try it in a minute
+<table>
+<tr>
+<td width="50%"><b>Switch it on and run a program</b><br>Lamps, switches and a real 8080 at 2 MHz.<br><img src="./screenshots/front-panel.jpg" alt="The front panel in 3D, running the Bouncing light example: lamps lit across the status and data rows"></td>
+<td width="50%"><b>Take it apart in 3D</b><br>The lid, the cards, the power supply, in the order the real one allows.<br><img src="./screenshots/3d.jpg" alt="The Altair 8800 taken apart in 3D: the lid lifted off, the card cage with its boards, the power supply and fan beside it"></td>
+</tr>
+<tr>
+<td><b>Boot Microsoft 4K BASIC</b><br>Bill Gates and Paul Allen's 1975 BASIC, unmodified, on a Teletype.<br><img src="./screenshots/teletype.jpg" alt="Microsoft 4K BASIC on the Teletype: a short program typed in, and its sine wave of stars printed down the paper"></td>
+<td><b>Write 8080 assembly</b><br>Intel's own language, macros and all, assembled as you type.<br><img src="./screenshots/assembler.jpg" alt="The Assembler with the Macros example: coloured source on the left, each line's address and bytes on the right, the line being run marked in green"></td>
+</tr>
+<tr>
+<td><b>Watch the CPU work</b><br>Registers, the next instruction and memory, a step at a time.<br><img src="./screenshots/debugger.jpg" alt="The Debugger part way through the adder: the registers beside the next instruction, LDA 0081H, and the memory dump marking its three bytes"></td>
+<td><b>Learn as you go</b><br>Four lessons, from meeting the machine to running BASIC.<br><img src="./screenshots/tutorial.jpg" alt="The Tutorial's first lesson, Meet the Machine, under the front panel: a photo of an Altair 8800 beside a Teletype, and a paragraph on its history"></td>
+</tr>
+</table>
+
+## Try it in a minute
 
 1. Open the simulator, [online](https://wixette.github.io/8800-simulator/)
    or [on your own machine](#run-it-locally).
 2. Open **Load**, and choose **Pattern shift** under *Front Panel
    Examples*.
-3. Click **RUN**, on the strip of buttons under the panel or on the
-   panel's own RUN switch.
+3. Click **RUN**.
 
-A pattern now walks across the data lamps, D7–D0. That is a real
-program: eight bytes of 8080 machine code, running at the Altair's
-own 2 MHz. Click **STOP** to stop it.
+A pattern walks across the data lamps: eight bytes of 8080 machine
+code, running at the Altair's own 2 MHz. Click **STOP** to stop it.
+Then try **3D** at the top right, or the **Tutorial** tab under the
+panel, which takes it from there.
 
-## 2. Meet the front panel
+## The guide
+
+Everything in more detail, for when you want it:
+[the front panel](#meet-the-front-panel) ·
+[a program by hand](#your-first-program-by-hand) ·
+[around the simulator](#around-the-simulator) ·
+[the machine in 3D](#the-machine-in-3d) ·
+[the Teletype](#the-teletype) ·
+[4K BASIC](#microsoft-4k-basic) ·
+[assembly](#write-it-in-assembly) ·
+[more programs](#more-programs) ·
+[for developers](#for-developers).
+
+### Meet the front panel
 
 The Altair 8800 had no screen and no keyboard. This panel was the
 whole of the way in and out.
-
-![The Altair 8800 front panel, with A7 and A1 lit on the address lamps and D1 and D0 on the data lamps: the answer to the program in section 3](./screenshots/front-panel.png)
 
 **The lamps** show the machine as it is:
 
@@ -93,7 +107,7 @@ a HLT, MEMR, HLTA and WO. INP, OUT and STACK belong to cycles inside
 an instruction, so they stay dark; and while a program runs the lamps
 hold still, rather than glowing with every cycle as the real ones did.
 
-## 3. Your first program, by hand
+### Your first program, by hand
 
 This is how an Altair owner put in a program in 1975: one byte at a
 time, on the switches. It adds 1 and 2. The same steps are in the
@@ -136,11 +150,10 @@ simulator's **Tutorial**, under the panel, to follow as you go.
  1. The data lamps D7–D0 show the result 00 000 011 (3 in decimal).
  1. Turn off the Altair 8800.
 
-At step 18 the panel looks like the picture in
-[section 2](#2-meet-the-front-panel): A7 and A1 lit for the address
-0082H, and D1 and D0 for the answer.
+At step 18, A7 and A1 are lit on the address lamps for 0082H, and D1
+and D0 on the data lamps for the answer.
 
-## 4. Around the simulator
+### Around the simulator
 
 Everything is on one screen: the panel, a toolbar above it, a dock of
 tools below it, and a status line along the foot.
@@ -165,7 +178,7 @@ tools below it, and a status line along the foot.
 The **Debugger** is a view the real Altair never had. Step through a
 program with SINGLE STEP and watch it work:
 
-![The Debugger, part way through the adder: the registers beside the next instruction, LDA a16 with a16 = 0081H, and the memory dump marking that instruction's three bytes](./screenshots/debugger.png)
+![The Debugger part way through the adder: the registers beside the next instruction, LDA 0081H, and the memory dump marking its three bytes](./screenshots/debugger.jpg)
 
 - **The registers**, with the flags S Z AC P CY lit when set.
 - **The next instruction**: its address, its bytes, its mnemonic with
@@ -187,7 +200,7 @@ the bus, and each card in its slot. It is the same machine as the 2D
 panel, not a picture of it: click a switch on it and it does what the
 2D switch does, and its lamps light as the 2D lamps do.
 
-![The 3D view of the Altair 8800, switched off and opened: the grey lid lifted off above the box, a memory card pulled up out of its slot, the CPU and serial cards in the card cage behind the front panel, and the power supply at the back](./screenshots/3d.png)
+![The Altair 8800 taken apart in 3D: the lid lifted off, the card cage with its boards, the power supply and fan beside it](./screenshots/3d.jpg)
 
 - **Look around:** drag to turn it, right-drag or two fingers to move
   it, scroll or pinch to zoom; ⌂ brings it back. With the view
@@ -216,14 +229,12 @@ The 3D view needs WebGL 2, and loads only the first time you choose
 it (about 5 MB). How the model was made, and from what, is in
 [docs/3d-model.md](docs/3d-model.md).
 
-## 5. The Teletype
+### The Teletype
 
 The Altair's terminal was a Teletype ASR-33: a keyboard and a printer
 on paper, upper case only. Here it sits on an 88-SIO serial board, at
 ports 00H and 01H (and an 88-2SIO at 10H and 11H). Nothing echoes by
 itself: a program has to be running and reading the board.
-
-![The Teletype, playing Guess my letter: each guess answered HIGHER or LOWER, until GOT IT IN 5 TRIES](./screenshots/teletype.png)
 
 Try the *Teletype Examples* from the Load menu, in this order:
 
@@ -238,7 +249,7 @@ Try the *Teletype Examples* from the Load menu, in this order:
 The keys a PC keyboard lacks, such as BREAK, RUBOUT and LINE FEED, are
 along the top of the paper.
 
-## 6. Microsoft 4K BASIC
+### Microsoft 4K BASIC
 
 The Altair's first piece of software was Microsoft's first product:
 [Altair BASIC 3.2](http://altairbasic.org), written in 1975 by Bill
@@ -266,6 +277,8 @@ PRINT 3.14 * 9
 OK
 ```
 
+![Microsoft 4K BASIC on the Teletype: a short program typed in, and its sine wave of stars printed down the paper](./screenshots/teletype.jpg)
+
 727 bytes is all a 4 KB machine leaves you, which is exactly what the
 name means. Load it and look at the memory map in the Debugger before
 pressing RUN, and you can see BASIC filling fifteen of the sixteen
@@ -277,17 +290,17 @@ The BASIC tape is in [roms/](./roms/), and [roms/NOTICE](./roms/NOTICE)
 explains what it is and why it is not under this repository's licence.
 **Binary File…** in the Load menu loads an image of your own instead.
 
-## 7. Write it in assembly
+### Write it in assembly
 
-Section 3 put a program in byte by byte, the way an owner did in 1975.
+[Your first program](#your-first-program-by-hand) went in byte by byte, the way an owner did in 1975.
 Intel's answer, the same year, was assembly language: you write
 `ADD B`, and an assembler works out that it is `80`. The **Assembler**
 tab, under the panel, takes the language exactly as Intel's *8080
 Assembly Language Programming Manual* defines it, macros and all.
 
-![The Assembler tab holding the Macros example, assembled: highlighted source with line numbers on the left, and on the right each line's address and bytes, a macro's use showing the bytes of its expansion. Line 35, where the program counter is, is marked in green across the line number, the source and its bytes; line 37, where the caret is, is banded lighter across to its bytes](./screenshots/assembler.png)
+![The Assembler with the Macros example: coloured source on the left, each line's address and bytes on the right, the line being run marked in green](./screenshots/assembler.jpg)
 
-Here is section 3's program again, with names for its addresses
+Here is that first program again, with names for its addresses
 instead of the numbers. It makes exactly the bytes you toggled in:
 
 ```
@@ -310,7 +323,7 @@ START:  LDA     FIRST           ; A = the first number
    wrong under the source.
 3. Click **Assemble** (or press Ctrl+Enter, ⌘+Enter on a Mac). The
    program goes into memory and RESET is pressed.
-4. DEPOSIT 1 at 0080H and 2 at 0081H, as in section 3, then RUN, STOP
+4. DEPOSIT 1 at 0080H and 2 at 0081H, as by hand, then RUN, STOP
    and EXAMINE 0082H: 00 000 011.
 
 What it takes is the whole of the manual's language: every
@@ -326,7 +339,7 @@ back). On a phone, the source and its bytes take turns, under the
 **Source** and **Bytes** tabs. The design and its decisions are in
 [docs/assembler.md](docs/assembler.md).
 
-## 8. More programs
+### More programs
 
 - **[Kill the Bit](examples/kill-the-bit.md)**, the 1975 front-panel
   game by Dean McDaniel: a lit bit runs across the upper address lamps,
@@ -336,7 +349,7 @@ back). On a phone, the source and its bytes take turns, under the
   language: **Load** puts one in memory, ready to RUN, and the Assembler's
   **Examples** shows its source. See [examples/](examples/README.md).
 - **Your own, in assembly language**: in the **Assembler** tab
-  ([section 7](#7-write-it-in-assembly)).
+  ([Write it in assembly](#write-it-in-assembly)).
 - **Your own, as bytes**: paste them in hex with **Load › Hex Bytes…**,
   or read a binary with **Load › Binary File…**.
 - **Share one as a link**: **Share** copies a link that opens the
@@ -346,7 +359,7 @@ back). On a phone, the source and its bytes take turns, under the
   on the data lamps and halts:
   **[Run it](https://wixette.github.io/8800-simulator/?hex=3E8CD3FF76)**.
 
-## 9. For developers
+## For developers
 
 ### Run it locally
 
@@ -448,6 +461,7 @@ favicon still has the logo's drawing.
 | [model/](model/) | The 3D model: its params, its Blender build (`npm run build:model`), its research, and the built `.glb` |
 | [vendor/three/](vendor/three/) | three.js, pinned (`node tools/vendor.mjs`) |
 | [tools/stamp.mjs](tools/stamp.mjs), [tools/icons.mjs](tools/icons.mjs), [tools/vendor.mjs](tools/vendor.mjs) | Not part of the page: the version stamp, drawing the icons from the logo, and vendoring three.js |
+| [tools/shots.mjs](tools/shots.mjs), [tools/video.mjs](tools/video.mjs) | Not part of the page either: the screenshots and the video clips, below |
 
 The design notes say why things are the way they are:
 [docs/ui-design.md](docs/ui-design.md) for the layout and its
@@ -497,6 +511,23 @@ Only the files that start with `// @ts-check` are checked, so far
 `js/asm8080.js`, `js/sim8800.js`, `js/box.js` and the 3D view's
 framing and views; [tsconfig.json](tsconfig.json)
 says how strictly.
+
+### Screenshots and videos
+
+The pictures in this README, and a larger set for posts, are taken from
+the page itself in a headless Chrome, as a reader would leave it:
+
+```
+npm run shots -- --readme            # English, and this README's pictures into screenshots/
+npm run shots -- --lang en,zh        # any languages, into ~/Downloads/8800-simulator-v<version>-media/shots/
+npm run video -- --lang en,zh        # 1080p clips into .../videos/ (needs ffmpeg)
+```
+
+`--only <name>` takes the shots or clips whose names hold it. The clips
+are rendered frame by frame on a clock the tool moves on, so they are
+smooth however slowly the frames are taken, and the 8080 runs at its own
+2 MHz in them. The shots and scenes are listed in
+[tools/shots.mjs](tools/shots.mjs) and [tools/video.mjs](tools/video.mjs).
 
 ### The link format
 
