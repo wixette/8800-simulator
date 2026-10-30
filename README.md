@@ -16,7 +16,7 @@ BASIC, and the whole machine in 3D, down to the cards inside.
 **[▶ Try it online](https://wixette.github.io/8800-simulator/)** -
 nothing to install, on a desktop or a phone, in ten languages.
 
-![The simulator: the Altair 8800 in 3D above, and below it Microsoft 4K BASIC drawing a sine wave of stars on the Teletype](./screenshots/app.jpg)
+![The simulator: the Altair 8800's front panel in 3D, its lamps lit, and below it Microsoft 4K BASIC on the Teletype, its welcome followed by PRINT "HELLO, WORLD" and the answer](./screenshots/app.jpg)
 
 ## What you can do
 

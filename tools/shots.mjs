@@ -43,8 +43,11 @@ const SIZES = {
 /** @type {!Array<Shot>} */
 const SHOTS = [
     // The app as a whole: the machine in 3D, BASIC on the Teletype below.
+    // The first picture: the front panel in 3D, large, and under it a
+    // short Teletype with BASIC's welcome and a HELLO, WORLD.
     {name: 'app-3d-basic', readme: 'app', setup: `
-        strip(false); dockHeight(420); await basic(); await view3d('whole'); dock(true); tab('tty');`},
+        strip(false); dockHeight(345); await basic('', 'PRINT "HELLO, WORLD"\\n');
+        await view3d('front'); dock(true); tab('tty');`},
     // The front panel in 2D, running; the Tutorial below.
     {name: 'app-2d-tutorial', readme: 'tutorial', setup: `
         await example('bouncing-light'); run(); tab('ref');`},

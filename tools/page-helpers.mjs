@@ -70,7 +70,8 @@ const type = async (text, gap = 30) => {
 // Microsoft 4K BASIC, booted on 8 KB and answered, a program typed in
 // and run: a sine wave of stars down the paper.
 const BASIC_PROGRAM = '10 FOR X=0 TO 6.3 STEP .9\\n20 PRINT TAB(16+14*SIN(X));"*"\\n30 NEXT X\\nRUN\\n';
-const basic = async (program = BASIC_PROGRAM) => {
+// What is typed first, once BASIC says OK: a sum, or anything else.
+const basic = async (program = BASIC_PROGRAM, first = 'PRINT 22/7\\n') => {
     panel.onSetMemSize(8192);
     await sleep(300);
     panel.onLoadBasic();
@@ -82,7 +83,7 @@ const basic = async (program = BASIC_PROGRAM) => {
     await type('\\n'); await sleep(800);
     await type('\\n'); await sleep(800);
     await type('Y\\n'); await sleep(1500);
-    await type('PRINT 22/7\\n'); await sleep(800);
+    await type(first); await sleep(800);
     await type(program); await sleep(3000);
 };
 `;
