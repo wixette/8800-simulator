@@ -97,8 +97,8 @@ export default async function(h) {
     verify('choosing one shows its icon, marked as a change', after.changed && after.icon != plain.icon && after.title == 'Show: Case faded', JSON.stringify(after));
     await js(`panel.box.snapTogether()`); await sleep(300);
     await click(h, 'card.mem1k', 'top');
-    verify('a click goes through the faded lid to the card under it',
-           (await statusText()).startsWith('Take this out first: Case top'), await statusText());
+    verify('a click goes through the faded lid to the card under it, and says how to reach the lid',
+           (await statusText()).startsWith('Move this first: Case top') && (await statusText()).includes('Everything'), await statusText());
     await press('#show-button');
     await press('#show-list [data-value="all"]');
     verify('and the whole machine again is no change', !(await js(showButton)).changed);
@@ -344,6 +344,146 @@ export async function views(h) {
                onDress.text.includes('Take this out first: Chassis') && !onDress.text.includes('Click'), onDress.text);
         verify('and no hand, as a click there does nothing', onDress.cursor == '', onDress.cursor);
     }
+}
+
+/**
+ * The state machine's main paths on the real page (docs/3d-view.md,
+ * V4b); tests/state-machine.test.js walks every state of it in Node.
+ */
+export async function states(h) {
+    const {js, send, viewport, fresh, press, verify, sleep, statusText} = h;
+    await viewport(1280, 860); await fresh();
+    await press('#view-3d');
+    verify('3D loads', await load3d(h));
+    const settle = async () => {
+        await sleep(150);
+        for (let i = 0; i < 160 && await js(`panel.box.isBusy() || panel.stage3d.viewer.isFlying()`); i++) {
+            await sleep(100);
+        }
+    };
+    const button = `!document.getElementById('box-restore').hidden`;
+    const viewName = `document.querySelector('#views-current > span:not(.dropdown-label-room)').textContent`;
+    const clickAt = async (p, buttonName = 'left') => {
+        for (const type of ['mousePressed', 'mouseReleased']) {
+            await send('Input.dispatchMouseEvent', {type, x: p.x, y: p.y, button: buttonName, clickCount: 1});
+        }
+        await sleep(200);
+    };
+    const lid = () => js(`panel.stage3d.screenPoint('case.top', 'top')`);
+    await js(`panel.stage3d.setView('whole')`); await settle();
+    verify('a whole machine offers no Put it all back', !(await js(button)));
+
+    // The right button pans: it takes nothing out.
+    await clickAt(await lid(), 'right'); await settle();
+    verify('a right click takes nothing out', await js(`panel.box.isWhole()`));
+
+    // The report: a part out by hand, and the way back.
+    await clickAt(await lid()); await settle();
+    verify('a click takes the lid off', await js(`panel.box.isOut('case.top')`));
+    verify('and Put it all back appears', await js(button));
+    verify('a plain click leaves the camera the view\'s own', await js(`panel.stage3d.fitted`) === 'whole');
+    verify('which takes in the lid where it stopped', await js(`(async () => {
+        const {silhouette, corners} = await import('./js/view3d/framing.js');
+        const s = panel.stage3d, {width, height} = s.viewer.size();
+        const b = silhouette(corners(s.boxBind.boxes((n) => s.boxBind.modelName(n) == 'case.top')),
+                             {position: s.viewer.camera.position.toArray(), target: s.viewer.controls.target.toArray()}, 35, width, height);
+        return b.top >= 0 && b.left >= 0 && b.right <= width && b.bottom <= height; })()`));
+    await js(`panel.onToggle('off-on')`);
+    verify('OFF/ON refuses, and says what to press', (await statusText()).includes('Put it all back') && !(await js(`panel.isPoweredOn`)), await statusText());
+    await js(`panel.stage3d.setView('above')`); await settle();
+    verify('another view leaves the lid off, to look inside', await js(`panel.box.isOut('case.top')`) && await js(button));
+    await press('#box-restore'); await settle();
+    verify('Put it all back puts it back', await js(`panel.box.isWhole()`));
+    verify('and goes', !(await js(button)));
+    verify('and says it can be switched on', (await statusText()).startsWith('Back together'), await statusText());
+    verify('in the view it was in', await js(viewName) === 'Inside');
+    await js(`panel.onToggle('off-on')`);
+    verify('and it does switch on', await js(`panel.isPoweredOn`));
+    await js(`panel.onPowerOff()`);
+
+    // Reset view is the whole way home.
+    await js(`panel.stage3d.setView('whole')`); await settle();
+    await clickAt(await lid()); await settle();
+    await js(`panel.stage3d.setShow('case-faded')`);
+    await press('#view-reset'); await settle();
+    verify('Reset view puts the parts back', await js(`panel.box.isWhole()`));
+    verify('shows the whole machine', await js(`panel.stage3d.boxBind.show`) === 'all');
+    verify('from the front', await js(viewName) === 'Front panel');
+
+    // A drag is the reader's camera; nothing else is.
+    await js(`panel.stage3d.setView('whole')`); await settle();
+    const p = await lid();
+    await send('Input.dispatchMouseEvent', {type: 'mousePressed', x: p.x, y: p.y, button: 'left', clickCount: 1});
+    await send('Input.dispatchMouseEvent', {type: 'mouseMoved', x: p.x + 40, y: p.y, button: 'left', buttons: 1});
+    await send('Input.dispatchMouseEvent', {type: 'mouseReleased', x: p.x + 40, y: p.y, button: 'left', clickCount: 1});
+    await sleep(300);
+    verify('a drag makes the camera the reader\'s', await js(`panel.stage3d.fitted`) === null);
+    verify('and moves no part', await js(`panel.box.isWhole()`));
+
+    // Taken apart, and every way out of it.
+    const apart = async () => {
+        await js(`panel.stage3d.setView('apart'); panel.box.snap()`);
+        await settle();
+    };
+    await apart();
+    verify('Taken apart offers Put it all back too', await js(button));
+    await js(`panel.box.putBack('card.sio2')`); await settle();
+    verify('one part back is still Taken apart', await js(viewName) === 'Taken apart');
+    await press('#box-restore'); await settle();
+    verify('Put it all back leaves Taken apart for the front', await js(viewName) === 'Front panel' && await js(`panel.box.isWhole()`));
+    await apart();
+    await js(`(async () => { await panel.fetchExamples(); panel.loadExample('adder'); })()`); await settle();
+    verify('a load leaves no Taken apart behind', await js(viewName) === 'Front panel' && await js(`panel.box.isWhole() && panel.isPoweredOn`));
+    verify('and no way back to offer', !(await js(button)));
+    await js(`panel.onPowerOff()`);
+    await apart();
+    await press('#view-2d'); await sleep(300);
+    verify('going to 2D puts it together', await js(`panel.box.isWhole()`));
+    await press('#view-3d'); await settle();
+    verify('and 3D comes back on the front, not Taken apart', await js(viewName) === 'Front panel');
+
+    // A switch's hint says when OFF/ON will not go.
+    await js(`panel.stage3d.setView('whole')`); await settle();
+    await clickAt(await lid()); await settle();
+    const off = await js(`panel.stage3d.screenPoint('panel.switch.off_on', [0, 0, 0.009])`);
+    await send('Input.dispatchMouseEvent', {type: 'mouseMoved', x: off.x, y: off.y});
+    await sleep(650);
+    verify('OFF/ON\'s label says to put it back first', (await js(`document.getElementById('part-label').innerText`)).includes('Put it all back first'),
+           await js(`document.getElementById('part-label').innerText`));
+    await press('#box-restore'); await settle();
+
+    // In every language the button fits a phone's stage.
+    await viewport(375, 740); await sleep(600);
+    await js(`panel.box.takeOut('case.top', false); panel.box.snap()`); await sleep(200);
+    const wide = [];
+    for (const locale of await js(`l10n.LOCALES`)) {
+        await js(`l10n.setLocale('${locale}')`); await sleep(60);
+        const fits = await js(`(() => { const b = document.getElementById('box-restore').getBoundingClientRect(), s = document.getElementById('stage3d').getBoundingClientRect();
+            return b.width > 40 && b.left >= s.left && b.right <= s.right; })()`);
+        if (!fits) {
+            wide.push(locale);
+        }
+    }
+    verify('Put it all back fits a phone, in every language', wide.length == 0, wide.join());
+    await js(`l10n.setLocale('en')`);
+}
+
+/** A link that opens in 3D keeps what the link said; tabs open at their top. */
+export async function linked(h) {
+    const {js, send, viewport, fresh, verify, sleep, statusText} = h;
+    await viewport(1280, 860); await fresh();
+    const url = await js('location.href');
+    await send('Page.navigate', {url: url.split('#')[0] + '?hex=3E8CD3FF76&view=3d'});
+    await sleep(1500);
+    verify('a 3D link loads', await load3d(h));
+    await sleep(300);
+    verify('and its program\'s message outlives the 3D view\'s welcome', !(await statusText()).startsWith('The whole machine in 3D'), await statusText());
+    await js(`panel.showTab('ref')`);
+    await js(`document.getElementById('dock-body').scrollTop = 300`); await sleep(450);
+    await js(`panel.showTab('debug')`);
+    verify('another tab opens at its top', await js(`document.getElementById('dock-body').scrollTop`) === 0);
+    await js(`panel.showTab('ref')`);
+    verify('and the Tutorial goes back to its place', Math.abs(await js(`document.getElementById('dock-body').scrollTop`) - 300) < 2);
 }
 
 /** How deep the case's top shows in the front view, over its front. */

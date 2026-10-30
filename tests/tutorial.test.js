@@ -189,6 +189,7 @@ test('a 3D Show chooses a view and a Show, as the menus do, and names what it pi
     };
     stub(t, panel, {
         has3d: true,
+        view: '3d',
         chooseView() {},
         whenStage3d: () => Promise.resolve(stage),
         setStatus(id, params) { said.push([id, params]); },

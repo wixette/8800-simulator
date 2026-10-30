@@ -473,8 +473,9 @@ that a choice never moves the tools beside it. The views and presets
 change how the machine is drawn, never what it does, so the machine keeps running in all of them. Taking parts out is
 the one thing that needs it off (U9). Keyboard: once the 3D view has
 the focus (by Tab, not by a click, as the dock's tabs), the arrows,
-+ and −, and Home move the camera; otherwise the Teletype keeps its
-keys (U3).
++ and − move the camera, and Home is Reset view; otherwise the Teletype
+keeps its keys (U3). ⌂ is the whole way home: the front, the whole
+machine shown, every part back.
 
 ### U9 — Taking it apart needs the power off, and the 2D panel is always whole
 
@@ -483,6 +484,14 @@ anything is out, saying what (P6). Every other way the page switches
 the machine on - every load, Assemble, a link - puts the box back
 together first and says so; going back to 2D does too. The full table
 is V4a in [3d-view.md](3d-view.md#v4a--the-box-and-the-power-in-every-way-the-page-switches-the-machine).
+
+**Put it all back** stands on the stage, in amber, whenever anything
+is out (P6: never a dead end): one press to a machine that switches
+on. Choosing a view leaves parts where the reader put them, so that a
+lid can stay off to look inside. A part that a Show fades or hides
+cannot be clicked, so when one is in the way the status line says to
+choose Everything. The state machine behind all this is
+[V4b](3d-view.md#v4b--the-state-machine).
 
 ### U10 — The Tutorial in chapters, with Shows that point
 

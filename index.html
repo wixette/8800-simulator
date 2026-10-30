@@ -65,6 +65,7 @@
         "./js/view3d/boxBind.js": "./js/view3d/boxBind.js?v=1.8.0",
         "./js/view3d/framing.js": "./js/view3d/framing.js?v=1.8.0",
         "./js/view3d/panelBind.js": "./js/view3d/panelBind.js?v=1.8.0",
+        "./js/view3d/stage-state.js": "./js/view3d/stage-state.js?v=1.8.0",
         "./js/view3d/view3d.js": "./js/view3d/view3d.js?v=1.8.0",
         "./js/view3d/viewer.js": "./js/view3d/viewer.js?v=1.8.0",
         "./js/view3d/views.js": "./js/view3d/views.js?v=1.8.0",
@@ -219,6 +220,12 @@
           <div id="stage3d-progress" class="stage3d-progress" hidden><div></div></div>
           <p id="stage3d-message" class="stage3d-message" hidden></p>
           <div id="part-label" class="part-label" hidden></div>
+          <!-- There whenever a part is out: the one way back from anything
+               taken apart, by hand or at once (V4). -->
+          <button id="box-restore" class="box-restore" type="button" hidden>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>
+            <span id="view-put-back" class="l10n">Put it all back</span>
+          </button>
         </div>
 
         <!-- The Switch Board Helper: the panel's switches again, large
@@ -418,7 +425,7 @@
           </ol>
           <h4 id="tut-meet-g3" class="step-group l10n">Your turn</h4>
           <ol class="steps">
-            <li><span id="tut-meet-12" class="l10n">Now take it apart yourself: switch OFF, click the lid, then a card. Views ▸ Taken apart shows every part; any other view puts it back. Drag to turn it, scroll to zoom.</span></li>
+            <li><span id="tut-meet-12" class="l10n">Now take it apart yourself: switch OFF, click the lid, then a card; click a part again to put it back, or press Put it all back. Views ▸ Taken apart shows every part. Drag to turn it, scroll to zoom.</span></li>
           </ol>
         </section>
 

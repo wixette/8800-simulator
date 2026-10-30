@@ -29,9 +29,11 @@ import * as THREE from 'three';
 import {Dropdown} from '../dropdown.js';
 import {l10n} from '../l10n.js';
 import {BoxBinding} from './boxBind.js';
+import {MOVE_S} from '../box.js';
 import {corners, frame, frameShowingTop} from './framing.js';
 import {PanelBinding} from './panelBind.js';
-import {Viewer} from './viewer.js';
+import {StageState} from './stage-state.js';
+import {Viewer, reducedMotion} from './viewer.js';
 import {HOME_VIEW, SHOWS, VIEWS, WIRED, partKey, showButton,
         switchName} from './views.js';
 
@@ -76,11 +78,10 @@ export class Stage {
         this.canvas = this.viewer.canvas;
         this.canvas.id = 'stage3d-canvas';
         this.canvas.tabIndex = 0;
-        /** The view on show, and whether the camera is still where it put it. */
-        this.view = HOME_VIEW;
+        /** The view the camera is still where it put, if it is. */
         this.fitted = HOME_VIEW;
-        /** Whether Taken apart moved the parts out (V4). */
-        this.apart = false;
+        /** What it does with the box (V4b). @type {!StageState} */
+        this.state = new StageState(panel.box, this.stateHost());
         this.root = null;
         this.panelBind = null;
         this.boxBind = null;
@@ -88,10 +89,14 @@ export class Stage {
         this.labelTimer = 0;
         /** @type {?string} What the label is for, shown or on its way. */
         this.labelKey = null;
+        /** @type {?string} The name on that label. */
+        this.labelName = null;
         /** @type {?string} The part a press put the label away for. */
         this.pressedOn = null;
         /** @type {{x: number, y: number}} Where the mouse last was. */
         this.pointerAt = {x: 0, y: 0};
+        /** @type {?PointerEvent} The move waiting for a look under it. */
+        this.hoverAt = null;
     }
 
     /**
@@ -110,15 +115,12 @@ export class Stage {
         this.panel.box.onChange = () => {
             this.boxBind.pose();
             invalidate();
+            this.state.boxChanged();
         };
         this.viewer.fitShadow(new THREE.Box3().setFromObject(this.root));
         this.viewer.onFrame.push((dt) => this.frame(dt));
         this.viewer.onResize.push(() => this.refit());
-        this.viewer.controls.addEventListener('start', () => {
-            // The reader took the camera; it stays where they put it.
-            this.fitted = null;
-            this.pressLabel();
-        });
+        this.viewer.controls.addEventListener('start', () => this.pressLabel());
         this.viewer.controls.addEventListener('change', () => this.refreshZoom());
         this.initPointer();
         this.initKeys();
@@ -126,9 +128,25 @@ export class Stage {
         this.place(HOME_VIEW, false);
     }
 
+    /** The view of what the page and the drawing are, for the state. */
+    stateHost() {
+        return {
+            isPoweredOn: () => this.panel.isPoweredOn,
+            say: (id, params, severity) => this.panel.setStatus(id, params, severity),
+            sayBox: (why) => this.panel.sayBox(why),
+            place: (id) => this.place(id, this.viewer.running),
+            refit: () => this.refitToParts(),
+            refreshBox: () => this.refreshBox(),
+            partName: (name) => this.partName(name),
+            isUnseen: (name) => !!this.boxBind.find(name).userData.seeThrough,
+            showAll: () => this.setShow('all'),
+        };
+    }
+
     /** Shows the view: starts drawing, and catches up with the box. */
     show() {
         this.boxBind.pose();
+        this.panelBind.settle();
         this.viewer.start();
         this.refit();
     }
@@ -136,6 +154,11 @@ export class Stage {
     /** Hides the view: stops drawing. */
     hide() {
         this.hideLabel();
+        for (const menu of [this.viewsMenu, this.showMenu]) {
+            if (menu.isOpen()) {
+                menu.close(false);
+            }
+        }
         this.viewer.stop();
     }
 
@@ -146,20 +169,10 @@ export class Stage {
         let moved = this.panelBind.update(dt);
         const box = this.panel.box;
         if (box.isBusy()) {
-            box.update(dt);
-            this.boxBind.pose();
+            // Less motion asked for: each part there in a frame, as a
+            // camera flight is.
+            box.update(reducedMotion() ? MOVE_S : dt);
             moved = true;
-            if (!box.isBusy()) {
-                // Taken apart says how to put it back once the last part is out.
-                if (this.apart) {
-                    this.panel.setStatus('view-apart-done');
-                }
-                // A view the page chose takes in the parts where they stopped.
-                if (this.fitted) {
-                    const f = this.framing(this.fitted);
-                    this.viewer.flyTo(f.position, f.target, 0.5);
-                }
-            }
         }
         if (moved) {
             this.viewer.invalidate();
@@ -170,30 +183,11 @@ export class Stage {
     // ---- the views ----
 
     /**
-     * Shows a view from the Views menu, or Reset view.
+     * Shows a view from the Views menu.
      * @param {string} id The view.
      */
     setView(id) {
-        if (id == 'apart') {
-            if (this.panel.isPoweredOn) {
-                this.panel.setStatus('box-switch-off', {}, 'warn');
-                return;
-            }
-            const why = this.panel.box.takeAllApart(false);
-            if (why) {
-                this.panel.sayBox(why);
-                return;
-            }
-            this.apart = true;
-        } else if (this.apart) {
-            // Leaving Taken apart puts back what it took out (V4).
-            this.apart = false;
-            this.panel.box.snap();
-            this.panel.box.putAllBack(true);
-            this.panel.setStatus('view-reassembling');
-        }
-        this.place(id, true);
-        this.refreshTools();
+        this.state.setView(id);
     }
 
     /**
@@ -203,7 +197,6 @@ export class Stage {
      * @param {boolean} fly Whether to fly there, or jump.
      */
     place(id, fly) {
-        this.view = id;
         this.fitted = id;
         const f = this.framing(id);
         if (fly) {
@@ -243,6 +236,14 @@ export class Stage {
         if (this.fitted && !this.viewer.isFlying() && this.root) {
             const f = this.framing(this.fitted);
             this.viewer.jumpTo(f.position, f.target);
+        }
+    }
+
+    /** @private The parts stopped: a view the page chose takes them in. */
+    refitToParts() {
+        if (this.fitted && this.viewer.running) {
+            const f = this.framing(this.fitted);
+            this.viewer.flyTo(f.position, f.target, 0.5);
         }
     }
 
@@ -324,41 +325,78 @@ export class Stage {
     initPointer() {
         this.raycaster = new THREE.Raycaster();
         this.ndc = new THREE.Vector2();
-        const hitAt = (e) => this.hitAt(e);
         let down = null;
+        const pointers = new Set();
         // A click does not take the keyboard from the Teletype: the view
         // takes the focus by Tab, as the dock's tabs do (U3).
         this.canvas.addEventListener('mousedown', (e) => e.preventDefault());
         this.canvas.addEventListener('pointerdown', (e) => {
-            down = {x: e.clientX, y: e.clientY, t: performance.now()};
+            pointers.add(e.pointerId);
+            // A second finger is a pinch, which no finger ends as a tap.
+            down = pointers.size == 1 ?
+                {x: e.clientX, y: e.clientY, t: performance.now(), button: e.button} : null;
             // A press puts the label away, so that it never covers the
             // lamps the click is about to change (U8).
             this.pressLabel();
         });
         this.canvas.addEventListener('pointerup', (e) => {
+            pointers.delete(e.pointerId);
             const d = down;
             down = null;
-            if (!d || Math.hypot(e.clientX - d.x, e.clientY - d.y) > CLICK_PX ||
+            // The right button pans: only the main one works the machine.
+            if (!d || d.button != 0 || Math.hypot(e.clientX - d.x, e.clientY - d.y) > CLICK_PX ||
                 performance.now() - d.t > CLICK_MS) {
                 return;
             }
-            const hit = hitAt(e);
+            const hit = this.hitAt(e);
             if (hit) {
                 this.onClick(hit);
                 // No hover on a touch screen: a tap on a part shows its
                 // label. A tap on a switch shows itself, by throwing it.
                 if (e.pointerType != 'mouse' && !this.panelBind.pick(hit.object, hit.point, this.viewer.camera) &&
-                    !this.isLamp(hit.object)) {
+                    !this.lampAt(hit.object)) {
                     this.showLabel(hit, 2500);
                 }
             }
         });
+        this.canvas.addEventListener('pointercancel', (e) => {
+            pointers.delete(e.pointerId);
+            down = null;
+        });
         this.canvas.addEventListener('pointermove', (e) => {
+            if (pointers.size > 1 ||
+                (down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > CLICK_PX)) {
+                // A drag, not a click: the camera is the reader's now.
+                this.fitted = null;
+            }
             if (e.pointerType == 'mouse' && !e.buttons) {
-                this.hover(hitAt(e), e);
+                this.hoverSoon(e);
             }
         });
+        this.canvas.addEventListener('wheel', () => {
+            this.fitted = null;
+        }, {passive: true});
         this.canvas.addEventListener('pointerleave', () => this.hideLabel());
+    }
+
+    /**
+     * @private At most one look under the pointer a frame: a ray through
+     * every mesh of the model is too much for each mouse event.
+     * @param {!PointerEvent} e Where the pointer is.
+     */
+    hoverSoon(e) {
+        const waiting = this.hoverAt;
+        this.hoverAt = e;
+        if (waiting) {
+            return;
+        }
+        window.requestAnimationFrame(() => {
+            const at = this.hoverAt;
+            this.hoverAt = null;
+            if (at) {
+                this.hover(this.hitAt(at), at);
+            }
+        });
     }
 
     /** @private */
@@ -390,26 +428,10 @@ export class Stage {
             return;
         }
         if (at.unit) {
-            this.toggleUnit(at.unit);
+            this.state.click(at.unit);
         } else if (WIRED.includes(at.part)) {
             this.panel.setStatus('box-fixed', {part: this.partName(at.part)});
         }
-    }
-
-    /**
-     * Takes a unit out, or puts it back.
-     * @param {string} unit The unit.
-     */
-    toggleUnit(unit) {
-        const box = this.panel.box;
-        const out = box.position(unit) > 0;
-        const why = out ? box.putBack(unit) : box.takeOut(unit, this.panel.isPoweredOn);
-        if (why) {
-            this.panel.sayBox(why);
-            return;
-        }
-        this.panel.setStatus(out ? 'box-put-back' : 'box-taken-out',
-                             {part: this.partName(unit)});
     }
 
     /** @return {string} A part's name, in the reader's language. */
@@ -429,10 +451,13 @@ export class Stage {
         }
         const thrown = this.panelBind.pick(hit.object, hit.point, this.viewer.camera);
         if (thrown) {
-            return {name: l10n.getMessage('label-switch').replace('{name}', switchName(thrown.id)),
-                    role: '', hint: l10n.getMessage('hint-throw'), acts: true};
+            const name = l10n.getMessage('label-switch').replace('{name}', switchName(thrown.id));
+            // OFF/ON will not go on with a part out: not a throw to offer.
+            const stuck = thrown.id == 'off-on' && !this.panel.isPoweredOn && this.panel.box.interlock();
+            return {name: name, role: '', hint: l10n.getMessage(stuck ? 'hint-put-back-first' : 'hint-throw'),
+                    acts: !stuck};
         }
-        const lamp = this.isLamp(hit.object);
+        const lamp = this.lampAt(hit.object);
         if (lamp) {
             return {name: l10n.getMessage('label-lamp').replace('{name}', lamp.toUpperCase()),
                     role: '', hint: '', acts: false};
@@ -451,7 +476,7 @@ export class Stage {
      * @param {!THREE.Object3D} object What the pointer is over.
      * @return {?string} The lamp it is, if it is one.
      */
-    isLamp(object) {
+    lampAt(object) {
         for (let n = object; n; n = n.parent) {
             if (n.userData.lamp_id) {
                 return n.userData.lamp_id;
@@ -507,6 +532,7 @@ export class Stage {
             return;
         }
         this.labelKey = key;
+        this.labelName = text ? text.name : null;
         window.clearTimeout(this.labelTimer);
         this.label.hidden = true;
         if (text) {
@@ -522,7 +548,7 @@ export class Stage {
         // Both the camera's grab and the click's own press come here:
         // the second finds the label already put away.
         if (this.labelKey) {
-            this.pressedOn = JSON.parse(this.labelKey).name;
+            this.pressedOn = this.labelName;
             this.labelKey = null;
         }
     }
@@ -584,6 +610,7 @@ export class Stage {
 
     /** @private */
     hideLabel() {
+        this.hoverAt = null;
         window.clearTimeout(this.labelTimer);
         this.labelKey = null;
         this.pressedOn = null;
@@ -653,7 +680,7 @@ export class Stage {
                 '=': () => this.zoom(1 / ZOOM_STEP),
                 '-': () => this.zoom(ZOOM_STEP),
                 '_': () => this.zoom(ZOOM_STEP),
-                Home: () => this.setView(HOME_VIEW),
+                Home: () => this.state.home(),
             }[e.key];
             if (act) {
                 e.preventDefault();
@@ -671,22 +698,39 @@ export class Stage {
         this.showMenu = new Dropdown('show-dropdown', (id) => this.setShow(id),
                                      () => this.refreshShowMenu());
         const press = (id, fn) => this.panel.makePressable(document.getElementById(id), fn);
-        press('view-reset', () => this.setView(HOME_VIEW));
+        press('view-reset', () => this.state.home());
         press('view-zoom-in', () => this.zoom(1 / ZOOM_STEP));
         press('view-zoom-out', () => this.zoom(ZOOM_STEP));
+        this.restore = document.getElementById('box-restore');
+        this.restore.addEventListener('mousedown', (e) => e.preventDefault());
+        this.restore.addEventListener('click', () => {
+            // It goes as it is pressed: the keyboard stays with the view.
+            if (document.activeElement == this.restore) {
+                this.canvas.focus();
+            }
+            this.state.putAllBack();
+        });
+        this.refreshBox();
         this.refreshTools();
+    }
+
+    /** @private Put it all back is there while it has anything to do. */
+    refreshBox() {
+        if (this.restore) {
+            this.restore.hidden = !this.state.canPutBack();
+        }
     }
 
     /** @private Fills the Views menu as things stand. */
     refreshViewsMenu() {
-        const busy = this.panel.isPoweredOn && !this.apart;
+        const on = this.panel.isPoweredOn;
         this.viewsMenu.setItems(VIEWS.map((v) => ({
             value: v.id,
             label: l10n.getMessage('view-' + v.id),
-            disabled: v.id == 'apart' && busy,
-            detail: v.id == 'apart' && busy ? l10n.getMessage('view-apart-detail') : undefined,
+            disabled: v.id == 'apart' && on,
+            detail: v.id == 'apart' && on ? l10n.getMessage('view-apart-detail') : undefined,
         })));
-        this.viewsMenu.setSelected(this.view);
+        this.viewsMenu.setSelected(this.state.view);
     }
 
     /**
@@ -712,7 +756,7 @@ export class Stage {
         }
         // The Views button is as wide as its longest view, whichever it
         // names, so that the tools beside it stay put (U8).
-        this.viewsMenu.setLabel(l10n.getMessage('view-' + this.view),
+        this.viewsMenu.setLabel(l10n.getMessage('view-' + this.state.view),
                                 VIEWS.map((v) => l10n.getMessage('view-' + v.id)));
         if (this.viewsMenu.isOpen()) {
             this.refreshViewsMenu();

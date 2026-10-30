@@ -15,6 +15,8 @@ simulator's existing machine, and where it sits in the page.
 release review being the owner's hands-on passes, several rounds of
 them, and the full test suites. The Chromebook-class performance check
 was not measured; the view drops to a lighter quality below 25 fps.
+v1.8.1 followed a review of the states after a reader got lost with a
+part taken out: V4b is the state machine it wrote down.
 Where building changed a
 decision, the decision says so. Decisions are numbered so that the
 code can cite them: **M** for the model and its sources, **V** for the
@@ -171,8 +173,9 @@ no 2D panel to call. Here, the 3D panel must not duplicate it (P2).
     sprites become one subscriber, and the 3D view another.
 - **The 3D view never touches `Sim8800`.** It reads lamps and switch
   positions from the seam and sends throws to it. Its mechanical state
-  (which units are out, and how far) is its own module, `js/view3d/
-  box.js`, with no three.js in it, tested in Node like the rest.
+  (which units are out, and how far) is its own module, `js/box.js`,
+  loaded with the page (V4a), with no three.js in it, tested in Node
+  like the rest.
 - **Lamps are drawn once a frame:** while the machine runs, lamp
   changes are collected and applied on the next animation frame, so
   the 3D view never renders faster than the screen.
@@ -197,9 +200,11 @@ js/view3d/
   viewer.js       renderer, camera, controls, lighting, render on demand, quality
   framing.js      fit each view into the stage's free area (as the Leibniz simulator's U10)
   panelBind.js    switch bats and lamps <-> panel.operate / onPanelChange; picking
-  box.js          removable units, paths, prerequisites, the interlock (no three.js)
-  boxBind.js      units' poses from box.js; fade and hide
-  parts.js        part names and roles for labels (keys into l10n)
+  boxBind.js      units' poses from js/box.js; fade and hide
+  stage-state.js  what the view does with the box: V4b's transitions (no three.js)
+  views.js        the views, the Show presets, how a part is drawn (no three.js)
+js/box.js         removable units, prerequisites, the interlock (no three.js), with the page
+js/l10n-3d.js     part names and roles for labels, with every other 3D message
 ```
 
 Separate modules, as `panel-*.js` are, written in the repository's
@@ -255,7 +260,9 @@ and other 3D tools keep theirs.
 - Drag to orbit, right-drag or two fingers to pan, wheel or pinch to
   zoom. Movement is damped and limited (never from underneath, never
   too near or too far), so the machine can't be lost.
-- ⌂ Reset view, and a joined zoom − / + pair.
+- ⌂ Reset view, and a joined zoom − / + pair. Reset is the whole way
+  home: the front view, the whole machine shown, every part back (V4b).
+  The Home key does the same.
 - **Keyboard:** the 3D view takes the focus with Tab. While it has
   it, the arrow keys orbit, Shift with the arrows pans, + and − zoom,
   and Home resets. Only then, so the Teletype keeps its keys
@@ -343,8 +350,14 @@ language, so that choosing a view never moves the tools beside it.
   the right and behind, where the cards show their chips. It is the
   one view that moves parts: leaving it for another view puts them all
   back, in reverse, quickly (0.12 s a unit, about two seconds in all,
-  where taking it apart goes at 0.8 s a unit to be watched). The other views never move a part, so a lid taken
-  off by hand stays off while the reader looks from above.
+  where taking it apart goes at 0.8 s a unit to be watched). The other
+  views never move a part, so a lid taken off by hand stays off while
+  the reader looks from above.
+- **Put it all back** stands on the stage whenever anything is out,
+  however it came out: one press from any state to a machine that
+  switches on. OFF/ON's refusal names it. *Changed in v1.8.1:* a reader
+  who took out a part by hand had no way back but to click each part
+  again in order, and ⌂ and the other views did nothing for them.
 - **Labels:** hovering (or tapping, on a phone) a part shows its name
   and one line on what it does, translated (P5: the panel's own
   lettering stays as it is). Clicking an operable part does it. The
@@ -393,9 +406,9 @@ simulator and the model's own rule:
   same reason (P6).
 - While anything is out, OFF/ON refuses ON and says why. The
   switches that need power refuse as they do on a dead machine today.
-- What it costs is small: switching off keeps memory (the simulator's
-  OFF keeps it, as it does now), so a program survives being taken
-  apart. Only its run stops.
+- What it costs is the program: switching on again brings memory up
+  full of random bytes, as on the real machine, so a program does not
+  survive being taken apart, and is loaded again afterwards.
 - Why it is right here: a card out of its slot, or a chassis out of
   the case, is not a machine that can run. Pretending otherwise would
   teach that the parts don't matter. The reader who wants to *watch*
@@ -419,7 +432,7 @@ machine, and nothing switches on a machine that is taken apart.**
 | A load that switches the machine on: Load menu (hex bytes, a binary file, 4K BASIC, the examples), Assemble, a program link | The box is **put back together at once**, then the machine goes on, and the status line says so ("…was put back together and switched on first", in place of "…was switched on first"). The reader asked for a program; refusing it over a view they may not be looking at would be wrong. |
 | Switching to the 2D view | The box is **put back together at once** (it is off, so nothing else changes). The 2D panel never stands for a machine with its cards out. |
 | A link with `view=3d`, or a reload | The box starts whole, as the machine starts afresh. |
-| The Memory menu (switches the machine off) | Allowed. The cards follow the new size; the rest of the box stays as it is. |
+| The Memory menu (switches the machine off) | Allowed. What is moving finishes first, then the cards follow the new size; the rest of the box stays as it is. |
 | OFF, by the switch or by the Memory menu | Nothing changes in the box. |
 | Any other switch on a machine that is off | As today: it does nothing, and says the machine is off. Address switches still latch. |
 
@@ -427,6 +440,72 @@ Taking anything out needs the machine off (V4); the status line says
 "Switch the machine OFF before taking it apart". All of this is in
 `tests/box.test.js` and `tests/seam.test.js`, which also hold every
 caller of `panel.onPowerOn()` to the two that ask the box.
+
+### V4b — The state machine
+
+Written down in v1.8.1, after a review found that most of what went
+wrong came from the same thing: the state was never named, and a copy
+of it, `Stage.apart`, went stale whenever something other than the 3D
+view changed the box. Now the box alone knows (`js/box.js`), and
+`js/view3d/stage-state.js` holds the transitions, with no three.js in
+them, so that they can be walked in Node.
+
+**The state** is the product of the power (off, on), the page's view
+(2D, 3D), the camera's view (front, whole, inside, rear, Taken apart),
+and the box:
+
+| Box state | What it is |
+|---|---|
+| **Whole** | Every unit in, nothing moving. The only state the power can be on in. |
+| **By hand** | Some units out, by clicks; nothing moving. |
+| **Moving** | A clicked unit under way, or the cards following the Memory menu. |
+| **Coming apart** | Take it all apart under way: one unit after another, 0.8 s each. |
+| **Apart** | Taken apart, and still: the Views menu says so. |
+| **Going back** | Everything on its way in, 0.12 s a unit: nothing to press but to wait. |
+
+**The events**, and what each does to the box. Only the last rows are
+the 3D view's own: everything above them can arrive from the Load menu,
+the Assembler or a link, whichever view is showing.
+
+| Event | Whole | By hand | Moving | Coming apart | Apart | Going back |
+|---|---|---|---|---|---|---|
+| OFF/ON to ON | On | Refused: press Put it all back | Refused | Refused | Refused | Refused: wait |
+| ON to OFF | Off | - | - | - | - | - |
+| A load | Whole, on | Whole at once, on, says so | Same | Same; view to front | Same; view to front | Same |
+| Memory | Cards change | Moves finish, cards follow | Same | Apart, cards follow | Same | Whole, cards change |
+| To 2D | - | Whole at once | Same | Same; view to front | Same; view to front | Same |
+| Click a unit | Out, if the rules allow | Out or in | Wait | Wait | Out or in | Wait |
+| A view | Camera only | Camera only | Camera only | Going back | Going back | Camera only |
+| Taken apart | Coming apart | Coming apart | Wait | Wait | (says so) | Wait |
+| ⌂ Reset | Front, all shown | Going back, front, all shown | Same | Same | Same | Same |
+| Put it all back | not offered | Going back, view kept | Same | Going back, front | Same | not offered |
+
+**The invariants,** which `tests/state-machine.test.js` holds in every
+state reached from a new page by every event, with the real `Box`,
+`StageState` and the panel's power and view logic:
+
+1. The power is on only with the box whole.
+2. The 2D view is shown only with the box whole.
+3. Put it all back is offered exactly while the box will not end whole.
+4. At rest, no unit stands part of the way out.
+5. At rest, the Views menu says Taken apart exactly while the box is.
+6. At rest, nothing is left waiting to be said.
+7. At rest, the status line does not say the box is going back.
+8. At rest, the interlock refuses exactly while the box is not whole.
+9. From any state, in 3D, Put it all back and a wait lead to a machine
+   that switches on, and off Taken apart.
+
+And a status can only say what is so: "every part is out" and "back
+together" are checked as they are said, and OFF/ON never tells the
+reader to press a button that is not there. The walk's events include
+a frame partway through a move, so an event arriving mid-move is
+covered too. `tests/browser/view3d.mjs`'s `states` check runs the main
+paths on the real page, with real clicks: what Node cannot reach is the
+camera, the button and the pointer.
+
+A view other than Taken apart moves no part (V4), and leaves a part
+out: a reader takes the lid off to look inside. So Put it all back and
+⌂ are the two ways back from By hand.
 
 ### V5 — The 3D front panel works as the 2D one
 
@@ -442,8 +521,9 @@ caller of `panel.onPowerOn()` to the two that ask the box.
   it is the practical way to throw switches whose bats are a few
   pixels apart, in 3D even more than in 2D. P2's exception for it
   holds.
-- Picking takes a generous area round each bat, as the 2D panel's hit
-  areas do. The Front panel view frames the panel large enough to
+- Picking takes a generous area round each bat on the panel's face,
+  as the 2D panel's hit areas do. Only the main button works the
+  machine: the right button pans, and a pinch is no tap. The Front panel view frames the panel large enough to
   play Kill the Bit on a laptop.
 
 ### V6 — Look and words
@@ -582,7 +662,7 @@ All on branch `v1.8.0`, in this order. Each step ends with `npm test`,
 | W6 | **The panel in 3D (V5)** via the seam | Browser check: Kill the Bit played by clicking 3D switches; lamps match 2D after every step |
 | W7 | **Views and Show presets (V3)** | Faded parts pass clicks; machine keeps running |
 | W8 | **Taking it apart (V4):** `box.js` ported with its tests, picking units, Taken apart, the interlock, labels, the Memory menu in the cage | The take-apart order and the interlock pass in Node; the browser takes it apart and puts it back |
-| W9 | **The Tutorial (V7):** `js/tutorial.js`, the three sections moved over with their keys unchanged, the contents row, Show chips, the Meet the machine chapter, the 2D group outline | Same words in all ten languages; every Show resolves; a browser check runs each chip |
+| W9 | **The Tutorial (V7):** `js/panel-tutorial.js`, the three sections moved over with their keys unchanged, the contents row, Show chips, the Meet the machine chapter, the 2D group outline | Same words in all ten languages; every Show resolves; a browser check runs each chip |
 | W10 | **Words and docs (V6):** all new strings in ten languages; README section and screenshot, About's licence lines, References (the model's sources) | The l10n key test passes; your read-through |
 | W11 | **Release review:** a Chromebook-class performance check, a full manual pass, `npm version 1.8.0`, PR to `master` | Your manual check and OK |
 

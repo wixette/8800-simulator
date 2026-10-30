@@ -55,6 +55,20 @@ function latches(object) {
     return object.userData.kind == 'latching';
 }
 
+/**
+ * @param {!THREE.Object3D} object What a ray hit.
+ * @return {boolean} Whether it is part of the front panel, rather than
+ *     something else that happens to stand near a switch.
+ */
+function onPanel(object) {
+    for (let n = object; n; n = n.parent) {
+        if (/^panel\./.test(n.userData.modelName || '')) {
+            return true;
+        }
+    }
+    return false;
+}
+
 export class PanelBinding {
     /**
      * @param {!THREE.Object3D} root The model.
@@ -184,6 +198,18 @@ export class PanelBinding {
     }
 
     /**
+     * Stands every bat as the 2D panel's lever stands, at once: the view
+     * draws no frames while it is hidden, so a throw made then is over.
+     */
+    settle() {
+        for (const [id, bat] of this.bats) {
+            bat.hold = 0;
+            bat.target = bat.angle = this.restAngle(id, bat);
+            this.pose(bat);
+        }
+    }
+
+    /**
      * @param {string} id A lamp.
      * @return {boolean} Whether it is drawn lit.
      */
@@ -203,8 +229,8 @@ export class PanelBinding {
     /**
      * The switch, and the way, a click on the model means: on a bat, the
      * half of it clicked, as it looks from where the camera is (a
-     * latching switch flips); on the panel near a switch, above or below
-     * its pivot.
+     * latching switch flips); on the panel's own face near a switch,
+     * above or below its pivot.
      * @param {!THREE.Object3D} object What the pointer's ray hit.
      * @param {!THREE.Vector3} point Where, in the world.
      * @param {!THREE.Camera} camera The camera it was seen with.
@@ -222,6 +248,9 @@ export class PanelBinding {
                 const middle = new THREE.Box3().setFromObject(n).getCenter(new THREE.Vector3());
                 return this.throwFor(id, n, point, middle, camera);
             }
+        }
+        if (!onPanel(object)) {
+            return null;
         }
         for (const [id, bat] of this.bats) {
             const pivot = bat.node.getWorldPosition(new THREE.Vector3());

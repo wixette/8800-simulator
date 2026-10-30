@@ -247,16 +247,14 @@ panel.restoreLessonScroll = function() {
     if (!body || !pane || pane.hidden) {
         return;
     }
-    panel.restoringScroll = true;
     body.scrollTop = panel.tutorial.scroll[panel.tutorial.lesson] || 0;
-    panel.restoringScroll = false;
 };
 
 /** The reader scrolled: remember how far down the open lesson is read. */
 panel.noteLessonScroll = function() {
     var body = document.getElementById('dock-body');
     var pane = document.getElementById('tab-ref');
-    if (panel.restoringScroll || !body || !pane || pane.hidden || !panel.tutorial.lesson) {
+    if (!body || !pane || pane.hidden || !panel.tutorial.lesson) {
         return;
     }
     panel.tutorial.scroll[panel.tutorial.lesson] = Math.round(body.scrollTop);
@@ -287,7 +285,8 @@ panel.onShowChip = function(chip) {
     }
     panel.chooseView('3d');
     return panel.whenStage3d().then(function(stage) {
-        if (!stage) {
+        // It may have failed to load, or the reader gone back to 2D.
+        if (!stage || panel.view != '3d') {
             return;
         }
         // The same two choices as the Views and Show menus make, so the

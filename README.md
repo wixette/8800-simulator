@@ -203,7 +203,8 @@ panel, not a picture of it: click a switch on it and it does what the
 ![The Altair 8800 taken apart in 3D: the lid lifted off, the card cage with its boards, the power supply and fan beside it](./screenshots/3d.jpg)
 
 - **Look around:** drag to turn it, right-drag or two fingers to move
-  it, scroll or pinch to zoom; ⌂ brings it back. With the view
+  it, scroll or pinch to zoom; ⌂ brings everything back: the front
+  view, the whole machine, every part in place. With the view
   focused (Tab), the arrow keys turn it, Shift and the arrows move it,
   and + and − zoom.
 - **Views** picks where to look from - the front panel, the whole
@@ -215,10 +216,12 @@ panel, not a picture of it: click a switch on it and it does what the
 - **Take it apart:** switch the machine OFF, then click the lid to
   take it off, then a card to pull it, a transformer, the chassis...
   in the order the real machine allows; a part in the way says so.
-  Click a part again to put it back. **Views ▸ Taken apart** takes
-  everything out at once, and any other view puts it back.
+  Click a part again to put it back, or press **Put it all back**,
+  which is on the stage whenever anything is out. **Views ▸ Taken
+  apart** takes everything out at once.
 - **No power while it is apart.** OFF/ON will not switch on a machine
-  with anything out. Loading a program puts it back together first,
+  with anything out, and switching on brings up new random memory, so
+  load your program again. Loading a program puts it back together first,
   and so does going back to 2D.
 - The cards follow the **Memory** menu: 256 bytes is the 1K card, 4 KB
   one 88-4MCS, 8 KB two.
@@ -457,7 +460,7 @@ favicon still has the logo's drawing.
 | [js/l10n.js](js/l10n.js), [js/l10n-3d.js](js/l10n-3d.js) | Every message, in ten languages |
 | [js/panel-view.js](js/panel-view.js), [js/panel-tutorial.js](js/panel-tutorial.js) | The 2D / 3D toggle; the Tutorial's lessons, remembered, and Show chips |
 | [js/box.js](js/box.js) | The machine's box: which parts are out, in what order they come out, and so whether it may switch on |
-| [js/view3d/](js/view3d/) | The 3D view, loaded when first chosen: the renderer and camera, the 3D panel, the box's parts, the Views and Show menus |
+| [js/view3d/](js/view3d/) | The 3D view, loaded when first chosen: the renderer and camera, the 3D panel, the box's parts, the Views and Show menus, and its state machine ([stage-state.js](js/view3d/stage-state.js)) |
 | [model/](model/) | The 3D model: its params, its Blender build (`npm run build:model`), its research, and the built `.glb` |
 | [vendor/three/](vendor/three/) | three.js, pinned (`node tools/vendor.mjs`) |
 | [tools/stamp.mjs](tools/stamp.mjs), [tools/icons.mjs](tools/icons.mjs), [tools/vendor.mjs](tools/vendor.mjs) | Not part of the page: the version stamp, drawing the icons from the logo, and vendoring three.js |
@@ -484,8 +487,9 @@ front panel, the serial boards and the Teletype, the page's own logic
 and translations, the link format, the assembler against Intel's
 manual, every program in [examples/](examples/), 4K BASIC booting
 and running end to end, and the 3D view's logic: the box and the
-power, the model against its params, framing, and the toggle. It runs
-on each push and pull request.
+power, the model against its params, framing, the toggle, and a walk
+of every state its state machine can reach. It runs on each push and
+pull request.
 
 The page itself - clicks, menus, the Assembler's editor, the layout -
 is checked in a headless Chrome:
@@ -509,7 +513,7 @@ npm run typecheck
 
 Only the files that start with `// @ts-check` are checked, so far
 `js/asm8080.js`, `js/sim8800.js`, `js/box.js` and the 3D view's
-framing and views; [tsconfig.json](tsconfig.json)
+framing, views and state; [tsconfig.json](tsconfig.json)
 says how strictly.
 
 ### Screenshots and videos
