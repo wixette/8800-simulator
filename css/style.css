@@ -1182,11 +1182,13 @@ a {
 }
 
 /* The Tutorial (docs/ui-design.md, U11): a bar of numbered lessons,
-   one lesson at a time, on the dock's own dark. Colour means one thing
-   each: amber is what to do (the step numbers, Show - the orange a Show
-   lights the machine with), green is what you should see, blue is the
-   story and the asides, and code sits on the darkest panel. */
+   one lesson at a time, in a column down the middle of the dock's own
+   dark. Colour means one thing each: amber is what to press (Show - the
+   orange a Show lights the machine with - and the lesson open), green
+   is what you should see, blue is the story and the asides, and code
+   sits on the darkest panel. */
 .tutorial-pane {
+    --reading-width: 780px;
     --t-text: #e2e4e7;
     --t-muted: #a3a8af;
     --t-edge: #3a3e44;
@@ -1204,7 +1206,8 @@ a {
 }
 
 /* The lessons, numbered, across the top: it stays in sight while a
-   lesson scrolls under it. */
+   lesson scrolls under it. Its rule runs the dock's width; its tabs
+   line up with the lesson's column under them. */
 .lesson-bar {
     background-color: #262626;
     border-bottom: 1px solid var(--t-edge);
@@ -1212,7 +1215,7 @@ a {
     gap: 4px;
     margin: 0 -12px;
     overflow-x: auto;
-    padding: 6px 12px 0 12px;
+    padding: 6px max(12px, calc((100% - var(--reading-width)) / 2 + 12px)) 0;
     position: sticky;
     scrollbar-width: none;
     top: 0;
@@ -1280,7 +1283,8 @@ a {
 
 .tutorial-chapter {
     counter-reset: step;
-    max-width: 780px;
+    margin: 0 auto;
+    max-width: var(--reading-width);
     padding: 16px 0 24px 0;
 }
 
@@ -1387,7 +1391,8 @@ a {
 }
 
 /* The steps: numbered down a thin line, one lesson's numbers running on
-   from group to group, as the steps refer to each other by them. */
+   from group to group, as the steps refer to each other by them. The
+   numbers are grey: they are where you are, not something to press. */
 .steps {
     list-style: none;
     margin: 0;
@@ -1403,10 +1408,10 @@ a {
 }
 
 .steps > li::before {
-    border: 1.5px solid var(--t-amber);
+    border: 1.5px solid #6b7078;
     border-radius: 50%;
     box-sizing: border-box;
-    color: var(--t-amber);
+    color: #c4c8ce;
     content: counter(step);
     font-size: 12px;
     font-weight: bold;
@@ -1448,18 +1453,31 @@ a {
     padding: 1px 8px;
 }
 
-/* A step's Show: it points at what the step is about. */
+/* A step's Show: it points at what the step is about, an eye before its
+   word - look - in the amber of something to press. */
 .show-chip {
+    align-items: center;
     background-color: var(--t-amber-bg);
     border: 1px solid var(--t-amber);
     border-radius: 12px;
     color: var(--t-amber);
     cursor: pointer;
+    display: inline-flex;
     font: inherit;
     font-size: 12px;
+    gap: 4px;
+    line-height: 18px;
     margin-left: 6px;
-    padding: 0 9px;
+    padding: 0 9px 0 7px;
     vertical-align: 1px;
+    white-space: nowrap;
+}
+
+.show-chip .icon {
+    fill: currentColor;
+    flex: none;
+    height: 14px;
+    width: 14px;
 }
 
 .show-chip:hover,
@@ -1488,6 +1506,15 @@ a {
     border-color: var(--t-amber);
     color: var(--t-amber);
     outline: none;
+}
+
+/* The References tab reads as the Tutorial does: one column down the
+   middle of the dock (U11). */
+#tab-links > * {
+    box-sizing: border-box;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 780px;
 }
 
 /* The References tab's source code and further reading: a compact

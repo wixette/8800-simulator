@@ -518,10 +518,18 @@ bright block under the panel and the 3D view. Now:
   would be boxes in boxes; the groups give the structure, and a number
   down a thin line gives each step its place.
 - **Colour means one thing each,** on the dock's own dark: amber is
-  what to do (the step numbers, Show, the bar's current lesson - the
-  orange a Show lights the machine with); green is what you should see
-  (the step that shows the answer); blue is the story and the asides;
-  code sits on the darkest panel. Grey is everything else.
+  what to press (Show, and the bar's current lesson - the orange a Show
+  lights the machine with); green is what you should see (the step
+  that shows the answer); blue is the story and the asides; code sits
+  on the darkest panel. Grey is everything else, the step numbers among
+  it: they say where you are, and in amber, wrapped on a narrow dock,
+  they tangled with the Show chips beside them.
+- **Show has an eye,** Material's "visibility", before its word: look.
+  It lights up what a step is about in the view above, rather than
+  going anywhere, which an arrow would have said.
+- **One column down the middle.** A lesson is at most 780 px wide,
+  centred in the dock, and the lesson bar's tabs line up with it; the
+  References tab reads the same way.
 - **Meet the Machine opens on the real thing:** a photo of an Altair
   8800 beside a Model 33 Teletype (Tim Colegrove, CC BY-SA 4.0,
   credited under it, in About and in `images/tutorial/CREDITS.md`),

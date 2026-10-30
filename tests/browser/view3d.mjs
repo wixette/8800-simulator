@@ -365,7 +365,25 @@ export async function tutorial(h) {
     await js(`document.querySelector('#chapter-first .lesson-next').click()`);
     verify('a lesson ends with the way on to the next', await js(shown) === 'chapter-asm');
     verify('the step that shows the answer is marked as one', await js(`document.querySelectorAll('#chapter-first li.result').length`) === 1);
+    // One column down the middle, for the lessons and the References.
+    const column = (sel) => js(`(() => { const c = document.querySelector('${sel}').getBoundingClientRect(), b = document.getElementById('dock-body');
+        const r = b.getBoundingClientRect(); return {left: Math.round(c.left), mid: Math.round((c.left + c.right) / 2 - (r.left + b.clientWidth / 2)), width: Math.round(c.width)}; })()`);
+    const lessonCol = await column('#chapter-asm');
+    verify('a lesson is a column down the middle of the dock', lessonCol.width <= 780 && Math.abs(lessonCol.mid) <= 2, JSON.stringify(lessonCol));
+    const firstTab = await js(`Math.round(document.querySelector('.lesson-tab').getBoundingClientRect().left)`);
+    verify('and the lesson bar lines up with it', Math.abs(firstTab - lessonCol.left) <= 8, firstTab + ' ' + lessonCol.left);
+    await js(`document.getElementById('nav-links').click()`); await sleep(100);
+    const refCol = await column('#tab-links .link-list');
+    verify('the References read in the same column', refCol.left == lessonCol.left && refCol.width == lessonCol.width, JSON.stringify(refCol));
+    await js(`document.getElementById('nav-ref').click()`); await sleep(100);
     await h.press('#lesson-tab-chapter-meet');
+    // Show: an eye and its word, in amber; the step numbers in grey, so
+    // that, wrapped, the two never read as one.
+    const chips = await js(`[...document.querySelectorAll('.show-chip')].every((c) => c.querySelector('svg.icon path') && c.textContent == 'Show')`);
+    verify('every Show has its eye', chips);
+    const colours = await js(`(() => { const n = getComputedStyle(document.querySelector('#chapter-meet .steps > li'), '::before'), c = getComputedStyle(document.querySelector('.show-chip'));
+        return [n.color, n.borderTopColor, c.color, c.borderTopColor]; })()`);
+    verify('the step numbers are not the Show chips\' colour', colours[0] != colours[2] && colours[1] != colours[3], colours.join(' / '));
     const chip = (i) => js(`document.querySelectorAll('.show-chip')[${i}].click()`);
     await chip(1); await sleep(200);
     verify('a 2D Show outlines the data lamps', await js(`!!document.getElementById('tutorial-outline')`));
