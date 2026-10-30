@@ -105,8 +105,6 @@ export class BoxBinding {
             }
         }
         this.show = 'all';
-        /** @type {?Set<string>} The parts a Tutorial step points at, if any. */
-        this.highlight = null;
         this.pose();
     }
 
@@ -203,24 +201,12 @@ export class BoxBinding {
         this.applyLooks();
     }
 
-    /**
-     * Points at some parts, as a Tutorial step does (docs/3d-view.md,
-     * V7): they glow, shown even where the Show preset hides them, and
-     * every other part fades round them. Null stops pointing.
-     * @param {?Array<string>} names The parts, by their names in the model.
-     */
-    setHighlight(names) {
-        this.highlight = names ? new Set(names) : null;
-        this.applyLooks();
-    }
-
-    /** @private Draws every part as the Show preset and the highlight say. */
+    /** @private Draws every part as the Show preset says. */
     applyLooks() {
         const preset = SHOWS.find((s) => s.id == this.show);
-        const lit = this.highlight;
         for (const node of this.parts.values()) {
             const name = this.modelName(node);
-            const {glows, kept, faded, hidden, opacity: fade, outlined} = lookOf(name, preset, lit);
+            const {glows, kept, faded, hidden, opacity: fade, outlined} = lookOf(name, preset);
             node.userData.seeThrough = faded || hidden;
             for (const mesh of this.ownMeshes(node)) {
                 for (const m of [].concat(mesh.material)) {

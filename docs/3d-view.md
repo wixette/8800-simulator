@@ -284,6 +284,12 @@ looks faint or is gone:
                                  ⫼ Case hidden
                                  ▤ Electronics only   case, chassis and power supply hidden:
                                                       the panel, the bus boards, the cards, the harness
+                                 ── PARTS ──
+                                 ◎ CPU card           one key part glowing, the rest faded round it:
+                                 ◎ Memory cards       the parts Meet the Machine (V7) is about
+                                 ◎ Serial cards
+                                 ◎ The bus
+                                 ◎ Power supply
 ```
 
 *Changed while building:* the first build had one Views menu with
@@ -299,8 +305,16 @@ language, so that choosing a view never moves the tools beside it.
   let clicks and hover pass through, so a card can be pointed at
   through a faded lid. A faded case is drawn as outlined glass, at 40 %:
   the pale lid faded over the pale chassis, with no outline, read as no
-  lid at all. A Tutorial Show (V7) fades the parts round what it points
-  at further, to 16 %, out of its way.
+  lid at all.
+- **The key parts are Shows too.** Each makes its parts glow, shown
+  even where they would be hidden, and fades every other part further,
+  to 16 %, out of their way. Like any Show it stays as the view
+  changes. The memory cards are every card the Memory menu can fit;
+  those not fitted are not drawn. *Changed while building:* these began
+  as a highlight only a Tutorial chip could make, which neither menu
+  could show, so the bar said "Front panel" and "Everything" over a
+  machine faded round its CPU card; as Shows they are on the menu, and
+  the button says which.
 - **The machine keeps running** in every view and every Show preset:
   they change only how it is drawn. Watching the lamps through a
   faded case is the point.
@@ -434,22 +448,16 @@ Show action.**
   A contents row at the top of the tab jumps to each chapter, and the
   last one read is remembered, like the dock's tab.
 - **A step can end with a Show chip**, such as `[◎ Show]`, which acts
-  on the view and never on the machine: switch to 3D, fly to a view,
-  set a Show preset, and highlight the step's part (a glow, as on
-  hover, with the rest faded around it). It doesn't move the machine,
+  on the view and never on the machine: switch to 3D, then make the
+  same two choices as the Views and Show menus, a view and a Show (the
+  step's part, V3), so the menus' buttons say what it did. It doesn't move the machine,
   throw a switch or take anything apart. The reader still does those,
   as every step asks today. So a chip is a way to *look*, like the
   Views menu (P2: two ways to one view operation, not a copy of a
   control), and nothing locks and no mode is entered.
-- **The highlight ends** when the reader moves the camera to another
-  view, chooses from the Views or Show menu, or presses another chip.
-  The status line names what is shown ("Showing: the CPU card").
-- **The tools say what a chip did** *(changed while building)*: the
-  Views button names the view the chip looked from, and the Show button
-  becomes a target, in orange, named after the parts, with those parts
-  as the Show menu's current item above the presets. The first build
-  left both buttons as they were, so the bar said "Front panel" and
-  "Everything" over a machine faded round its CPU card.
+- **A part stays picked out** until the reader chooses another Show,
+  or a chip does. The status line names what is shown ("Showing: CPU
+  card.").
 - **Meet the machine, about ten steps:**
   - The front panel (works in 2D or 3D): the address and data lamps,
     the status lamps, the address/data switches, the control
@@ -468,14 +476,14 @@ Show action.**
   `<section class="tutorial-chapter">`, with the keys they had. A Show
   is a `<button class="show-chip">` whose data says what it shows
   (`data-view="2d" data-outline="status"`, or `data-view="3d"
-  data-camera="whole" data-parts="card.cpu"`; `memory` means the
-  memory cards fitted now). `js/panel-tutorial.js` builds the contents
+  data-camera="whole" data-show="cpu"`). `js/panel-tutorial.js` builds the contents
   row and runs the chips. *Changed while building:* the first draft
   rendered the chapters from data in `js/tutorial.js`; keeping them as
   markup changed no words or keys in the three chapters that were
   already there, and the layout checks stayed as they were.
-  `tests/tutorial.test.js` checks that every chip names a region,
-  view and parts that exist, and that a Show never works the machine.
+  `tests/tutorial.test.js` checks that every chip names a region, or a
+  view and a Show, that exist, that Meet the Machine picks out every
+  part Show, and that a Show never works the machine.
 - *Rejected:* the Leibniz step player and course mode (heavy for four
   short chapters, and it would make the three existing chapters work
   differently from the new one); a separate 3D tab in the dock (two

@@ -17,8 +17,8 @@ import {Box, CARD_IDS} from '../js/box.js';
 import {l10n} from '../js/l10n.js';
 import {panel} from '../js/app.js';
 import {axes, corners, frame, silhouette} from '../js/view3d/framing.js';
-import {CARD_LIFT, FADED_OPACITY, HOME_VIEW, PANEL_SUBJECT, POINTED, POINTED_ICON,
-        POINTED_AROUND_OPACITY, REST_SLOT, SHOWS, VIEWS, WIRED, lookOf, partKey, showButton,
+import {AROUND_PARTS_OPACITY, CARD_LIFT, FADED_OPACITY, HOME_VIEW, PANEL_SUBJECT, PART_ICON,
+        REST_SLOT, SHOWS, VIEWS, WIRED, lookOf, partKey, showButton,
         switchName} from '../js/view3d/views.js';
 import {readGlb} from './glb.js';
 import {stub} from './stub.js';
@@ -102,13 +102,19 @@ test('every part a Show preset or the page names is in the model', () => {
     assert.strictEqual(SHOWS[0], all, 'the whole machine is first, the one not marked changed');
 });
 
-test('the Show menu is icons: one for each Show, each its own, each a plain drawing', () => {
-    const icons = SHOWS.map((s) => s.icon);
-    assert.strictEqual(new Set(icons).size, SHOWS.length);
+test('the Show menu is icons: one for each way of drawing the machine, a target for each part', () => {
+    const drawn = SHOWS.filter((s) => !s.parts.length);
+    assert.deepStrictEqual(drawn.map((s) => s.id), ['all', 'case-faded', 'case-hidden', 'electronics']);
+    assert.strictEqual(new Set(drawn.map((s) => s.icon)).size, drawn.length);
+    assert.ok(!drawn.some((s) => s.icon == PART_ICON));
+    const parts = SHOWS.filter((s) => s.parts.length);
+    assert.deepStrictEqual(parts.map((s) => s.id), ['cpu', 'memory', 'serial', 'bus', 'psu']);
+    assert.ok(parts.every((s) => s.icon == PART_ICON && !s.faded.length && !s.hidden.length));
+    assert.strictEqual(SHOWS.indexOf(parts[0]), drawn.length, 'the parts come after the four');
     for (const show of SHOWS) {
         // Only paths, drawn in the icon's own colour: nothing that runs,
         // and nothing that would not follow the button's colour.
-        assert.match(show.icon, /^(<path( fill-rule="evenodd"| opacity="[.\d]+")* d="[MmHhVvZz\d. -]+"\/>)+$/,
+        assert.match(show.icon, /^(<path( fill-rule="evenodd"| opacity="[.\d]+")* d="[MmHhVvZzAa\d. -]+"\/>)+$/,
                      show.id);
     }
     const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
@@ -119,45 +125,40 @@ test('the Show menu is icons: one for each Show, each its own, each a plain draw
 
 test('a Show preset fades the case to glass, outlined; hides; never touches the panel\'s lamps', () => {
     const preset = (id) => SHOWS.find((s) => s.id == id);
-    const faded = lookOf('case.top', preset('case-faded'), null);
+    const faded = lookOf('case.top', preset('case-faded'));
     assert.deepStrictEqual([faded.faded, faded.hidden, faded.outlined], [true, false, true]);
     assert.ok(faded.opacity >= 0.35, 'a faded case is still plainly there, not gone');
-    assert.deepStrictEqual(lookOf('card.cpu', preset('case-faded'), null),
+    assert.deepStrictEqual(lookOf('card.cpu', preset('case-faded')),
                            {glows: false, kept: false, faded: false, hidden: false,
                             opacity: FADED_OPACITY, outlined: false});
-    const hidden = lookOf('case.top', preset('case-hidden'), null);
+    const hidden = lookOf('case.top', preset('case-hidden'));
     assert.deepStrictEqual([hidden.faded, hidden.hidden, hidden.outlined], [false, true, false]);
     for (const show of SHOWS) {
-        const lamp = lookOf('panel.lamp.d0', show, null);
+        const lamp = lookOf('panel.lamp.d0', show);
         assert.ok(lamp.kept && !lamp.faded && !lamp.hidden, show.id);
     }
 });
 
-test('pointing fades everything round its parts, further than a preset, and shows them even hidden', () => {
-    const pointed = new Set(['psu.t1']);
-    const electronics = SHOWS.find((s) => s.id == 'electronics');
-    assert.ok(electronics.hidden.includes('psu.t1'));
-    const it = lookOf('psu.t1', electronics, pointed);
+test('a part\'s Show makes it glow and fades everything round it, further than a preset', () => {
+    const psu = SHOWS.find((s) => s.id == 'psu');
+    const it = lookOf('psu.t1', psu);
     assert.deepStrictEqual([it.glows, it.faded, it.hidden], [true, false, false]);
-    const other = lookOf('card.cpu', SHOWS[0], pointed);
-    assert.deepStrictEqual([other.glows, other.faded, other.outlined], [false, true, false]);
-    assert.ok(POINTED_AROUND_OPACITY < FADED_OPACITY);
-    assert.strictEqual(other.opacity, POINTED_AROUND_OPACITY);
-    // A preset's faded case, while something is pointed at, fades with
-    // the rest rather than standing out outlined.
-    assert.strictEqual(lookOf('case.top', SHOWS[1], pointed).outlined, false);
+    for (const other of ['card.cpu', 'case.top', 'chassis.frame']) {
+        const look = lookOf(other, psu);
+        assert.deepStrictEqual([look.glows, look.faded, look.outlined, look.opacity],
+                               [false, true, false, AROUND_PARTS_OPACITY], other);
+    }
+    assert.ok(AROUND_PARTS_OPACITY < FADED_OPACITY);
+    for (const show of SHOWS.filter((s) => !s.parts.length)) {
+        assert.ok(!lookOf('card.cpu', show).glows, show.id + ' picks nothing out');
+    }
 });
 
-test('the Show button always says what is on show: a preset, or what a Tutorial step points at', () => {
-    assert.deepStrictEqual(showButton('all', false), {icon: SHOWS[0].icon, changed: false, selected: 'all'});
-    for (const show of SHOWS.slice(1)) {
-        assert.deepStrictEqual(showButton(show.id, false), {icon: show.icon, changed: true, selected: show.id});
-    }
-    // Pointing is on show whatever the preset under it, Everything too.
+test('the Show button shows the Show: its icon, orange unless the whole machine', () => {
     for (const show of SHOWS) {
-        assert.deepStrictEqual(showButton(show.id, true), {icon: POINTED_ICON, changed: true, selected: POINTED});
+        assert.deepStrictEqual(showButton(show.id), {icon: show.icon, changed: show.id != 'all'});
     }
-    assert.ok(!SHOWS.some((s) => s.id == POINTED || s.icon == POINTED_ICON));
+    assert.deepStrictEqual(showButton('nonesuch'), showButton('all'));
 });
 
 test('the menus\' words: every view and Show named, the button saying which, in every language', () => {
@@ -166,6 +167,7 @@ test('the menus\' words: every view and Show named, the button saying which, in 
             assert.ok(l10n.MESSAGES[id][locale], id + ' in ' + locale);
         }
         assert.ok(l10n.MESSAGES['show-menu-current'][locale].includes('{show}'), locale);
+        assert.ok(l10n.MESSAGES['show-heading-parts'][locale], locale);
     }
     // Short enough that the Views button, as wide as its longest name,
     // still leaves the stage's top edge room on a phone (U8).

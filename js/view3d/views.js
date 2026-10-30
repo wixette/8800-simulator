@@ -67,78 +67,83 @@ const ICONS = {
 };
 
 /**
- * The Show button's icon while a Tutorial step points at parts: a
- * target, for a Show that is none of the presets (V7).
+ * The icon of a Show that picks out parts: a target. The menu names
+ * which, and so does the button's tooltip.
  */
-export const POINTED_ICON = '<path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 1 0 0-20zm0 2.5a7.5 7.5 0 1 1 0 15 7.5 7.5 0 1 1 0-15zM12 8a4 4 0 1 0 0 8 4 4 0 1 0 0-8z"/>';
+export const PART_ICON = '<path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 1 0 0-20zm0 2.5a7.5 7.5 0 1 1 0 15 7.5 7.5 0 1 1 0-15zM12 8a4 4 0 1 0 0 8 4 4 0 1 0 0-8z"/>';
 
 /**
- * The Show presets, in the menu's order: which parts each fades, and
- * which it hides. A part named here is that node's own geometry, not
- * the parts fixed to it: hiding the chassis leaves the cards on it.
- * Electronics only keeps the front panel, the bus, the cards and the
- * wiring.
+ * The Show presets, in the menu's order: which parts each fades, which
+ * it hides, and which it picks out. A part named here is that node's
+ * own geometry, not the parts fixed to it: hiding the chassis leaves
+ * the cards on it. Electronics only keeps the front panel, the bus, the
+ * cards and the wiring.
+ *
+ * After those, a Show for each of the machine's key parts, which the
+ * Tutorial's Meet the Machine points at (V7): they glow, shown even
+ * where they would be hidden, and every other part fades round them.
+ * The memory cards are every one the Memory menu can fit; those not
+ * fitted are not drawn at all.
  * @type {!Array<{id: string, faded: !Array<string>, hidden: !Array<string>,
- *                 icon: string}>}
+ *                 parts: !Array<string>, icon: string}>}
  */
 export const SHOWS = [
-    {id: 'all', faded: [], hidden: [], icon: ICONS.all},
-    {id: 'case-faded', faded: CASE, hidden: [], icon: ICONS.caseFaded},
-    {id: 'case-hidden', faded: [], hidden: CASE, icon: ICONS.caseHidden},
+    {id: 'all', faded: [], hidden: [], parts: [], icon: ICONS.all},
+    {id: 'case-faded', faded: CASE, hidden: [], parts: [], icon: ICONS.caseFaded},
+    {id: 'case-hidden', faded: [], hidden: CASE, parts: [], icon: ICONS.caseHidden},
     {id: 'electronics', faded: [],
      hidden: CASE.concat(['chassis.frame', 'chassis.card_rail.0', 'chassis.card_rail.1',
                           'psu.t1', 'psu.t2', 'psu.t3', 'psu.board',
                           'psu.terminal_block', 'psu.fan']),
-     icon: ICONS.electronics},
+     parts: [], icon: ICONS.electronics},
+    {id: 'cpu', faded: [], hidden: [], parts: ['card.cpu'], icon: PART_ICON},
+    {id: 'memory', faded: [], hidden: [], parts: ['card.mem1k', 'card.mem4k_0', 'card.mem4k_1'],
+     icon: PART_ICON},
+    {id: 'serial', faded: [], hidden: [], parts: ['card.sio', 'card.sio2'], icon: PART_ICON},
+    {id: 'bus', faded: [], hidden: [], parts: ['bus.board.0', 'bus.board.1'], icon: PART_ICON},
+    {id: 'psu', faded: [], hidden: [], parts: ['psu.t1', 'psu.t2', 'psu.t3', 'psu.board'],
+     icon: PART_ICON},
 ];
 
 /**
  * A faded part's opacity: a Show preset's faded case is still plainly
  * there, glass rather than gone, and outlined; the parts round those a
- * Tutorial step points at fade further, out of their way.
+ * Show picks out fade further, out of their way.
  */
 export const FADED_OPACITY = 0.4;
-export const POINTED_AROUND_OPACITY = 0.16;
+export const AROUND_PARTS_OPACITY = 0.16;
 
 /**
- * How one part is drawn, as the Show preset and a Tutorial step's
- * pointing say (V3, V7).
+ * How one part is drawn in a Show preset (V3).
  * @param {string} name The part, by its name in the model.
- * @param {{faded: !Array<string>, hidden: !Array<string>}} preset The Show preset.
- * @param {?Set<string>} pointed The parts a Tutorial step points at, if any.
+ * @param {{faded: !Array<string>, hidden: !Array<string>, parts: !Array<string>}} preset
+ *     The Show preset.
  * @return {{glows: boolean, kept: boolean, faded: boolean, hidden: boolean,
- *           opacity: number, outlined: boolean}} Whether it glows (pointed
- *     at), is kept as it is (the panel's lamps and switches, which the
+ *           opacity: number, outlined: boolean}} Whether it glows (picked
+ *     out), is kept as it is (the panel's lamps and switches, which the
  *     panel draws), faded, hidden or outlined, and the opacity it fades to.
  */
-export function lookOf(name, preset, pointed) {
-    const glows = !!pointed && pointed.has(name);
+export function lookOf(name, preset) {
+    const picking = preset.parts.length > 0;
+    const glows = preset.parts.includes(name);
     const kept = /^panel\.(lamp|switch)\./.test(name);
-    const faded = !glows && !kept && (preset.faded.includes(name) || !!pointed);
+    const faded = !glows && !kept && (preset.faded.includes(name) || picking);
     const hidden = !glows && preset.hidden.includes(name);
     return {glows, kept, faded, hidden,
-            opacity: pointed ? POINTED_AROUND_OPACITY : FADED_OPACITY,
-            outlined: faded && !pointed};
+            opacity: picking ? AROUND_PARTS_OPACITY : FADED_OPACITY,
+            outlined: faded && !picking};
 }
 
 /**
- * What the Show button shows: the preset's icon, or a target while a
- * Tutorial step points at parts; changed - the orange of a setting
- * changed - unless the whole machine is on show; and which menu item
- * is the current one.
+ * What the Show button shows: the preset's icon, and changed - the
+ * orange of a setting changed - unless the whole machine is on show.
  * @param {string} show The Show preset.
- * @param {boolean} pointing Whether a Tutorial step points at parts.
- * @return {{icon: string, changed: boolean, selected: string}}
+ * @return {{icon: string, changed: boolean}}
  */
-export function showButton(show, pointing) {
+export function showButton(show) {
     const preset = SHOWS.find((s) => s.id == show) || SHOWS[0];
-    return {icon: pointing ? POINTED_ICON : preset.icon,
-            changed: pointing || preset !== SHOWS[0],
-            selected: pointing ? POINTED : preset.id};
+    return {icon: preset.icon, changed: preset !== SHOWS[0]};
 }
-
-/** The Show menu's item for what a Tutorial step points at. */
-export const POINTED = 'pointed';
 
 /**
  * The parts wired in place: a click on one says it does not come out.

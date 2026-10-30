@@ -195,9 +195,10 @@ panel, not a picture of it: click a switch on it and it does what the
   and + and − zoom.
 - **Views** picks where to look from - the front panel, the whole
   machine, inside from above, the rear. **Show**, the icon beside it,
-  picks what is drawn: everything, the case faded or hidden, or the
-  electronics alone; it turns orange while part of the machine is left
-  out. Pointing at a part names it and says what it does.
+  picks what is drawn: everything, the case faded or hidden, the
+  electronics alone, or one key part - the CPU card, the memory, the
+  serial cards, the bus, the power supply - glowing in a faded machine;
+  it turns orange while the machine is not drawn whole. Pointing at a part names it and says what it does.
 - **Take it apart:** switch the machine OFF, then click the lid to
   take it off, then a card to pull it, a transformer, the chassis...
   in the order the real machine allows; a part in the way says so.

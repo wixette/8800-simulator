@@ -14,7 +14,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {l10n} from '../js/l10n.js';
 import {panel} from '../js/app.js';
-import {VIEWS} from '../js/view3d/views.js';
+import {CARD_IDS} from '../js/box.js';
+import {SHOWS, VIEWS} from '../js/view3d/views.js';
 import {readGlb} from './glb.js';
 import {stub} from './stub.js';
 
@@ -51,10 +52,22 @@ test('every Show chip points at something that exists', () => {
             continue;
         }
         assert.ok(VIEWS.some((v) => v.id == chip.camera), chip.camera);
-        for (const part of (chip.parts || '').split(' ').filter(Boolean)) {
-            assert.ok(part == 'memory' || NODES.has(part), part);
+        assert.ok(SHOWS.some((s) => s.id == chip.show), chip.show);
+    }
+    // Meet the Machine picks out each key part, from the menu's own Shows.
+    const picked = all.filter((c) => c.show && c.show != 'all').map((c) => c.show);
+    assert.deepStrictEqual(picked, SHOWS.filter((s) => s.parts.length).map((s) => s.id));
+});
+
+test('the key parts\' Shows pick out parts that are in the model', () => {
+    for (const show of SHOWS) {
+        for (const part of show.parts) {
+            assert.ok(NODES.has(part), show.id + ': ' + part);
         }
     }
+    const memory = SHOWS.find((s) => s.id == 'memory').parts;
+    assert.deepStrictEqual(memory, CARD_IDS.filter((c) => /^mem/.test(c)).map((c) => 'card.' + c),
+                           'every card the Memory menu can fit');
 });
 
 test('the outlines sit on the 2D panel\'s artwork, round its lamps and switches', () => {
@@ -94,13 +107,12 @@ test('a 2D Show outlines its region, and says what it is', (t) => {
     assert.deepStrictEqual(said, [['tutorial-showing', {part: l10n.getMessage('tut-region-data')}]]);
 });
 
-test('a 3D Show points the 3D view at its parts, from its view', async (t) => {
+test('a 3D Show chooses a view and a Show, as the menus do, and names what it picks out', async (t) => {
     const said = [];
-    const pointed = [];
+    const chosen = [];
     const stage = {
-        point(parts, from) { pointed.push([parts, from]); return ['card.cpu']; },
-        setView(id) { pointed.push(['view', id]); },
-        partName: (name) => l10n.getMessage('part-' + name),
+        setView(id) { chosen.push(['view', id]); },
+        setShow(id) { chosen.push(['show', id]); },
     };
     stub(t, panel, {
         has3d: true,
@@ -108,13 +120,13 @@ test('a 3D Show points the 3D view at its parts, from its view', async (t) => {
         whenStage3d: () => Promise.resolve(stage),
         setStatus(id, params) { said.push([id, params]); },
     });
-    await panel.onShowChip({dataset: {view: '3d', camera: 'above', parts: 'card.cpu'}});
-    assert.deepStrictEqual(pointed, [[['card.cpu'], 'above']]);
-    assert.strictEqual(said[0][0], 'tutorial-showing');
-    assert.strictEqual(said[0][1].part, l10n.getMessage('part-card.cpu'));
-    await panel.onShowChip({dataset: {view: '3d', camera: 'whole'}});
-    assert.deepStrictEqual(pointed.at(-1), ['view', 'whole']);
+    await panel.onShowChip({dataset: {view: '3d', camera: 'whole', show: 'cpu'}});
+    assert.deepStrictEqual(chosen, [['view', 'whole'], ['show', 'cpu']]);
+    assert.deepStrictEqual(said, [['tutorial-showing', {part: l10n.getMessage('show-cpu')}]]);
+    await panel.onShowChip({dataset: {view: '3d', camera: 'whole', show: 'all'}});
+    assert.deepStrictEqual(chosen.slice(2), [['view', 'whole'], ['show', 'all']]);
+    assert.strictEqual(said.length, 1, 'the whole machine needs no naming');
     panel.has3d = false;
-    await panel.onShowChip({dataset: {view: '3d', camera: 'whole'}});
+    await panel.onShowChip({dataset: {view: '3d', camera: 'whole', show: 'cpu'}});
     assert.strictEqual(said.at(-1)[0], 'view3d-no-webgl', 'without WebGL 2 it says why');
 });

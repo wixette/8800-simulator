@@ -124,7 +124,8 @@ panel.showChapter = function(id, save) {
  * When a step's Show is pressed: it shows what the step is about.
  * @param {!Element} chip The chip, whose data says what: data-view,
  *     then data-outline (a region of the 2D panel), or data-camera (a
- *     view in 3D) and data-parts (parts to point at, space-separated).
+ *     view in 3D) and data-show (a Show preset: one of the key parts,
+ *     or the whole machine).
  * @return {!Promise} Settles once it is shown.
  */
 panel.onShowChip = function(chip) {
@@ -145,29 +146,14 @@ panel.onShowChip = function(chip) {
         if (!stage) {
             return;
         }
-        if (!data.parts) {
-            stage.setView(data.camera);
-            return;
+        // The same two choices as the Views and Show menus make, so the
+        // menus say what the chip did.
+        stage.setView(data.camera);
+        stage.setShow(data.show);
+        if (data.show != 'all') {
+            panel.setStatus('tutorial-showing', {part: l10n.getMessage('show-' + data.show)});
         }
-        var parts = stage.point(data.parts.split(' '), data.camera);
-        panel.setStatus('tutorial-showing', {part: panel.listOf(parts.map(function(name) {
-            return stage.partName(name);
-        }))});
     });
-};
-
-/**
- * Some names as one list, in the reader's language.
- * @param {!Array<string>} names The names.
- * @return {string} The list.
- */
-panel.listOf = function(names) {
-    try {
-        return new Intl.ListFormat(l10n.LOCALES[l10n.current] || 'en',
-                                   {type: 'conjunction'}).format(names);
-    } catch (e) {
-        return names.join(', ');
-    }
 };
 
 /**

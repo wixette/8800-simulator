@@ -465,8 +465,8 @@ stage's top right, on a band of its own (V1 in
 ### U8 — The 3D view's tools follow its view, not its machine
 
 In 3D the band also holds ⌂ (reset view), zoom − / +, a Views menu
-of five views, and a Show menu of four presets (P10: items only; V2,
-V3). Each button shows its current choice: Views by name, Show by
+of five views, and a Show menu of four ways to draw the machine and
+five key parts to pick out (P10: items only; V2, V3). Each button shows its current choice: Views by name, Show by
 icon, in orange when part of the machine is faded or hidden. The Views
 button is as wide as its longest name in the reader's language, so
 that a choice never moves the tools beside it. The views and presets
@@ -488,8 +488,9 @@ is V4a in [3d-view.md](3d-view.md#v4a--the-box-and-the-power-in-every-way-the-pa
 
 The Tutorial gains a contents row and a first chapter, *Meet the
 Machine*. A step may end with a Show chip that points at what it is
-about (an outline on the 2D panel, or parts lit in 3D with the rest
-faded). A chip only shows; it never works the machine (V7). No guided
+about: an outline on the 2D panel, or in 3D a view and one of the
+Show menu's parts, lit with the rest faded, which the Views and Show
+buttons then name. A chip only shows; it never works the machine (V7). No guided
 tour overlays the page (V8): the first visit opens on the Tutorial, as
 it did, and a dot on "3D" says the view is there until it is seen.
 

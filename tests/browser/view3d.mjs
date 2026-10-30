@@ -88,9 +88,9 @@ export default async function(h) {
     const plain = await js(showButton);
     verify('the Show button starts as the whole machine', !plain.changed && plain.title == 'Show: Everything', JSON.stringify(plain));
     await press('#show-button');
-    verify('the Show menu lists the four, each with its icon',
+    verify('the Show menu lists the four, then the parts, each with its icon',
            await js(`[...document.querySelectorAll('#show-list [role="option"]')].map((li) => li.dataset.value + (li.querySelector('svg.dropdown-icon path') ? '+' : '')).join()`) ==
-           'all+,case-faded+,case-hidden+,electronics+');
+           'all+,case-faded+,case-hidden+,electronics+,cpu+,memory+,serial+,bus+,psu+');
     await press('#show-list [data-value="case-faded"]');
     const after = await js(showButton);
     verify('choosing one shows its icon, marked as a change', after.changed && after.icon != plain.icon && after.title == 'Show: Case faded', JSON.stringify(after));
@@ -218,26 +218,30 @@ export async function tutorial(h) {
     for (let i = 0; i < 60 && !(await js(`!!panel.stage3d`)); i++) await sleep(250);
     await sleep(1200);
     verify('a 3D Show opens the 3D view', await js(`panel.view`) === '3d');
-    verify('and points at the CPU card', await js(`[...panel.stage3d.boxBind.highlight].join()`) === 'card.cpu');
-    verify('saying so', (await statusText()).startsWith('Showing: CPU card'), await statusText());
-    // The tools say so too (the repro: they said Front panel and Everything).
+    verify('and picks out the CPU card', await js(`panel.stage3d.boxBind.show`) === 'cpu');
+    verify('saying so', (await statusText()) == 'Showing: CPU card.', await statusText());
+    // The menus say what the chip chose: they are the same choices.
     const tools = `(() => { const b = document.getElementById('show-button'); return {view: document.querySelector('#views-current > span:not(.dropdown-label-room)').textContent, title: b.title, changed: b.classList.contains('changed')}; })()`;
-    const pointing = await js(tools);
-    verify('the Views button names where it looks from', pointing.view == 'Whole machine', JSON.stringify(pointing));
-    verify('the Show button names what it points at', pointing.changed && pointing.title == 'Show: CPU card (Intel 8080)', JSON.stringify(pointing));
+    const picked = await js(tools);
+    verify('the Views button names where it looks from', picked.view == 'Whole machine', JSON.stringify(picked));
+    verify('the Show button names the part, in orange', picked.changed && picked.title == 'Show: CPU card', JSON.stringify(picked));
     await h.press('#show-button');
-    verify('the Show menu has it as the current choice',
-           await js(`document.querySelector('#show-list [aria-selected="true"]').dataset.value`) === 'pointed');
+    const menu = await js(`[...document.querySelectorAll('#show-list li')].map((li) => li.getAttribute('aria-selected') == 'true' ? '[' + li.textContent + ']' : li.textContent).join(' | ')`);
+    verify('the Show menu lists the parts after the four, the CPU card chosen',
+           menu == 'Everything | Case faded | Case hidden | Electronics only | Parts | [CPU card] | Memory cards | Serial cards | The bus | Power supply', menu);
     await h.press('#show-list [data-value="case-faded"]'); await sleep(300);
-    const lid = `(() => { let m, lines; panel.stage3d.boxBind.find('case.top').traverse((o) => { if (o.isMesh && !m) m = [].concat(o.material)[0]; if (o.isLineSegments) lines = o.visible; }); return {opacity: +m.opacity.toFixed(2), lines}; })()`;
-    verify('Case faded then stops pointing', await js(`panel.stage3d.boxBind.highlight`) === null);
-    verify('and shows the case as glass, outlined, not gone', JSON.stringify(await js(lid)) == '{"opacity":0.4,"lines":true}', JSON.stringify(await js(lid)));
+    const lid = `(() => { let m, lines; panel.stage3d.boxBind.find('case.top').traverse((o) => { if (o.isMesh && !m) m = [].concat(o.material)[0]; if (o.isLineSegments) lines = o.visible; }); const cpu = panel.stage3d.boxBind.find('card.cpu'); let c; cpu.traverse((o) => { if (o.isMesh && !c) c = [].concat(o.material)[0]; }); return {opacity: +m.opacity.toFixed(2), lines, cpuGlows: c.emissive.getHex() == 0xff9900}; })()`;
+    verify('Case faded shows the case as glass, outlined, not gone, the CPU card no longer picked out',
+           JSON.stringify(await js(lid)) == '{"opacity":0.4,"lines":true,"cpuGlows":false}', JSON.stringify(await js(lid)));
     verify('as its button says', (await js(tools)).title == 'Show: Case faded');
-    await h.press('#show-button'); await h.press('#show-list [data-value="all"]'); await sleep(200);
-    verify('Everything puts the case back solid, unoutlined', JSON.stringify(await js(lid)) == '{"opacity":1,"lines":false}', JSON.stringify(await js(lid)));
+    await h.press('#show-button'); await h.press('#show-list [data-value="psu"]'); await sleep(200);
+    verify('a part chosen from the menu glows, the case fading round it',
+           JSON.stringify(await js(lid)) == '{"opacity":0.16,"lines":false,"cpuGlows":false}' && await js(`panel.stage3d.boxBind.show`) === 'psu', JSON.stringify(await js(lid)));
+    await js(`panel.stage3d.setView('rear')`); await sleep(200);
+    verify('and stays picked out from another view, as any Show does', await js(`panel.stage3d.boxBind.show`) === 'psu');
     await chip(7); await sleep(300);
-    verify('memory means the cards the Memory menu fitted', await js(`[...panel.stage3d.boxBind.highlight].join()`) === 'card.mem1k');
-    await js(`panel.stage3d.setView('whole')`);
-    verify('choosing a view stops pointing', await js(`panel.stage3d.boxBind.highlight`) === null);
+    verify('the memory Show picks out the cards the Memory menu fitted', await js(`(() => { const b = panel.stage3d.boxBind; const glow = (n) => { let c; b.find(n).traverse((o) => { if (o.isMesh && !c) c = [].concat(o.material)[0]; }); return c.emissive.getHex() == 0xff9900; }; return b.show == 'memory' && glow('card.mem1k') && !glow('card.cpu'); })()`));
+    await chip(5); await sleep(300);
+    verify('See it whole puts the whole machine back', await js(`panel.stage3d.boxBind.show`) === 'all' && !(await js(tools)).changed);
     verify('a Show never switched the machine on', !(await js(`panel.isPoweredOn`)));
 }
