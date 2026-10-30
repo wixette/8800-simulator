@@ -294,6 +294,22 @@ panel.setDataLedsCallback = function(bits) {
 };
 
 /**
+ * Says how the machine is - off, running, halted or stopped - for when
+ * what the status line said no longer applies.
+ */
+panel.sayMachineState = function() {
+    if (!panel.isPoweredOn) {
+        panel.setStatus('status-off');
+    } else if (panel.sim.isRunning) {
+        panel.setStatus('status-running');
+    } else if (panel.sim.halted) {
+        panel.setStatus('status-halted');
+    } else {
+        panel.setStatus('status-stopped');
+    }
+};
+
+/**
  * When CPU sets the WAIT LED.
  */
 panel.setWaitLedCallback = function(isRunning) {

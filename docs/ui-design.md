@@ -537,6 +537,24 @@ bright block under the panel and the 3D view. Now:
   Microsoft's first product, the Homebrew Computer Club.
 - **"Quick Tutorial" is "Your First Program",** which says what it is.
 
+### U12 — The status line keeps its height
+
+The status line takes one line's height in the page, whatever it says.
+A message that needs more rises over the foot of the dock, and the
+dock's scroll gains as much room below its end, so its last line - the
+Teletype's, the dump's - can still be scrolled clear of it. Before, the
+line grew and shrank with its message, and each time a two-line
+message gave way to a one-line one - switching the machine on, in the
+3D view - the stage, and the machine drawn on it, changed size. With
+the dock folded, a long message covers part of its tabs until the next
+one.
+
+Going back to 2D, a message about the 3D view, its camera or the box's
+parts gives way to how the machine is (off, running, halted, stopped),
+rather than staying on the panel that it no longer describes. The 3D
+view's welcome is one line on a desktop: what each part does is on its
+label, and taking the machine apart is in the Tutorial.
+
 ---
 
 ## Part 4 — Open questions

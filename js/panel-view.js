@@ -162,10 +162,20 @@ panel.setView = function(view, save) {
         // The 2D panel always stands for a whole machine (V4a).
         if (panel.box.snapTogether() && was == '3d') {
             panel.setStatus('view2d-reassembled');
+        } else if (was == '3d' && panel.SAID_IN_3D.test(panel.statusId || '')) {
+            // What the 3D view said is of no use on the 2D panel: say how
+            // the machine is instead.
+            panel.sayMachineState();
         }
     }
     panel.applyDock();
 };
+
+/**
+ * The status line's messages that are about the 3D view, its camera or
+ * the box's parts: going back to 2D replaces them.
+ */
+panel.SAID_IN_3D = /^(view3d-|view-|box-|tutorial-showing$)/;
 
 /**
  * Shows the 3D view, loading it the first time.

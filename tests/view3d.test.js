@@ -377,6 +377,54 @@ test('leaving the 3D view puts the box back together, and says so', (t) => {
     assert.deepStrictEqual(said, [], 'nothing to say when nothing was out');
 });
 
+test('going back to 2D, what the 3D view said gives way to how the machine is', (t) => {
+    const {said} = stubToggle(t);
+    const machine = {isRunning: false, halted: false};
+    stub(t, panel, {isPoweredOn: false, sim: machine, statusId: null});
+    const leave = (lastSaid, state) => {
+        panel.chooseView('3d');
+        panel.statusId = lastSaid;
+        Object.assign(panel, {isPoweredOn: state != 'off'});
+        Object.assign(machine, {isRunning: state == 'running', halted: state == 'halted'});
+        said.length = 0;
+        panel.chooseView('2d');
+        return said.slice();
+    };
+    for (const id of ['view3d-ready', 'view-apart-done', 'view-reassembling', 'box-taken-out',
+                      'box-out-first', 'tutorial-showing']) {
+        assert.deepStrictEqual(leave(id, 'off'), ['status-off'], id);
+    }
+    assert.deepStrictEqual(leave('view3d-ready', 'running'), ['status-running']);
+    assert.deepStrictEqual(leave('view3d-ready', 'halted'), ['status-halted']);
+    assert.deepStrictEqual(leave('view3d-ready', 'stopped'), ['status-stopped']);
+    // What is not about the 3D view stays: it is as true on the panel.
+    for (const id of ['status-running', 'rom-loaded', 'status-mem-installed', 'asm-has-errors']) {
+        assert.deepStrictEqual(leave(id, 'running'), [], id);
+    }
+    // Every message the 3D view and the box say is one it replaces.
+    const source = ['js/panel-view.js', 'js/view3d/view3d.js', 'js/panel.js']
+          .map((f) => fs.readFileSync(path.join(ROOT, f), 'utf8')).join('\n');
+    const own = [...source.matchAll(/setStatus\('((?:view3d|view|box)-[\w-]+)'/g)].map((m) => m[1])
+          .filter((id) => id != 'view2d-reassembled');
+    assert.ok(own.length >= 5, own.join());
+    for (const id of own.concat(Object.keys(l10n.MESSAGES).filter((k) => /^box-/.test(k)))) {
+        assert.ok(panel.SAID_IN_3D.test(id), id);
+    }
+});
+
+test('the status line keeps one line\'s height, a longer message rising over the dock', () => {
+    // So that a two-line message giving way to a one-line one does not
+    // resize the stage, and the 3D view with it.
+    const css = fs.readFileSync(path.join(ROOT, 'css', 'style.css'), 'utf8');
+    const bar = css.match(/\n#status-bar \{([^}]*)\}/)[1];
+    const text = css.match(/\n#status-text \{([^}]*)\}/)[1];
+    assert.match(bar, /\n    height: 33px;/);
+    assert.match(bar, /position: relative;/);
+    assert.match(text, /position: absolute;/);
+    assert.match(text, /bottom: 0;/);
+    assert.doesNotMatch(text, /\n    (max-)?height:/);
+});
+
 test('a link copied from the 3D view opens there', async (t) => {
     stubToggle(t);
     stub(t, global.window.location, {href: 'https://example.com/sim/'});

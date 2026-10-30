@@ -180,6 +180,21 @@ export async function phone(h) {
     verify('with room to see the machine', box.h >= 220 && box.w >= 300, JSON.stringify(box));
     const share = await js(TOP_SHARE);
     verify('the front shows the same band of the top as on a wide screen', Math.abs(share - 0.15) < 0.005, share);
+    // The status line keeps its height: a message of two lines or more
+    // rises over the dock, and the 3D view keeps its size as messages
+    // come and go - here, switching the machine on.
+    const sizes = `(() => { const s = document.getElementById('stage3d').getBoundingClientRect(), b = document.getElementById('status-bar').getBoundingClientRect(), t = document.getElementById('status-text').getBoundingClientRect();
+        return {stage: Math.round(s.width) + 'x' + Math.round(s.height), bar: Math.round(b.height), text: Math.round(t.height), barTop: Math.round(b.top), textTop: Math.round(t.top)}; })()`;
+    await js(`panel.setStatus('view3d-ready')`); await h.sleep(100);
+    const long = await js(sizes);
+    verify('a long message rises above the status line, which keeps its height', long.text > long.bar && long.textTop < long.barTop && long.bar == 33, JSON.stringify(long));
+    await js(`panel.onPowerOn()`); await h.sleep(200);
+    const short = await js(sizes);
+    verify('and switching on, with a shorter message, leaves the 3D view the size it was', short.stage == long.stage && short.bar == 33, JSON.stringify([long, short]));
+    await js(`panel.onPowerOff()`);
+    await js(`panel.setStatus('view3d-ready')`);
+    await press('#view-2d'); await h.sleep(200);
+    verify('going back to 2D, the 3D view\'s message gives way to how the machine is', (await h.statusText()).startsWith('The machine is off'), await h.statusText());
     verify('the tools fit across the top', await js(`(() => { const t = document.getElementById('view-tools'); return t.scrollWidth <= t.clientWidth + 1 && t.getBoundingClientRect().height < 40; })()`));
     verify('nothing to scroll sideways', await js(`document.documentElement.scrollWidth <= innerWidth`));
     const tapped = await js(`(() => { const s = panel.stage3d; const p = s.screenPoint('case.top', 'top'); s.showLabel(s.hitAt({clientX: p.x, clientY: p.y}), 2500);

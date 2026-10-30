@@ -668,16 +668,16 @@ export const MESSAGES_3D = {
     },
 
     'view3d-ready': {
-        'en': 'The whole machine in 3D. Drag to turn it, scroll or pinch to zoom. Click a switch to throw it; to look inside, switch OFF and click the lid.',
-        'es': 'La máquina entera en 3D. Arrastra para girarla y usa la rueda o pellizca para acercarte. Haz clic en un interruptor para accionarlo; para mirar dentro, apágala (OFF) y haz clic en la tapa.',
-        'fr': 'La machine entière en 3D. Faites-la tourner en la faisant glisser, zoomez avec la molette ou en pinçant. Cliquez sur un interrupteur pour l’actionner ; pour regarder à l’intérieur, éteignez (OFF) et cliquez sur le capot.',
-        'de': 'Die ganze Maschine in 3D. Ziehen dreht sie, Mausrad oder Zwei-Finger-Geste zoomt. Ein Klick auf einen Schalter legt ihn um; um hineinzusehen, schalten Sie aus (OFF) und klicken auf den Deckel.',
-        'it': 'La macchina intera in 3D. Trascina per ruotarla, usa la rotella o pizzica per lo zoom. Fai clic su un interruttore per azionarlo; per guardare dentro, spegni (OFF) e fai clic sul coperchio.',
-        'pt-BR': 'A máquina inteira em 3D. Arraste para girá-la, use a roda ou o gesto de pinça para aproximar. Clique num interruptor para acioná-lo; para olhar dentro, desligue (OFF) e clique na tampa.',
-        'zh': '3D 的整台机器。拖动可旋转，滚轮或双指可缩放。点击开关即可拨动；要看内部，请先关机（OFF）再点击上盖。',
-        'zh-TW': '3D 的整台機器。拖曳可旋轉，滾輪或雙指可縮放。點擊開關即可撥動；要看內部，請先關機（OFF）再點擊上蓋。',
-        'ja': '3D のマシン全体です。ドラッグで回転、ホイールかピンチでズームします。スイッチをクリックすると倒せます。中を見るには電源を切って（OFF）上ぶたをクリックしてください。',
-        'ko': '3D로 본 기계 전체입니다. 끌어서 돌리고, 휠이나 두 손가락으로 확대합니다. 스위치를 누르면 젖혀집니다. 안을 보려면 끄고(OFF) 덮개를 누르세요.',
+        'en': 'The whole machine in 3D: drag to turn it, scroll or pinch to zoom, click a part.',
+        'es': 'La máquina entera en 3D: arrastra para girarla, usa la rueda o pellizca para acercarte, haz clic en una pieza.',
+        'fr': 'La machine entière en 3D : faites-la glisser pour la tourner, zoomez à la molette ou en pinçant, cliquez sur une pièce.',
+        'de': 'Die ganze Maschine in 3D: zum Drehen ziehen, zum Zoomen scrollen oder zusammenziehen, ein Teil anklicken.',
+        'it': 'La macchina intera in 3D: trascina per ruotarla, scorri o pizzica per lo zoom, clicca su un pezzo.',
+        'pt-BR': 'A máquina inteira em 3D: arraste para girar, role ou faça pinça para aproximar, clique numa peça.',
+        'zh': '整台机器的 3D 视图：拖动旋转，滚动或双指缩放，点击部件。',
+        'zh-TW': '整台機器的 3D 視圖：拖曳旋轉，捲動或雙指縮放，點擊部件。',
+        'ja': 'マシン全体の 3D 表示：ドラッグで回転、スクロールかピンチでズーム、部品をクリック。',
+        'ko': '기계 전체의 3D 보기: 드래그로 회전, 스크롤이나 핀치로 확대, 부품을 클릭하세요.',
     },
 
     'view3d-failed': {

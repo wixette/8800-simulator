@@ -1105,6 +1105,9 @@ a {
     flex: 1 1 0;
     min-height: 0;
     overflow: auto;
+    /* Room below the end for the status message that rises over the
+       dock's foot (panel.fitStatus). */
+    padding-bottom: var(--status-rise, 0px);
 }
 
 .dock-closed #dock-body {
@@ -2195,23 +2198,34 @@ a {
 /* The status line along the foot of the app. Everything the simulator
    wants to tell you - the power went off, a board was installed, a
    tape was loaded, something would not work - says it here, so there
-   is one place to look. It is never hidden (P7). */
+   is one place to look. It is never hidden (P7).
+
+   It takes one line's height in the layout, whatever it says: a message
+   that needs more grows upwards, over the foot of the dock, rather than
+   pushing the page up - which shrank the panel, and the 3D view with
+   it, each time a two-line message gave way to a one-line one. */
 #status-bar {
-    align-items: baseline;
     background-color: #333;
-    border-top: 1px solid #111;
+    box-sizing: border-box;
     color: #ccc;
-    display: flex;
     flex: none;
     font-size: 14px;
-    gap: 16px;
+    height: 33px;
     line-height: 20px;
-    min-height: 20px;
-    padding: 6px 12px;
+    position: relative;
+    z-index: 3;
 }
 
 #status-text {
-    flex: 1;
+    background-color: inherit;
+    border-top: 1px solid #111;
+    bottom: 0;
+    box-sizing: border-box;
+    left: 0;
+    min-height: 33px;
+    padding: 6px 12px;
+    position: absolute;
+    right: 0;
 }
 
 

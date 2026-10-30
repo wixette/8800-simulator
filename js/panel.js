@@ -235,6 +235,24 @@ panel.refreshStatus = function() {
         msg = note + (/\u3002$/.test(note) ? '' : ' ') + msg;
     }
     text.textContent = msg;
+    panel.fitStatus();
+};
+
+/**
+ * The status line keeps one line's height in the page, and a longer
+ * message rises over the foot of the dock (css/style.css, #status-bar):
+ * the dock's scroll gains as much room below its end, so that its last
+ * line - the Teletype's, the dump's - can still be scrolled clear of it.
+ */
+panel.fitStatus = function() {
+    var bar = document.getElementById('status-bar');
+    var text = document.getElementById('status-text');
+    var app = document.getElementById('app');
+    if (!bar || !text || !app || !app.style) {
+        return;
+    }
+    var rise = Math.max(0, text.offsetHeight - bar.offsetHeight);
+    app.style.setProperty('--status-rise', rise + 'px');
 };
 
 /**
@@ -397,7 +415,10 @@ panel.init = function() {
         }
     });
     panel.initDockSplitter();
-    window.addEventListener('resize', function() { panel.applyDock(); },
+    window.addEventListener('resize', function() {
+        panel.applyDock();
+        panel.fitStatus();
+    },
                             false);
 
     // Initializes svg components for all LEDs.
