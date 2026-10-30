@@ -209,7 +209,7 @@ panel, not a picture of it: click a switch on it and it does what the
   and so does going back to 2D.
 - The cards follow the **Memory** menu: 256 bytes is the 1K card, 4 KB
   one 88-4MCS, 8 KB two.
-- The Tutorial's first chapter, **Meet the Machine**, walks through
+- The Tutorial's first lesson, **Meet the Machine**, walks through
   the panel and the parts behind it, pointing at each one.
 
 The 3D view needs WebGL 2, and loads only the first time you choose
@@ -442,7 +442,7 @@ favicon still has the logo's drawing.
 | [js/asm8080.js](js/asm8080.js), [js/asmtab.js](js/asmtab.js) | The 8080 assembler, and its tab |
 | [js/dropdown.js](js/dropdown.js), [js/dialog.js](js/dialog.js) | The menus and the dialogs |
 | [js/l10n.js](js/l10n.js), [js/l10n-3d.js](js/l10n-3d.js) | Every message, in ten languages |
-| [js/panel-view.js](js/panel-view.js), [js/panel-tutorial.js](js/panel-tutorial.js) | The 2D / 3D toggle; the Tutorial's chapters and Show chips |
+| [js/panel-view.js](js/panel-view.js), [js/panel-tutorial.js](js/panel-tutorial.js) | The 2D / 3D toggle; the Tutorial's lessons, remembered, and Show chips |
 | [js/box.js](js/box.js) | The machine's box: which parts are out, in what order they come out, and so whether it may switch on |
 | [js/view3d/](js/view3d/) | The 3D view, loaded when first chosen: the renderer and camera, the 3D panel, the box's parts, the Views and Show menus |
 | [model/](model/) | The 3D model: its params, its Blender build (`npm run build:model`), its research, and the built `.glb` |
@@ -566,6 +566,8 @@ Wikimedia Commons and Flickr contributors, credited in
 The model and its data are CC BY-SA 4.0 ([model/LICENSE](model/LICENSE));
 the rest of this repository, apart from the BASIC tape, is Apache 2.0.
 
-The Quick Tutorial in the simulator uses an example program from the original [Altair 8800 Operator's Manual](https://altairclone.com/downloads/manuals/Altair%208800%20Operator's%20Manual.pdf).
+The Tutorial's **Your First Program** lesson uses an example program from the original [Altair 8800 Operator's Manual](https://altairclone.com/downloads/manuals/Altair%208800%20Operator's%20Manual.pdf).
+
+The photo that opens the Tutorial, an Altair 8800 beside a Model 33 Teletype, is by Tim Colegrove, [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), from [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Altair_8800_and_Model_33_ASR_Teletype.jpg), scaled down; see [images/tutorial/CREDITS.md](images/tutorial/CREDITS.md).
 
 The interaction design took [another Altair 8800 simulator](https://s2js.com/altair/) as a reference.

@@ -2544,16 +2544,16 @@ l10n.MESSAGES = {
     },
 
     'tutorial-title': {
-        'en': 'Quick Tutorial',
-        'es': 'Tutorial rápido',
-        'fr': 'Tutoriel rapide',
-        'de': 'Kurzanleitung',
-        'it': 'Tutorial rapido',
-        'pt-BR': 'Tutorial Rápido',
-        'zh': '快速教程',
-        'zh-TW': '快速教學',
-        'ja': 'クイックチュートリアル',
-        'ko': '빠른 튜토리얼',
+        'en': 'Your First Program',
+        'es': 'Tu primer programa',
+        'fr': 'Votre premier programme',
+        'de': 'Ihr erstes Programm',
+        'it': 'Il tuo primo programma',
+        'pt-BR': 'Seu primeiro programa',
+        'zh': '第一个程序',
+        'zh-TW': '第一個程式',
+        'ja': 'はじめてのプログラム',
+        'ko': '첫 번째 프로그램',
     },
 
     'tutorial-desc': {

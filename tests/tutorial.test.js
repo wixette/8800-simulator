@@ -30,15 +30,88 @@ function chips() {
                                        .map((d) => [d[1], d[2]])));
 }
 
-test('the Tutorial has four chapters, Meet the Machine first', () => {
-    const ids = [...HTML.matchAll(/<section id="(chapter-\w+)" class="tutorial-chapter">/g)]
+test('the Tutorial is four lessons, Meet the Machine first, each with a title and a lead', () => {
+    const ids = [...HTML.matchAll(/<section id="(chapter-\w+)" class="tutorial-chapter" role="tabpanel">/g)]
           .map((m) => m[1]);
     assert.deepStrictEqual(ids, ['chapter-meet', 'chapter-first', 'chapter-asm', 'chapter-basic']);
-    assert.ok(HTML.includes('<nav id="tutorial-contents" class="tutorial-contents"></nav>'));
-    // The three chapters that were already there keep their words.
+    assert.ok(HTML.includes('<div id="tutorial-lessons" class="lesson-bar" role="tablist"></div>'));
+    for (const id of ids) {
+        const lesson = HTML.slice(HTML.indexOf('<section id="' + id + '"'));
+        const head = lesson.slice(0, lesson.indexOf('</header>'));
+        assert.match(head, /class="lesson-kicker"/, id);
+        assert.match(head, /<h3 id="[\w-]+" class="lesson-title l10n">/, id);
+        assert.match(head, /<p id="[\w-]+" class="lesson-lead l10n">/, id);
+    }
+    // The lessons that were there keep their words' keys.
     for (const id of ['tutorial-title', 'tutorial-19', 'asm-tutorial-4', 'basic-note']) {
         assert.ok(HTML.includes('id="' + id + '"'), id);
     }
+    // And a name that says what it is.
+    assert.strictEqual(l10n.MESSAGES['tutorial-title'].en, 'Your First Program');
+});
+
+test('a lesson\'s steps are numbered right through it, as they refer to each other', () => {
+    // "Repeat steps 4-5" is in Your First Program: its groups' lists
+    // carry on one count, which only the lesson resets.
+    const css = fs.readFileSync(path.join(ROOT, 'css', 'style.css'), 'utf8');
+    assert.match(css, /\.tutorial-chapter \{\n    counter-reset: step;/);
+    assert.doesNotMatch(css, /\.steps \{[^}]*counter-reset/);
+    const first = HTML.slice(HTML.indexOf('<section id="chapter-first"'), HTML.indexOf('<section id="chapter-asm"'));
+    const steps = [...first.matchAll(/<li(?: class="result")?><span id="tutorial-(\d+)"/g)].map((m) => +m[1]);
+    assert.deepStrictEqual(steps, Array.from({length: 19}, (_, i) => i + 1));
+    assert.ok((first.match(/class="step-group l10n"/g) || []).length >= 3, 'in named groups');
+    assert.match(first, /<li class="result"><span id="tutorial-18"/, 'the answer is marked as what you should see');
+});
+
+test('every word the lessons show is in every language', () => {
+    const tab = HTML.slice(HTML.indexOf('<div id="tab-ref"'), HTML.indexOf('<div id="tab-links"'));
+    const ids = [...tab.matchAll(/id="([\w-]+)" class="[^"]*\bl10n\b/g)].map((m) => m[1]);
+    assert.ok(ids.length > 50, ids.length);
+    for (const id of ids.concat(['tutorial-lesson-of', 'tutorial-next', 'tutorial-contents-label', 'tutorial-show'])) {
+        for (const locale of l10n.LOCALES) {
+            assert.ok(l10n.MESSAGES[id] && l10n.MESSAGES[id][locale], id + ' in ' + locale);
+        }
+    }
+    for (const locale of l10n.LOCALES) {
+        assert.ok(l10n.MESSAGES['tutorial-lesson-of'][locale].includes('{n}') &&
+                  l10n.MESSAGES['tutorial-lesson-of'][locale].includes('{total}'), locale);
+        assert.ok(l10n.MESSAGES['tutorial-next'][locale].includes('{title}'), locale);
+    }
+});
+
+test('Meet the Machine opens on a photo of the real thing, credited as its licence asks', () => {
+    const src = HTML.match(/<img src="(images\/tutorial\/[\w.-]+\.jpg)\?v=[\d.]+" width="960" height="720" alt="" loading="lazy" draggable="false">/);
+    assert.ok(src, 'the photo, versioned like every file the page names');
+    const file = path.join(ROOT, src[1]);
+    assert.ok(fs.statSync(file).size < 200 * 1024, 'small enough for a dock');
+    const credits = fs.readFileSync(path.join(ROOT, 'images', 'tutorial', 'CREDITS.md'), 'utf8');
+    const name = path.basename(file);
+    const row = credits.split('\n').find((line) => line.includes('`' + name + '`'));
+    assert.ok(row, name + ' is credited in images/tutorial/CREDITS.md');
+    assert.match(row, /Tim Colegrove/);
+    assert.match(row, /CC BY-SA 4\.0/);
+    assert.match(row, /commons\.wikimedia\.org/);
+    // On the page, too: the author, linked to the photo's page, and the
+    // licence, linked.
+    assert.match(HTML, /<a href="https:\/\/commons\.wikimedia\.org\/wiki\/File:Altair_8800_and_Model_33_ASR_Teletype\.jpg"[^>]*>Tim Colegrove<\/a>, <a href="https:\/\/creativecommons\.org\/licenses\/by-sa\/4\.0\/"[^>]*>CC BY-SA 4\.0<\/a>/);
+});
+
+test('the Tutorial remembers the lesson and where each was read to, and reads 1.7\'s chapter', (t) => {
+    const store = {};
+    stub(t, global, {localStorage: {
+        getItem: (k) => (k in store ? store[k] : null),
+        setItem: (k, v) => { store[k] = String(v); },
+    }});
+    assert.deepStrictEqual(panel.readTutorial(), {lesson: null, scroll: {}}, 'a first visit');
+    store[panel.chapterStorageKey] = 'chapter-asm';
+    assert.deepStrictEqual(panel.readTutorial(), {lesson: 'chapter-asm', scroll: {}}, '1.7\'s chapter');
+    stub(t, panel, {tutorial: {lesson: 'chapter-first', scroll: {'chapter-first': 300, 'chapter-meet': 0}}});
+    panel.saveTutorial();
+    assert.deepStrictEqual(panel.readTutorial(), {lesson: 'chapter-first', scroll: {'chapter-first': 300, 'chapter-meet': 0}});
+    store[panel.tutorialStorageKey] = '{not json';
+    assert.deepStrictEqual(panel.readTutorial(), {lesson: null, scroll: {}}, 'nonsense is forgotten');
+    store[panel.tutorialStorageKey] = '{"lesson": 3, "scroll": "far"}';
+    assert.deepStrictEqual(panel.readTutorial(), {lesson: null, scroll: {}}, 'and so is the wrong shape');
 });
 
 test('every Show chip points at something that exists', () => {

@@ -331,11 +331,41 @@ export async function views(h) {
 export async function tutorial(h) {
     const {js, viewport, fresh, verify, statusText, sleep} = h;
     await viewport(1280, 860); await fresh();
-    const names = await js(`[...document.querySelectorAll('.tutorial-jump')].map((b) => b.textContent)`);
-    verify('the contents name the four chapters', names.length == 4 && names[0] == 'Meet the Machine', names.join(' | '));
-    await js(`document.querySelectorAll('.tutorial-jump')[2].click()`); await sleep(200);
-    const top = await js(`document.getElementById('chapter-asm').getBoundingClientRect().top - document.getElementById('dock-body').getBoundingClientRect().top`);
-    verify('a chapter\'s button scrolls to it', Math.abs(top) < 4, top);
+    // Four lessons, one shown at a time (U11).
+    const names = await js(`[...document.querySelectorAll('#tutorial-lessons .lesson-tab')].map((b) => b.textContent)`);
+    verify('the bar numbers and names the four lessons', names.join(' | ') ==
+           '1Meet the Machine | 2Your First Program | 3Writing in Assembly | 4Running Microsoft BASIC', names.join(' | '));
+    const shown = `[...document.querySelectorAll('.tutorial-chapter')].filter((c) => !c.hidden).map((c) => c.id).join()`;
+    verify('a first visit opens on Meet the Machine, alone', await js(shown) === 'chapter-meet');
+    verify('which opens on the machine itself, credited',
+           await js(`(() => { const img = document.querySelector('.lesson-photo img'); return img.complete && img.naturalWidth == 960 && img.alt.includes('Teletype'); })()`) &&
+           (await js(`document.querySelector('.photo-credit').innerText`)).includes('Tim Colegrove, CC BY-SA 4.0'));
+    verify('and says it is lesson 1 of 4', await js(`document.querySelector('#chapter-meet .lesson-kicker').textContent`) === 'Lesson 1 of 4');
+    await h.press('#lesson-tab-chapter-asm');
+    verify('a lesson\'s tab opens it, alone', await js(shown) === 'chapter-asm' &&
+           await js(`document.getElementById('lesson-tab-chapter-asm').getAttribute('aria-selected')`) === 'true');
+    await js(`document.getElementById('lesson-tab-chapter-asm').focus()`);
+    await h.send('Input.dispatchKeyEvent', {type: 'keyDown', key: 'ArrowRight', code: 'ArrowRight', windowsVirtualKeyCode: 39});
+    await h.send('Input.dispatchKeyEvent', {type: 'keyUp', key: 'ArrowRight', code: 'ArrowRight', windowsVirtualKeyCode: 39});
+    verify('the arrow keys move along the bar', await js(shown) === 'chapter-basic');
+    await h.press('#lesson-tab-chapter-first');
+    await js(`document.getElementById('dock-body').scrollTop = 300`); await sleep(500);
+    const read = await js(`document.getElementById('dock-body').scrollTop`);
+    await h.press('#lesson-tab-chapter-meet');
+    verify('another lesson opens at its own top', await js(`document.getElementById('dock-body').scrollTop`) === 0);
+    await h.press('#lesson-tab-chapter-first');
+    verify('and coming back goes back to where it was read to', Math.abs(await js(`document.getElementById('dock-body').scrollTop`) - read) < 2, read);
+    await h.send('Page.navigate', {url: await js('location.href')}); await sleep(1500);
+    verify('a reload opens the lesson last read, where it was read to',
+           await js(shown) === 'chapter-first' && Math.abs(await js(`document.getElementById('dock-body').scrollTop`) - read) < 2, read);
+    await js(`document.getElementById('nav-tty').click()`); await sleep(100);
+    await js(`document.getElementById('dock-body').scrollTop = 0`);
+    await js(`document.getElementById('nav-ref').click()`); await sleep(100);
+    verify('so does coming back to the Tutorial from another tab', Math.abs(await js(`document.getElementById('dock-body').scrollTop`) - read) < 2);
+    await js(`document.querySelector('#chapter-first .lesson-next').click()`);
+    verify('a lesson ends with the way on to the next', await js(shown) === 'chapter-asm');
+    verify('the step that shows the answer is marked as one', await js(`document.querySelectorAll('#chapter-first li.result').length`) === 1);
+    await h.press('#lesson-tab-chapter-meet');
     const chip = (i) => js(`document.querySelectorAll('.show-chip')[${i}].click()`);
     await chip(1); await sleep(200);
     verify('a 2D Show outlines the data lamps', await js(`!!document.getElementById('tutorial-outline')`));

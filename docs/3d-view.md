@@ -471,7 +471,9 @@ Show action.**
   4. **Running Microsoft BASIC** (as now).
 
   A contents row at the top of the tab jumps to each chapter, and the
-  last one read is remembered, like the dock's tab.
+  last one read is remembered, like the dock's tab. *Changed since:*
+  the chapters became lessons, shown one at a time from a numbered bar
+  (docs/ui-design.md, U11).
 - **A step can end with a Show chip**, such as `[◎ Show]`, which acts
   on the view and never on the machine: switch to 3D, then make the
   same two choices as the Views and Show menus, a view and a Show (the

@@ -493,6 +493,41 @@ Show menu's parts, lit with the rest faded, which the Views and Show
 buttons then name. A chip only shows; it never works the machine (V7). No guided
 tour overlays the page (V8): the first visit opens on the Tutorial, as
 it did, and a dot on "3D" says the view is there until it is seen.
+(Its contents row became U11's lesson bar.)
+
+### U11 — The Tutorial as lessons, one at a time, on the dark
+
+The four chapters were one long light-grey page under a row of pill
+buttons: hard to find a place in, impossible to come back to, and a
+bright block under the panel and the 3D view. Now:
+
+- **Lessons, one at a time.** A bar of numbered lessons across the top
+  of the tab (a tab list: one tab stop, the arrows move along it) opens
+  one lesson and hides the rest. It stays in sight as the lesson
+  scrolls. On a narrow dock the other lessons are their numbers alone,
+  their names their tooltips. The lesson open, and how far down each
+  was read, are remembered (`localStorage` `sim8800tutorial`), and the
+  Tutorial goes back to both on a reload and when the dock comes back
+  to it from another tab. 1.7's remembered chapter is read once.
+- **A lesson's page.** "Lesson 2 of 4", its title and a one-line lead;
+  then its steps, in a few named groups (*Enter the program*, *Enter
+  the two numbers*, *Run it*, *Read the answer*). The numbers run on
+  through a lesson's groups, as its steps refer to each other by them.
+  It ends with the way on to the next lesson. Steps are not cards: the
+  dock's tabs, then lessons, then a card for each of nineteen steps
+  would be boxes in boxes; the groups give the structure, and a number
+  down a thin line gives each step its place.
+- **Colour means one thing each,** on the dock's own dark: amber is
+  what to do (the step numbers, Show, the bar's current lesson - the
+  orange a Show lights the machine with); green is what you should see
+  (the step that shows the answer); blue is the story and the asides;
+  code sits on the darkest panel. Grey is everything else.
+- **Meet the Machine opens on the real thing:** a photo of an Altair
+  8800 beside a Model 33 Teletype (Tim Colegrove, CC BY-SA 4.0,
+  credited under it, in About and in `images/tutorial/CREDITS.md`),
+  and a paragraph on why it matters - the January 1975 cover, the kit,
+  Microsoft's first product, the Homebrew Computer Club.
+- **"Quick Tutorial" is "Your First Program",** which says what it is.
 
 ---
 

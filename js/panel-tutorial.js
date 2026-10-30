@@ -13,18 +13,25 @@
  *   See the License for the specific language governing permissions and
  *   limitations under the License.
  *
- * @fileoverview The Tutorial's chapters and what a step can show
- * (docs/3d-view.md, V7): a contents row that jumps to each chapter, and
- * Show chips that point at what a step is about - a part of the 2D
- * panel, or parts of the machine in 3D. A chip changes only what is
- * shown: it never throws a switch or takes a part out; the reader does
- * that. Part of the panel namespace, which js/panel.js declares.
+ * @fileoverview The Tutorial's lessons and what a step can show
+ * (docs/ui-design.md, U11; docs/3d-view.md, V7): a bar of numbered
+ * lessons, one shown at a time, remembered with how far down each was
+ * read; and Show chips that point at what a step is about - a part of
+ * the 2D panel, or parts of the machine in 3D. A chip changes only what
+ * is shown: it never throws a switch or takes a part out; the reader
+ * does that. Part of the panel namespace, which js/panel.js declares.
  */
 
 import {l10n} from './l10n.js';
 import {panel} from './panel.js';
 
-/** Where the last chapter read is remembered. */
+/**
+ * Where the Tutorial is remembered: the lesson open, and how far down
+ * each lesson was read, as {lesson: id, scroll: {id: px}}.
+ */
+panel.tutorialStorageKey = 'sim8800tutorial';
+
+/** Where 1.7 remembered the last chapter jumped to, read once. */
 panel.chapterStorageKey = 'sim8800chapter';
 
 /**
@@ -43,23 +50,60 @@ panel.PANEL_REGIONS = {
 /** How long an outline on the 2D panel stays, in milliseconds. */
 panel.OUTLINE_MS = 6000;
 
+/** The Tutorial as remembered: the lesson open, and where each was read to. */
+panel.tutorial = {lesson: null, scroll: {}};
+
 /**
- * Builds the contents row and makes the Show chips work.
+ * Builds the lesson bar and each lesson's way on to the next, and makes
+ * the Show chips work; then opens the lesson last read.
  */
 panel.initTutorial = function() {
-    var contents = document.getElementById('tutorial-contents');
-    var chapters = document.querySelectorAll('.tutorial-chapter');
-    for (let i = 0; i < chapters.length; i++) {
-        let chapter = chapters[i];
-        let button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'tutorial-jump';
-        button.dataset.chapter = chapter.id;
-        button.addEventListener('click', function() {
-            panel.showChapter(chapter.id, true);
+    var bar = document.getElementById('tutorial-lessons');
+    var lessons = panel.lessons();
+    for (let i = 0; i < lessons.length; i++) {
+        let lesson = lessons[i];
+        let tab = document.createElement('button');
+        tab.type = 'button';
+        tab.id = 'lesson-tab-' + lesson.id;
+        tab.className = 'lesson-tab';
+        tab.setAttribute('role', 'tab');
+        tab.setAttribute('aria-controls', lesson.id);
+        tab.dataset.lesson = lesson.id;
+        let number = document.createElement('span');
+        number.className = 'lesson-num';
+        number.textContent = String(i + 1);
+        let name = document.createElement('span');
+        name.className = 'lesson-name';
+        tab.append(number, name);
+        tab.addEventListener('click', function() {
+            panel.showLesson(lesson.id, true);
         }, false);
-        contents.appendChild(button);
+        bar.appendChild(tab);
+        lesson.setAttribute('aria-labelledby', tab.id);
+        if (i + 1 < lessons.length) {
+            let next = document.createElement('button');
+            next.type = 'button';
+            next.className = 'lesson-next';
+            next.dataset.lesson = lessons[i + 1].id;
+            next.addEventListener('click', function() {
+                panel.showLesson(lessons[i + 1].id, true);
+            }, false);
+            lesson.appendChild(next);
+        }
     }
+    // The bar is one tab stop, and the arrows move along it, as tabs do.
+    bar.addEventListener('keydown', function(event) {
+        var tabs = Array.from(bar.querySelectorAll('.lesson-tab'));
+        var at = tabs.indexOf(/** @type {!HTMLElement} */ (document.activeElement));
+        var to = {ArrowLeft: at - 1, ArrowRight: at + 1, Home: 0, End: tabs.length - 1}[event.key];
+        if (at < 0 || to === undefined) {
+            return;
+        }
+        event.preventDefault();
+        to = (to + tabs.length) % tabs.length;
+        tabs[to].focus();
+        panel.showLesson(tabs[to].dataset.lesson, true);
+    }, false);
     var chips = document.querySelectorAll('.show-chip');
     for (let i = 0; i < chips.length; i++) {
         let chip = chips[i];
@@ -67,31 +111,85 @@ panel.initTutorial = function() {
             panel.onShowChip(chip);
         }, false);
     }
-    panel.refreshTutorial();
-    var saved = null;
-    try {
-        saved = localStorage.getItem(panel.chapterStorageKey);
-    } catch (e) {
-        saved = null;
+    var body = document.getElementById('dock-body');
+    if (body) {
+        body.addEventListener('scroll', function() {
+            panel.noteLessonScroll();
+        }, {passive: true});
     }
-    if (saved && document.getElementById(saved) && panel.dock.tab == 'ref') {
-        panel.showChapter(saved, false);
+    panel.tutorial = panel.readTutorial();
+    var first = lessons.length ? lessons[0].id : null;
+    var saved = panel.tutorial.lesson;
+    panel.showLesson(saved && document.getElementById(saved) ? saved : first, false);
+    panel.refreshTutorial();
+};
+
+/** @return {!Array<!HTMLElement>} The lessons, in order. */
+panel.lessons = function() {
+    return Array.from(document.querySelectorAll('.tutorial-chapter'));
+};
+
+/**
+ * @return {{lesson: ?string, scroll: !Object<string, number>}} The
+ *     Tutorial as last left, or as 1.7 left it, or nothing.
+ */
+panel.readTutorial = function() {
+    try {
+        var saved = JSON.parse(localStorage.getItem(panel.tutorialStorageKey) || 'null');
+        if (saved && typeof saved == 'object') {
+            return {lesson: typeof saved.lesson == 'string' ? saved.lesson : null,
+                    scroll: saved.scroll && typeof saved.scroll == 'object' ? saved.scroll : {}};
+        }
+        return {lesson: localStorage.getItem(panel.chapterStorageKey), scroll: {}};
+    } catch (e) {
+        return {lesson: null, scroll: {}};
+    }
+};
+
+/** Remembers the Tutorial: the lesson open, and where each was read to. */
+panel.saveTutorial = function() {
+    try {
+        localStorage.setItem(panel.tutorialStorageKey, JSON.stringify(panel.tutorial));
+    } catch (e) {
+        // Not remembered; no harm.
     }
 };
 
 /**
- * Writes the chapters' names into the contents row and the chips'
- * word, in the reader's language.
+ * Writes the lessons' names into the bar, their numbers over them, and
+ * the chips' word, in the reader's language.
  */
 panel.refreshTutorial = function() {
-    var buttons = document.querySelectorAll('.tutorial-jump');
-    for (let i = 0; i < buttons.length; i++) {
-        let title = document.querySelector('#' + buttons[i].dataset.chapter + ' .l10n');
-        buttons[i].textContent = title ? title.textContent : '';
+    var lessons = panel.lessons();
+    var title = function(lesson) {
+        var heading = lesson.querySelector('.lesson-title');
+        return heading ? heading.textContent : '';
+    };
+    for (let i = 0; i < lessons.length; i++) {
+        let lesson = lessons[i];
+        let name = document.querySelector('#lesson-tab-' + lesson.id + ' .lesson-name');
+        if (name) {
+            name.textContent = title(lesson);
+            name.parentElement.title = title(lesson);
+        }
+        let kicker = lesson.querySelector('.lesson-kicker');
+        if (kicker) {
+            kicker.textContent = l10n.getMessage('tutorial-lesson-of')
+                .replace('{n}', String(i + 1)).replace('{total}', String(lessons.length));
+        }
+        let next = lesson.querySelector('.lesson-next');
+        if (next) {
+            next.textContent = l10n.getMessage('tutorial-next')
+                .replace('{title}', title(lessons[i + 1])) + ' \u2192';
+        }
     }
-    var contents = document.getElementById('tutorial-contents');
-    if (contents) {
-        contents.setAttribute('aria-label', l10n.getMessage('tutorial-contents-label'));
+    var bar = document.getElementById('tutorial-lessons');
+    if (bar) {
+        bar.setAttribute('aria-label', l10n.getMessage('tutorial-contents-label'));
+    }
+    var photo = document.querySelector('.lesson-photo img');
+    if (photo) {
+        photo.alt = l10n.getMessage('tut-meet-photo');
     }
     var chips = document.querySelectorAll('.show-chip');
     for (let i = 0; i < chips.length; i++) {
@@ -100,24 +198,61 @@ panel.refreshTutorial = function() {
 };
 
 /**
- * Scrolls the Tutorial to a chapter.
- * @param {string} id The chapter's element.
+ * Opens a lesson: the others go out of sight, and the Tutorial goes
+ * back to where this one was read to.
+ * @param {?string} id The lesson's element.
  * @param {boolean} save Whether the reader chose it, to be remembered.
  */
-panel.showChapter = function(id, save) {
-    var chapter = document.getElementById(id);
-    var body = document.getElementById('dock-body');
-    if (!chapter || !body) {
+panel.showLesson = function(id, save) {
+    var lessons = panel.lessons();
+    if (!id || !document.getElementById(id)) {
         return;
     }
-    body.scrollTop += chapter.getBoundingClientRect().top - body.getBoundingClientRect().top;
-    if (save) {
-        try {
-            localStorage.setItem(panel.chapterStorageKey, id);
-        } catch (e) {
-            // Not remembered; no harm.
+    for (const lesson of lessons) {
+        let shown = lesson.id == id;
+        lesson.hidden = !shown;
+        let tab = document.getElementById('lesson-tab-' + lesson.id);
+        if (tab) {
+            tab.setAttribute('aria-selected', shown ? 'true' : 'false');
+            tab.tabIndex = shown ? 0 : -1;
+            tab.classList.toggle('current', shown);
+            if (shown) {
+                tab.scrollIntoView({block: 'nearest', inline: 'nearest'});
+            }
         }
     }
+    panel.tutorial.lesson = id;
+    if (save) {
+        panel.saveTutorial();
+    }
+    panel.restoreLessonScroll();
+};
+
+/**
+ * Puts the Tutorial back where its open lesson was read to - when it
+ * opens, and when the dock comes back to it.
+ */
+panel.restoreLessonScroll = function() {
+    var body = document.getElementById('dock-body');
+    var pane = document.getElementById('tab-ref');
+    if (!body || !pane || pane.hidden) {
+        return;
+    }
+    panel.restoringScroll = true;
+    body.scrollTop = panel.tutorial.scroll[panel.tutorial.lesson] || 0;
+    panel.restoringScroll = false;
+};
+
+/** The reader scrolled: remember how far down the open lesson is read. */
+panel.noteLessonScroll = function() {
+    var body = document.getElementById('dock-body');
+    var pane = document.getElementById('tab-ref');
+    if (panel.restoringScroll || !body || !pane || pane.hidden || !panel.tutorial.lesson) {
+        return;
+    }
+    panel.tutorial.scroll[panel.tutorial.lesson] = Math.round(body.scrollTop);
+    window.clearTimeout(panel.tutorialSaveTimer);
+    panel.tutorialSaveTimer = window.setTimeout(panel.saveTutorial, 300);
 };
 
 /**

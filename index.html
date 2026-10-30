@@ -378,40 +378,56 @@
             </div>
           </div>
 
-          <div id="tab-ref" class="dock-pane" role="tabpanel">
-        <!-- The chapters, and a row that jumps to each (docs/3d-view.md,
-             V7). A step's Show points at what it is about; it never
-             works the machine. -->
-        <nav id="tutorial-contents" class="tutorial-contents"></nav>
-        <section id="chapter-meet" class="tutorial-chapter">
-        <div class="subheader-bar">
-          <div id="tut-meet-title" class="l10n">Meet the Machine</div>
-        </div>
-        <div class="tutorial">
-          <p id="tut-meet-desc" class="tutorial-lead l10n">The Altair 8800 had no screen and no keyboard: its front panel was all there was. What it shows, and what is behind it. Each Show points it out.</p>
+          <div id="tab-ref" class="dock-pane tutorial-pane" role="tabpanel">
+        <!-- The Tutorial: four lessons, one at a time, chosen from the bar
+             across the top, which js/panel-tutorial.js builds from them
+             and remembers (docs/ui-design.md, U11). A step's Show points
+             at what it is about; it never works the machine (V7). -->
+        <div id="tutorial-lessons" class="lesson-bar" role="tablist"></div>
+
+        <section id="chapter-meet" class="tutorial-chapter" role="tabpanel">
+          <header class="lesson-head">
+            <div class="lesson-kicker"></div>
+            <h3 id="tut-meet-title" class="lesson-title l10n">Meet the Machine</h3>
+            <p id="tut-meet-desc" class="lesson-lead l10n">The Altair 8800 had no screen and no keyboard: its front panel was all there was. What it shows, and what is behind it. Each Show points it out.</p>
+          </header>
+          <div class="lesson-intro">
+            <figure class="lesson-photo">
+              <img src="images/tutorial/altair-8800-and-teletype.jpg?v=1.7.0" width="960" height="720" alt="" loading="lazy" draggable="false">
+              <figcaption><span id="tut-meet-photo" class="l10n">An Altair 8800 beside a Model 33 Teletype.</span>
+                <span class="photo-credit"><span id="tutorial-photo-by" class="l10n">Photo:</span> <a href="https://commons.wikimedia.org/wiki/File:Altair_8800_and_Model_33_ASR_Teletype.jpg" target="_blank" rel="noopener">Tim Colegrove</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a></span></figcaption>
+            </figure>
+            <p id="tut-meet-history" class="lesson-story l10n">In January 1975 the Altair 8800 was on the cover of Popular Electronics.</p>
+          </div>
+          <h4 id="tut-meet-g1" class="step-group l10n">On the front panel</h4>
           <ol class="steps">
             <li><span id="tut-meet-1" class="l10n">The status lamps, top left, show what the 8080 is doing: reading memory (MEMR), fetching an instruction (M1), halted (HLTA).</span> <button class="show-chip" type="button" data-view="2d" data-outline="status"></button></li>
             <li><span id="tut-meet-2" class="l10n">The data lamps D7–D0 show the byte on the data bus: lit is 1.</span> <button class="show-chip" type="button" data-view="2d" data-outline="data"></button></li>
             <li><span id="tut-meet-3" class="l10n">The address lamps A15–A0 show the address the CPU is using. WAIT, beside them, is lit while the machine is stopped.</span> <button class="show-chip" type="button" data-view="2d" data-outline="address"></button></li>
             <li><span id="tut-meet-4" class="l10n">The address/data switches set an address to examine, or a byte to deposit: up is 1. A program can read A15–A8 as its sense switches.</span> <button class="show-chip" type="button" data-view="2d" data-outline="switches"></button></li>
             <li><span id="tut-meet-5" class="l10n">The control switches spring back after each throw: STOP and RUN, SINGLE STEP, EXAMINE, DEPOSIT, RESET. OFF/ON, at the far left, is the power.</span> <button class="show-chip" type="button" data-view="2d" data-outline="controls"></button></li>
+          </ol>
+          <h4 id="tut-meet-g2" class="step-group l10n">Inside the box</h4>
+          <ol class="steps">
             <li><span id="tut-meet-6" class="l10n">Behind the panel is a box of cards on a bus. See it whole in 3D.</span> <button class="show-chip" type="button" data-view="3d" data-camera="whole" data-show="all"></button></li>
             <li><span id="tut-meet-7" class="l10n">The CPU card: the Intel 8080, the one chip that runs every program.</span> <button class="show-chip" type="button" data-view="3d" data-camera="whole" data-show="cpu"></button></li>
             <li><span id="tut-meet-8" class="l10n">The memory card: what the Memory menu installs. More memory is more cards.</span> <button class="show-chip" type="button" data-view="3d" data-camera="whole" data-show="memory"></button></li>
             <li><span id="tut-meet-9" class="l10n">The serial cards: the way to the Teletype, where BASIC talks to you.</span> <button class="show-chip" type="button" data-view="3d" data-camera="whole" data-show="serial"></button></li>
             <li><span id="tut-meet-10" class="l10n">The bus: every card plugs into the same 100 lines, so any card fits any slot.</span> <button class="show-chip" type="button" data-view="3d" data-camera="whole" data-show="bus"></button></li>
             <li><span id="tut-meet-11" class="l10n">The power supply: three transformers and their board, making the voltages every card needs.</span> <button class="show-chip" type="button" data-view="3d" data-camera="rear" data-show="psu"></button></li>
+          </ol>
+          <h4 id="tut-meet-g3" class="step-group l10n">Your turn</h4>
+          <ol class="steps">
             <li><span id="tut-meet-12" class="l10n">Now take it apart yourself: switch OFF, click the lid, then a card. Views ▸ Taken apart shows every part; any other view puts it back. Drag to turn it, scroll to zoom.</span></li>
           </ol>
-        </div>
         </section>
 
-        <section id="chapter-first" class="tutorial-chapter">
-        <div class="subheader-bar">
-          <div id="tutorial-title" class="l10n">Quick Tutorial</div>
-        </div>
-        <div class="tutorial">
-          <p id="tutorial-desc" class="tutorial-lead l10n">How to input and run the following program to calculate 1 + 2 = 3:</p>
+        <section id="chapter-first" class="tutorial-chapter" role="tabpanel">
+          <header class="lesson-head">
+            <div class="lesson-kicker"></div>
+            <h3 id="tutorial-title" class="lesson-title l10n">Your First Program</h3>
+            <p id="tutorial-desc" class="lesson-lead l10n">How to input and run the following program to calculate 1 + 2 = 3:</p>
+          </header>
           <pre class="tutorial-code">LDA 0080H  ; 00 111 010
            ; 10 000 000
            ; 00 000 000
@@ -426,6 +442,7 @@ STA 0082H  ; 00 110 010
 JMP 0000H  ; 11 000 011
            ; 00 000 000
            ; 00 000 000</pre>
+          <h4 id="tutorial-g1" class="step-group l10n">Enter the program</h4>
           <ol class="steps">
             <li><span id="tutorial-1" class="l10n">Turn on the Altair 8800 with the OFF/ON switch.</span></li>
             <li><span id="tutorial-2" class="l10n">Set switches A7–A0 to 00 111 010 (up for 1, down for 0).</span></li>
@@ -433,30 +450,37 @@ JMP 0000H  ; 11 000 011
             <li><span id="tutorial-4" class="l10n">Set switches A7–A0 to 10 000 000.</span></li>
             <li><span id="tutorial-5" class="l10n">Click "DEPOSIT NEXT".</span></li>
             <li><span id="tutorial-6" class="l10n">Repeat steps 4–5 to enter the following bytes one by one: 00 000 000, 01 000 111, 00 111 010, 10 000 001, 00 000 000, 10 000 000, 00 110 010, 10 000 010, 00 000 000, 11 000 011, 00 000 000, 00 000 000.</span></li>
+          </ol>
+          <h4 id="tutorial-g2" class="step-group l10n">Enter the two numbers</h4>
+          <ol class="steps">
             <li><span id="tutorial-7" class="l10n">Set switches A7–A0 to 10 000 000.</span></li>
             <li><span id="tutorial-8" class="l10n">Click "EXAMINE".</span></li>
             <li><span id="tutorial-9" class="l10n">Set switches A7–A0 to 00 000 001 (the first number to be added, or 1 in decimal).</span></li>
             <li><span id="tutorial-10" class="l10n">Click "DEPOSIT".</span></li>
             <li><span id="tutorial-11" class="l10n">Set switches A7–A0 to 00 000 010 (the second number to be added, or 2 in decimal).</span></li>
             <li><span id="tutorial-12" class="l10n">Click "DEPOSIT NEXT".</span></li>
+          </ol>
+          <h4 id="tutorial-g3" class="step-group l10n">Run it</h4>
+          <ol class="steps">
             <li><span id="tutorial-13" class="l10n">Click "RESET".</span></li>
             <li><span id="tutorial-14" class="l10n">Click "RUN" and wait for a few seconds.</span></li>
             <li><span id="tutorial-15" class="l10n">Click "STOP".</span></li>
+          </ol>
+          <h4 id="tutorial-g4" class="step-group l10n">Read the answer</h4>
+          <ol class="steps">
             <li><span id="tutorial-16" class="l10n">Set switches A7–A0 to 10 000 010 (the address that holds the sum).</span></li>
             <li><span id="tutorial-17" class="l10n">Click "EXAMINE".</span></li>
-            <li><span id="tutorial-18" class="l10n">The data lamps D7–D0 show the result 00 000 011 (3 in decimal).</span></li>
+            <li class="result"><span id="tutorial-18" class="l10n">The data lamps D7–D0 show the result 00 000 011 (3 in decimal).</span></li>
             <li><span id="tutorial-19" class="l10n">Turn off the Altair 8800.</span></li>
           </ol>
-        </div>
-
         </section>
 
-        <section id="chapter-asm" class="tutorial-chapter">
-        <div class="subheader-bar">
-          <div id="asm-tutorial-title" class="l10n">Writing in Assembly</div>
-        </div>
-        <div class="tutorial">
-          <p id="asm-tutorial-desc" class="tutorial-lead l10n">The same machine, without toggling each byte by hand: write the program in Intel's assembly language, and let the assembler make the bytes. A program that copies the sense switches to the data lamps:</p>
+        <section id="chapter-asm" class="tutorial-chapter" role="tabpanel">
+          <header class="lesson-head">
+            <div class="lesson-kicker"></div>
+            <h3 id="asm-tutorial-title" class="lesson-title l10n">Writing in Assembly</h3>
+            <p id="asm-tutorial-desc" class="lesson-lead l10n">The same machine, without toggling each byte by hand: write the program in Intel's assembly language, and let the assembler make the bytes. A program that copies the sense switches to the data lamps:</p>
+          </header>
           <ol class="steps">
             <li><span id="asm-tutorial-1" class="l10n">Open the Assembler, under the panel, and type these three lines:</span>
               <pre class="tutorial-code">LOOP:   IN      0FFH    ; read the sense switches
@@ -465,24 +489,26 @@ JMP 0000H  ; 11 000 011
             </li>
             <li><span id="asm-tutorial-2" class="l10n">Beside each line, the listing shows its address and the bytes it makes: IN 0FFH is DB FF, at 0000H. A mistake is marked on its line, with what is wrong under the source.</span></li>
             <li><span id="asm-tutorial-3" class="l10n">Click Assemble, or press Ctrl+Enter. The machine is switched on if it was off, the program goes into memory, and RESET is pressed.</span></li>
-            <li><span id="asm-tutorial-4" class="l10n">Click RUN on the front panel, then flip the switches A15–A8: the data lamps follow them.</span></li>
+            <li class="result"><span id="asm-tutorial-4" class="l10n">Click RUN on the front panel, then flip the switches A15–A8: the data lamps follow them.</span></li>
           </ol>
           <p id="asm-tutorial-note" class="tutorial-note l10n">More to try: the Assembler's Examples menu has fourteen programs, from lamps on the front panel to a game on the Teletype, macros included. Intel's own manual, in References, describes the whole language.</p>
-        </div>
-
         </section>
 
-        <section id="chapter-basic" class="tutorial-chapter">
-        <div class="subheader-bar">
-          <div id="basic-title" class="l10n">Running Microsoft BASIC</div>
-        </div>
-        <div class="tutorial">
-          <p id="basic-desc" class="tutorial-lead l10n">The Altair's first piece of software, and Microsoft's: Altair BASIC 3.2, written in 1975 by Bill Gates, Paul Allen and Monte Davidoff. How to start it:</p>
+        <section id="chapter-basic" class="tutorial-chapter" role="tabpanel">
+          <header class="lesson-head">
+            <div class="lesson-kicker"></div>
+            <h3 id="basic-title" class="lesson-title l10n">Running Microsoft BASIC</h3>
+            <p id="basic-desc" class="lesson-lead l10n">The Altair's first piece of software, and Microsoft's: Altair BASIC 3.2, written in 1975 by Bill Gates, Paul Allen and Monte Davidoff. How to start it:</p>
+          </header>
+          <h4 id="basic-g1" class="step-group l10n">Load it</h4>
           <ol class="steps">
             <li><span id="basic-1" class="l10n">In the Memory menu, choose 4 KB (or 8 KB, for room to write longer programs). Installing memory switches the machine off, which is what opening the case would have done.</span></li>
             <li><span id="basic-2" class="l10n">In the Load menu, choose Microsoft 4K BASIC. The machine powers up, the tape is read for you, RESET is pressed, and the Debugger opens to show what arrived.</span></li>
             <li><span id="basic-3" class="l10n">Before going any further, look at the memory map above the dump. Fifteen of the sixteen pages of a 4 KB machine are full: that is BASIC, and the one page left over is all the room you have for a program. This is what "4K BASIC" means.</span></li>
             <li><span id="basic-4" class="l10n">The address switches A15–A8 tell BASIC which terminal board to use: all down is the 88-SIO at ports 00H and 01H, switch A11 up is the 88-2SIO at 10H and 11H. The teletype here is wired to both slots, so either setting works - a real Altair would have had only one of the two boards fitted, and the wrong setting left it silent.</span></li>
+          </ol>
+          <h4 id="basic-g2" class="step-group l10n">Talk to it</h4>
+          <ol class="steps">
             <li><span id="basic-5" class="l10n">Click RUN on the front panel.</span></li>
             <li><span id="basic-6" class="l10n">Open the Teletype, under the panel. BASIC asks MEMORY SIZE? - press Enter to take everything it found. Press Enter again for TERMINAL WIDTH?, then Y for WANT SIN? to keep the maths functions.</span></li>
             <li><span id="basic-7" class="l10n">It prints how many bytes are free, then OK. Try PRINT 22/7 for an answer straight away. To enter a program, type these lines one at a time, pressing Enter after each:</span>
@@ -494,7 +520,6 @@ RUN</pre>
             <li><span id="basic-8" class="l10n">The keyboard is upper case only. Underscore rubs out the last character, at-sign throws away the line, and Ctrl-C stops a running program.</span></li>
           </ol>
           <p id="basic-note" class="tutorial-note l10n">What loading 4K BASIC skips: on a real Altair you first toggled a 28 byte boot loader in through the front panel, one byte at a time, then started the paper tape reader and waited about seven minutes while BASIC clattered in. Get one switch wrong and you did it again.</p>
-        </div>
         </section>
           </div>
 
@@ -639,6 +664,8 @@ RUN</pre>
           <dd><a href="https://github.com/wixette/8800-simulator/blob/master/model/LICENSE" target="_blank" rel="noopener">CC BY-SA 4.0</a></dd>
           <dt id="about-license-three" class="l10n">3D engine</dt>
           <dd><a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> <span>© three.js authors</span> · <span>MIT</span></dd>
+          <dt id="about-license-photo" class="l10n">Photo</dt>
+          <dd><a href="https://commons.wikimedia.org/wiki/File:Altair_8800_and_Model_33_ASR_Teletype.jpg" target="_blank" rel="noopener">Tim Colegrove</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a></dd>
           <dt id="about-license-icons" class="l10n">Icons</dt>
           <dd><a href="https://github.com/google/material-design-icons" target="_blank" rel="noopener">Material Icons</a> <span>© Google</span> · <span>Apache 2.0</span></dd>
         </dl>

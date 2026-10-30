@@ -553,51 +553,6 @@ a {
     right: 0;
 }
 
-/* The Tutorial's chapters, one button each, across its top (V7). */
-.tutorial-contents {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin: 6px 0 2px 0;
-}
-
-.tutorial-jump {
-    background: none;
-    border: 1px solid #555;
-    border-radius: 14px;
-    color: #ccc;
-    cursor: pointer;
-    font-size: 13px;
-    padding: 3px 10px;
-}
-
-.tutorial-jump:hover,
-.tutorial-jump:focus-visible {
-    background-color: var(--hover-bg);
-    color: #fff;
-    outline: none;
-}
-
-/* A step's Show: it points at what the step is about. */
-.show-chip {
-    background: none;
-    border: 1px solid #c70;
-    border-radius: 12px;
-    color: #c60;
-    cursor: pointer;
-    font-size: 12px;
-    margin-left: 6px;
-    padding: 0 8px;
-    vertical-align: 1px;
-}
-
-.show-chip:hover,
-.show-chip:focus-visible {
-    background-color: #f90;
-    color: #222;
-    outline: none;
-}
-
 /* What a Show points at on the 2D panel. */
 .tutorial-outline {
     fill: none;
@@ -1226,34 +1181,214 @@ a {
     padding: 5px 10px;
 }
 
-/* The Tutorial: an introduction, a program listing, numbered steps,
-   and a closing note. */
-.tutorial {
-    background-color: #ccc;
-    border-radius: 10px;
-    color: #222;
+/* The Tutorial (docs/ui-design.md, U11): a bar of numbered lessons,
+   one lesson at a time, on the dock's own dark. Colour means one thing
+   each: amber is what to do (the step numbers, Show - the orange a Show
+   lights the machine with), green is what you should see, blue is the
+   story and the asides, and code sits on the darkest panel. */
+.tutorial-pane {
+    --t-text: #e2e4e7;
+    --t-muted: #a3a8af;
+    --t-edge: #3a3e44;
+    --t-amber: #f9a23b;
+    --t-amber-bg: rgba(255, 153, 0, 0.12);
+    --t-green: #93d48c;
+    --t-green-bg: rgba(110, 190, 100, 0.11);
+    --t-blue: #8db9f2;
+    --t-blue-bg: rgba(90, 140, 220, 0.12);
+    color: var(--t-text);
+    container-type: inline-size;
     font-size: 14px;
     line-height: 1.6;
-    padding: 16px 20px;
+    padding-top: 0;
 }
 
-.tutorial-lead {
+/* The lessons, numbered, across the top: it stays in sight while a
+   lesson scrolls under it. */
+.lesson-bar {
+    background-color: #262626;
+    border-bottom: 1px solid var(--t-edge);
+    display: flex;
+    gap: 4px;
+    margin: 0 -12px;
+    overflow-x: auto;
+    padding: 6px 12px 0 12px;
+    position: sticky;
+    scrollbar-width: none;
+    top: 0;
+    z-index: 1;
+}
+
+.lesson-tab {
+    align-items: center;
+    background: none;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    color: var(--t-muted);
+    cursor: pointer;
+    display: flex;
+    flex: none;
+    font: inherit;
+    font-size: 13px;
+    gap: 8px;
+    margin-bottom: -1px;
+    padding: 6px 10px 8px 6px;
+    white-space: nowrap;
+}
+
+.lesson-tab:hover,
+.lesson-tab:focus-visible {
+    color: var(--t-text);
+    outline: none;
+}
+
+.lesson-tab:focus-visible .lesson-num {
+    box-shadow: 0 0 0 2px var(--t-amber);
+}
+
+.lesson-tab.current {
+    border-bottom-color: var(--t-amber);
+    color: var(--t-text);
+}
+
+.lesson-num {
+    border: 1.5px solid currentColor;
+    border-radius: 50%;
+    box-sizing: border-box;
+    flex: none;
+    font-size: 12px;
     font-weight: bold;
-    margin: 0 0 12px 0;
+    height: 22px;
+    line-height: 19px;
+    text-align: center;
+    width: 22px;
+}
+
+.lesson-tab.current .lesson-num {
+    background-color: var(--t-amber);
+    border-color: var(--t-amber);
+    color: #222;
+}
+
+/* Narrow, the other lessons are their numbers alone; their names are
+   their tooltips. */
+@container (max-width: 560px) {
+    .lesson-tab:not(.current) .lesson-name {
+        display: none;
+    }
+}
+
+.tutorial-chapter {
+    counter-reset: step;
+    max-width: 780px;
+    padding: 16px 0 24px 0;
+}
+
+.lesson-kicker {
+    color: var(--t-muted);
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.lesson-title {
+    color: #fff;
+    font-size: 20px;
+    line-height: 1.3;
+    margin: 2px 0 6px 0;
+}
+
+.lesson-lead {
+    color: var(--t-muted);
+    margin: 0 0 16px 0;
+}
+
+/* Meet the Machine opens on the real thing, and why it matters. */
+.lesson-intro {
+    align-items: start;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    margin: 0 0 8px 0;
+}
+
+@container (max-width: 560px) {
+    .lesson-intro {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.lesson-photo {
+    margin: 0;
+}
+
+.lesson-photo img {
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+    display: block;
+    height: auto;
+    width: 100%;
+}
+
+.lesson-photo figcaption {
+    color: var(--t-muted);
+    font-size: 12px;
+    line-height: 1.45;
+    margin-top: 6px;
+}
+
+.photo-credit {
+    white-space: nowrap;
+}
+
+.photo-credit a {
+    color: var(--t-muted);
+}
+
+.photo-credit a:hover {
+    color: var(--t-text);
+}
+
+/* The story, and the asides: blue. */
+.lesson-story,
+.tutorial-note {
+    background-color: var(--t-blue-bg);
+    border-left: 3px solid var(--t-blue);
+    border-radius: 6px;
+    margin: 0;
+    padding: 10px 14px;
+}
+
+.tutorial-note {
+    margin: 20px 0 0 0;
+}
+
+/* A lesson's steps come in a few groups, each named. */
+.step-group {
+    color: var(--t-muted);
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 0.06em;
+    margin: 22px 0 10px 0;
+    text-transform: uppercase;
 }
 
 .tutorial-code {
-    background-color: #e6e6e6;
-    border-left: 3px solid #999;
-    border-radius: 6px;
+    background-color: #17191c;
+    border: 1px solid var(--t-edge);
+    border-radius: 8px;
+    color: #d6dbe0;
+    font-size: 13px;
     line-height: 1.5;
-    margin: 0 0 16px 0;
+    margin: 0 0 8px 0;
     overflow-x: auto;
-    padding: 10px 16px;
+    padding: 10px 14px;
 }
 
+/* The steps: numbered down a thin line, one lesson's numbers running on
+   from group to group, as the steps refer to each other by them. */
 .steps {
-    counter-reset: step;
     list-style: none;
     margin: 0;
     padding: 0;
@@ -1261,43 +1396,98 @@ a {
 
 .steps > li {
     counter-increment: step;
-    margin: 0 0 8px 0;
+    margin: 0;
     min-height: 24px;
-    padding: 1px 0 0 38px;
+    padding: 1px 0 14px 38px;
     position: relative;
 }
 
-.steps > li:last-child {
-    margin-bottom: 0;
-}
-
-/* The step number, as a badge in the gutter. */
 .steps > li::before {
-    background-color: #666;
-    border-radius: 12px;
-    color: #eee;
+    border: 1.5px solid var(--t-amber);
+    border-radius: 50%;
+    box-sizing: border-box;
+    color: var(--t-amber);
     content: counter(step);
     font-size: 12px;
     font-weight: bold;
     height: 24px;
     left: 0;
-    line-height: 24px;
+    line-height: 21px;
     position: absolute;
     text-align: center;
     top: 0;
     width: 24px;
 }
 
-.steps .tutorial-code {
-    margin: 8px 0 4px 0;
+.steps > li:not(:last-child)::after {
+    background-color: var(--t-edge);
+    bottom: 2px;
+    content: '';
+    left: 11px;
+    position: absolute;
+    top: 28px;
+    width: 2px;
 }
 
-.tutorial-note {
-    background-color: #e6e6e6;
-    border-left: 3px solid #f90;
+.steps .tutorial-code {
+    margin: 8px 0 0 0;
+}
+
+/* What you should see: green. */
+.steps > li.result::before {
+    background-color: var(--t-green);
+    border-color: var(--t-green);
+    color: #1a1a1a;
+}
+
+.steps > li.result > span {
+    background-color: var(--t-green-bg);
     border-radius: 6px;
-    margin: 16px 0 0 0;
-    padding: 10px 16px;
+    color: var(--t-green);
+    display: inline-block;
+    padding: 1px 8px;
+}
+
+/* A step's Show: it points at what the step is about. */
+.show-chip {
+    background-color: var(--t-amber-bg);
+    border: 1px solid var(--t-amber);
+    border-radius: 12px;
+    color: var(--t-amber);
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+    margin-left: 6px;
+    padding: 0 9px;
+    vertical-align: 1px;
+}
+
+.show-chip:hover,
+.show-chip:focus-visible {
+    background-color: var(--t-amber);
+    color: #222;
+    outline: none;
+}
+
+/* On to the next lesson, at the end of each. */
+.lesson-next {
+    background: none;
+    border: 1px solid var(--t-edge);
+    border-radius: 8px;
+    color: var(--t-text);
+    cursor: pointer;
+    display: block;
+    font: inherit;
+    font-size: 13px;
+    margin: 24px 0 0 auto;
+    padding: 8px 14px;
+}
+
+.lesson-next:hover,
+.lesson-next:focus-visible {
+    border-color: var(--t-amber);
+    color: var(--t-amber);
+    outline: none;
 }
 
 /* The References tab's source code and further reading: a compact
