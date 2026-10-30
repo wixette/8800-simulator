@@ -1,6 +1,6 @@
 {
   "name": "8800-simulator",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "private": true,
   "type": "module",
   "description": "The Altair 8800 in your browser: a working front panel, an ASR-33 Teletype, Microsoft's original 4K BASIC, and an 8080 assembler.",
