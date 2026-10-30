@@ -346,14 +346,18 @@ language, so that choosing a view never moves the tools beside it.
   lettering stays as it is). Clicking an operable part does it. The
   cursor and the label say what a click will do, or why it will not
   yet ("Take this out first: Chassis"); the hand shows only where a
-  click acts. The label is a caption in the stage's bottom-left corner
-  (on a phone, the top, over the case top), never beside the pointer,
-  and it shows once the mouse rests on a part for 400 ms, as a tooltip
-  waits; the hand shows at once. *Changed while building:* it followed
-  the pointer, and over the front panel it covered the very switches
-  being worked; then, in the corner, it still flicked between a
-  switch's two lines and the dress panel's four as the pointer slid
-  across the panel to a switch.
+  click acts. The label shows once the mouse rests on a part for
+  400 ms, as a tooltip waits, beside the pointer (below and to its
+  right, or above it at the stage's foot); a press puts it away, and it
+  stays away until the pointer is over something else, so it never
+  covers the lamps a click changes. The hand shows at once. A tap on a
+  phone shows a part's label in the stage's top left corner, over the
+  case top, not under the finger; a tapped switch or lamp shows none.
+  *Changed while building:* the label first followed the pointer at
+  once, covering the switches being worked, then sat in the stage's
+  bottom-left corner, where it flicked between a switch's two lines and
+  the dress panel's four as the pointer slid across the panel - and on
+  a wide stage was far from the part it named.
 - **Every view centres the box itself.** Framing leaves out the power
   cord, which trails out of the back to the table and had pushed the
   box off centre in every view but the front.

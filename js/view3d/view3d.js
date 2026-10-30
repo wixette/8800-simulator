@@ -57,6 +57,10 @@ const ZOOM_STEP = 1.25;
 /** How long the mouse rests on a part before its label shows, in ms. */
 const LABEL_REST_MS = 400;
 
+/** How far the label stands from the pointer, and from the stage's edge, in px. */
+const LABEL_OFFSET = 16;
+const LABEL_INSET = 8;
+
 /**
  * The 3D view, once loaded.
  */
@@ -84,6 +88,10 @@ export class Stage {
         this.labelTimer = 0;
         /** @type {?string} What the label is for, shown or on its way. */
         this.labelKey = null;
+        /** @type {?string} The part a press put the label away for. */
+        this.pressedOn = null;
+        /** @type {{x: number, y: number}} Where the mouse last was. */
+        this.pointerAt = {x: 0, y: 0};
     }
 
     /**
@@ -109,7 +117,7 @@ export class Stage {
         this.viewer.controls.addEventListener('start', () => {
             // The reader took the camera; it stays where they put it.
             this.fitted = null;
-            this.hideLabel();
+            this.pressLabel();
         });
         this.viewer.controls.addEventListener('change', () => this.refreshZoom());
         this.initPointer();
@@ -317,6 +325,9 @@ export class Stage {
         this.canvas.addEventListener('mousedown', (e) => e.preventDefault());
         this.canvas.addEventListener('pointerdown', (e) => {
             down = {x: e.clientX, y: e.clientY, t: performance.now()};
+            // A press puts the label away, so that it never covers the
+            // lamps the click is about to change (U8).
+            this.pressLabel();
         });
         this.canvas.addEventListener('pointerup', (e) => {
             const d = down;
@@ -338,7 +349,7 @@ export class Stage {
         });
         this.canvas.addEventListener('pointermove', (e) => {
             if (e.pointerType == 'mouse' && !e.buttons) {
-                this.hover(hitAt(e));
+                this.hover(hitAt(e), e);
             }
         });
         this.canvas.addEventListener('pointerleave', () => this.hideLabel());
@@ -469,14 +480,22 @@ export class Stage {
 
     /**
      * @private What the mouse is over: the hand at once where a click
-     * acts, and the label once the pointer rests on the same thing for
-     * LABEL_REST_MS - so that sliding across the panel to a switch shows
-     * no labels flicking from part to part, as a tooltip waits.
+     * acts, and, as a tooltip does, the label beside the pointer once it
+     * rests on the same thing for LABEL_REST_MS - so that sliding across
+     * the panel to a switch shows no labels flicking from part to part.
+     * After a press, the label stays away until the pointer is over
+     * something else.
      * @param {?THREE.Intersection} hit What it is over.
+     * @param {{clientX: number, clientY: number}} e Where the pointer is.
      */
-    hover(hit) {
+    hover(hit, e) {
         const text = this.describe(hit);
         this.canvas.style.cursor = text && text.acts ? 'pointer' : '';
+        this.pointerAt = {x: e.clientX, y: e.clientY};
+        if (text && this.pressedOn == text.name) {
+            return;
+        }
+        this.pressedOn = null;
         const key = text ? JSON.stringify(text) : null;
         if (key == this.labelKey) {
             return;
@@ -485,7 +504,20 @@ export class Stage {
         window.clearTimeout(this.labelTimer);
         this.label.hidden = true;
         if (text) {
-            this.labelTimer = window.setTimeout(() => this.drawLabel(text), LABEL_REST_MS);
+            this.labelTimer = window.setTimeout(() => this.drawLabel(text, this.pointerAt),
+                                                LABEL_REST_MS);
+        }
+    }
+
+    /** @private A press: the label goes, until the pointer moves on. */
+    pressLabel() {
+        window.clearTimeout(this.labelTimer);
+        this.label.hidden = true;
+        // Both the camera's grab and the click's own press come here:
+        // the second finds the label already put away.
+        if (this.labelKey) {
+            this.pressedOn = JSON.parse(this.labelKey).name;
+            this.labelKey = null;
         }
     }
 
@@ -503,15 +535,19 @@ export class Stage {
             this.hideLabel();
             return;
         }
-        this.drawLabel(text);
+        // No pointer to stand beside, and a finger over the spot: the
+        // stage's top left corner, over the case top.
+        this.drawLabel(text, null);
         this.labelTimer = window.setTimeout(() => this.hideLabel(), ms);
     }
 
     /**
      * @private
      * @param {{name: string, role: string, hint: string}} text What it says.
+     * @param {?{x: number, y: number}} at The pointer, which it goes below
+     *     and to the right of, kept inside the stage; or null, the corner.
      */
-    drawLabel(text) {
+    drawLabel(text, at) {
         const label = this.label;
         label.textContent = '';
         for (const [cls, line] of [['part-name', text.name], ['part-role', text.role],
@@ -524,12 +560,27 @@ export class Stage {
             }
         }
         label.hidden = false;
+        let x = LABEL_INSET;
+        let y = LABEL_INSET;
+        if (at) {
+            const host = this.host.getBoundingClientRect();
+            x = Math.max(LABEL_INSET, Math.min(at.x - host.left + LABEL_OFFSET,
+                                               host.width - label.offsetWidth - LABEL_INSET));
+            y = at.y - host.top + LABEL_OFFSET;
+            if (y + label.offsetHeight > host.height - LABEL_INSET) {
+                // No room below: above the pointer instead.
+                y = Math.max(LABEL_INSET, at.y - host.top - LABEL_OFFSET - label.offsetHeight);
+            }
+        }
+        label.style.left = x + 'px';
+        label.style.top = y + 'px';
     }
 
     /** @private */
     hideLabel() {
         window.clearTimeout(this.labelTimer);
         this.labelKey = null;
+        this.pressedOn = null;
         if (this.label) {
             this.label.hidden = true;
         }

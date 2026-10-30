@@ -180,8 +180,9 @@ export async function phone(h) {
     verify('with room to see the machine', box.h >= 220 && box.w >= 300, JSON.stringify(box));
     verify('the tools fit across the top', await js(`(() => { const t = document.getElementById('view-tools'); return t.scrollWidth <= t.clientWidth + 1 && t.getBoundingClientRect().height < 40; })()`));
     verify('nothing to scroll sideways', await js(`document.documentElement.scrollWidth <= innerWidth`));
-    const label = await js(`(() => { const c = getComputedStyle(document.getElementById('part-label')); return c.top + ' ' + c.bottom; })()`);
-    verify('a part\'s label goes over the case top, not the panel', label.startsWith('8px') && label.endsWith('auto'), label);
+    const tapped = await js(`(() => { const s = panel.stage3d; const p = s.screenPoint('case.top', 'top'); s.showLabel(s.hitAt({clientX: p.x, clientY: p.y}), 2500);
+        const l = document.getElementById('part-label'); return [l.hidden, l.style.left, l.style.top].join(); })()`);
+    verify('a tapped part\'s label goes in the top corner, over the case top, not under the finger', tapped == 'false,8px,8px', tapped);
     // Choosing a view moves nothing on the top edge, in any language (U8).
     const tools = `JSON.stringify(['view-reset', 'view-zoom-out', 'views-button', 'show-button', 'view-2d'].map((id) => { const b = document.getElementById(id).getBoundingClientRect(); return [Math.round(b.left), Math.round(b.width)]; }))`;
     const moved = [];
@@ -264,8 +265,8 @@ export async function views(h) {
     verify('leaving it puts the box back in a couple of seconds', took < 3000 && await js(`panel.box.isWhole()`), took + ' ms');
     await settle();
 
-    // The label: in the stage's corner, never over the pointer, and a
-    // click it offers is one that works.
+    // The label: beside the pointer once it rests, gone at a press, and
+    // a click it offers is one that works.
     const move = async (x, y) => {
         await send('Input.dispatchMouseEvent', {type: 'mouseMoved', x, y});
         await sleep(150);
@@ -285,12 +286,22 @@ export async function views(h) {
     verify('the hand shows at once over a switch', await js(`document.getElementById('stage3d-canvas').style.cursor`) == 'pointer');
     await sleep(450);
     const label = `(() => { const l = document.getElementById('part-label'); const r = l.getBoundingClientRect(); const s = document.getElementById('stage3d').getBoundingClientRect();
-        return {shown: !l.hidden, left: Math.round(r.left - s.left), bottom: Math.round(s.bottom - r.bottom), right: r.right, top: r.top, text: l.innerText.replace(/\\n/g, ' | '), cursor: document.getElementById('stage3d-canvas').style.cursor}; })()`;
+        return {shown: !l.hidden, left: r.left, top: r.top, right: r.right, bottom: r.bottom, inside: r.left >= s.left && r.right <= s.right && r.top >= s.top && r.bottom <= s.bottom,
+                text: l.innerText.replace(/\\n/g, ' | '), cursor: document.getElementById('stage3d-canvas').style.cursor}; })()`;
     const onSwitch = await js(label);
     verify('over a switch, the label names it', onSwitch.shown && onSwitch.text.startsWith('Switch A07'), JSON.stringify(onSwitch));
-    verify('in the stage\'s bottom left corner', onSwitch.left <= 10 && onSwitch.bottom <= 10, JSON.stringify(onSwitch));
-    verify('not over the pointer', tip.x > onSwitch.right || tip.y < onSwitch.top, JSON.stringify([tip, onSwitch]));
+    verify('beside the pointer, below and to its right, inside the stage',
+           onSwitch.inside && onSwitch.left > tip.x && onSwitch.left - tip.x < 40 &&
+           (onSwitch.top > tip.y && onSwitch.top - tip.y < 40 || onSwitch.bottom < tip.y), JSON.stringify([tip, onSwitch]));
     verify('and the hand says a click throws it', onSwitch.cursor == 'pointer');
+    // A press puts it away, and resting on the same switch after does
+    // not bring it back over the lamps the click changes.
+    await send('Input.dispatchMouseEvent', {type: 'mousePressed', x: tip.x, y: tip.y, button: 'left', clickCount: 1});
+    verify('a press puts the label away', !(await js(label)).shown);
+    await send('Input.dispatchMouseEvent', {type: 'mouseReleased', x: tip.x, y: tip.y, button: 'left', clickCount: 1});
+    await move(tip.x + 1, tip.y);
+    await sleep(600);
+    verify('and it stays away while the pointer stays on the switch', !(await js(label)).shown);
     // A spot of the dress panel between the switches and lamps.
     const bare = await js(`(() => {
         const s = panel.stage3d; const r = s.canvas.getBoundingClientRect();
