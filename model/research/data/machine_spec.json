@@ -1,0 +1,576 @@
+{
+ "_about": "Best current values for a board/card-level 3D model of the original MITS Altair 8800 (1975), compiled from the four notes files in ../sources/. Every value is given in inches (the unit of the sources) and millimetres. basis: doc = stated in a document, standard or museum record; artwork = measured on the 1:1 MITS PCB artwork; drawing = scaled from a to-scale drawing; photo = scaled from a photo; est = estimate. confidence: high = documented and corroborated; medium = one good source or a consistent measurement; low = estimate. The raw values, with every disagreement, are in dims-documents.json, dims-case-and-panel.json and dims-boards-and-backplane.json. Source keys are defined in ../sources/bibliography.md.",
+ "compiled": "2026-10-20",
+ "machine": {
+  "value": "MITS Altair 8800, 1975 (not 8800a/b/bt)",
+  "note": "The simulator's panel.svg shows this panel (shared with the 8800a). 1975 features: short round switch bats, 4-slot 88-EC expander boards wired together, hand-wired front-panel harness, fan optional (88-FAN)."
+ },
+ "box": {
+  "height": {
+   "in": 7.0,
+   "mm": 177.8,
+   "source": [
+    "NMAH-334396",
+    "NMAH-1325625",
+    "CHM-102621982",
+    "HNF-E-1996-1420"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "width": {
+   "in": 17.0,
+   "mm": 431.8,
+   "source": [
+    "NMAH-334396",
+    "NMAH-1325625",
+    "CHM-102621982"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "alternatives": [
+    "16.75 in (CHM-102626725, snippet; ADUINO-GROUP-PANEL)",
+    "43 cm (HNF-E-1996-1420)"
+   ]
+  },
+  "depth": {
+   "in": 17.5,
+   "mm": 444.5,
+   "source": [
+    "CHM-102621982"
+   ],
+   "basis": "doc",
+   "confidence": "medium",
+   "alternatives": [
+    "18 in (NMAH-334396)",
+    "18.5 in (NMAH-1325625)",
+    "45 cm (HNF-E-1996-1420)"
+   ],
+   "note": "Sources disagree; likely depends on whether rear parts are counted. One tape measurement settles it."
+  },
+  "weight_lb": {
+   "value": 31,
+   "source": "CHM-102626725",
+   "confidence": "medium",
+   "alternatives": [
+    "11 kg (HNF-E-1996-1420)"
+   ]
+  },
+  "case": {
+   "value": "Stock Optima enclosure, MITS P/N 100505: grey C-shaped top with louvres (2 rear #6-32 screws), blue bottom tray with front bezel; chassis slides in from the rear (4 #6-32 screws)",
+   "source": [
+    "MITS-ASM-1975",
+    "SEBHC-2004"
+   ],
+   "confidence": "high"
+  },
+  "case_sheet_thickness": {
+   "mm": null,
+   "confidence": "unknown",
+   "how_to_get": "Measure a real case, or Clone cabinet drawings (close, not exact), or a 1970s Optima catalogue"
+  },
+  "louvre_pattern": {
+   "mm": null,
+   "confidence": "unknown",
+   "how_to_get": "Photos with scale (side views among the reference photos)"
+  }
+ },
+ "front_panel": {
+  "dress_panel": {
+   "in": [
+    16.469,
+    6.531,
+    0.094
+   ],
+   "mm": [
+    418.3,
+    165.9,
+    2.4
+   ],
+   "source": [
+    "NMAH-FRONTPANEL"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "note": "16 15/32 x 6 17/32 x 3/32 in, a loose original; held by the bezel lip, no fasteners"
+  },
+  "visible_area": {
+   "in": [
+    16.35,
+    6.36
+   ],
+   "mm": [
+    415.3,
+    161.5
+   ],
+   "source": [
+    "COMMONS-FP-CROMEMCO"
+   ],
+   "basis": "photo",
+   "confidence": "medium",
+   "note": "Scaled from the bezel width (17.0 in), +-2 %"
+  },
+  "grid_pitch_in_group": {
+   "in": 0.6,
+   "mm": 15.2,
+   "source": [
+    "MITS-ART-DC",
+    "DFF180-PANEL",
+    "COMMONS-FP-CROMEMCO"
+   ],
+   "basis": "artwork",
+   "confidence": "high",
+   "note": "Lamps and switches of one octal group"
+  },
+  "grid_pitch_across_group": {
+   "in": 0.9,
+   "mm": 22.9,
+   "source": [
+    "MITS-ART-DC",
+    "DFF180-PANEL",
+    "COMMONS-FP-CROMEMCO"
+   ],
+   "basis": "artwork",
+   "confidence": "high"
+  },
+  "row_pitch": {
+   "in": 1.2,
+   "mm": 30.5,
+   "source": [
+    "MITS-ART-DC",
+    "DFF180-PANEL"
+   ],
+   "basis": "artwork",
+   "confidence": "high",
+   "note": "Lamp row 1 to lamp row 2 to address switches to control switches"
+  },
+  "control_switch_pitch": {
+   "in": 1.2,
+   "mm": 30.5,
+   "source": [
+    "MITS-ART-DC",
+    "DFF180-PANEL"
+   ],
+   "basis": "artwork",
+   "confidence": "high"
+  },
+  "power_to_stop_run": {
+   "in": 2.9,
+   "mm": 73.7,
+   "source": [
+    "DFF180-PANEL",
+    "COMMONS-FP-CROMEMCO"
+   ],
+   "basis": "photo",
+   "confidence": "medium"
+  },
+  "positions": {
+   "value": "Every lamp and switch centre relative to the A0 lamp: table in ../sources/notes-case-and-panel.md section 4.2; unrounded values in dims-case-and-panel.json",
+   "confidence": "high (relative, about +-1 mm)"
+  },
+  "a0_lamp_from_visible_centre": {
+   "in": [
+    6.17,
+    0.93
+   ],
+   "mm": [
+    156.7,
+    23.6
+   ],
+   "source": [
+    "COMMONS-FP-CROMEMCO"
+   ],
+   "basis": "photo",
+   "confidence": "low",
+   "note": "x right, y up; +-0.1 in. Places the grid on the dress panel. Measure the NMAH loose panel or any original to reach +-1 mm"
+  },
+  "switches": {
+   "value": "25 toggles: 17 latching ST-1-1-C (A0-A15 and power), 8 momentary centre-off ST-1-3-C; American Switch; short round bats (about 10 mm, est.); 1/4-40 bushing (modern APEM 5236 equivalent)",
+   "source": [
+    "MITS-ASM-1975",
+    "FP8800C-MANUAL",
+    "APEM-5236"
+   ],
+   "confidence": "medium"
+  },
+  "lamps": {
+   "value": "36 red diffused LEDs, Litronix RL-21, likely 5 mm T-1 3/4 body",
+   "source": [
+    "MITS-ASM-1975",
+    "DFF180-PANEL"
+   ],
+   "confidence": "medium"
+  },
+  "name_plate_height": {
+   "in": 0.71,
+   "mm": 18.0,
+   "source": [
+    "COMMONS-SI-UTHMAN"
+   ],
+   "basis": "photo",
+   "confidence": "low",
+   "note": "Brushed aluminium, black ALTAIR 8800 COMPUTER and MITS logo; absent on some machines"
+  },
+  "sub_panel": {
+   "mm": null,
+   "confidence": "unknown",
+   "how_to_get": "Thickness and outline: measure; it carries the 25 switches and 4 #6-32 screws to the chassis"
+  },
+  "dc_board_spacers": {
+   "in": 0.6,
+   "mm": 15.2,
+   "source": [
+    "MITS-ASM-1975"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "note": "4 spacers, D/C board to sub-panel; later errata hold the board by the switch nuts only"
+  }
+ },
+ "cards": {
+  "body": {
+   "in": [
+    10.0,
+    5.0
+   ],
+   "mm": [
+    254.0,
+    127.0
+   ],
+   "source": [
+    "MITS-THEORY-1975 p.26 (drawing 880-110)",
+    "MITS-ART-CPU",
+    "MITS-ART-1K"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "note": "Length along the connector x height; IEEE 696 allows 9.98-10.02 x up to 5.125 in"
+  },
+  "tab": {
+   "in": [
+    6.375,
+    0.3
+   ],
+   "mm": [
+    161.9,
+    7.6
+   ],
+   "source": [
+    "MITS-THEORY-1975 p.26",
+    "S100-IEEE696"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "note": "Length x depth"
+  },
+  "tab_offset_front_end": {
+   "in": 1.5,
+   "mm": 38.1,
+   "source": [
+    "MITS-THEORY-1975 p.26"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "note": "The short end is the front of the box"
+  },
+  "tab_offset_rear_end": {
+   "in": 2.125,
+   "mm": 54.0,
+   "source": [
+    "MITS-THEORY-1975 p.26",
+    "S100-IEEE696"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "thickness": {
+   "in": 0.062,
+   "mm": 1.6,
+   "source": [
+    "S100-IEEE696"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "contact_pitch": {
+   "in": 0.125,
+   "mm": 3.2,
+   "source": [
+    "S100-IEEE696",
+    "MITS-ART-CPU"
+   ],
+   "basis": "doc",
+   "confidence": "high",
+   "note": "50 contacts per side"
+  },
+  "heat_sink_above_top_edge": {
+   "in": 0.22,
+   "mm": 5.6,
+   "source": [
+    "MFE-CPU-SCAN",
+    "MFE-SIO-PHOTOS"
+   ],
+   "basis": "photo",
+   "confidence": "low",
+   "note": "0.2-0.25 in; every card has a 7805 on a finned heat sink"
+  },
+  "orientation": {
+   "value": "On edge, front to back, component side facing the right side of the box (seen from the front)",
+   "source": [
+    "MITS-4MCS-1976",
+    "MITS-SIO-1975",
+    "MITS-2SIO-1976"
+   ],
+   "confidence": "high"
+  },
+  "part_positions": {
+   "value": "CPU and 1K RAM: measure on the 1:1 X1 artwork (facts only, no tracing). 4MCS, SIO, 2SIO: photos only",
+   "confidence": "high for CPU and 1K, low for the others"
+  }
+ },
+ "backplane": {
+  "expander_board": {
+   "in": [
+    11.08,
+    3.41
+   ],
+   "mm": [
+    281.4,
+    86.6
+   ],
+   "source": [
+    "MITS-ASM-1975 printed p.65"
+   ],
+   "basis": "drawing",
+   "confidence": "medium",
+   "note": "88-EC, front-to-back length x width across the slots; foil drawing scaled by the 0.125 in pad pitch"
+  },
+  "slot_pitch": {
+   "in": 0.75,
+   "mm": 19.0,
+   "source": [
+    "MITS-ASM-1975 printed p.65",
+    "S100-IEEE696"
+   ],
+   "basis": "drawing",
+   "confidence": "high",
+   "note": "Measured 0.748 in; IEEE 696 0.75 +- 0.01"
+  },
+  "slots_per_board": {
+   "value": 4,
+   "source": "MITS-PRICE-1975",
+   "confidence": "high"
+  },
+  "boards_max_in_case": {
+   "value": 4,
+   "source": "BYTE-1975-09",
+   "confidence": "medium",
+   "note": "16 slots; one board standard. Further boards wired wire by wire (CCTALK-GUZIS-2005)"
+  },
+  "board_thickness": {
+   "in": 0.062,
+   "mm": 1.6,
+   "source": [
+    "MFE-SN220081K-DOC"
+   ],
+   "basis": "doc",
+   "confidence": "medium",
+   "note": "Early boards; later ones thicker"
+  },
+  "connector_mounting_holes_apart": {
+   "in": 6.8,
+   "mm": 172.7,
+   "source": [
+    "MITS-ASM-1975 printed p.65"
+   ],
+   "basis": "drawing",
+   "confidence": "medium",
+   "note": "The two card rails run under these"
+  },
+  "card_guide_pairs_apart": {
+   "in": 10.33,
+   "mm": 262.4,
+   "source": [
+    "MITS-ASM-1975 printed p.65"
+   ],
+   "basis": "drawing",
+   "confidence": "medium"
+  },
+  "card_guide": {
+   "in": [
+    5.5,
+    0.5,
+    0.65
+   ],
+   "mm": [
+    139.7,
+    12.7,
+    16.5
+   ],
+   "source": [
+    "PLANET-KAUFMAN"
+   ],
+   "basis": "est",
+   "confidence": "low",
+   "note": "From a reproduction STL (units assumed mm: 139.8 x 12.8 x 16.5); blue plastic U-channel, 2 per card"
+  },
+  "edge_connector_body": {
+   "mm": null,
+   "confidence": "unknown",
+   "how_to_get": "Measure, or a 1970s connector datasheet; green bodies, rows about 0.14-0.15 in apart (HJ-S100BUS, drawing p.65)"
+  },
+  "card_cage_height": {
+   "mm": null,
+   "confidence": "unknown",
+   "how_to_get": "About 5.5 in above the expander board (card guide STL); measure"
+  },
+  "card_rail_positions": {
+   "mm": null,
+   "confidence": "unknown",
+   "how_to_get": "Set by hole counts 13 / 21 / 9 in the perforated side members; the hole pitch is not documented. Scale from MFE-SN220081K-PHOTOS or measure"
+  }
+ },
+ "power_supply": {
+  "transformers": {
+   "value": "T1 7.5 VAC 8 A (P-6138), T2 8 VAC 1.2 A + 24 VAC CT 0.4 A, T3 11 VAC 0.3 A (133-P-5), all on the back panel, right rear",
+   "source": [
+    "MITS-SCHEM-1975",
+    "MITS-ASM-1975"
+   ],
+   "confidence": "high"
+  },
+  "t1_footprint": {
+   "in": [
+    3.75,
+    3.0
+   ],
+   "mm": [
+    95.2,
+    76.2
+   ],
+   "source": [
+    "MFE-SN220081K-PHOTOS"
+   ],
+   "basis": "photo",
+   "confidence": "low",
+   "note": "+-10-15 %"
+  },
+  "t2_footprint": {
+   "in": [
+    3.0,
+    2.3
+   ],
+   "mm": [
+    76.2,
+    58.4
+   ],
+   "source": [
+    "MFE-SN220081K-PHOTOS"
+   ],
+   "basis": "photo",
+   "confidence": "low",
+   "note": "+-10-15 %"
+  },
+  "t3_footprint": {
+   "in": [
+    1.3,
+    2.3
+   ],
+   "mm": [
+    33.0,
+    58.4
+   ],
+   "source": [
+    "MFE-SN220081K-PHOTOS"
+   ],
+   "basis": "photo",
+   "confidence": "low",
+   "note": "+-10-15 %"
+  },
+  "psu_board": {
+   "in": [
+    8.5,
+    3.3
+   ],
+   "mm": [
+    215.9,
+    83.8
+   ],
+   "source": [
+    "MFE-SN220081K-PHOTOS"
+   ],
+   "basis": "photo",
+   "confidence": "low",
+   "note": "+-10-15 %; on the cross member on 4 x 0.375 in spacers; six 3300 uF axial capacitors in a row"
+  },
+  "psu_board_spacers": {
+   "in": 0.375,
+   "mm": 9.5,
+   "source": [
+    "MITS-ASM-1975"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "card_rail_spacers": {
+   "in": 0.25,
+   "mm": 6.3,
+   "source": [
+    "MITS-ASM-1975"
+   ],
+   "basis": "doc",
+   "confidence": "high"
+  },
+  "terminal_block": {
+   "value": "Two rows of 10, on the back panel left of the transformers",
+   "source": "MITS-ASM-1975",
+   "confidence": "high"
+  },
+  "fan": {
+   "value": "Optional 88-FAN; early back panels have a round screened hole, later ones slots",
+   "source": [
+    "MITS-PRICE-1975",
+    "MFE-SN220081K-DOC"
+   ],
+   "confidence": "high"
+  }
+ },
+ "front_panel_board": {
+  "height": {
+   "in": 6.46,
+   "mm": 164.1,
+   "source": [
+    "MITS-ART-DC"
+   ],
+   "basis": "artwork",
+   "confidence": "high"
+  },
+  "length": {
+   "in": 15.9,
+   "mm": 403.9,
+   "source": [
+    "MITS-ART-DC"
+   ],
+   "basis": "est",
+   "confidence": "low",
+   "note": "Artwork split over two pages with no overlap found; stitch the halves or measure"
+  },
+  "harness": {
+   "value": "62 loose wires plus 2 jumpers: numbered bus wires to the expander board's staggered holes, 8 data wires (about 16 in) to a 10-pin plug on the CPU's wafer connector, laced bundle down the right side",
+   "source": "MITS-ASM-1975",
+   "confidence": "high"
+  }
+ },
+ "chassis": {
+  "outline": {
+   "mm": null,
+   "confidence": "unknown",
+   "how_to_get": "No drawing found. Scale from the CC0 top view (Altair_8800_chasis.jpg) and MFE-SN220081K-PHOTOS using the 10 in cards and the 0.75 in slot pitch, or measure"
+  },
+  "back_panel_cutouts": {
+   "mm": null,
+   "confidence": "unknown",
+   "how_to_get": "Photos only (DERAMP-EARLY, VCCA-LOSTFOUND, not free); measure"
+  }
+ }
+}

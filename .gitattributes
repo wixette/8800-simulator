@@ -1,0 +1,6 @@
+# Line endings: leave them as they are, except as below.
+
+# The 3D model is binary. It is kept in plain git, not LFS: Pages
+# serves this branch as it is, and would serve an LFS pointer in its
+# place (docs/3d-view.md, M1).
+*.glb binary

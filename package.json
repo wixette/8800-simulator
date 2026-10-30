@@ -11,6 +11,7 @@
     "stamp": "node tools/stamp.mjs",
     "icons": "node tools/icons.mjs",
     "version": "node tools/stamp.mjs",
-    "typecheck": "npx --yes -p typescript@5.9.3 tsc -p tsconfig.json"
+    "typecheck": "npx --yes -p typescript@5.9.3 tsc -p tsconfig.json",
+    "build:model": "\"${BLENDER:-/Applications/Blender.app/Contents/MacOS/Blender}\" --background --factory-startup --python-exit-code 1 --python model/blender/scripts/build_whole_box.py"
   }
 }

@@ -1,0 +1,40 @@
+id,part,assembly,qty,node_name,mounted_on,fastening,comes_out_by,motion_when_operated,size_from,size_confidence,notes
+C01,Case top (C-shaped lid with louvres),case,1,case.top,case.bottom,2 #6-32 screws through the back panel into the rear flange,slide back then lift,static,doc (box W x H x D) + photos,medium,Grey; sheet thickness and louvre pattern unknown
+C02,Case bottom with front bezel,case,1,case.bottom,—,—,base of the assembly,static,doc (box) + photos,medium,Blue; bezel lip holds the dress panel
+C03,Rubber feet,case,2,case.foot.N,case.bottom,adhesive or screws (early units),—,static,est,low,
+C04,Dress panel (lettered),panel,1,panel.dress,between sub-panel and bezel lip,none (captured),falls free when the chassis is slid out,static,doc (NMAH loose panel 16 15/32 x 6 17/32 x 3/32 in),high,Hole grid position on it +-2.5 mm (photo)
+C05,Name plate,panel,1,panel.name_plate,panel.dress,adhesive,—,static,photo,low,Absent on some machines
+C06,Sub-panel,panel,1,panel.sub,chassis front,4 #6-32 screws,unscrew from chassis (with the D/C board and switches),static,est,low,Outline and thickness unknown
+C07,Latching toggle switch ST-1-1-C (A0-A15),panel,16,panel.switch.aNN,panel.sub,panel nut on 1/4-40 bushing,with the sub-panel,"rotate about bushing axis: up / down",artwork (positions) + est (body),high (position),Bat about 10 mm (est)
+C08,Power switch ST-1-1-C (OFF/ON),panel,1,panel.switch.power,panel.sub,panel nut,with the sub-panel,"rotate: up / down",artwork + photo,high (position),Switches 120 VAC directly
+C09,Momentary toggle ST-1-3-C (STOP/RUN … AUX),panel,8,panel.switch.<name>,panel.sub,panel nut,with the sub-panel,"rotate: up / centre / down, springs back to centre",artwork + photo,high (position),SINGLE STEP and AUX act one way only
+C10,LED RL-21,panel,36,panel.lamp.<name>,panel.dc_board (soldered),solder,with the D/C board,"emissive on/off (no motion)",artwork (position) + est (5 mm body),high (position),Lamp names as in the simulator
+C11,Display/Control board,panel,1,panel.dc_board,panel.sub,switch nuts (errata); first build 4 #6-32 x 1 in screws on 0.6 in spacers,with the sub-panel,static,artwork (height 6.46 in) + est (length ~15.9 in),medium,One board in the 8800 (880-105 and 880-106 are two sheets of it)
+C12,Front panel 7805 regulator and heat sink,panel,1,panel.dc_board.regulator,panel.dc_board,#6-32 screw,—,static,est,low,Left end of the board
+C13,Front-panel harness (bus wires),harness,1,harness.panel_bus,panel.dc_board → bus.board.0,solder at both ends,stays soldered: the panel assembly stays tethered to the bus board,static,est,low,Model as a laced bundle down the right side
+C14,Data cable with 10-pin plug (D0-D7),harness,1,harness.panel_data,panel.dc_board → card.cpu,plug on the CPU's 8-pin wafer,unplug from the CPU,static,est,low,About 16 in of 8 wires
+C15,Chassis (side members and floor),chassis,1,chassis.frame,case.bottom,4 #6-32 screws through the case bottom,slide out to the rear,static,photo,low,Anodised aluminium; perforated side members; outline unknown
+C16,Back panel,chassis,1,chassis.back,chassis.frame,part of the chassis,with the chassis,static,photo,low,Transformers; terminal block; fan opening; I/O cut-outs; screen
+C17,Cross member,chassis,1,chassis.cross_member,chassis.frame,4 #6-32 screws,unscrew,static,est,low,Under the transformers; heat sink for the bridge rectifier
+C18,Card rails,chassis,2,chassis.card_rail.N,chassis.frame,"#6-32 x 3/4 in screws on 1/4 in spacers, one each end",unscrew,static,drawing (about 6.8 in apart),medium,Run side to side; positions by hole count (13 / 21 / 9)
+C19,Transformer T1 (8 A),psu,1,psu.t1,chassis.back,4 #8-32 x 3/8 in screws in slotted holes,unscrew,static,photo (~3.75 x 3.0 in footprint),low,Rests on the cross member
+C20,Transformer T2,psu,1,psu.t2,chassis.back,2 #6-32 x 3/8 in screws,unscrew,static,photo (~3.0 x 2.3 in),low,
+C21,Transformer T3 (133-P-5),psu,1,psu.t3,chassis.back,2 #6-32 x 3/8 in screws,unscrew,static,photo (~1.3 x 2.3 in),low,
+C22,Terminal block (2 x 10),psu,1,psu.terminal_block,chassis.back,4 #6-32 x 5/8 in screws,unscrew,static,est,low,All supply and bus power wires meet here
+C23,Power supply board,psu,1,psu.board,chassis.cross_member,4 #6-32 screws on 0.375 in metal spacers,unscrew,static,photo (~8.5 x 3.3 in),low,No artwork found
+C24,Filter capacitors 3300 uF (axial),psu,6,psu.cap.N,psu.board,solder,with the board,static,est,low,Lying in a row; plus 2200 uF and 500 uF
+C25,Bridge rectifier VJ048,psu,1,psu.bridge,psu.board + chassis.cross_member,#6-32 x 1/2 in screw,with the board,static,est,low,On the foil side
+C26,Fuse 3AG 1 A in clips,psu,1,psu.fuse,psu.board,clips,pull,static,doc (3AG = 1/4 x 1 1/4 in),high,
+C27,Power cord with strain relief,psu,1,psu.cord,chassis.back,strain relief,—,static,est,low,3-wire 6 ft; model a stub
+C28,Fan (88-FAN option),psu,0-1,psu.fan,chassis.back,screws,unscrew,may spin,est,low,Optional in 1975; early panels have a round screened hole
+C29,Expander board 88-EC,bus,1-4,bus.board.N,chassis.card_rail (both),2 #4-40 x 5/8 in + 2 #4-40 x 5/16 in screws,unscrew (after the cards),static,drawing (11.08 x 3.41 in; slot pitch 0.75 in),medium,Board 0 at the right; more go left along the rails
+C30,Edge connector (100 pin),bus,2-16,bus.connector.NN,bus.board.N,solder + the board's screws through its ears,with the board,static,est,low,Green body; size unknown
+C31,Card guide,bus,4-32,bus.guide.NN.front / .rear,bus.board.N,#6-32 x 3/8 in screw from below,unscrew,static,est (reproduction STL ~5.5 x 0.5 x 0.65 in),low,Blue plastic; 2 per occupied slot
+C32,CPU card (8800 CPU board),card,1,card.cpu,bus.connector.00 (outermost right),edge connector + 2 guides,slide up out of the guides,static,artwork (1:1),high,8080 in socket; 7805 + heat sink front-top; Molex wafer rear-top
+C33,1K static memory card (88-MCS; 256 bytes as shipped),card,1,card.mem.0,bus.connector.01,edge connector + 2 guides,slide up,static,artwork (1:1),high,8 x 8101 sockets (2 filled for 256 bytes)
+C34,88-4MCS 4K static memory card,card,0-2,card.mem4k.N,any slot,edge connector + 2 guides,slide up,static,doc (outline) + photo (parts),medium (outline) / low (parts),32 x 2102; large heat sink rear-top
+C35,88-SIO serial card,card,0-1,card.sio,any slot,edge connector + 2 guides,slide up,static,doc (outline) + photo (parts),medium / low,Cable to a 25-pin connector on the back panel
+C36,88-2SIO serial card,card,0-1,card.sio2,any slot,edge connector + 2 guides,slide up,static,doc (outline) + photo (parts),medium / low,Two 10-pin headers; cables to 25-pin connectors on the back panel
+C37,Card regulator 7805 + heat sink,card,1 per card,card.<card>.regulator,card,#6-32 screw,with the card,static,photo (0.2-0.25 in above the card edge),low,
+C38,25-pin I/O connectors on the back panel,chassis,0-3,chassis.io.N,chassis.back,screws,—,static,est,low,Present only with SIO / 2SIO cards
+C39,Grounding braids,chassis,several,chassis.ground.N,various,screws,—,static,doc (1/8 and 1/4 in braid),low,Optional detail (grounding errata)
