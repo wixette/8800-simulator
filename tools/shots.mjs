@@ -84,7 +84,8 @@ const SHOTS = [
         strip(false); await example('bouncing-light'); run(); await view3d('whole'); tab('ref');`},
     {name: 'phone-tutorial', size: 'phone', setup: `
         strip(false); tab('ref'); await sleep(300);
-        document.getElementById('dock-body').scrollTop = document.querySelector('.lesson-intro').offsetTop - 60;`},
+        const body = document.getElementById('dock-body');
+        body.scrollTop += document.querySelector('.lesson-intro').getBoundingClientRect().top - body.getBoundingClientRect().top - 50;`},
 ];
 
 const {values: opts} = parseArgs({options: {
