@@ -583,6 +583,215 @@ a {
     width: 100%;
 }
 
+/* The stage's top edge (docs/3d-view.md, V1): the [2D | 3D] toggle,
+   and in 3D its camera's tools, at the right. A band of its own, not
+   laid over the panel, so it costs the panel only its height. */
+#view-tools {
+    align-items: center;
+    align-self: stretch;
+    display: flex;
+    flex: none;
+    gap: 6px;
+    height: 34px;
+    justify-content: flex-end;
+    margin-bottom: 4px;
+}
+
+#view-switch {
+    border: 1px solid #555;
+    border-radius: 6px;
+    display: flex;
+    order: 2;
+    overflow: hidden;
+}
+
+.view-tab {
+    color: #aaa;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 20px;
+    padding: 3px 12px;
+    position: relative;
+}
+
+.view-tab + .view-tab {
+    border-left: 1px solid #555;
+}
+
+.view-tab:hover,
+.view-tab:focus-visible {
+    background-color: var(--hover-bg);
+    color: #fff;
+    outline: none;
+}
+
+.view-tab.selected {
+    background-color: #3a3a3a;
+    color: #f90;
+    cursor: default;
+    font-weight: bold;
+}
+
+.view-tab.disabled {
+    color: #666;
+    cursor: default;
+}
+
+/* Until the 3D view has been seen once: the dock tabs' activity dot. */
+.view-tab.has-news::after {
+    background-color: #f90;
+    border-radius: 50%;
+    content: '';
+    height: 6px;
+    position: absolute;
+    right: 3px;
+    top: 3px;
+    width: 6px;
+}
+
+#view3d-tools {
+    align-items: center;
+    display: flex;
+    gap: 2px;
+    order: 1;
+}
+
+#view3d-tools[hidden] {
+    display: none;
+}
+
+#view3d-tools .icon-button {
+    height: 30px;
+    width: 30px;
+}
+
+/* Zoom out and in, one joined pair. */
+.view-zoom {
+    display: flex;
+}
+
+#view3d-tools .icon-button.disabled,
+#view3d-tools.loading .icon-button,
+#view3d-tools.loading .tool-button {
+    color: #666;
+    cursor: default;
+}
+
+/* The Views menu's button is a tool button, as the toolbar's are. */
+#view3d-tools .dropdown > .tool-button {
+    background: none;
+    border-radius: 6px;
+    color: #eee;
+    font-size: 13px;
+    gap: 6px;
+    height: 30px;
+    padding: 0 8px;
+}
+
+#view3d-tools .dropdown > .tool-button:hover,
+#view3d-tools .dropdown > .tool-button:focus-visible {
+    background-color: var(--hover-bg);
+    color: #fff;
+    outline: none;
+}
+
+#view3d-tools .dropdown > .tool-button[aria-expanded="true"] {
+    background-color: var(--open-bg);
+}
+
+#views-list {
+    left: auto;
+    min-width: 200px;
+    right: 0;
+}
+
+/* The whole machine in 3D: it takes the room the panel would. */
+#stage3d {
+    background: radial-gradient(ellipse at 50% 40%, #3a3a3a 0%, #262626 70%);
+    border-radius: 8px;
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+
+#stage3d[hidden] {
+    display: none;
+}
+
+#stage3d canvas {
+    display: block;
+    height: 100%;
+    touch-action: none;
+    width: 100%;
+}
+
+#stage3d canvas:focus-visible {
+    outline: 2px solid #f90;
+    outline-offset: -2px;
+}
+
+.stage3d-message {
+    color: #bbb;
+    font-size: 14px;
+    left: 0;
+    margin: 0;
+    padding: 0 16px;
+    position: absolute;
+    right: 0;
+    text-align: center;
+    top: 45%;
+}
+
+/* How much of the model has arrived. */
+.stage3d-progress {
+    background-color: #444;
+    border-radius: 2px;
+    height: 4px;
+    left: 25%;
+    overflow: hidden;
+    position: absolute;
+    right: 25%;
+    top: calc(45% + 32px);
+}
+
+.stage3d-progress > div {
+    background-color: #f90;
+    height: 100%;
+    transform: scaleX(var(--progress, 0));
+    transform-origin: left;
+    transition: transform 0.2s;
+}
+
+/* What the pointer is over: its name, what it does, what a click does. */
+.part-label {
+    background-color: rgba(20, 20, 20, 0.92);
+    border: 1px solid #555;
+    border-radius: 6px;
+    color: #eee;
+    font-size: 13px;
+    max-width: 280px;
+    padding: 6px 9px;
+    pointer-events: none;
+    position: absolute;
+    z-index: 2;
+}
+
+.part-label .part-name {
+    font-weight: bold;
+}
+
+.part-label .part-role {
+    color: #bbb;
+    margin-top: 2px;
+}
+
+.part-label .part-hint {
+    color: #f90;
+    margin-top: 4px;
+}
+
 /* The Switch Board Helper, a strip under the panel and as wide as its
    artwork (panel.fitSwitchStrip). Its tab, on its top edge, folds it
    away; folded, the tab is all that is left. */
@@ -1770,6 +1979,18 @@ a {
     #panel {
         flex: none;
         height: auto;
+    }
+
+    /* The 3D view has no shape of its own to keep: on a phone it takes
+       a near-square of the width, as the panel takes its own shape. */
+    #stage3d {
+        aspect-ratio: 5 / 4;
+        flex: none;
+        max-height: 55vh;
+    }
+
+    #view-tools {
+        height: 30px;
     }
 
     #dock-splitter {

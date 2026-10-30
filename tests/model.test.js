@@ -18,24 +18,12 @@ import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
 import {panel} from '../js/app.js';
+import {readGlb} from './glb.js';
 
 const ROOT = path.join(import.meta.dirname, '..');
 const GLB = path.join(ROOT, 'model', 'altair-8800.glb');
 const PARAMS = JSON.parse(fs.readFileSync(
     path.join(ROOT, 'model', 'params', 'machine.json'), 'utf8'));
-
-/**
- * The glTF JSON chunk of a .glb file.
- * @param {string} file The file.
- * @return {!Object} The glTF document.
- */
-export function readGlb(file) {
-    const bytes = fs.readFileSync(file);
-    assert.strictEqual(bytes.toString('latin1', 0, 4), 'glTF', 'a .glb file');
-    const length = bytes.readUInt32LE(12);
-    assert.strictEqual(bytes.toString('latin1', 16, 20), 'JSON');
-    return JSON.parse(bytes.toString('utf8', 20, 20 + length));
-}
 
 const GLTF = readGlb(GLB);
 

@@ -25,5 +25,6 @@ import './panel-front.js';
 import './panel-link.js';
 import './panel-load.js';
 import './panel-tty.js';
+import './panel-view.js';
 
 export {panel};

@@ -56,10 +56,17 @@
         "./js/panel-link.js": "./js/panel-link.js?v=1.7.0",
         "./js/panel-load.js": "./js/panel-load.js?v=1.7.0",
         "./js/panel-tty.js": "./js/panel-tty.js?v=1.7.0",
+        "./js/panel-view.js": "./js/panel-view.js?v=1.7.0",
         "./js/panel.js": "./js/panel.js?v=1.7.0",
         "./js/sim8800.js": "./js/sim8800.js?v=1.7.0",
         "./js/sio.js": "./js/sio.js?v=1.7.0",
         "./js/teletype.js": "./js/teletype.js?v=1.7.0",
+        "./js/view3d/boxBind.js": "./js/view3d/boxBind.js?v=1.7.0",
+        "./js/view3d/framing.js": "./js/view3d/framing.js?v=1.7.0",
+        "./js/view3d/panelBind.js": "./js/view3d/panelBind.js?v=1.7.0",
+        "./js/view3d/view3d.js": "./js/view3d/view3d.js?v=1.7.0",
+        "./js/view3d/viewer.js": "./js/view3d/viewer.js?v=1.7.0",
+        "./js/view3d/views.js": "./js/view3d/views.js?v=1.7.0",
         "./vendor/three/build/three.core.js": "./vendor/three/build/three.core.js?v=1.7.0",
         "./vendor/three/build/three.module.js": "./vendor/three/build/three.module.js?v=1.7.0",
         "./vendor/three/examples/jsm/controls/OrbitControls.js": "./vendor/three/examples/jsm/controls/OrbitControls.js?v=1.7.0",
@@ -160,6 +167,32 @@
       </header>
 
       <main id="stage">
+        <!-- The stage's top edge: which view, the front panel in 2D or the
+             whole machine in 3D, and in 3D its camera (docs/3d-view.md,
+             V1-V3). Icons are Material Icons, inline, as the toolbar's. -->
+        <div id="view-tools">
+          <div id="view-switch" role="tablist">
+            <div id="view-2d" class="view-tab" role="tab" tabindex="0" aria-controls="stage">2D</div>
+            <div id="view-3d" class="view-tab" role="tab" tabindex="-1" aria-controls="stage">3D</div>
+          </div>
+          <div id="view3d-tools" hidden>
+            <div id="view-reset" class="icon-button view-tool" role="button" tabindex="0"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>
+            <div class="view-zoom">
+              <div id="view-zoom-out" class="icon-button view-tool" role="button" tabindex="0"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zM7 9h5v1H7z"/></svg></div>
+              <div id="view-zoom-in" class="icon-button view-tool" role="button" tabindex="0"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14zm.5-7H9v2H7v1h2v2h1v-2h2V9h-2z"/></svg></div>
+            </div>
+            <div id="views-dropdown" class="dropdown">
+              <button id="views-button" class="tool-button" type="button"
+                      aria-haspopup="listbox" aria-expanded="false">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                <span id="views-current" class="dropdown-label"></span>
+                <span class="dropdown-arrow" aria-hidden="true">&#9662;</span>
+              </button>
+              <ul id="views-list" role="listbox" hidden></ul>
+            </div>
+          </div>
+        </div>
+
         <svg id="panel" width="100%" height="100%" viewBox="0 0 1440 644" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
           <!-- Panel artwork. Edit images/panel.svg to change it. -->
           <image x="0" y="0" width="1440" height="644" href="images/panel.svg?v=1.7.0"/>
@@ -171,6 +204,14 @@
           <image id="switch-mid" x="0" y="0" width="20" height="30" href="images/switch-mid.svg?v=1.7.0"/>
           <image id="switch-down" x="0" y="0" width="20" height="30" href="images/switch-down.svg?v=1.7.0"/>
         </svg>
+
+        <!-- The whole machine in 3D, drawn by js/view3d/ once it is first
+             chosen: three.js and the model load only then (M5). -->
+        <div id="stage3d" data-src="model/altair-8800.glb?v=1.7.0" hidden>
+          <div id="stage3d-progress" class="stage3d-progress" hidden><div></div></div>
+          <p id="stage3d-message" class="stage3d-message" hidden></p>
+          <div id="part-label" class="part-label" hidden></div>
+        </div>
 
         <!-- The Switch Board Helper: the panel's switches again, large
              enough for a thumb, and laid out as the panel lays them out -

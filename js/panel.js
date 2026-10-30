@@ -514,6 +514,7 @@ panel.init = function() {
         panel.renderInstrPane();
         panel.refreshDockToggle();
         panel.refreshStripTab();
+        panel.refreshViewSwitch();
         if (panel.memoryMenu) {
             panel.memoryMenu.setItems(panel.memoryMenuItems());
             panel.updateMemoryControls();
@@ -549,6 +550,8 @@ panel.init = function() {
     // The machine comes up switched off, and the empty dump and dark
     // panel should say why rather than look broken.
     panel.setStatus('status-off');
+    // The 2D or the 3D view: a link's, or the reader's last.
+    panel.initView();
     // A link to a program, or to a machine part way through one.
     panel.loadFromLink();
     // A link pasted into the address bar while the page is open only

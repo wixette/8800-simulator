@@ -49,6 +49,10 @@ panel.loadFromLink = function() {
  * @return {!Promise} Settles once the link, if any, is loaded.
  */
 panel.onHashChange = function() {
+    var view = Link.queryToView(window.location.hash);
+    if (view) {
+        panel.chooseView(view);
+    }
     return Link.linkToState(window.location.hash, panel.MEM_SIZES).then(
         panel.applyLinkState);
 };
@@ -127,6 +131,8 @@ panel.currentLink = function() {
         bytes: panel.sim.mem,
         cpu: withState ? panel.linkCpu() : null,
         switches: panel.getInputAddressCallback(),
+        // Shared from the 3D view, it opens there (docs/3d-view.md, V1).
+        view: panel.view,
     }, panel.MEM_SIZES).then(function(query) {
         return base + '#' + query;
     });

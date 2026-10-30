@@ -172,17 +172,20 @@ export class Dropdown {
     }
 
     /**
-     * Marks one item as the current choice, for a menu that holds one.
-     * A menu of actions passes null and marks nothing.
-     * @param {?string} value The chosen value.
+     * Marks one item as the current choice, for a menu that holds one,
+     * or one in each of its groups. A menu of actions passes null and
+     * marks nothing.
+     * @param {?string|!Array<string>} value The chosen value, or values.
      */
     setSelected(value) {
         if (!this.list) {
             return;
         }
+        // One choice, or one in each group (the 3D view's Views menu).
+        var values = [].concat(value);
         for (const item of this.options()) {
             item.setAttribute('aria-selected',
-                              item.dataset.value === value ? 'true' : 'false');
+                              values.indexOf(item.dataset.value) >= 0 ? 'true' : 'false');
         }
     }
 
