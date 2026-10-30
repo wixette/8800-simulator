@@ -32,7 +32,8 @@ import {BoxBinding} from './boxBind.js';
 import {corners, frame} from './framing.js';
 import {PanelBinding} from './panelBind.js';
 import {Viewer} from './viewer.js';
-import {HOME_VIEW, PANEL_SUBJECT, SHOWS, VIEWS, WIRED, partKey, switchName} from './views.js';
+import {HOME_VIEW, PANEL_SUBJECT, POINTED, POINTED_ICON, SHOWS, VIEWS, WIRED, partKey,
+        showButton, switchName} from './views.js';
 
 /** A press and release this close together, in px and ms, is a click. */
 const CLICK_PX = 5;
@@ -73,6 +74,8 @@ export class Stage {
         this.fitted = HOME_VIEW;
         /** Whether Taken apart moved the parts out (V4). */
         this.apart = false;
+        /** @type {?Array<string>} The parts a Tutorial step points at. */
+        this.pointed = null;
         this.root = null;
         this.panelBind = null;
         this.boxBind = null;
@@ -268,6 +271,7 @@ export class Stage {
             }
         }
         this.boxBind.setHighlight(parts);
+        this.pointed = parts;
         const view = VIEWS.find((v) => v.id == from);
         const points = corners(this.boxBind.boxes(
             (node) => parts.includes(this.boxBind.modelName(node))));
@@ -275,8 +279,14 @@ export class Stage {
         const f = frame(points, view.dir, FOV, width, height,
                         {top: GAP, right: GAP, bottom: GAP, left: GAP}, 0.5);
         this.fitted = null;
+        // The Views button names where it looks from, unless the box is
+        // taken apart, which it stays.
+        if (!this.apart) {
+            this.view = from;
+        }
         this.viewer.flyTo(f.position, f.target);
         this.viewer.invalidate();
+        this.refreshTools();
         return parts;
     }
 
@@ -284,7 +294,9 @@ export class Stage {
     unpoint() {
         if (this.boxBind.highlight) {
             this.boxBind.setHighlight(null);
+            this.pointed = null;
             this.viewer.invalidate();
+            this.refreshTools();
         }
     }
 
@@ -577,7 +589,8 @@ export class Stage {
     initTools() {
         this.viewsMenu = new Dropdown('views-dropdown', (id) => this.setView(id),
                                       () => this.refreshViewsMenu());
-        this.showMenu = new Dropdown('show-dropdown', (id) => this.setShow(id),
+        // Choosing what is pointed at again leaves it as it is.
+        this.showMenu = new Dropdown('show-dropdown', (id) => id == POINTED || this.setShow(id),
                                      () => this.refreshShowMenu());
         const press = (id, fn) => this.panel.makePressable(document.getElementById(id), fn);
         press('view-reset', () => this.setView(HOME_VIEW));
@@ -598,14 +611,26 @@ export class Stage {
         this.viewsMenu.setSelected(this.view);
     }
 
-    /** @private Fills the Show menu. */
+    /**
+     * @private Fills the Show menu: the presets, and while a Tutorial
+     * step points at parts, that first, as what is on show.
+     */
     refreshShowMenu() {
-        this.showMenu.setItems(SHOWS.map((s) => ({
+        const items = SHOWS.map((s) => ({
             value: s.id,
             label: l10n.getMessage('show-' + s.id),
             icon: s.icon,
-        })));
-        this.showMenu.setSelected(this.boxBind.show);
+        }));
+        if (this.pointed) {
+            items.unshift({value: POINTED, label: this.pointedName(), icon: POINTED_ICON});
+        }
+        this.showMenu.setItems(items);
+        this.showMenu.setSelected(showButton(this.boxBind.show, !!this.pointed).selected);
+    }
+
+    /** @private The parts pointed at, as one name in the reader's language. */
+    pointedName() {
+        return this.panel.listOf(this.pointed.map((name) => this.partName(name)));
     }
 
     /** Redraws the tools in the reader's language, as things stand. */
@@ -620,14 +645,16 @@ export class Stage {
         if (this.viewsMenu.isOpen()) {
             this.refreshViewsMenu();
         }
-        // The Show button is the chosen Show's icon, and, when that is
-        // not the whole machine, in the colour of a setting changed.
-        const show = SHOWS.find((s) => s.id == this.boxBind.show) || SHOWS[0];
+        // The Show button is the chosen Show's icon - or a target, while
+        // a Tutorial step points at parts - and, when that is not the
+        // whole machine, in the colour of a setting changed.
+        const state = showButton(this.boxBind.show, !!this.pointed);
         const button = document.getElementById('show-button');
         const name = l10n.getMessage('show-menu-current')
-              .replace('{show}', l10n.getMessage('show-' + show.id));
-        document.getElementById('show-current').innerHTML = show.icon;
-        button.classList.toggle('changed', show.id != SHOWS[0].id);
+              .replace('{show}', this.pointed ? this.pointedName() :
+                       l10n.getMessage('show-' + state.selected));
+        document.getElementById('show-current').innerHTML = state.icon;
+        button.classList.toggle('changed', state.changed);
         button.title = name;
         button.setAttribute('aria-label', name);
         if (this.showMenu.isOpen()) {

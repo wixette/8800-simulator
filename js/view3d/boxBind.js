@@ -23,10 +23,16 @@
 
 import * as THREE from 'three';
 import {CARD_IDS} from '../box.js';
-import {CARD_LIFT, REST_SLOT, SHOWS} from './views.js';
+import {CARD_LIFT, REST_SLOT, SHOWS, lookOf} from './views.js';
 
-/** A faded part's opacity. */
-const FADED_OPACITY = 0.16;
+/**
+ * A Show preset's faded part is outlined: pale over the pale parts
+ * inside it, the fade alone could pass for the part being gone.
+ */
+const OUTLINE = new THREE.LineBasicMaterial({color: 0xcfd6dc, transparent: true, opacity: 0.55,
+                                             depthWrite: false});
+/** Edges sharper than this, in degrees, are outlined. */
+const OUTLINE_ANGLE = 30;
 
 /** The glow on a part a Tutorial step points at: the page's orange. */
 const HIGHLIGHT = new THREE.Color(0xff9900);
@@ -214,18 +220,14 @@ export class BoxBinding {
         const lit = this.highlight;
         for (const node of this.parts.values()) {
             const name = this.modelName(node);
-            const glows = !!lit && lit.has(name);
-            // Lamps and switches belong to the panel, which keeps them.
-            const kept = /^panel\.(lamp|switch)\./.test(name);
-            const faded = !glows && !kept && (preset.faded.includes(name) || !!lit);
-            const hidden = !glows && preset.hidden.includes(name);
+            const {glows, kept, faded, hidden, opacity: fade, outlined} = lookOf(name, preset, lit);
             node.userData.seeThrough = faded || hidden;
             for (const mesh of this.ownMeshes(node)) {
                 for (const m of [].concat(mesh.material)) {
                     const look = this.looks.get(m);
                     m.visible = !hidden;
                     m.transparent = faded || look.transparent;
-                    m.opacity = faded ? FADED_OPACITY * look.opacity : look.opacity;
+                    m.opacity = faded ? fade * look.opacity : look.opacity;
                     m.depthWrite = faded ? false : look.depthWrite;
                     if (look.emissive && !kept) {
                         m.emissive.copy(glows ? HIGHLIGHT : look.emissive);
@@ -233,11 +235,32 @@ export class BoxBinding {
                     }
                     m.needsUpdate = true;
                 }
+                this.outline(mesh, outlined);
                 if (mesh.userData.castsShadow === undefined) {
                     mesh.userData.castsShadow = mesh.castShadow;
                 }
                 mesh.castShadow = !faded && !hidden && mesh.userData.castsShadow;
             }
+        }
+    }
+
+    /**
+     * @private Shows or hides a mesh's outline, made the first time it
+     * is wanted. It is no part of what a click can hit.
+     * @param {!THREE.Mesh} mesh The mesh.
+     * @param {boolean} shown Whether it is outlined.
+     */
+    outline(mesh, shown) {
+        let lines = mesh.userData.outline;
+        if (!lines && shown) {
+            lines = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry, OUTLINE_ANGLE),
+                                           OUTLINE);
+            lines.raycast = () => {};
+            mesh.add(lines);
+            mesh.userData.outline = lines;
+        }
+        if (lines) {
+            lines.visible = shown;
         }
     }
 

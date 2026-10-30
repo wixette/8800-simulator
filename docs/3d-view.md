@@ -297,7 +297,10 @@ language, so that choosing a view never moves the tools beside it.
   and Show decides what is drawn. They combine: Inside
   with Case faded, or Front panel with Electronics only. Faded parts
   let clicks and hover pass through, so a card can be pointed at
-  through a faded lid.
+  through a faded lid. A faded case is drawn as outlined glass, at 40 %:
+  the pale lid faded over the pale chassis, with no outline, read as no
+  lid at all. A Tutorial Show (V7) fades the parts round what it points
+  at further, to 16 %, out of its way.
 - **The machine keeps running** in every view and every Show preset:
   they change only how it is drawn. Watching the lamps through a
   faded case is the point.
@@ -439,8 +442,14 @@ Show action.**
   Views menu (P2: two ways to one view operation, not a copy of a
   control), and nothing locks and no mode is entered.
 - **The highlight ends** when the reader moves the camera to another
-  view, chooses from the Views menu, or presses another chip. The
-  status line names what is shown ("Showing: the CPU card").
+  view, chooses from the Views or Show menu, or presses another chip.
+  The status line names what is shown ("Showing: the CPU card").
+- **The tools say what a chip did** *(changed while building)*: the
+  Views button names the view the chip looked from, and the Show button
+  becomes a target, in orange, named after the parts, with those parts
+  as the Show menu's current item above the presets. The first build
+  left both buttons as they were, so the bar said "Front panel" and
+  "Everything" over a machine faded round its CPU card.
 - **Meet the machine, about ten steps:**
   - The front panel (works in 2D or 3D): the address and data lamps,
     the status lamps, the address/data switches, the control

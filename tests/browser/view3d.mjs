@@ -220,6 +220,21 @@ export async function tutorial(h) {
     verify('a 3D Show opens the 3D view', await js(`panel.view`) === '3d');
     verify('and points at the CPU card', await js(`[...panel.stage3d.boxBind.highlight].join()`) === 'card.cpu');
     verify('saying so', (await statusText()).startsWith('Showing: CPU card'), await statusText());
+    // The tools say so too (the repro: they said Front panel and Everything).
+    const tools = `(() => { const b = document.getElementById('show-button'); return {view: document.querySelector('#views-current > span:not(.dropdown-label-room)').textContent, title: b.title, changed: b.classList.contains('changed')}; })()`;
+    const pointing = await js(tools);
+    verify('the Views button names where it looks from', pointing.view == 'Whole machine', JSON.stringify(pointing));
+    verify('the Show button names what it points at', pointing.changed && pointing.title == 'Show: CPU card (Intel 8080)', JSON.stringify(pointing));
+    await h.press('#show-button');
+    verify('the Show menu has it as the current choice',
+           await js(`document.querySelector('#show-list [aria-selected="true"]').dataset.value`) === 'pointed');
+    await h.press('#show-list [data-value="case-faded"]'); await sleep(300);
+    const lid = `(() => { let m, lines; panel.stage3d.boxBind.find('case.top').traverse((o) => { if (o.isMesh && !m) m = [].concat(o.material)[0]; if (o.isLineSegments) lines = o.visible; }); return {opacity: +m.opacity.toFixed(2), lines}; })()`;
+    verify('Case faded then stops pointing', await js(`panel.stage3d.boxBind.highlight`) === null);
+    verify('and shows the case as glass, outlined, not gone', JSON.stringify(await js(lid)) == '{"opacity":0.4,"lines":true}', JSON.stringify(await js(lid)));
+    verify('as its button says', (await js(tools)).title == 'Show: Case faded');
+    await h.press('#show-button'); await h.press('#show-list [data-value="all"]'); await sleep(200);
+    verify('Everything puts the case back solid, unoutlined', JSON.stringify(await js(lid)) == '{"opacity":1,"lines":false}', JSON.stringify(await js(lid)));
     await chip(7); await sleep(300);
     verify('memory means the cards the Memory menu fitted', await js(`[...panel.stage3d.boxBind.highlight].join()`) === 'card.mem1k');
     await js(`panel.stage3d.setView('whole')`);
