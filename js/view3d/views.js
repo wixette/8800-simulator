@@ -24,25 +24,25 @@
  */
 
 /**
- * The views, in the menu's order. Each frames its subject: 'panel' (the
- * dress panel and the switches standing out of it) or 'box' (every
- * part, where it is going to be). Taken apart is the one view that
- * moves parts (V4).
- * @type {!Array<{id: string, dir: !Array<number>, subject: string}>}
+ * The views, in the menu's order: where each looks from. Each frames
+ * every part, where it is going to be; Taken apart is the one view that
+ * moves parts (V4). The front looks from just above the case's top
+ * edge, so that a thin band of the top shows over the panel and the
+ * view reads as a box, not the 2D panel again. Taken apart looks from
+ * the right and behind, where the cards show their chips, not their
+ * bare backs, and the lifted lid is off to one side.
+ * @type {!Array<{id: string, dir: !Array<number>}>}
  */
 export const VIEWS = [
-    {id: 'front', dir: [0, 0.08, 1], subject: 'panel'},
-    {id: 'whole', dir: [0.75, 0.62, 1], subject: 'box'},
-    {id: 'above', dir: [0, 1, 0.42], subject: 'box'},
-    {id: 'rear', dir: [-0.55, 0.42, -1], subject: 'box'},
-    {id: 'apart', dir: [-0.9, 0.8, 1], subject: 'box'},
+    {id: 'front', dir: [0, 0.3, 1]},
+    {id: 'whole', dir: [0.75, 0.62, 1]},
+    {id: 'above', dir: [0, 1, 0.42]},
+    {id: 'rear', dir: [-0.55, 0.42, -1]},
+    {id: 'apart', dir: [1, 0.9, -0.3]},
 ];
 
 /** The view the 3D view opens on, and Reset view goes back to. */
 export const HOME_VIEW = 'front';
-
-/** What the 'panel' subject is: the parts the front panel view frames. */
-export const PANEL_SUBJECT = ['panel.dress', 'panel.name_plate'];
 
 /** The case: what Case faded and Case hidden act on. */
 const CASE = ['case.top', 'case.bottom'];
@@ -166,6 +166,14 @@ export function showButton(show) {
     const preset = SHOWS.find((s) => s.id == show) || SHOWS[0];
     return {icon: preset.icon, changed: preset !== SHOWS[0]};
 }
+
+/**
+ * Materials the camera's framing leaves out: the power cord, which
+ * trails 15 cm out of the back to the table. Framed with the box, it
+ * pushed the box off centre in every view but the front, away from
+ * whichever side the cord stood out on.
+ */
+export const UNFRAMED_MATERIALS = ['cord_black'];
 
 /**
  * The parts wired in place: a click on one says it does not come out.

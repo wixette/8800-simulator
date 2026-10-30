@@ -852,14 +852,20 @@ a {
 }
 
 /* What the pointer is over: its name, what it does, what a click does. */
+/* What the pointer is over, as a caption in the stage's corner rather
+   than beside the pointer, where it covered the very lamps and switches
+   being worked. */
 .part-label {
-    background-color: rgba(20, 20, 20, 0.92);
+    background-color: rgba(20, 20, 20, 0.85);
     border: 1px solid #555;
     border-radius: 6px;
+    bottom: 8px;
+    box-sizing: border-box;
     color: #eee;
-    font-size: 13px;
-    max-width: 280px;
-    padding: 6px 9px;
+    font-size: 12px;
+    left: 8px;
+    max-width: min(320px, calc(100% - 16px));
+    padding: 5px 8px;
     pointer-events: none;
     position: absolute;
     z-index: 2;
@@ -2078,6 +2084,13 @@ a {
 
     #view-tools {
         height: 30px;
+    }
+
+    /* The panel fills the bottom of a phone's stage: the label goes over
+       the case top instead. */
+    .part-label {
+        bottom: auto;
+        top: 8px;
     }
 
     #dock-splitter {

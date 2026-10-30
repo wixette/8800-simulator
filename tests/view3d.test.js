@@ -17,8 +17,8 @@ import {Box, CARD_IDS} from '../js/box.js';
 import {l10n} from '../js/l10n.js';
 import {panel} from '../js/app.js';
 import {axes, corners, frame, silhouette} from '../js/view3d/framing.js';
-import {AROUND_PARTS_OPACITY, CARD_LIFT, FADED_OPACITY, HOME_VIEW, PANEL_SUBJECT,
-        REST_SLOT, SHOWS, VIEWS, WIRED, lookOf, partKey, showButton,
+import {AROUND_PARTS_OPACITY, CARD_LIFT, FADED_OPACITY, HOME_VIEW,
+        REST_SLOT, SHOWS, UNFRAMED_MATERIALS, VIEWS, WIRED, lookOf, partKey, showButton,
         switchName} from '../js/view3d/views.js';
 import {readGlb} from './glb.js';
 import {stub} from './stub.js';
@@ -73,7 +73,6 @@ test('the views are the menu\'s, each looking at something from somewhere', () =
     assert.deepStrictEqual(VIEWS.map((v) => v.id), ['front', 'whole', 'above', 'rear', 'apart']);
     assert.strictEqual(HOME_VIEW, 'front');
     for (const view of VIEWS) {
-        assert.ok(['panel', 'box'].includes(view.subject), view.id);
         assert.ok(view.dir[1] >= 0, view.id + ': never from underneath');
         assert.ok(l10n.MESSAGES['view-' + view.id], view.id + ' has a name');
     }
@@ -81,10 +80,24 @@ test('the views are the menu\'s, each looking at something from somewhere', () =
     assert.ok(VIEWS.find((v) => v.id == 'rear').dir[2] < 0, 'the rear the other way');
 });
 
+test('framing leaves out the power cord, which trails outside the case', () => {
+    // Framed with the box, the cord trailing out of the back pushed the
+    // box off centre in every view but the front.
+    const materials = GLTF.materials.map((m) => m.name);
+    for (const name of UNFRAMED_MATERIALS) {
+        assert.ok(materials.includes(name), name + ' is a material of the model');
+    }
+    // The cord is a primitive of the chassis frame, which three.js loads
+    // as a mesh of its own, so boxes() can skip it alone.
+    const frame = GLTF.meshes[GLTF.nodes.find((n) => n.name == 'chassis.frame').mesh];
+    assert.ok(frame.primitives.some((p) => UNFRAMED_MATERIALS.includes(GLTF.materials[p.material].name)));
+    assert.ok(frame.primitives.some((p) => !UNFRAMED_MATERIALS.includes(GLTF.materials[p.material].name)));
+});
+
 // ---- the menu and the model ----
 
 test('every part a Show preset or the page names is in the model', () => {
-    const named = PANEL_SUBJECT.concat(WIRED);
+    const named = WIRED.slice();
     for (const show of SHOWS) {
         named.push(...show.faded, ...show.hidden);
         assert.ok(l10n.MESSAGES['show-' + show.id], show.id + ' has a name');

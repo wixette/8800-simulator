@@ -32,7 +32,7 @@ import {BoxBinding} from './boxBind.js';
 import {corners, frame} from './framing.js';
 import {PanelBinding} from './panelBind.js';
 import {Viewer} from './viewer.js';
-import {HOME_VIEW, PANEL_SUBJECT, SHOWS, VIEWS, WIRED, partKey, showButton,
+import {HOME_VIEW, SHOWS, VIEWS, WIRED, partKey, showButton,
         switchName} from './views.js';
 
 /** A press and release this close together, in px and ms, is a click. */
@@ -176,7 +176,7 @@ export class Stage {
             // Leaving Taken apart puts back what it took out (V4).
             this.apart = false;
             this.panel.box.snap();
-            this.panel.box.putAllBack();
+            this.panel.box.putAllBack(true);
             this.panel.setStatus('view-reassembling');
         }
         this.place(id, true);
@@ -212,13 +212,7 @@ export class Stage {
         const view = VIEWS.find((v) => v.id == id);
         const box = this.panel.box;
         this.boxBind.pose(id == 'apart' ? () => 1 : (unit) => box.destination(unit));
-        const which = view.subject == 'panel' ?
-              (node) => {
-                  const name = this.boxBind.modelName(node);
-                  return PANEL_SUBJECT.includes(name) || /^panel\.switch\./.test(name);
-              } :
-              () => true;
-        const points = corners(this.boxBind.boxes(which));
+        const points = corners(this.boxBind.boxes());
         this.boxBind.pose();
         const {width, height} = this.viewer.size();
         return frame(points, view.dir, FOV, width, height,
@@ -293,18 +287,25 @@ export class Stage {
 
     // ---- the pointer: throwing switches, taking parts out, labels ----
 
+    /**
+     * What is under a point on the screen.
+     * @param {{clientX: number, clientY: number}} e The point.
+     * @return {?THREE.Intersection} The first solid part there, if any.
+     */
+    hitAt(e) {
+        const r = this.canvas.getBoundingClientRect();
+        this.ndc.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+        this.raycaster.setFromCamera(this.ndc, this.viewer.camera);
+        // Faded and hidden parts are context, not obstacles: a click goes
+        // through them (V3).
+        return this.raycaster.intersectObject(this.root, true).find((h) => this.isSolid(h.object)) || null;
+    }
+
     /** @private */
     initPointer() {
-        const raycaster = new THREE.Raycaster();
-        const ndc = new THREE.Vector2();
-        const hitAt = (e) => {
-            const r = this.canvas.getBoundingClientRect();
-            ndc.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
-            raycaster.setFromCamera(ndc, this.viewer.camera);
-            // Faded and hidden parts are context, not obstacles: a click
-            // goes through them (V3).
-            return raycaster.intersectObject(this.root, true).find((h) => this.isSolid(h.object)) || null;
-        };
+        this.raycaster = new THREE.Raycaster();
+        this.ndc = new THREE.Vector2();
+        const hitAt = (e) => this.hitAt(e);
         let down = null;
         // A click does not take the keyboard from the Teletype: the view
         // takes the focus by Tab, as the dock's tabs do (U3).
@@ -322,15 +323,17 @@ export class Stage {
             const hit = hitAt(e);
             if (hit) {
                 this.onClick(hit);
-                if (e.pointerType != 'mouse') {
-                    // No hover on a touch screen: the tap shows the label.
-                    this.showLabel(hit, e, 2500);
+                // No hover on a touch screen: a tap on a part shows its
+                // label. A tap on a switch shows itself, by throwing it.
+                if (e.pointerType != 'mouse' && !this.panelBind.pick(hit.object, hit.point, this.viewer.camera) &&
+                    !this.isLamp(hit.object)) {
+                    this.showLabel(hit, 2500);
                 }
             }
         });
         this.canvas.addEventListener('pointermove', (e) => {
             if (e.pointerType == 'mouse' && !e.buttons) {
-                this.showLabel(hitAt(e), e, 0);
+                this.showLabel(hitAt(e), 0);
             }
         });
         this.canvas.addEventListener('pointerleave', () => this.hideLabel());
@@ -355,7 +358,7 @@ export class Stage {
      * @param {!THREE.Intersection} hit Where it landed.
      */
     onClick(hit) {
-        const thrown = this.panelBind.pick(hit.object, hit.point);
+        const thrown = this.panelBind.pick(hit.object, hit.point, this.viewer.camera);
         if (thrown) {
             this.panel.operate(thrown.id, thrown.dir);
             return;
@@ -396,42 +399,78 @@ export class Stage {
      * The label for what the pointer is over: its name, what it does,
      * and what a click will do.
      * @param {?THREE.Intersection} hit What it is over.
-     * @return {?{name: string, role: string, hint: string}}
+     * @return {?{name: string, role: string, hint: string, acts: boolean}}
      */
     describe(hit) {
         if (!hit) {
             return null;
         }
-        const thrown = this.panelBind.pick(hit.object, hit.point);
+        const thrown = this.panelBind.pick(hit.object, hit.point, this.viewer.camera);
         if (thrown) {
             return {name: l10n.getMessage('label-switch').replace('{name}', switchName(thrown.id)),
-                    role: '', hint: l10n.getMessage('hint-throw')};
+                    role: '', hint: l10n.getMessage('hint-throw'), acts: true};
         }
-        for (let n = hit.object; n; n = n.parent) {
-            if (n.userData.lamp_id) {
-                return {name: l10n.getMessage('label-lamp').replace(
-                    '{name}', n.userData.lamp_id.toUpperCase()), role: '', hint: ''};
-            }
+        const lamp = this.isLamp(hit.object);
+        if (lamp) {
+            return {name: l10n.getMessage('label-lamp').replace('{name}', lamp.toUpperCase()),
+                    role: '', hint: '', acts: false};
         }
         const at = this.boxBind.partAt(hit.object);
         if (!at) {
             return null;
         }
         const node = at.unit || at.part;
-        let hint = '';
-        if (at.unit) {
-            const box = this.panel.box;
-            hint = box.position(at.unit) > 0 ? 'hint-put-back' :
-                this.panel.isPoweredOn ? 'hint-off-first' : 'hint-take-out';
-        }
-        return {name: this.partName(node), role: l10n.getMessage('role-' + partKey(node)),
-                hint: hint ? l10n.getMessage(hint) : ''};
+        return Object.assign({name: this.partName(node), role: l10n.getMessage('role-' + partKey(node))},
+                             at.unit ? this.unitHint(at.unit) : {hint: '', acts: false});
     }
 
-    /** @private */
-    showLabel(hit, e, ms) {
+    /**
+     * @private
+     * @param {!THREE.Object3D} object What the pointer is over.
+     * @return {?string} The lamp it is, if it is one.
+     */
+    isLamp(object) {
+        for (let n = object; n; n = n.parent) {
+            if (n.userData.lamp_id) {
+                return n.userData.lamp_id;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * What a click on a unit will do, or why it will not: the hint says
+     * so, rather than offer a click that only gets a refusal.
+     * @private
+     * @param {string} unit The unit.
+     * @return {{hint: string, acts: boolean}}
+     */
+    unitHint(unit) {
+        const box = this.panel.box;
+        const out = box.position(unit) > 0;
+        const why = out ? box.whyNotIn(unit) : box.whyNotOut(unit, this.panel.isPoweredOn);
+        if (!why) {
+            return {hint: l10n.getMessage(out ? 'hint-put-back' : 'hint-take-out'), acts: true};
+        }
+        if (why.id == 'box-switch-off') {
+            return {hint: l10n.getMessage('hint-off-first'), acts: false};
+        }
+        if (why.params.part) {
+            return {hint: l10n.getMessage(why.id).replace('{part}', this.partName(why.params.part)),
+                    acts: false};
+        }
+        return {hint: '', acts: false};
+    }
+
+    /**
+     * @private Shows what the pointer is over, or hides the label.
+     * @param {?THREE.Intersection} hit What it is over.
+     * @param {number} ms How long it stays, or 0 until the pointer moves.
+     */
+    showLabel(hit, ms) {
         const text = this.describe(hit);
-        this.canvas.style.cursor = text && text.hint ? 'pointer' : '';
+        // The hand only where a click does something.
+        this.canvas.style.cursor = text && text.acts ? 'pointer' : '';
         window.clearTimeout(this.labelTimer);
         if (!text) {
             this.hideLabel();
@@ -449,14 +488,6 @@ export class Stage {
             }
         }
         label.hidden = false;
-        const host = this.host.getBoundingClientRect();
-        const x = e.clientX - host.left;
-        const y = e.clientY - host.top;
-        // Beside the pointer, kept inside the stage.
-        const w = label.offsetWidth;
-        const h = label.offsetHeight;
-        label.style.left = Math.max(4, Math.min(x + 14, host.width - w - 4)) + 'px';
-        label.style.top = Math.max(4, Math.min(y + 14, host.height - h - 4)) + 'px';
         if (ms) {
             this.labelTimer = window.setTimeout(() => this.hideLabel(), ms);
         }
@@ -477,8 +508,9 @@ export class Stage {
      * checks, which click the 3D panel as a reader would.
      * @param {string} name A node in the model, such as 'panel.switch.s0'.
      * @param {!Array<number>|string=} where A point in the node's own
-     *     frame, in metres; or 'top', the middle of the top of its own
-     *     geometry, as it is now.
+     *     frame, in metres; 'top', the middle of the top of its own
+     *     geometry, as it is now; or 'upper' or 'lower', a point a
+     *     quarter of the way down or up it as drawn - a bat's halves.
      * @return {{x: number, y: number}} In client pixels.
      */
     screenPoint(name, where = [0, 0, 0]) {
@@ -486,7 +518,18 @@ export class Stage {
         this.root.updateMatrixWorld(true);
         this.viewer.camera.updateMatrixWorld();
         let world;
-        if (where == 'top') {
+        if (where == 'upper' || where == 'lower') {
+            // A quarter of the way down, or up, the part as drawn.
+            const b = new THREE.Box3().setFromObject(node);
+            const ends = corners([{min: b.min.toArray(), max: b.max.toArray()}])
+                  .map((c) => new THREE.Vector3().fromArray(c).project(this.viewer.camera));
+            const top = Math.max(...ends.map((e) => e.y));
+            const bottom = Math.min(...ends.map((e) => e.y));
+            const r = this.canvas.getBoundingClientRect();
+            const x = ends.reduce((sum, e) => sum + e.x, 0) / ends.length;
+            const y = where == 'upper' ? top - (top - bottom) / 4 : bottom + (top - bottom) / 4;
+            return {x: r.left + (x + 1) / 2 * r.width, y: r.top + (1 - y) / 2 * r.height};
+        } else if (where == 'top') {
             const b = new THREE.Box3();
             for (const mesh of this.boxBind.ownMeshes(node)) {
                 b.expandByObject(mesh, true);

@@ -23,7 +23,7 @@
 
 import * as THREE from 'three';
 import {CARD_IDS} from '../box.js';
-import {CARD_LIFT, REST_SLOT, SHOWS, lookOf} from './views.js';
+import {CARD_LIFT, REST_SLOT, SHOWS, UNFRAMED_MATERIALS, lookOf} from './views.js';
 
 /**
  * A Show preset's faded part is outlined: pale over the pale parts
@@ -287,7 +287,9 @@ export class BoxBinding {
             }
             const b = new THREE.Box3();
             for (const mesh of this.ownMeshes(node)) {
-                b.expandByObject(mesh, true);
+                if (![].concat(mesh.material).every((m) => UNFRAMED_MATERIALS.includes(m.name))) {
+                    b.expandByObject(mesh, true);
+                }
             }
             if (!b.isEmpty()) {
                 out.push({min: b.min.toArray(), max: b.max.toArray()});

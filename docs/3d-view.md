@@ -274,7 +274,7 @@ looks faint or is gone:
 
 ```
 [⌂] [−|+] [Front panel ▾] [▣ ▾] [2D|3D]
-           Front panel          the default: the panel square on, slightly from above
+           Front panel          the default: the panel square on, from just above its top edge
            Whole machine        three-quarter view
            Inside               from above
            Rear
@@ -335,14 +335,29 @@ language, so that choosing a view never moves the tools beside it.
   status line says what blocks it ("Take the lid off first"). Putting
   a unit back that others depend on says which must go back first.
 - **Taken apart** in the Views menu takes every unit out, in order,
-  and flies the camera to fit the parts out on the table. It is the
+  and flies the camera to fit the parts out on the table, seen from
+  the right and behind, where the cards show their chips. It is the
   one view that moves parts: leaving it for another view puts them all
-  back, in reverse. The other views never move a part, so a lid taken
+  back, in reverse, quickly (0.12 s a unit, about two seconds in all,
+  where taking it apart goes at 0.8 s a unit to be watched). The other views never move a part, so a lid taken
   off by hand stays off while the reader looks from above.
 - **Labels:** hovering (or tapping, on a phone) a part shows its name
   and one line on what it does, translated (P5: the panel's own
   lettering stays as it is). Clicking an operable part does it. The
-  cursor and the label say what a click will do.
+  cursor and the label say what a click will do, or why it will not
+  yet ("Take this out first: Chassis"); the hand shows only where a
+  click acts. The label is a caption in the stage's bottom-left corner
+  (on a phone, the top, over the case top), never beside the pointer.
+  *Changed while building:* it followed the pointer, and over the
+  front panel it covered the very switches being worked.
+- **Every view centres the box itself.** Framing leaves out the power
+  cord, which trails out of the back to the table and had pushed the
+  box off centre in every view but the front.
+- **A bat's halves are as drawn.** A click on the upper half of a
+  momentary bat, as it shows on the screen, throws it up, the lower
+  half down. From above, all that shows of a bat sticking straight out
+  is its top, so the world's up and down could not tell the halves
+  apart, and EXAMINE NEXT could not be reached.
 - **The Memory menu shows in the cage.** The fitted cards follow the
   memory size (with the CPU, SIO and 2SIO always in: the 1K board for
   256 B, one 88-4MCS in its place for 4 KB, two for 8 KB). Changing

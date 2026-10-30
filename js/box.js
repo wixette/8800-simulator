@@ -77,6 +77,14 @@ export const NEEDS_IN = {
 /** How long a unit takes to come out, or go back, in seconds. */
 export const MOVE_S = 0.8;
 
+/**
+ * How long each unit takes when the whole box goes back together on
+ * leaving Taken apart: the same order, so nothing passes through
+ * anything, but quick - the reader has seen it come apart, and is
+ * waiting for the next view.
+ */
+export const QUICK_MOVE_S = 0.12;
+
 /** A slot: [expander board, slot on it]; board 0 at the right, slot 0 outermost. */
 /** @typedef {!Array<number>} Slot */
 
@@ -150,6 +158,10 @@ export class Box {
          * @private @type {!Array<!Array<*>>}
          */
         this.plan = [];
+        /** How long each unit in the plan takes to move, in seconds. */
+        this.moveS = MOVE_S;
+        /** Whether what is going is the plan's, at its pace. @private */
+        this.planning = false;
         /** The memory size the cards are fitted for. */
         this.memSize = memSize;
         /**
@@ -339,6 +351,7 @@ export class Box {
         if (this.isBusy()) {
             return refusal('box-busy');
         }
+        this.moveS = MOVE_S;
         this.plan = this.units().filter((unit) => !this.isOut(unit))
             .map((unit) => [unit, 1]);
         this.step();
@@ -347,12 +360,14 @@ export class Box {
 
     /**
      * Puts every unit back, one after another, in the reverse order.
+     * @param {boolean=} quick Whether each takes QUICK_MOVE_S, not MOVE_S.
      * @return {?Refusal} Why not, or null if it has started.
      */
-    putAllBack() {
+    putAllBack(quick = false) {
         if (this.isBusy()) {
             return refusal('box-busy');
         }
+        this.moveS = quick ? QUICK_MOVE_S : MOVE_S;
         this.plan = this.units().reverse().filter((unit) => !this.isIn(unit))
             .map((unit) => [unit, 0]);
         this.step();
@@ -368,6 +383,8 @@ export class Box {
     snapTogether() {
         const apart = !this.isWhole();
         this.plan = [];
+        this.planning = false;
+        this.moveS = MOVE_S;
         this.going.clear();
         this.refits.clear();
         const fitted = fittedFor(this.memSize);
@@ -398,6 +415,8 @@ export class Box {
         const want = fittedFor(memSize);
         const seen = !this.isIn('case.top');
         this.plan = [];
+        this.planning = false;
+        this.moveS = MOVE_S;
         for (const card of CARD_IDS) {
             const unit = 'card.' + card;
             const now = this.slots[card];
@@ -430,10 +449,13 @@ export class Box {
      */
     update(dt) {
         const step = dt / MOVE_S;
+        // The units of a plan move at its pace; one taken out or put
+        // back by itself, and the cards a refit moves, at MOVE_S.
+        const planned = dt / this.moveS;
         let moved = false;
         let ended = false;
         for (const [unit, to] of [...this.going]) {
-            this.at[unit] = this.towards(this.at[unit], to, step);
+            this.at[unit] = this.towards(this.at[unit], to, this.planning ? planned : step);
             moved = true;
             if (this.at[unit] == to) {
                 this.going.delete(unit);
@@ -469,6 +491,10 @@ export class Box {
         }
         if (ended && !this.going.size) {
             this.step();
+            if (!this.going.size) {
+                this.planning = false;
+                this.moveS = MOVE_S;
+            }
         }
         if (ended) {
             this.changed();
@@ -488,6 +514,7 @@ export class Box {
      * @private
      */
     step() {
+        this.planning = this.plan.length > 0;
         while (this.plan.length) {
             const [unit, to] = /** @type {!Array<*>} */ (this.plan.shift());
             if (this.at[unit] != to) {

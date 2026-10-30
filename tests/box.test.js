@@ -12,7 +12,7 @@ import test from 'node:test';
 import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
-import {Box, CARD_IDS, MOVE_S, NEEDS_IN, PARTS, PREREQS, fittedFor} from '../js/box.js';
+import {Box, CARD_IDS, MOVE_S, NEEDS_IN, PARTS, PREREQS, QUICK_MOVE_S, fittedFor} from '../js/box.js';
 import {l10n} from '../js/l10n.js';
 import {panel} from '../js/app.js';
 import {stub} from './stub.js';
@@ -158,6 +158,52 @@ test('while anything is out or moving, the machine will not go on, and says what
     assert.ok(box.interlock(), 'nor while it goes back');
     box.snap();
     assert.strictEqual(box.interlock(), null);
+});
+
+test('leaving Taken apart puts it all back quickly, in the same order, then at the usual pace again', () => {
+    /** How long, in seconds of updates, until the box stops moving. */
+    const timeToStop = (box) => {
+        let t = 0;
+        for (; box.isBusy() && t < 60; t += 0.01) {
+            box.update(0.01);
+        }
+        return t;
+    };
+    const apart = () => {
+        const box = new Box(8192);
+        box.takeAllApart(false);
+        box.snap();
+        return box;
+    };
+    const units = apart().units().length;
+    const slow = apart();
+    slow.putAllBack();
+    const slowS = timeToStop(slow);
+    assert.ok(Math.abs(slowS - units * MOVE_S) < units * 0.02, slowS);
+    const quick = apart();
+    const order = [];
+    quick.onChange = () => {
+        for (const unit of quick.units()) {
+            if (quick.isIn(unit) && !order.includes(unit)) {
+                order.push(unit);
+            }
+        }
+    };
+    quick.putAllBack(true);
+    const quickS = timeToStop(quick);
+    assert.ok(quick.isWhole());
+    assert.ok(Math.abs(quickS - units * QUICK_MOVE_S) < units * 0.02, quickS);
+    assert.ok(quickS <= 2.5, 'a couple of seconds, not ' + quickS);
+    assert.deepStrictEqual(order, quick.units().reverse(), 'one after another, as the rules allow');
+    // A unit taken out afterwards moves at the usual pace.
+    quick.takeOut('case.top', false);
+    quick.update(QUICK_MOVE_S * 2);
+    assert.ok(quick.isBusy() && quick.position('case.top') < 0.5);
+    // And Take it all apart is never hurried.
+    const again = new Box(8192);
+    again.putAllBack(true);
+    again.takeAllApart(false);
+    assert.ok(Math.abs(timeToStop(again) - units * MOVE_S) < units * 0.02);
 });
 
 test('snapping together puts every unit in at once, and says if anything was out', () => {

@@ -19,7 +19,8 @@ async function load3d(h) {
  * Clicks a part of the model where it is on the screen now.
  * @param {!Object} h The harness.
  * @param {string} name The node, as the model names it.
- * @param {!Array<number>|string=} where A point in its frame, or 'top'.
+ * @param {!Array<number>|string=} where A point in its frame, 'top', or a
+ *     bat's 'upper' or 'lower' half as drawn.
  */
 async function click(h, name, where = [0, 0, 0]) {
     const p = await h.js(`panel.stage3d.screenPoint(${JSON.stringify(name)}, ${JSON.stringify(where)})`);
@@ -57,16 +58,16 @@ export default async function(h) {
     await click(h, 'panel.switch.s7', TIP);
     await click(h, 'panel.switch.s0', TIP);
     verify('address switches clicked in 3D raise A7 and A0', await js(`panel.getInputAddressCallback()`) === 0x81);
-    await click(h, 'panel.switch.examine', TIP);
+    await click(h, 'panel.switch.examine', 'upper');
     await sleep(300);
     verify('EXAMINE clicked in 3D examines 0081H', await js(`panel.sim.lastAddress`) === 0x81);
     verify('and the 3D lamps show what the 2D lamps show', await js(LAMPS_AGREE));
     verify('A7 and A0 are lit', await js(`panel.stage3d.panelBind.isLit('a7') && panel.stage3d.panelBind.isLit('a0') && !panel.stage3d.panelBind.isLit('a1')`));
     verify('the EXAMINE bat springs back to centre', await js(`panel.stage3d.panelBind.angleOf('examine')`) === 0);
-    await click(h, 'panel.switch.examine', [0, 0, -0.004]);
+    await click(h, 'panel.switch.examine', 'lower');
     await sleep(300);
     verify('its lower half gives EXAMINE NEXT', await js(`panel.sim.lastAddress`) === 0x82);
-    await click(h, 'panel.switch.single', [0, 0, -0.004]);
+    await click(h, 'panel.switch.single', 'lower');
     verify('SINGLE STEP\'s lower half does nothing', await js(`panel.stage3d.panelBind.angleOf('single')`) === 0);
 
     // The box and the power.
@@ -179,6 +180,8 @@ export async function phone(h) {
     verify('with room to see the machine', box.h >= 220 && box.w >= 300, JSON.stringify(box));
     verify('the tools fit across the top', await js(`(() => { const t = document.getElementById('view-tools'); return t.scrollWidth <= t.clientWidth + 1 && t.getBoundingClientRect().height < 40; })()`));
     verify('nothing to scroll sideways', await js(`document.documentElement.scrollWidth <= innerWidth`));
+    const label = await js(`(() => { const c = getComputedStyle(document.getElementById('part-label')); return c.top + ' ' + c.bottom; })()`);
+    verify('a part\'s label goes over the case top, not the panel', label.startsWith('8px') && label.endsWith('auto'), label);
     // Choosing a view moves nothing on the top edge, in any language (U8).
     const tools = `JSON.stringify(['view-reset', 'view-zoom-out', 'views-button', 'show-button', 'view-2d'].map((id) => { const b = document.getElementById(id).getBoundingClientRect(); return [Math.round(b.left), Math.round(b.width)]; }))`;
     const moved = [];
@@ -199,6 +202,105 @@ export async function phone(h) {
     }
     await js(`l10n.setLocale('en')`); await h.sleep(80);
     verify('the tools stay put whichever view or Show, in every language', moved.length == 0, moved.join('; '));
+}
+
+/**
+ * The views: each centres the machine, the front shows a band of the
+ * top, Taken apart looks at the cards' chips, and leaving it is quick.
+ * And the label keeps out of the way of the panel being worked.
+ */
+export async function views(h) {
+    const {js, send, viewport, fresh, press, verify, sleep} = h;
+    await viewport(1280, 860); await fresh();
+    await press('#view-3d');
+    verify('3D loads', await load3d(h));
+    const settle = async () => {
+        for (let i = 0; i < 120 && await js(`panel.box.isBusy() || panel.stage3d.viewer.isFlying()`); i++) {
+            await sleep(100);
+        }
+    };
+    // Where the box itself - the case, without the cord - is on the stage.
+    const placed = `(async () => {
+        const {silhouette, corners} = await import('./js/view3d/framing.js');
+        const s = panel.stage3d; const b = s.boxBind;
+        const camera = {position: s.viewer.camera.position.toArray(), target: s.viewer.controls.target.toArray()};
+        const {width, height} = s.viewer.size();
+        const sil = silhouette(corners(b.boxes((n) => /^case\\./.test(b.modelName(n)))), camera, 35, width, height);
+        const top = b.boxes((n) => b.modelName(n) == 'case.top')[0];
+        return {dx: ((sil.left + sil.right) / 2 - width / 2) / width, dy: ((sil.top + sil.bottom) / 2 - height / 2) / height,
+                cam: camera.position, target: camera.target, caseTop: top ? top.max[1] : null};
+    })()`;
+    for (const view of ['front', 'whole', 'above', 'rear']) {
+        await js(`panel.stage3d.setView('${view}')`); await settle();
+        const at = await js(placed);
+        verify(view + ' centres the box on the stage', Math.abs(at.dx) < 0.02 && Math.abs(at.dy) < 0.04,
+               JSON.stringify({dx: at.dx.toFixed(3), dy: at.dy.toFixed(3)}));
+        if (view == 'front') {
+            verify('the front looks from just above the top, so a band of it shows',
+                   at.cam[1] > at.caseTop && at.cam[1] < at.caseTop + 0.15, JSON.stringify(at));
+        }
+    }
+    // A bat's halves, as drawn, throw it up and down from every view:
+    // from above, a bat sticking out shows only its top, every point of
+    // it above the pivot, so world height cannot tell them apart.
+    const halves = [];
+    for (const view of ['front', 'whole', 'above']) {
+        await js(`panel.stage3d.setView('${view}')`); await settle();
+        for (const half of ['upper', 'lower']) {
+            halves.push(view + ' ' + half + ': ' + await js(`(() => { const s = panel.stage3d; const p = s.screenPoint('panel.switch.examine', '${half}');
+                const hit = s.hitAt({clientX: p.x, clientY: p.y}); const t = hit && s.panelBind.pick(hit.object, hit.point, s.viewer.camera); return t ? t.id + ' ' + t.dir : 'nothing'; })()`));
+        }
+    }
+    verify('a bat\'s upper half throws it up, its lower half down, from every view',
+           halves.every((x) => x.endsWith(x.includes('upper') ? 'examine up' : 'examine down')), halves.join('; '));
+    await js(`panel.stage3d.setView('apart')`); await settle();
+    const apart = await js(placed);
+    verify('Taken apart looks from the right and behind, at the cards\' chips',
+           apart.cam[0] > apart.target[0] && apart.cam[2] < apart.target[2], JSON.stringify(apart));
+    const t0 = Date.now();
+    await js(`panel.stage3d.setView('front')`);
+    for (let i = 0; i < 100 && await js(`panel.box.isBusy()`); i++) await sleep(50);
+    const took = Date.now() - t0;
+    verify('leaving it puts the box back in a couple of seconds', took < 3000 && await js(`panel.box.isWhole()`), took + ' ms');
+    await settle();
+
+    // The label: in the stage's corner, never over the pointer, and a
+    // click it offers is one that works.
+    const move = async (x, y) => {
+        await send('Input.dispatchMouseEvent', {type: 'mouseMoved', x, y});
+        await sleep(150);
+    };
+    const tip = await js(`panel.stage3d.screenPoint('panel.switch.s7', [0, 0, 0.009])`);
+    await move(tip.x, tip.y);
+    const label = `(() => { const l = document.getElementById('part-label'); const r = l.getBoundingClientRect(); const s = document.getElementById('stage3d').getBoundingClientRect();
+        return {shown: !l.hidden, left: Math.round(r.left - s.left), bottom: Math.round(s.bottom - r.bottom), right: r.right, top: r.top, text: l.innerText.replace(/\\n/g, ' | '), cursor: document.getElementById('stage3d-canvas').style.cursor}; })()`;
+    const onSwitch = await js(label);
+    verify('over a switch, the label names it', onSwitch.shown && onSwitch.text.startsWith('Switch A07'), JSON.stringify(onSwitch));
+    verify('in the stage\'s bottom left corner', onSwitch.left <= 10 && onSwitch.bottom <= 10, JSON.stringify(onSwitch));
+    verify('not over the pointer', tip.x > onSwitch.right || tip.y < onSwitch.top, JSON.stringify([tip, onSwitch]));
+    verify('and the hand says a click throws it', onSwitch.cursor == 'pointer');
+    // A spot of the dress panel between the switches and lamps.
+    const bare = await js(`(() => {
+        const s = panel.stage3d; const r = s.canvas.getBoundingClientRect();
+        for (let y = 0.3; y < 0.8; y += 0.02) {
+            for (let x = 0.3; x < 0.7; x += 0.01) {
+                const px = {clientX: r.left + x * r.width, clientY: r.top + y * r.height};
+                const hit = s.hitAt(px);
+                if (hit && !s.panelBind.pick(hit.object, hit.point, s.viewer.camera) && (s.boxBind.partAt(hit.object) || {}).unit == 'panel.dress') {
+                    return {x: px.clientX, y: px.clientY};
+                }
+            }
+        }
+        return null;
+    })()`);
+    verify('the dress panel shows between the switches', !!bare);
+    if (bare) {
+        await move(bare.x, bare.y);
+        const onDress = await js(label);
+        verify('over it, the label says why it cannot come out yet, not "click to take it out"',
+               onDress.text.includes('Take this out first: Chassis') && !onDress.text.includes('Click'), onDress.text);
+        verify('and no hand, as a click there does nothing', onDress.cursor == '', onDress.cursor);
+    }
 }
 
 /** The Tutorial's contents and its Show chips (V7). */

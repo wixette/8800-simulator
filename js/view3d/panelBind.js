@@ -202,18 +202,25 @@ export class PanelBinding {
 
     /**
      * The switch, and the way, a click on the model means: on a bat, the
-     * half of it clicked (a latching switch flips); on the panel near a
-     * switch, above or below its pivot.
+     * half of it clicked, as it looks from where the camera is (a
+     * latching switch flips); on the panel near a switch, above or below
+     * its pivot.
      * @param {!THREE.Object3D} object What the pointer's ray hit.
      * @param {!THREE.Vector3} point Where, in the world.
+     * @param {!THREE.Camera} camera The camera it was seen with.
      * @return {?{id: string, dir: string}} The throw, or null if the
      *     click is on no switch.
      */
-    pick(object, point) {
+    pick(object, point, camera) {
         for (let n = object; n; n = n.parent) {
             const id = n.userData.switch_id;
             if (id) {
-                return this.throwFor(id, n, point);
+                // The middle of the bat as drawn: from above, all that
+                // shows of a bat sticking straight out is its top, every
+                // point of it above the pivot, so the world's up and down
+                // cannot tell its halves apart, but the screen's can.
+                const middle = new THREE.Box3().setFromObject(n).getCenter(new THREE.Vector3());
+                return this.throwFor(id, n, point, middle, camera);
             }
         }
         for (const [id, bat] of this.bats) {
@@ -222,18 +229,26 @@ export class PanelBinding {
             if (Math.abs(point.x - pivot.x) <= zone.x &&
                 Math.abs(point.y - pivot.y) <= zone.y &&
                 Math.abs(point.z - pivot.z) <= ZONE_DEPTH) {
-                return this.throwFor(id, bat.node, point);
+                return this.throwFor(id, bat.node, point, pivot, camera);
             }
         }
         return null;
     }
 
-    /** @private */
-    throwFor(id, node, point) {
+    /**
+     * @private
+     * @param {string} id The switch.
+     * @param {!THREE.Object3D} node Its node.
+     * @param {!THREE.Vector3} point Where the click landed.
+     * @param {!THREE.Vector3} middle Where above is up from, and below down.
+     * @param {!THREE.Camera} camera The camera it was seen with.
+     * @return {{id: string, dir: string}}
+     */
+    throwFor(id, node, point, middle, camera) {
         if (latches(node)) {
             return {id: id, dir: this.panel.switchPosition(id) > 0 ? 'down' : 'up'};
         }
-        const pivot = node.getWorldPosition(new THREE.Vector3());
-        return {id: id, dir: point.y >= pivot.y ? 'up' : 'down'};
+        const up = point.clone().project(camera).y >= middle.clone().project(camera).y;
+        return {id: id, dir: up ? 'up' : 'down'};
     }
 }
