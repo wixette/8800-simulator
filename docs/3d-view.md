@@ -311,12 +311,22 @@ Views button keeps the width of the longest one in the reader's
 language, so that choosing a view never moves the tools beside it.
 
 - **Fade or hide, in presets.** The view decides where you look from,
-  and Show decides what is drawn. They combine: Inside
+  and Show decides what is drawn. They combine: Rear
   with Case faded, or Front panel with Electronics only. Faded parts
   let clicks and hover pass through, so a card can be pointed at
   through a faded lid. A faded case is drawn as outlined glass, at 40 %:
   the pale lid faded over the pale chassis, with no outline, read as no
   lid at all.
+- **Inside is the one view that brings a Show.** From above, a closed
+  lid shows only a lid. So going to Inside with Show on Everything
+  turns it to Case faded, and leaving turns it back, if it is still
+  the Show Inside chose. A Show the reader or a Tutorial chip chose is
+  theirs: Inside leaves it, and so does leaving. Everything chosen
+  while on Inside stays, for the lid from above. Case faded, not Case
+  hidden, because it keeps the box a box round what is in it.
+  *Changed in v1.8.1:* the view was named for what it did not show.
+  Lifting the lid instead would not work with the machine on, which is
+  when the inside is worth watching.
 - **The key parts are Shows too.** Each makes its parts glow, shown
   even where they would be hidden, and fades every other part further,
   to 16 %, out of their way. Like any Show it stays as the view
@@ -340,11 +350,24 @@ language, so that choosing a view never moves the tools beside it.
 
 ### V4 — Taking it apart
 
-- **One unit at a time:** with the machine off, click a unit (the lid,
-  a card, a transformer…) to take it out along its path, and click it
-  again to put it back. A unit that is blocked doesn't move, and the
-  status line says what blocks it ("Take the lid off first"). Putting
-  a unit back that others depend on says which must go back first.
+- **The rule:** with the machine off, click a unit (the lid, a card, a
+  transformer…) and it comes out along its path, and anything in its
+  way comes out first, in order. Click it again and it goes back, after
+  whatever has to go back first. What must come out before what is the
+  box's business (`PREREQS` in `js/box.js`, from the model), and it
+  always holds, so no part ever passes through another. The reader is
+  never asked to work the order out, and it is the same under every
+  Show: the box knows nothing of what is drawn, so a faded or hidden
+  lid lifts just as a solid one does, and the order can be watched
+  in the parts going one after another. Those taken out go at 0.8 s a
+  unit; a unit going back alone takes 0.8 s, and several go at the
+  quick 0.12 s, as Put it all back does.
+- **One exception, the dress panel.** It lies among the switches on the
+  machine's face, so a click that missed one would otherwise take off
+  the lid and the chassis behind it. It comes out only once the chassis
+  is out, and says so. *Changed in v1.8.1:* a blocked unit used to
+  refuse and name what blocked it, and under Case faded or Case hidden
+  that was a lid the reader could not see or click.
 - **Taken apart** in the Views menu takes every unit out, in order,
   and flies the camera to fit the parts out on the table, seen from
   the right and behind, where the cards show their chips. It is the
@@ -362,7 +385,7 @@ language, so that choosing a view never moves the tools beside it.
   and one line on what it does, translated (P5: the panel's own
   lettering stays as it is). Clicking an operable part does it. The
   cursor and the label say what a click will do, or why it will not
-  yet ("Take this out first: Chassis"); the hand shows only where a
+  ("Switch the machine OFF first"); the hand shows only where a
   click acts. The label shows once the mouse rests on a part for
   400 ms, as a tooltip waits, beside the pointer (below and to its
   right, or above it at the stage's foot); a press puts it away, and it
@@ -474,11 +497,27 @@ the Assembler or a link, whichever view is showing.
 | A load | Whole, on | Whole at once, on, says so | Same | Same; view to front | Same; view to front | Same |
 | Memory | Cards change | Moves finish, cards follow | Same | Apart, cards follow | Same | Whole, cards change |
 | To 2D | - | Whole at once | Same | Same; view to front | Same; view to front | Same |
-| Click a unit | Out, if the rules allow | Out or in | Wait | Wait | Out or in | Wait |
+| Click a unit | Out, with what is in its way | Out or in, with what is in its way | Wait | Wait | Out or in, with what is in its way | Wait |
 | A view | Camera only | Camera only | Camera only | Going back | Going back | Camera only |
 | Taken apart | Coming apart | Coming apart | Wait | Wait | (says so) | Wait |
+| A Show chosen | Drawn only: the box does not know | Same | Same | Same | Same | Same |
 | ⌂ Reset | Front, all shown | Going back, front, all shown | Same | Same | Same | Same |
 | Put it all back | not offered | Going back, view kept | Same | Going back, front | Same | not offered |
+
+Clicks are the one thing the machine being on refuses outright, and
+the dress panel the one thing a click refuses for the order of the
+parts (V4). A click that puts the last part back ends Taken apart, as
+Put it all back does.
+
+**The Show** is one more piece of the state, and the box takes no part
+in it. Inside remembers the Show it chose:
+
+| Event | Show on Everything | Show chosen by Inside | Any other Show |
+|---|---|---|---|
+| To Inside | Case faded, chosen by Inside | (is there already) | Stays |
+| From Inside | Stays | Everything | Stays |
+| A Show chosen | That Show, the reader's | Same | Same |
+| ⌂ Reset | Stays | Everything, front | Everything, front |
 
 **The invariants,** which `tests/state-machine.test.js` holds in every
 state reached from a new page by every event, with the real `Box`,
@@ -494,6 +533,12 @@ state reached from a new page by every event, with the real `Box`,
 8. At rest, the interlock refuses exactly while the box is not whole.
 9. From any state, in 3D, Put it all back and a wait lead to a machine
    that switches on, and off Taken apart.
+10. A unit is out, or on its way, only while all it needs out is
+    wholly out: nothing ever passes through anything.
+11. At rest, with the machine off, a click on any unit acts, but for
+    the dress panel before the chassis.
+12. Inside's Show is remembered only on Inside, and only while it is
+    the Show on view.
 
 And a status can only say what is so: "every part is out" and "back
 together" are checked as they are said, and OFF/ON never tells the
