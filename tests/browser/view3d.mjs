@@ -468,6 +468,41 @@ export async function states(h) {
     await js(`l10n.setLocale('en')`);
 }
 
+/**
+ * The parts as they are drawn, frame by frame, not only where the box
+ * says they are: each one seen on its way, slow coming out, by a click
+ * or as a whole, and quick going back as a whole.
+ */
+export async function pace(h) {
+    const {js, viewport, fresh, press, verify, sleep} = h;
+    await viewport(1280, 860); await fresh();
+    await press('#view-3d');
+    verify('3D loads', await load3d(h));
+    await js(`panel.stage3d.setView('whole')`); await sleep(1000);
+    /** Starts a move: its seconds, and the places a part was drawn at. */
+    const watched = (part, start) => js(`new Promise((done) => {
+        const node = panel.stage3d.boxBind.find(${JSON.stringify(part)});
+        const at = node.position.clone(), places = new Set(), t0 = performance.now();
+        const frame = () => { places.add(node.getWorldPosition(at).toArray().join());
+            if (panel.box.isBusy()) { requestAnimationFrame(frame); }
+            else { done({s: (performance.now() - t0) / 1000, places: places.size}); } };
+        ${start}; requestAnimationFrame(frame); })`);
+    const lid = await watched('case.top', `panel.stage3d.state.click('case.top')`);
+    verify('a part clicked out takes its 0.8 s', lid.s > 0.65, JSON.stringify(lid));
+    verify('drawn all the way, not jumping there', lid.places > 10, JSON.stringify(lid));
+    await sleep(800);
+    const back = await watched('case.top', `panel.stage3d.state.click('case.top')`);
+    verify('and the same going back by itself', back.s > 0.65 && back.places > 10, JSON.stringify(back));
+    await sleep(800);
+    const apart = await watched('card.cpu', `panel.stage3d.setView('apart')`);
+    verify('Taken apart takes its 0.8 s a part', apart.s > 14 * 0.65, JSON.stringify(apart));
+    verify('each drawn on its way', apart.places > 10, JSON.stringify(apart));
+    await sleep(800);
+    const whole = await watched('case.top', `panel.stage3d.setView('front')`);
+    verify('and going back together is several times quicker', whole.s * 3 < apart.s, JSON.stringify([apart, whole]));
+    verify('and still drawn moving', whole.places > 2, JSON.stringify(whole));
+}
+
 /** A link that opens in 3D keeps what the link said; tabs open at their top. */
 export async function linked(h) {
     const {js, send, viewport, fresh, verify, sleep, statusText} = h;

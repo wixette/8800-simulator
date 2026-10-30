@@ -172,6 +172,7 @@ export class Stage {
             // Less motion asked for: each part there in a frame, as a
             // camera flight is.
             box.update(reducedMotion() ? MOVE_S : dt);
+            this.boxBind.pose();
             moved = true;
         }
         if (moved) {
