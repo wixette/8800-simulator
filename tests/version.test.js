@@ -114,12 +114,29 @@ test('every file the page names carries the version, for caches (#19)', () => {
     // Every module, and only those, in the import map, each to its own
     // file with the version; the map comes before the module script.
     const map = JSON.parse(html.match(/<script type="importmap">([\s\S]*?)<\/script>/)[1]);
-    const files = fs.readdirSync(path.join(ROOT, 'js')).filter((f) => f.endsWith('.js'));
-    assert.deepStrictEqual(Object.keys(map.imports).sort(),
-                           files.map((f) => './js/' + f).sort());
-    for (const [from, to] of Object.entries(map.imports)) {
-        assert.strictEqual(to, from + '?v=' + VERSION);
+    const files = [];
+    for (const top of ['js', 'vendor/three']) {
+        for (const f of fs.readdirSync(path.join(ROOT, top), {recursive: true})) {
+            if (f.endsWith('.js')) {
+                files.push('./' + top + '/' + f.split(path.sep).join('/'));
+            }
+        }
     }
+    assert.ok(files.includes('./js/main.js') && files.includes('./vendor/three/build/three.core.js'));
+    const named = Object.keys(map.imports).filter((from) => from.startsWith('./'));
+    assert.deepStrictEqual(named.sort(), files.sort());
+    for (const from of named) {
+        assert.strictEqual(map.imports[from], from + '?v=' + VERSION);
+    }
+    // three.js by the names its addons import it by, and nothing else.
+    const bare = Object.keys(map.imports).filter((from) => !from.startsWith('./'));
+    assert.strictEqual(map.imports['three'], './vendor/three/build/three.module.js?v=' + VERSION);
+    for (const from of bare.filter((name) => name != 'three')) {
+        assert.match(from, /^three\/addons\//);
+        assert.strictEqual(map.imports[from], from.replace(/^three\/addons\//,
+            './vendor/three/examples/jsm/') + '?v=' + VERSION);
+    }
+    assert.ok(map.imports['three/addons/loaders/GLTFLoader.js']);
     assert.ok(html.indexOf('type="importmap"') < html.indexOf('type="module"'));
 });
 
