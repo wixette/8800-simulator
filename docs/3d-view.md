@@ -274,7 +274,8 @@ looks faint or is gone:
 
 ```
 [⌂] [−|+] [Front panel ▾] [▣ ▾] [2D|3D]
-           Front panel          the default: the panel square on, from just above its top edge
+           Front panel          the default: the panel square on, from just above its top edge,
+                                a band of the top 15 % as deep as the front is tall, on every screen
            Whole machine        three-quarter view
            Inside               from above
            Rear
@@ -358,6 +359,14 @@ language, so that choosing a view never moves the tools beside it.
   bottom-left corner, where it flicked between a switch's two lines and
   the dress panel's four as the pointer slid across the panel - and on
   a wide stage was far from the part it named.
+- **The front shows the same band of the top on every screen.** Each
+  view fills the stage, so its camera comes close on a wide, short
+  stage and stands back on a narrow one; along one direction, that
+  showed a sliver of the top on a desktop (7 %) and four times as much
+  on a phone (31 %). The front's camera height is found for the stage
+  instead, so that the top shows 15 % as deep as the front is tall
+  (framing.js, frameShowingTop). The other views look down from high
+  enough that distance changes little.
 - **Every view centres the box itself.** Framing leaves out the power
   cord, which trails out of the back to the table and had pushed the
   box off centre in every view but the front.

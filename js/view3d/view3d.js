@@ -29,7 +29,7 @@ import * as THREE from 'three';
 import {Dropdown} from '../dropdown.js';
 import {l10n} from '../l10n.js';
 import {BoxBinding} from './boxBind.js';
-import {corners, frame} from './framing.js';
+import {corners, frame, frameShowingTop} from './framing.js';
 import {PanelBinding} from './panelBind.js';
 import {Viewer} from './viewer.js';
 import {HOME_VIEW, SHOWS, VIEWS, WIRED, partKey, showButton,
@@ -226,10 +226,16 @@ export class Stage {
         const box = this.panel.box;
         this.boxBind.pose(id == 'apart' ? () => 1 : (unit) => box.destination(unit));
         const points = corners(this.boxBind.boxes());
+        // The case's bottom half never moves, and stands the box's full
+        // height: the front and top that topShare measures.
+        const shell = this.boxBind.boxes((node) => this.boxBind.modelName(node) == 'case.bottom')[0];
         this.boxBind.pose();
         const {width, height} = this.viewer.size();
-        return frame(points, view.dir, FOV, width, height,
-                     {top: GAP, right: GAP, bottom: GAP, left: GAP});
+        const insets = {top: GAP, right: GAP, bottom: GAP, left: GAP};
+        if (view.topShare && shell) {
+            return frameShowingTop(points, shell, view.topShare, view.dir, FOV, width, height, insets);
+        }
+        return frame(points, view.dir, FOV, width, height, insets);
     }
 
     /** The canvas changed size: a view the page chose fits it again. */

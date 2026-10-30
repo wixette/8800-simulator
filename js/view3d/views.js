@@ -27,14 +27,16 @@
  * The views, in the menu's order: where each looks from. Each frames
  * every part, where it is going to be; Taken apart is the one view that
  * moves parts (V4). The front looks from just above the case's top
- * edge, so that a thin band of the top shows over the panel and the
- * view reads as a box, not the 2D panel again. Taken apart looks from
- * the right and behind, where the cards show their chips, not their
- * bare backs, and the lifted lid is off to one side.
- * @type {!Array<{id: string, dir: !Array<number>}>}
+ * edge, so that a band of the top shows over the panel and the view
+ * reads as a box, not the 2D panel again: its height is found for the
+ * stage so that the band is topShare of the front's height on every
+ * screen (framing.js, frameShowingTop). Taken apart looks from the
+ * right and behind, where the cards show their chips, not their bare
+ * backs, and the lifted lid is off to one side.
+ * @type {!Array<{id: string, dir: !Array<number>, topShare?: number}>}
  */
 export const VIEWS = [
-    {id: 'front', dir: [0, 0.3, 1]},
+    {id: 'front', dir: [0, 0.3, 1], topShare: 0.15},
     {id: 'whole', dir: [0.75, 0.62, 1]},
     {id: 'above', dir: [0, 1, 0.42]},
     {id: 'rear', dir: [-0.55, 0.42, -1]},

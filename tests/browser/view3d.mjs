@@ -178,6 +178,8 @@ export async function phone(h) {
     verify('3D loads on a phone', await load3d(h));
     const box = await js(`(() => { const b = document.getElementById('stage3d').getBoundingClientRect(); return {w: b.width, h: b.height}; })()`);
     verify('with room to see the machine', box.h >= 220 && box.w >= 300, JSON.stringify(box));
+    const share = await js(TOP_SHARE);
+    verify('the front shows the same band of the top as on a wide screen', Math.abs(share - 0.15) < 0.005, share);
     verify('the tools fit across the top', await js(`(() => { const t = document.getElementById('view-tools'); return t.scrollWidth <= t.clientWidth + 1 && t.getBoundingClientRect().height < 40; })()`));
     verify('nothing to scroll sideways', await js(`document.documentElement.scrollWidth <= innerWidth`));
     const tapped = await js(`(() => { const s = panel.stage3d; const p = s.screenPoint('case.top', 'top'); s.showLabel(s.hitAt({clientX: p.x, clientY: p.y}), 2500);
@@ -239,6 +241,8 @@ export async function views(h) {
         if (view == 'front') {
             verify('the front looks from just above the top, so a band of it shows',
                    at.cam[1] > at.caseTop && at.cam[1] < at.caseTop + 0.15, JSON.stringify(at));
+            const share = await js(TOP_SHARE);
+            verify('a band 15% as deep as the front is tall', Math.abs(share - 0.15) < 0.005, share);
         }
     }
     // A bat's halves, as drawn, throw it up and down from every view:
@@ -326,6 +330,12 @@ export async function views(h) {
         verify('and no hand, as a click there does nothing', onDress.cursor == '', onDress.cursor);
     }
 }
+
+/** How deep the case's top shows in the front view, over its front. */
+const TOP_SHARE = `(async () => { const {topShare} = await import('./js/view3d/framing.js');
+    const s = panel.stage3d, b = s.boxBind;
+    const shell = b.boxes((n) => b.modelName(n) == 'case.bottom')[0];
+    return topShare(shell, {position: s.viewer.camera.position.toArray(), target: s.viewer.controls.target.toArray()}, 35); })()`;
 
 /** The Tutorial's contents and its Show chips (V7). */
 export async function tutorial(h) {

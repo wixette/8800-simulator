@@ -16,7 +16,7 @@ import path from 'node:path';
 import {Box, CARD_IDS} from '../js/box.js';
 import {l10n} from '../js/l10n.js';
 import {panel} from '../js/app.js';
-import {axes, corners, frame, silhouette} from '../js/view3d/framing.js';
+import {axes, corners, frame, frameShowingTop, silhouette, topShare} from '../js/view3d/framing.js';
 import {AROUND_PARTS_OPACITY, CARD_LIFT, FADED_OPACITY, HOME_VIEW,
         REST_SLOT, SHOWS, UNFRAMED_MATERIALS, VIEWS, WIRED, lookOf, partKey, showButton,
         switchName} from '../js/view3d/views.js';
@@ -66,6 +66,35 @@ test('a view keeps its direction: the camera only comes nearer or moves aside', 
         for (let i = 0; i < 3; i++) {
             assert.ok(Math.abs(d[i] / length - z[i]) < 1e-9, view.id);
         }
+    }
+});
+
+test('the front shows the same band of the top on every screen, however near the camera comes', () => {
+    // The case's size, near enough: 43 cm wide, 18 cm tall, 44 cm deep.
+    const box = {min: [-0.216, 0, -0.222], max: [0.216, 0.178, 0.222]};
+    const points = corners([box]);
+    const front = VIEWS.find((v) => v.id == 'front');
+    assert.strictEqual(front.topShare, 0.15);
+    // Along one direction, a narrow canvas puts the camera far back and
+    // a wide one close in, and the top shows four times as deep on the
+    // first: what topShare is there to stop.
+    const along = [[378, 302], [1896, 355]].map(([w, h]) => topShare(box, frame(points, front.dir, 35, w, h, INSETS), 35));
+    assert.ok(along[0] > 3 * along[1], along.join(' '));
+    for (const [w, h] of [[378, 302], [776, 239], [1256, 271], [1896, 355], [600, 900]]) {
+        const camera = frameShowingTop(points, box, front.topShare, front.dir, 35, w, h, INSETS);
+        assert.ok(Math.abs(topShare(box, camera, 35) - 0.15) < 0.002, w + 'x' + h);
+        // Still framed: the box fills its limiting side, centred.
+        const sil = silhouette(points, camera, 35, w, h);
+        assert.ok(Math.abs((sil.left + sil.right) / 2 - w / 2) < 1 && Math.abs((sil.top + sil.bottom) / 2 - h / 2) < 1,
+                  w + 'x' + h + ' ' + JSON.stringify(sil));
+        assert.ok(camera.position[1] > box.max[1], 'from above the top');
+    }
+    // The higher the camera, the more of the top: what the search rests on.
+    let last = -Infinity;
+    for (const rise of [0.1, 0.2, 0.3, 0.5, 0.8]) {
+        const share = topShare(box, frame(points, [0, rise, 1], 35, 1256, 271, INSETS), 35);
+        assert.ok(share > last, rise);
+        last = share;
     }
 });
 

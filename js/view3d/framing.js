@@ -178,3 +178,61 @@ export function silhouette(points, camera, fov, width, height) {
     }
     return {left: left, right: right, top: top, bottom: bottom};
 }
+
+/**
+ * How deep a box's top looks, as a share of how tall its front looks,
+ * down the middle of the screen: from a camera close to a box, its top
+ * is foreshortened more than from far away along the same direction.
+ * @param {{min: !Vec, max: !Vec}} box The box, its front facing +z.
+ * @param {{position: !Vec, target: !Vec}} camera Where it is.
+ * @param {number} fov Its vertical field of view, in degrees.
+ * @return {number} The top's depth over the front's height, on screen;
+ *     at most 0 when the top cannot be seen.
+ */
+export function topShare(box, camera, fov) {
+    const {y, z} = axes(sub(camera.position, camera.target));
+    const tanV = Math.tan(fov * Math.PI / 360);
+    const up = (p) => {
+        const v = sub(p, camera.position);
+        return dot(v, y) / (-dot(v, z) * tanV);
+    };
+    const x = (box.min[0] + box.max[0]) / 2;
+    const frontTop = up([x, box.max[1], box.max[2]]);
+    const frontFoot = up([x, box.min[1], box.max[2]]);
+    const backTop = up([x, box.max[1], box.min[2]]);
+    return (backTop - frontTop) / (frontTop - frontFoot);
+}
+
+/**
+ * frame(), looking from just as high above the front as shows the top
+ * of a box at a given share of its front, however near the canvas's
+ * shape brings the camera. Along one direction, a narrow canvas puts
+ * the camera far back, looking down on the top; a wide one close in,
+ * looking along it. So the height is found for the canvas: the higher
+ * the camera, the more of the top shows.
+ * @param {!Array<!Vec>} points The subject: its parts' corners.
+ * @param {{min: !Vec, max: !Vec}} box The box whose top shows.
+ * @param {number} share How deep its top looks over how tall its front.
+ * @param {!Vec} dir From the subject towards the camera: its sideways
+ *     and forward parts are kept, its height found.
+ * @param {number} fov The camera's vertical field of view, in degrees.
+ * @param {number} width The canvas's width, in CSS pixels.
+ * @param {number} height Its height.
+ * @param {!Insets} insets What the subject keeps clear of.
+ * @return {{position: !Vec, target: !Vec}}
+ */
+export function frameShowingTop(points, box, share, dir, fov, width, height, insets) {
+    let low = 0;
+    let high = 2;
+    let best = frame(points, [dir[0], (low + high) / 2, dir[2]], fov, width, height, insets);
+    for (let i = 0; i < 40; i++) {
+        const rise = (low + high) / 2;
+        best = frame(points, [dir[0], rise, dir[2]], fov, width, height, insets);
+        if (topShare(box, best, fov) < share) {
+            low = rise;
+        } else {
+            high = rise;
+        }
+    }
+    return best;
+}
