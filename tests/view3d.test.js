@@ -96,7 +96,41 @@ test('every part a Show preset or the page names is in the model', () => {
                         'harness.panel_bus']) {
         assert.ok(!electronics.hidden.includes(kept), 'Electronics only keeps ' + kept);
     }
-    assert.deepStrictEqual(SHOWS.find((s) => s.id == 'all'), {id: 'all', faded: [], hidden: []});
+    const all = SHOWS.find((s) => s.id == 'all');
+    assert.deepStrictEqual([all.faded, all.hidden], [[], []]);
+    assert.strictEqual(SHOWS[0], all, 'the whole machine is first, the one not marked changed');
+});
+
+test('the Show menu is icons: one for each Show, each its own, each a plain drawing', () => {
+    const icons = SHOWS.map((s) => s.icon);
+    assert.strictEqual(new Set(icons).size, SHOWS.length);
+    for (const show of SHOWS) {
+        // Only paths, drawn in the icon's own colour: nothing that runs,
+        // and nothing that would not follow the button's colour.
+        assert.match(show.icon, /^(<path( fill-rule="evenodd"| opacity="[.\d]+")* d="[MmHhVvZz\d. -]+"\/>)+$/,
+                     show.id);
+    }
+    const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+    assert.ok(html.includes('<svg id="show-current" class="icon" viewBox="0 0 24 24" aria-hidden="true">' +
+                            SHOWS[0].icon + '</svg>'),
+              'before the 3D view loads, the button already shows the whole machine');
+});
+
+test('the menus\' words: every view and Show named, the button saying which, in every language', () => {
+    for (const locale of l10n.LOCALES) {
+        for (const id of VIEWS.map((v) => 'view-' + v.id).concat(SHOWS.map((s) => 'show-' + s.id))) {
+            assert.ok(l10n.MESSAGES[id][locale], id + ' in ' + locale);
+        }
+        assert.ok(l10n.MESSAGES['show-menu-current'][locale].includes('{show}'), locale);
+    }
+    // Short enough that the Views button, as wide as its longest name,
+    // still leaves the stage's top edge room on a phone (U8).
+    for (const locale of l10n.LOCALES) {
+        for (const view of VIEWS) {
+            const name = l10n.MESSAGES['view-' + view.id][locale];
+            assert.ok(name.length <= 17, locale + ': ' + name);
+        }
+    }
 });
 
 test('every part of the model has a name and a role, in every language', () => {
@@ -261,14 +295,15 @@ test('the stage has its toggle and the 3D view\'s tools, each with a name', () =
     const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
     for (const id of ['view-tools', 'view-switch', 'view-2d', 'view-3d', 'view3d-tools',
                       'view-reset', 'view-zoom-in', 'view-zoom-out', 'views-dropdown',
-                      'views-button', 'views-list', 'stage3d', 'stage3d-progress',
+                      'views-button', 'views-list', 'show-dropdown', 'show-button',
+                      'show-current', 'show-list', 'stage3d', 'stage3d-progress',
                       'stage3d-message', 'part-label']) {
         assert.ok(html.includes('id="' + id + '"'), id);
     }
     assert.match(html, /<div id="stage3d" data-src="model\/altair-8800\.glb\?v=/,
                  'the model is fetched by a versioned name, like every file the page names');
     for (const id of ['view-switch-label', 'view-2d-title', 'view-3d-title', 'view-3d-new',
-                      'view-reset', 'view-zoom-in', 'view-zoom-out', 'views-menu',
+                      'view-reset', 'view-zoom-in', 'view-zoom-out', 'views-menu', 'show-menu-current',
                       'view3d-loading', 'view3d-ready', 'view3d-failed', 'view3d-no-webgl',
                       'view3d-wait', 'view2d-reassembled', 'view3d-canvas-label']) {
         assert.ok(l10n.MESSAGES[id], id);

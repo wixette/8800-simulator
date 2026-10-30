@@ -48,21 +48,42 @@ export const PANEL_SUBJECT = ['panel.dress', 'panel.name_plate'];
 const CASE = ['case.top', 'case.bottom'];
 
 /**
+ * The Show menu's icons, as the inside of a 24 x 24 <svg>: the machine
+ * seen from the front, then less and less of it (docs/ui-design.md, U8).
+ * The button shows the one chosen, so the bar says why the case looks
+ * as it does.
+ */
+const ICONS = {
+    // The whole case, its lamps and switches.
+    all: '<path fill-rule="evenodd" d="M2 5h20v14H2zM5 8h2.5v2.5H5zm4.5 0H12v2.5H9.5zM14 8h2.5v2.5H14zM5 14h14v2H5z"/>',
+    // The case faint, the cards in it.
+    caseFaded: '<path fill-rule="evenodd" opacity=".45" d="M2 5h20v14H2zm1.5 1.5v11h17v-11z"/>' +
+        '<path d="M6 8h2v8H6zm5 0h2v8h-2zm5 0h2v8h-2z"/>',
+    // No case: the cards standing on the chassis.
+    caseHidden: '<path d="M6 4h2.5v11H6zm4.75 0h2.5v11h-2.5zm4.75 0H18v11h-2.5zM2 16h20v3.5H2z"/>',
+    // One card, its chip and its edge fingers.
+    electronics: '<path fill-rule="evenodd" d="M3 3h18v14H3zm4.5 3.5v7h9v-7z"/>' +
+        '<path d="M5 17h2v3.5H5zm4 0h2v3.5H9zm4 0h2v3.5h-2zm4 0h2v3.5h-2z"/>',
+};
+
+/**
  * The Show presets, in the menu's order: which parts each fades, and
  * which it hides. A part named here is that node's own geometry, not
  * the parts fixed to it: hiding the chassis leaves the cards on it.
  * Electronics only keeps the front panel, the bus, the cards and the
  * wiring.
- * @type {!Array<{id: string, faded: !Array<string>, hidden: !Array<string>}>}
+ * @type {!Array<{id: string, faded: !Array<string>, hidden: !Array<string>,
+ *                 icon: string}>}
  */
 export const SHOWS = [
-    {id: 'all', faded: [], hidden: []},
-    {id: 'case-faded', faded: CASE, hidden: []},
-    {id: 'case-hidden', faded: [], hidden: CASE},
+    {id: 'all', faded: [], hidden: [], icon: ICONS.all},
+    {id: 'case-faded', faded: CASE, hidden: [], icon: ICONS.caseFaded},
+    {id: 'case-hidden', faded: [], hidden: CASE, icon: ICONS.caseHidden},
     {id: 'electronics', faded: [],
      hidden: CASE.concat(['chassis.frame', 'chassis.card_rail.0', 'chassis.card_rail.1',
                           'psu.t1', 'psu.t2', 'psu.t3', 'psu.board',
-                          'psu.terminal_block', 'psu.fan'])},
+                          'psu.terminal_block', 'psu.fan']),
+     icon: ICONS.electronics},
 ];
 
 /**

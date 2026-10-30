@@ -194,9 +194,10 @@ panel, not a picture of it: click a switch on it and it does what the
   focused (Tab), the arrow keys turn it, Shift and the arrows move it,
   and + and − zoom.
 - **Views** picks where to look from - the front panel, the whole
-  machine, inside from above, the rear - and what to show: everything,
-  the case faded or hidden, or the electronics alone. Pointing at a
-  part names it and says what it does.
+  machine, inside from above, the rear. **Show**, the icon beside it,
+  picks what is drawn: everything, the case faded or hidden, or the
+  electronics alone; it turns orange while part of the machine is left
+  out. Pointing at a part names it and says what it does.
 - **Take it apart:** switch the machine OFF, then click the lid to
   take it off, then a card to pull it, a transformer, the chassis...
   in the order the real machine allows; a part in the way says so.
@@ -442,7 +443,7 @@ favicon still has the logo's drawing.
 | [js/l10n.js](js/l10n.js), [js/l10n-3d.js](js/l10n-3d.js) | Every message, in ten languages |
 | [js/panel-view.js](js/panel-view.js), [js/panel-tutorial.js](js/panel-tutorial.js) | The 2D / 3D toggle; the Tutorial's chapters and Show chips |
 | [js/box.js](js/box.js) | The machine's box: which parts are out, in what order they come out, and so whether it may switch on |
-| [js/view3d/](js/view3d/) | The 3D view, loaded when first chosen: the renderer and camera, the 3D panel, the box's parts, the Views menu |
+| [js/view3d/](js/view3d/) | The 3D view, loaded when first chosen: the renderer and camera, the 3D panel, the box's parts, the Views and Show menus |
 | [model/](model/) | The 3D model: its params, its Blender build (`npm run build:model`), its research, and the built `.glb` |
 | [vendor/three/](vendor/three/) | three.js, pinned (`node tools/vendor.mjs`) |
 | [tools/stamp.mjs](tools/stamp.mjs), [tools/icons.mjs](tools/icons.mjs), [tools/vendor.mjs](tools/vendor.mjs) | Not part of the page: the version stamp, drawing the icons from the logo, and vendoring three.js |

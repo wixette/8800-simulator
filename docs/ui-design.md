@@ -464,10 +464,13 @@ stage's top right, on a band of its own (V1 in
 
 ### U8 — The 3D view's tools follow its view, not its machine
 
-In 3D the band also holds ⌂ (reset view), zoom − / +, and one Views
-menu (P10: items only): five views, and four Show presets (V2, V3).
-The views and presets change how the machine is drawn, never what it
-does, so the machine keeps running in all of them. Taking parts out is
+In 3D the band also holds ⌂ (reset view), zoom − / +, a Views menu
+of five views, and a Show menu of four presets (P10: items only; V2,
+V3). Each button shows its current choice: Views by name, Show by
+icon, in orange when part of the machine is faded or hidden. The Views
+button is as wide as its longest name in the reader's language, so
+that a choice never moves the tools beside it. The views and presets
+change how the machine is drawn, never what it does, so the machine keeps running in all of them. Taking parts out is
 the one thing that needs it off (U9). Keyboard: once the 3D view has
 the focus (by Tab, not by a click, as the dock's tabs), the arrows,
 + and −, and Home move the camera; otherwise the Teletype keeps its

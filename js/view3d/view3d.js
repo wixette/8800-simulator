@@ -575,14 +575,10 @@ export class Stage {
 
     /** @private */
     initTools() {
-        this.menu = new Dropdown('views-dropdown', (value) => {
-            const [kind, id] = value.split(':');
-            if (kind == 'view') {
-                this.setView(id);
-            } else {
-                this.setShow(id);
-            }
-        }, () => this.refreshMenu());
+        this.viewsMenu = new Dropdown('views-dropdown', (id) => this.setView(id),
+                                      () => this.refreshViewsMenu());
+        this.showMenu = new Dropdown('show-dropdown', (id) => this.setShow(id),
+                                     () => this.refreshShowMenu());
         const press = (id, fn) => this.panel.makePressable(document.getElementById(id), fn);
         press('view-reset', () => this.setView(HOME_VIEW));
         press('view-zoom-in', () => this.zoom(1 / ZOOM_STEP));
@@ -591,30 +587,51 @@ export class Stage {
     }
 
     /** @private Fills the Views menu as things stand. */
-    refreshMenu() {
-        const items = VIEWS.map((v) => ({
-            value: 'view:' + v.id,
+    refreshViewsMenu() {
+        const busy = this.panel.isPoweredOn && !this.apart;
+        this.viewsMenu.setItems(VIEWS.map((v) => ({
+            value: v.id,
             label: l10n.getMessage('view-' + v.id),
-            disabled: v.id == 'apart' && this.panel.isPoweredOn && !this.apart,
-            detail: v.id == 'apart' && this.panel.isPoweredOn && !this.apart ?
-                l10n.getMessage('view-apart-detail') : undefined,
-        }));
-        items.push({heading: true, label: l10n.getMessage('views-heading-show')});
-        for (const s of SHOWS) {
-            items.push({value: 'show:' + s.id, label: l10n.getMessage('show-' + s.id)});
-        }
-        this.menu.setItems(items);
-        this.menu.setSelected(['view:' + this.view, 'show:' + this.boxBind.show]);
+            disabled: v.id == 'apart' && busy,
+            detail: v.id == 'apart' && busy ? l10n.getMessage('view-apart-detail') : undefined,
+        })));
+        this.viewsMenu.setSelected(this.view);
+    }
+
+    /** @private Fills the Show menu. */
+    refreshShowMenu() {
+        this.showMenu.setItems(SHOWS.map((s) => ({
+            value: s.id,
+            label: l10n.getMessage('show-' + s.id),
+            icon: s.icon,
+        })));
+        this.showMenu.setSelected(this.boxBind.show);
     }
 
     /** Redraws the tools in the reader's language, as things stand. */
     refreshTools() {
-        if (!this.menu) {
+        if (!this.viewsMenu) {
             return;
         }
-        this.menu.setLabel(l10n.getMessage('view-' + this.view));
-        if (this.menu.isOpen()) {
-            this.refreshMenu();
+        // The Views button is as wide as its longest view, whichever it
+        // names, so that the tools beside it stay put (U8).
+        this.viewsMenu.setLabel(l10n.getMessage('view-' + this.view),
+                                VIEWS.map((v) => l10n.getMessage('view-' + v.id)));
+        if (this.viewsMenu.isOpen()) {
+            this.refreshViewsMenu();
+        }
+        // The Show button is the chosen Show's icon, and, when that is
+        // not the whole machine, in the colour of a setting changed.
+        const show = SHOWS.find((s) => s.id == this.boxBind.show) || SHOWS[0];
+        const button = document.getElementById('show-button');
+        const name = l10n.getMessage('show-menu-current')
+              .replace('{show}', l10n.getMessage('show-' + show.id));
+        document.getElementById('show-current').innerHTML = show.icon;
+        button.classList.toggle('changed', show.id != SHOWS[0].id);
+        button.title = name;
+        button.setAttribute('aria-label', name);
+        if (this.showMenu.isOpen()) {
+            this.refreshShowMenu();
         }
         this.refreshZoom();
         this.canvas.setAttribute('aria-label', l10n.getMessage('view3d-canvas-label'));

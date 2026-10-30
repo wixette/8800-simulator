@@ -228,7 +228,7 @@ Neither plan as proposed:
 
 **Proposed: a segmented toggle `[2D | 3D]` in the stage's top-right
 corner**, the first item of the stage's view controls. In 3D it is
-joined by ⌂ (reset view), zoom − / +, and the Views menu (V3). This is
+joined by ⌂ (reset view), zoom − / +, and the Views and Show menus (V3). This is
 where the Leibniz simulator keeps its view controls, and where Blender
 and other 3D tools keep theirs.
 
@@ -265,27 +265,36 @@ and other 3D tools keep theirs.
   slow (a school Chromebook), and the motion honours
   `prefers-reduced-motion`.
 
-### V3 — The Views menu: where to look from, and what to show
+### V3 — The Views and Show menus: where to look from, and what to show
 
-One menu (P10: items only), whose button names the view on show:
+Two menus (P10: items only), side by side. The Views button names the
+view on show. The Show button is the chosen preset's icon, orange when
+it is anything but Everything, so the bar itself says why the case
+looks faint or is gone:
 
 ```
-[2D|3D] [⌂] [−|+] [🎥 Front panel ▾]
-                    Front panel          the default: the panel square on, slightly from above
-                    Whole machine        three-quarter view
-                    Inside, from above
-                    Rear
-                    Taken apart          (V4)
-                    ── SHOW ──
-                    ✓ Everything
-                      Case faded
-                      Case hidden
-                      Electronics only   case, chassis and power supply hidden:
-                                         the panel, the bus boards, the cards, the harness
+[⌂] [−|+] [Front panel ▾] [▣ ▾] [2D|3D]
+           Front panel          the default: the panel square on, slightly from above
+           Whole machine        three-quarter view
+           Inside               from above
+           Rear
+           Taken apart          (V4)
+                                 ▣ Everything
+                                 ◫ Case faded
+                                 ⫼ Case hidden
+                                 ▤ Electronics only   case, chassis and power supply hidden:
+                                                      the panel, the bus boards, the cards, the harness
 ```
+
+*Changed while building:* the first build had one Views menu with
+Show as a group under the views. The button named only the view, so a
+faded or hidden case had nothing on the bar to explain it, and changing
+it took a trip through the views. The views' names are short, and the
+Views button keeps the width of the longest one in the reader's
+language, so that choosing a view never moves the tools beside it.
 
 - **Fade or hide, in presets.** The view decides where you look from,
-  and Show decides what is drawn. They combine: Inside, from above
+  and Show decides what is drawn. They combine: Inside
   with Case faded, or Front panel with Electronics only. Faded parts
   let clicks and hover pass through, so a card can be pointed at
   through a faded lid.
@@ -387,12 +396,12 @@ caller of `panel.onPowerOn()` to the two that ask the box.
 
 - **Dark stage**, close to the page's chrome, with studio lighting for
   the metals. The prototype's light grey background goes.
-- **New strings in all ten languages:** the toggle, the Views menu,
+- **New strings in all ten languages:** the toggle, the Views and Show menus,
   Show presets, refusals, the loading and no-WebGL messages, and about
   35 part names with one-line roles. English is the reference, and
   `tests/` checks that every locale has every key.
 - The 3D controls follow P10 with this page's existing components:
-  `dropdown.js` for the Views menu, the dock tabs' style for the
+  `dropdown.js` for the Views and Show menus, the dock tabs' style for the
   toggle, `.icon-button` for ⌂ and zoom.
 
 ---

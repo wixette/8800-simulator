@@ -729,7 +729,7 @@ a {
     cursor: default;
 }
 
-/* The Views menu's button is a tool button, as the toolbar's are. */
+/* The 3D view's menu buttons are tool buttons, as the toolbar's are. */
 #view3d-tools .dropdown > .tool-button {
     background: none;
     border-radius: 6px;
@@ -751,10 +751,45 @@ a {
     background-color: var(--open-bg);
 }
 
-#views-list {
+/* A Show other than the whole machine: the button says something is
+   left out, as a changed setting does on the toolbar. */
+#view3d-tools #show-button.changed {
+    color: #f90;
+}
+
+#views-list,
+#show-list {
     left: auto;
     min-width: 200px;
     right: 0;
+}
+
+/* A label as wide as the longest it can say (Dropdown.setLabel): every
+   one in the same cell, the unchosen ones taking room unseen. */
+.dropdown-label-sized {
+    display: inline-grid;
+    text-align: start;
+}
+
+.dropdown-label-sized > span {
+    grid-area: 1 / 1;
+    white-space: nowrap;
+}
+
+.dropdown-label-room {
+    visibility: hidden;
+}
+
+.dropdown li.with-icon {
+    align-items: center;
+    gap: 10px;
+    justify-content: flex-start;
+}
+
+.dropdown-icon {
+    flex: none;
+    height: 20px;
+    width: 20px;
 }
 
 /* The whole machine in 3D: it takes the room the panel would. */

@@ -447,16 +447,16 @@ export const MESSAGES_3D = {
     },
 
     'view-above': {
-        'en': 'Inside, from above',
-        'es': 'Por dentro, desde arriba',
-        'fr': 'L’intérieur, vu d’en haut',
-        'de': 'Innen, von oben',
-        'it': 'L’interno, dall’alto',
-        'pt-BR': 'Por dentro, de cima',
-        'zh': '从上方看内部',
-        'zh-TW': '從上方看內部',
-        'ja': '上から見た内部',
-        'ko': '위에서 본 내부',
+        'en': 'Inside',
+        'es': 'Por dentro',
+        'fr': 'Intérieur',
+        'de': 'Innen',
+        'it': 'Interno',
+        'pt-BR': 'Por dentro',
+        'zh': '内部',
+        'zh-TW': '內部',
+        'ja': '内部',
+        'ko': '내부',
     },
 
     'view-rear': {
@@ -485,17 +485,17 @@ export const MESSAGES_3D = {
         'ko': '분해',
     },
 
-    'views-heading-show': {
-        'en': 'Show',
-        'es': 'Mostrar',
-        'fr': 'Afficher',
-        'de': 'Zeigen',
-        'it': 'Mostra',
-        'pt-BR': 'Mostrar',
-        'zh': '显示',
-        'zh-TW': '顯示',
-        'ja': '表示',
-        'ko': '표시',
+    'show-menu-current': {
+        'en': 'Show: {show}',
+        'es': 'Mostrar: {show}',
+        'fr': 'Afficher : {show}',
+        'de': 'Zeigen: {show}',
+        'it': 'Mostra: {show}',
+        'pt-BR': 'Mostrar: {show}',
+        'zh': '显示：{show}',
+        'zh-TW': '顯示：{show}',
+        'ja': '表示：{show}',
+        'ko': '표시: {show}',
     },
 
     'show-all': {

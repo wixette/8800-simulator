@@ -83,11 +83,24 @@ export default async function(h) {
            (await statusText()).startsWith('The machine is taken apart'), await statusText());
     await click(h, 'card.cpu', 'top');
     verify('the CPU card waits for its data plug', (await statusText()).startsWith('Take this out first: Data cable plug'), await statusText());
-    await js(`panel.stage3d.setShow('case-faded'); panel.box.snapTogether()`); await sleep(300);
+    // Show is a menu of its own, and its button shows which.
+    const showButton = `(() => { const b = document.getElementById('show-button'); return {changed: b.classList.contains('changed'), title: b.title, icon: document.getElementById('show-current').innerHTML}; })()`;
+    const plain = await js(showButton);
+    verify('the Show button starts as the whole machine', !plain.changed && plain.title == 'Show: Everything', JSON.stringify(plain));
+    await press('#show-button');
+    verify('the Show menu lists the four, each with its icon',
+           await js(`[...document.querySelectorAll('#show-list [role="option"]')].map((li) => li.dataset.value + (li.querySelector('svg.dropdown-icon path') ? '+' : '')).join()`) ==
+           'all+,case-faded+,case-hidden+,electronics+');
+    await press('#show-list [data-value="case-faded"]');
+    const after = await js(showButton);
+    verify('choosing one shows its icon, marked as a change', after.changed && after.icon != plain.icon && after.title == 'Show: Case faded', JSON.stringify(after));
+    await js(`panel.box.snapTogether()`); await sleep(300);
     await click(h, 'card.mem1k', 'top');
     verify('a click goes through the faded lid to the card under it',
            (await statusText()).startsWith('Take this out first: Case top'), await statusText());
-    await js(`panel.stage3d.setShow('all')`);
+    await press('#show-button');
+    await press('#show-list [data-value="all"]');
+    verify('and the whole machine again is no change', !(await js(showButton)).changed);
     // A load switches the machine on, putting the box together first.
     await js(`panel.box.takeOut('case.top', false); panel.box.snap()`);
     await js(`document.getElementById('debug-data-input').value = '76'; panel.debugLoadData()`);
@@ -98,15 +111,15 @@ export default async function(h) {
 
     // Taken apart is a view.
     await press('#views-button');
-    await press('#views-list [data-value="view:apart"]');
+    await press('#views-list [data-value="apart"]');
     for (let i = 0; i < 80 && await js(`panel.box.isBusy()`); i++) {
         await sleep(250);
     }
     verify('Taken apart takes every unit out', await js(`panel.box.units().every((u) => panel.box.isOut(u))`));
     verify('and says how to put it back', (await statusText()).startsWith('Taken apart'), await statusText());
-    verify('the menu names the view', await js(`document.getElementById('views-current').textContent`) === 'Taken apart');
+    verify('the menu names the view', await js(`document.querySelector('#views-current > span:not(.dropdown-label-room)').textContent`) === 'Taken apart');
     await press('#views-button');
-    await press('#views-list [data-value="view:front"]');
+    await press('#views-list [data-value="front"]');
     for (let i = 0; i < 80 && await js(`panel.box.isBusy()`); i++) {
         await sleep(250);
     }
@@ -166,6 +179,26 @@ export async function phone(h) {
     verify('with room to see the machine', box.h >= 220 && box.w >= 300, JSON.stringify(box));
     verify('the tools fit across the top', await js(`(() => { const t = document.getElementById('view-tools'); return t.scrollWidth <= t.clientWidth + 1 && t.getBoundingClientRect().height < 40; })()`));
     verify('nothing to scroll sideways', await js(`document.documentElement.scrollWidth <= innerWidth`));
+    // Choosing a view moves nothing on the top edge, in any language (U8).
+    const tools = `JSON.stringify(['view-reset', 'view-zoom-out', 'views-button', 'show-button', 'view-2d'].map((id) => { const b = document.getElementById(id).getBoundingClientRect(); return [Math.round(b.left), Math.round(b.width)]; }))`;
+    const moved = [];
+    for (const locale of await js(`l10n.LOCALES`)) {
+        await js(`l10n.setLocale('${locale}')`); await h.sleep(80);
+        const at = [];
+        for (const view of ['front', 'whole', 'above', 'rear']) {
+            await js(`panel.stage3d.setView('${view}')`);
+            at.push(await js(tools));
+        }
+        await js(`panel.stage3d.setShow('electronics')`);
+        at.push(await js(tools));
+        await js(`panel.stage3d.setShow('all')`);
+        const fits = await js(`(() => { const t = document.getElementById('view-tools'); return t.scrollWidth <= t.clientWidth + 1; })()`);
+        if (new Set(at).size != 1 || !fits) {
+            moved.push(locale + (fits ? '' : ' (does not fit)') + ': ' + [...new Set(at)].join(' / '));
+        }
+    }
+    await js(`l10n.setLocale('en')`); await h.sleep(80);
+    verify('the tools stay put whichever view or Show, in every language', moved.length == 0, moved.join('; '));
 }
 
 /** The Tutorial's contents and its Show chips (V7). */
