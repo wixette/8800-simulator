@@ -17,7 +17,7 @@ import {Box, CARD_IDS} from '../js/box.js';
 import {l10n} from '../js/l10n.js';
 import {panel} from '../js/app.js';
 import {axes, corners, frame, silhouette} from '../js/view3d/framing.js';
-import {AROUND_PARTS_OPACITY, CARD_LIFT, FADED_OPACITY, HOME_VIEW, PANEL_SUBJECT, PART_ICON,
+import {AROUND_PARTS_OPACITY, CARD_LIFT, FADED_OPACITY, HOME_VIEW, PANEL_SUBJECT,
         REST_SLOT, SHOWS, VIEWS, WIRED, lookOf, partKey, showButton,
         switchName} from '../js/view3d/views.js';
 import {readGlb} from './glb.js';
@@ -102,15 +102,26 @@ test('every part a Show preset or the page names is in the model', () => {
     assert.strictEqual(SHOWS[0], all, 'the whole machine is first, the one not marked changed');
 });
 
-test('the Show menu is icons: one for each way of drawing the machine, a target for each part', () => {
+test('the Show menu is icons, each its own: four ways to draw the machine, then a map for each part', () => {
+    assert.strictEqual(new Set(SHOWS.map((s) => s.icon)).size, SHOWS.length);
     const drawn = SHOWS.filter((s) => !s.parts.length);
     assert.deepStrictEqual(drawn.map((s) => s.id), ['all', 'case-faded', 'case-hidden', 'electronics']);
-    assert.strictEqual(new Set(drawn.map((s) => s.icon)).size, drawn.length);
-    assert.ok(!drawn.some((s) => s.icon == PART_ICON));
     const parts = SHOWS.filter((s) => s.parts.length);
     assert.deepStrictEqual(parts.map((s) => s.id), ['cpu', 'memory', 'serial', 'bus', 'psu']);
-    assert.ok(parts.every((s) => s.icon == PART_ICON && !s.faded.length && !s.hidden.length));
+    assert.ok(parts.every((s) => !s.faded.length && !s.hidden.length));
     assert.strictEqual(SHOWS.indexOf(parts[0]), drawn.length, 'the parts come after the four');
+    // A part's map is faint but for one solid piece, its part: quieter
+    // in the menu than the four, which are solid.
+    for (const show of parts) {
+        const paths = show.icon.match(/<path[^>]*>/g);
+        assert.strictEqual(paths.length, 2, show.id);
+        assert.match(paths[0], /opacity="\.3"/, show.id);
+        assert.doesNotMatch(paths[1], /opacity/, show.id);
+    }
+    // The map stands as the machine does from above: the CPU card the
+    // rightmost card, the serial cards left of the memory card.
+    const left = (id) => +SHOWS.find((s) => s.id == id).icon.match(/<path d="M([\d.]+)/)[1];
+    assert.ok(left('cpu') > left('memory') && left('memory') > left('serial'));
     for (const show of SHOWS) {
         // Only paths, drawn in the icon's own colour: nothing that runs,
         // and nothing that would not follow the button's colour.

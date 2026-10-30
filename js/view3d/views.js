@@ -67,10 +67,32 @@ const ICONS = {
 };
 
 /**
- * The icon of a Show that picks out parts: a target. The menu names
- * which, and so does the button's tooltip.
+ * The icons of the Shows that pick out a key part: a map of the machine
+ * from above, the front panel at the bottom, the power supply at the
+ * back, the cards in their cage - all faint but the part itself, so
+ * each says where its part is, and they sit quieter in the menu than
+ * the four ways of drawing the machine. The cards stand as they do
+ * from above, the CPU card at the right (js/box.js, fittedFor); the
+ * Memory menu can move the serial cards along a slot.
+ * @param {string} solid Which of the map's pieces is drawn solid.
+ * @return {string} The icon.
  */
-export const PART_ICON = '<path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 1 0 0-20zm0 2.5a7.5 7.5 0 1 1 0 15 7.5 7.5 0 1 1 0-15zM12 8a4 4 0 1 0 0 8 4 4 0 1 0 0-8z"/>';
+function partMap(solid) {
+    const pieces = {
+        psu: 'M4.5 4.5h15V8h-15z',
+        cpu: 'M17.5 9.5h2.5v8h-2.5z',
+        memory: 'M14.5 9.5H17v8h-2.5z',
+        serial: 'M8.5 9.5H11v8H8.5zm3 0H14v8h-2.5z',
+        bus: 'M8.5 18H20v1.5H8.5z',
+    };
+    let faint = 'M2 2h20v20H2zm1 1v18h18V3z';
+    for (const [piece, d] of Object.entries(pieces)) {
+        if (piece != solid) {
+            faint += d;
+        }
+    }
+    return '<path fill-rule="evenodd" opacity=".3" d="' + faint + '"/><path d="' + pieces[solid] + '"/>';
+}
 
 /**
  * The Show presets, in the menu's order: which parts each fades, which
@@ -96,13 +118,13 @@ export const SHOWS = [
                           'psu.t1', 'psu.t2', 'psu.t3', 'psu.board',
                           'psu.terminal_block', 'psu.fan']),
      parts: [], icon: ICONS.electronics},
-    {id: 'cpu', faded: [], hidden: [], parts: ['card.cpu'], icon: PART_ICON},
+    {id: 'cpu', faded: [], hidden: [], parts: ['card.cpu'], icon: partMap('cpu')},
     {id: 'memory', faded: [], hidden: [], parts: ['card.mem1k', 'card.mem4k_0', 'card.mem4k_1'],
-     icon: PART_ICON},
-    {id: 'serial', faded: [], hidden: [], parts: ['card.sio', 'card.sio2'], icon: PART_ICON},
-    {id: 'bus', faded: [], hidden: [], parts: ['bus.board.0', 'bus.board.1'], icon: PART_ICON},
+     icon: partMap('memory')},
+    {id: 'serial', faded: [], hidden: [], parts: ['card.sio', 'card.sio2'], icon: partMap('serial')},
+    {id: 'bus', faded: [], hidden: [], parts: ['bus.board.0', 'bus.board.1'], icon: partMap('bus')},
     {id: 'psu', faded: [], hidden: [], parts: ['psu.t1', 'psu.t2', 'psu.t3', 'psu.board'],
-     icon: PART_ICON},
+     icon: partMap('psu')},
 ];
 
 /**

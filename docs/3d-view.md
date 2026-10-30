@@ -285,11 +285,11 @@ looks faint or is gone:
                                  ▤ Electronics only   case, chassis and power supply hidden:
                                                       the panel, the bus boards, the cards, the harness
                                  ── PARTS ──
-                                 ◎ CPU card           one key part glowing, the rest faded round it:
-                                 ◎ Memory cards       the parts Meet the Machine (V7) is about
-                                 ◎ Serial cards
-                                 ◎ The bus
-                                 ◎ Power supply
+                                 ▥ CPU card           one key part glowing, the rest faded round it:
+                                 ▥ Memory cards       the parts Meet the Machine (V7) is about
+                                 ▥ Serial cards
+                                 ▥ The bus
+                                 ▥ Power supply
 ```
 
 *Changed while building:* the first build had one Views menu with
@@ -309,7 +309,9 @@ language, so that choosing a view never moves the tools beside it.
 - **The key parts are Shows too.** Each makes its parts glow, shown
   even where they would be hidden, and fades every other part further,
   to 16 %, out of their way. Like any Show it stays as the view
-  changes. The memory cards are every card the Memory menu can fit;
+  changes. Each one's icon is a small map of the machine from above,
+  faint but for its part, so the five sit quieter in the menu than the
+  four above them and each shows where its part is. The memory cards are every card the Memory menu can fit;
   those not fitted are not drawn. *Changed while building:* these began
   as a highlight only a Tutorial chip could make, which neither menu
   could show, so the bar said "Front panel" and "Everything" over a
