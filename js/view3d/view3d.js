@@ -54,6 +54,9 @@ const PAN_STEP = 0.06;
 /** And + or − zooms it, as a factor of the distance. */
 const ZOOM_STEP = 1.25;
 
+/** How long the mouse rests on a part before its label shows, in ms. */
+const LABEL_REST_MS = 400;
+
 /**
  * The 3D view, once loaded.
  */
@@ -79,6 +82,8 @@ export class Stage {
         this.boxBind = null;
         this.label = document.getElementById('part-label');
         this.labelTimer = 0;
+        /** @type {?string} What the label is for, shown or on its way. */
+        this.labelKey = null;
     }
 
     /**
@@ -333,7 +338,7 @@ export class Stage {
         });
         this.canvas.addEventListener('pointermove', (e) => {
             if (e.pointerType == 'mouse' && !e.buttons) {
-                this.showLabel(hitAt(e), 0);
+                this.hover(hitAt(e));
             }
         });
         this.canvas.addEventListener('pointerleave', () => this.hideLabel());
@@ -463,19 +468,50 @@ export class Stage {
     }
 
     /**
-     * @private Shows what the pointer is over, or hides the label.
+     * @private What the mouse is over: the hand at once where a click
+     * acts, and the label once the pointer rests on the same thing for
+     * LABEL_REST_MS - so that sliding across the panel to a switch shows
+     * no labels flicking from part to part, as a tooltip waits.
      * @param {?THREE.Intersection} hit What it is over.
-     * @param {number} ms How long it stays, or 0 until the pointer moves.
+     */
+    hover(hit) {
+        const text = this.describe(hit);
+        this.canvas.style.cursor = text && text.acts ? 'pointer' : '';
+        const key = text ? JSON.stringify(text) : null;
+        if (key == this.labelKey) {
+            return;
+        }
+        this.labelKey = key;
+        window.clearTimeout(this.labelTimer);
+        this.label.hidden = true;
+        if (text) {
+            this.labelTimer = window.setTimeout(() => this.drawLabel(text), LABEL_REST_MS);
+        }
+    }
+
+    /**
+     * @private Shows what a tap landed on, for a while: no hover on a
+     * touch screen.
+     * @param {!THREE.Intersection} hit What it landed on.
+     * @param {number} ms How long the label stays.
      */
     showLabel(hit, ms) {
         const text = this.describe(hit);
-        // The hand only where a click does something.
-        this.canvas.style.cursor = text && text.acts ? 'pointer' : '';
         window.clearTimeout(this.labelTimer);
+        this.labelKey = null;
         if (!text) {
             this.hideLabel();
             return;
         }
+        this.drawLabel(text);
+        this.labelTimer = window.setTimeout(() => this.hideLabel(), ms);
+    }
+
+    /**
+     * @private
+     * @param {{name: string, role: string, hint: string}} text What it says.
+     */
+    drawLabel(text) {
         const label = this.label;
         label.textContent = '';
         for (const [cls, line] of [['part-name', text.name], ['part-role', text.role],
@@ -488,13 +524,12 @@ export class Stage {
             }
         }
         label.hidden = false;
-        if (ms) {
-            this.labelTimer = window.setTimeout(() => this.hideLabel(), ms);
-        }
     }
 
     /** @private */
     hideLabel() {
+        window.clearTimeout(this.labelTimer);
+        this.labelKey = null;
         if (this.label) {
             this.label.hidden = true;
         }

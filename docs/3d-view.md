@@ -347,9 +347,13 @@ language, so that choosing a view never moves the tools beside it.
   cursor and the label say what a click will do, or why it will not
   yet ("Take this out first: Chassis"); the hand shows only where a
   click acts. The label is a caption in the stage's bottom-left corner
-  (on a phone, the top, over the case top), never beside the pointer.
-  *Changed while building:* it followed the pointer, and over the
-  front panel it covered the very switches being worked.
+  (on a phone, the top, over the case top), never beside the pointer,
+  and it shows once the mouse rests on a part for 400 ms, as a tooltip
+  waits; the hand shows at once. *Changed while building:* it followed
+  the pointer, and over the front panel it covered the very switches
+  being worked; then, in the corner, it still flicked between a
+  switch's two lines and the dress panel's four as the pointer slid
+  across the panel to a switch.
 - **Every view centres the box itself.** Framing leaves out the power
   cord, which trails out of the back to the table and had pushed the
   box off centre in every view but the front.

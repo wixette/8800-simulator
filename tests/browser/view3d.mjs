@@ -271,7 +271,19 @@ export async function views(h) {
         await sleep(150);
     };
     const tip = await js(`panel.stage3d.screenPoint('panel.switch.s7', [0, 0, 0.009])`);
+    // Sliding across the panel shows no labels: one shows only once the
+    // pointer rests (U8).
+    const s0 = await js(`panel.stage3d.screenPoint('panel.switch.s0', [0, 0, 0.009])`);
+    const shownWhileSliding = [];
+    for (let i = 0; i <= 20; i++) {
+        await send('Input.dispatchMouseEvent', {type: 'mouseMoved', x: s0.x + (tip.x - s0.x) * i / 20, y: tip.y + 6 * Math.sin(i)});
+        await sleep(40);
+        shownWhileSliding.push(await js(`!document.getElementById('part-label').hidden`));
+    }
+    verify('sliding across the panel shows no label', !shownWhileSliding.includes(true), shownWhileSliding.join());
     await move(tip.x, tip.y);
+    verify('the hand shows at once over a switch', await js(`document.getElementById('stage3d-canvas').style.cursor`) == 'pointer');
+    await sleep(450);
     const label = `(() => { const l = document.getElementById('part-label'); const r = l.getBoundingClientRect(); const s = document.getElementById('stage3d').getBoundingClientRect();
         return {shown: !l.hidden, left: Math.round(r.left - s.left), bottom: Math.round(s.bottom - r.bottom), right: r.right, top: r.top, text: l.innerText.replace(/\\n/g, ' | '), cursor: document.getElementById('stage3d-canvas').style.cursor}; })()`;
     const onSwitch = await js(label);
@@ -296,6 +308,7 @@ export async function views(h) {
     verify('the dress panel shows between the switches', !!bare);
     if (bare) {
         await move(bare.x, bare.y);
+        await sleep(450);
         const onDress = await js(label);
         verify('over it, the label says why it cannot come out yet, not "click to take it out"',
                onDress.text.includes('Take this out first: Chassis') && !onDress.text.includes('Click'), onDress.text);
