@@ -29,7 +29,8 @@
  * A machine, here, is {memSize, bytes, cpu, switches}: the installed
  * memory, its contents from 0000H, the registers by the names in
  * REGS16 and REGS8 (or null to leave them out), and the address
- * switches as a word. Functions that need to know which memory sizes
+ * switches as a word. Beside the machine, a link may say which view
+ * it opens in: view=3d (since v1.8.0; queryToView()). Functions that need to know which memory sizes
  * the machine offers take them as memSizes, smallest first.
  */
 export class Link {
@@ -114,9 +115,10 @@ export class Link {
      * program needs no more than, and registers at their power-on
      * values.
      * @param {{memSize: number, bytes: Array<number>, cpu: ?Object<string,
-     *     number>, switches: number}} state The machine. Without cpu,
-     *     only the memory is written, and the switches are left out with
-     *     the registers.
+     *     number>, switches: number, view: (string|undefined)}} state The
+     *     machine. Without cpu, only the memory is written, and the
+     *     switches are left out with the registers. A view of '3d' is
+     *     written as view=3d; the 2D view, the default, is left out.
      * @param {Array<number>} memSizes The sizes on offer, smallest first.
      * @param {string=} zip The memory already compressed, to write in
      *     place of the hex.
@@ -136,6 +138,9 @@ export class Link {
                 hex += Link.toHex(state.bytes[i], 2);
             }
             fields.push('hex=' + hex);
+        }
+        if (state.view == '3d') {
+            fields.push('view=3d');
         }
         if (!state.cpu) {
             return fields.join('&');
@@ -228,6 +233,23 @@ export class Link {
             }
         }
         return {memSize: memSize, bytes: bytes, cpu: cpu, switches: switches};
+    }
+
+    /**
+     * Which view a link opens the simulator in: view=3d for the 3D view
+     * of the box, view=2d for the front panel (docs/3d-view.md, V1). It
+     * stands apart from the machine, so a link may carry it alone
+     * (?view=3d) or beside a program. Written by hand, its case and
+     * spaces do not matter; anything else there is no view, which
+     * leaves the reader's own choice.
+     * @param {string} query The query string or fragment, with or
+     *     without its '?' or '#'.
+     * @return {?string} '2d', '3d', or null if the link names neither.
+     */
+    static queryToView(query) {
+        var view = new URLSearchParams(query.replace(/^#/, '')).get('view');
+        view = view === null ? null : view.trim().toLowerCase();
+        return view == '3d' || view == '2d' ? view : null;
     }
 
     /**
