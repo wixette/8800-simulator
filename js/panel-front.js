@@ -294,6 +294,22 @@ panel.setDataLedsCallback = function(bits) {
 };
 
 /**
+ * Says how the machine is - off, running, halted or stopped - for when
+ * what the status line said no longer applies.
+ */
+panel.sayMachineState = function() {
+    if (!panel.isPoweredOn) {
+        panel.setStatus('status-off');
+    } else if (panel.sim.isRunning) {
+        panel.setStatus('status-running');
+    } else if (panel.sim.halted) {
+        panel.setStatus('status-halted');
+    } else {
+        panel.setStatus('status-stopped');
+    }
+};
+
+/**
  * When CPU sets the WAIT LED.
  */
 panel.setWaitLedCallback = function(isRunning) {
@@ -639,6 +655,96 @@ panel.STATELESS_SWITCH = 1;
 panel.addressSwitchStates = new Array(16);
 
 /**
+ * Throws a switch on the front panel. This is the one way in for every
+ * control that throws one: a click on the 2D panel or on a command's
+ * label, a button of the Switch Board Helper, and a pick in the 3D
+ * view, so that all of them do the same thing, with the same sounds
+ * and the same refusals (docs/3d-view.md, M4).
+ * @param {string} id The switch: 's0' to 's15', 'off-on', or a command
+ *     switch such as 'examine'.
+ * @param {string} dir 'up' or 'down'.
+ * @return {string} 'done' if it was thrown; 'same' if a latching switch
+ *     stands that way already; 'none' if nothing is lettered that way,
+ *     so the switch does not go; 'refused' if it would not move (OFF/ON
+ *     with the box taken apart).
+ */
+panel.operate = function(id, dir) {
+    var info = panel.STATELESS_SWITCH_INFO.find((s) => s.id == id);
+    if (info) {
+        var cmd = dir == 'up' ? info.upperCmd : info.lowerCmd;
+        if (!cmd) {
+            return 'none';
+        }
+        if (dir == 'up') {
+            panel.switchUpThenBack(id);
+        } else {
+            panel.switchDownThenBack(id);
+        }
+        panel.playSwitch();
+        cmd.callback();
+        return 'done';
+    }
+    var before = panel.switchPosition(id);
+    if ((before > 0) == (dir == 'up')) {
+        return 'same';
+    }
+    panel.onToggle(id);
+    return panel.switchPosition(id) == before ? 'refused' : 'done';
+};
+
+/**
+ * Where a switch's lever stands.
+ * @param {string} id The switch, as for panel.operate().
+ * @return {number} 1 up, -1 down, 0 at the centre (a command switch at
+ *     rest). OFF/ON is up for OFF and down for ON, as lettered.
+ */
+panel.switchPosition = function(id) {
+    if (id[0] == 's' && /^s\d+$/.test(id)) {
+        return panel.addressSwitchStates[parseInt(id.substr(1))] ? 1 : -1;
+    }
+    if (id == 'off-on') {
+        return panel.isPoweredOn ? -1 : 1;
+    }
+    return 0;
+};
+
+/**
+ * Whether each lamp is lit, as the panel last drew it.
+ * @type {!Object<string, boolean>}
+ */
+panel.lamps = {};
+
+/**
+ * Who is told when a lamp or a switch on the panel changes: the 3D
+ * view, which draws the same panel (docs/3d-view.md, M4).
+ * @type {!Array<function(string, string, *)>}
+ */
+panel.panelListeners = [];
+
+/**
+ * Asks to be told of every change on the front panel.
+ * @param {function(string, string, *)} listener Called with what
+ *     changed - 'lamp' (lit: a boolean), 'switch' (a latching switch's
+ *     new position: 1 or -1) or 'throw' (a command switch thrown: 'up'
+ *     or 'down', and back) - its id, and that value.
+ */
+panel.onPanelChange = function(listener) {
+    panel.panelListeners.push(listener);
+};
+
+/**
+ * Tells the listeners of a change.
+ * @param {string} kind 'lamp', 'switch' or 'throw'.
+ * @param {string} id The lamp or switch.
+ * @param {*} value What it is now.
+ */
+panel.panelChanged = function(kind, id, value) {
+    for (let i = 0; i < panel.panelListeners.length; i++) {
+        panel.panelListeners[i](kind, id, value);
+    }
+};
+
+/**
  * Creates a new LED inside the panel svg.
  * @param {string} id The LED ID. This ID will be used as the prefix
  *     of DOM element's ID.
@@ -677,6 +783,10 @@ panel.createLed = function(id, x, y) {
 panel.setLed = function(id, on) {
     document.getElementById(id + '-on').style.display = on ? 'inline' : 'none';
     document.getElementById(id + '-off').style.display = on ? 'none' : 'inline';
+    if (panel.lamps[id] !== !!on) {
+        panel.lamps[id] = !!on;
+        panel.panelChanged('lamp', id, !!on);
+    }
 };
 
 /**
@@ -777,7 +887,7 @@ panel.createSwitch = function(id, type, x, y, upperCmd, lowerCmd) {
     // still leaves a gap between neighbours.
     if (type == panel.TOGGLE_SWITCH) {
         let toggle = function() {
-            panel.onToggle(id);
+            panel.operate(id, panel.switchPosition(id) > 0 ? 'down' : 'up');
         };
         upElem.addEventListener('click', toggle, false);
         downElem.addEventListener('click', toggle, false);
@@ -787,14 +897,10 @@ panel.createSwitch = function(id, type, x, y, upperCmd, lowerCmd) {
             'click', toggle, false);
     } else {
         let upper = upperCmd && function() {
-            panel.switchUpThenBack(id);
-            panel.playSwitch();
-            upperCmd.callback();
+            panel.operate(id, 'up');
         };
         let lower = lowerCmd && function() {
-            panel.switchDownThenBack(id);
-            panel.playSwitch();
-            lowerCmd.callback();
+            panel.operate(id, 'down');
         };
         // A position with no label in the artwork has no box to click.
         if (upper && upperCmd.width) {
@@ -848,6 +954,7 @@ panel.switchUp = function(id) {
     upElem.style.display = 'inline';
     midElem.style.display = 'none';
     downElem.style.display = 'none';
+    panel.panelChanged('switch', id, 1);
 };
 
 /**
@@ -862,6 +969,7 @@ panel.switchDown = function(id) {
     upElem.style.display = 'none';
     midElem.style.display = 'none';
     downElem.style.display = 'inline';
+    panel.panelChanged('switch', id, -1);
 };
 
 /**
@@ -870,6 +978,7 @@ panel.switchDown = function(id) {
  * @param {string} id The switch ID.
  */
 panel.switchUpThenBack = function(id) {
+    panel.panelChanged('throw', id, 'up');
     var midElem = document.getElementById(id + '-mid');
     var upElem = document.getElementById(id + '-up');
     var downElem = document.getElementById(id + '-down');
@@ -897,6 +1006,7 @@ panel.switchUpThenBack = function(id) {
  * @param {string} id The switch ID.
  */
 panel.switchDownThenBack = function(id) {
+    panel.panelChanged('throw', id, 'down');
     var midElem = document.getElementById(id + '-mid');
     var upElem = document.getElementById(id + '-up');
     var downElem = document.getElementById(id + '-down');
@@ -938,6 +1048,13 @@ panel.onToggle = function(id) {
         if (panel.isPoweredOn) {
             panel.onPowerOff();
         } else {
+            // It will not go on while the box is taken apart in the 3D
+            // view, and says what is out (docs/3d-view.md, V4).
+            var why = panel.box.interlock();
+            if (why) {
+                panel.sayBox(why);
+                return;
+            }
             panel.onPowerOn();
             // The machine finding its voice, half a second after the
             // switch that asked for it (D23).

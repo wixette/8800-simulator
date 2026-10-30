@@ -252,7 +252,7 @@ test('Assemble lifts protection, loads, and is in sync with its own load (U4, U7
             this.memLoads++;
             for (const [a, b] of pairs) this.mem[a] = b;
         },
-        reset() {}, flushDump() {}, endResetFlash() {}, showAddressAndData() {},
+        reset() {}, flushDump() {}, showAddressAndData() {},
         lastAddress: 0,
     };
     const source = 'MSG: DB 1\nSTART: MVI A,1\n HLT\n END START';
@@ -318,7 +318,7 @@ test('Assemble puts the PC where the program starts, and says so (U4, L8, #20)',
                 for (const [a, b] of pairs) this.mem[a] = b;
             },
             reset() { this.pc = 0; },
-            flushDump() {}, endResetFlash() {},
+            flushDump() {},
             showAddressAndData() { this.lamps = this.pc; },
             lastAddress: 0,
         };

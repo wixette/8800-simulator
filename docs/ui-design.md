@@ -17,7 +17,8 @@ principle here first, with its reason.**
 [U1](#u1--the-front-panel-and-a-dock-replace-the-four-tabs) replaced
 the four tabs, [U2](#u2--where-10s-features-go) put #10's features
 in their places, and U3 to U5 came of the first review of both, which
-also gave P10. U6 came of @cj0ne5's review of #11. The questions U1 left open were settled as listed in
+also gave P10. U6 came of @cj0ne5's review of #11. U7 to U10 came with
+the 3D view in v1.8.0 ([3d-view.md](3d-view.md)). The questions U1 left open were settled as listed in
 [Part 4](#part-4--open-questions), and remain open to revision once the
 layout has been used for a while.
 
@@ -440,6 +441,119 @@ its bottom.
   five tabs as icons alone, the names kept for screen readers and as
   tooltips, and the row scrolls under the pinned fold button at any
   width, should it ever need to.
+
+### U7 — Two views of the one machine, chosen on the stage's top edge
+
+*Since v1.8.0.* The stage shows the front panel in 2D or the whole
+machine in 3D, one at a time, chosen from a `[2D | 3D]` toggle at the
+stage's top right, on a band of its own (V1 in
+[3d-view.md](3d-view.md#v1--switching-views-a-2d--3d-toggle-at-the-stages-top-right)).
+
+- **P1 holds in both:** in 3D, the 3D front panel is the primary
+  surface; its lamps and switches are the panel's, through one seam
+  (`panel.operate()`, `panel.onPanelChange()`), so they cannot disagree.
+- **P2 holds:** a click on a 3D switch and on a 2D switch are two ways
+  to the same operation, not two copies. The Switch Board Helper stays
+  under the stage in both views.
+- **The band** costs the 2D panel only its height (about 32 px), and
+  nothing on a phone, where the panel is limited by its width.
+  *Rejected:* shrinking the panel to 85 % to make room round it; the
+  toggle in the top bar, which is for occasional actions (P4) and is
+  full on phones.
+- **Remembered**, and a link can carry it as `view=3d` (P8).
+
+### U8 — The 3D view's tools follow its view, not its machine
+
+In 3D the band also holds ⌂ (reset view), zoom − / +, a Views menu
+of five views, and a Show menu of four ways to draw the machine and
+five key parts to pick out (P10: items only; V2, V3). Each button shows its current choice: Views by name, Show by
+icon, in orange when part of the machine is faded or hidden. The Views
+button is as wide as its longest name in the reader's language, so
+that a choice never moves the tools beside it. The views and presets
+change how the machine is drawn, never what it does, so the machine keeps running in all of them. Taking parts out is
+the one thing that needs it off (U9). Keyboard: once the 3D view has
+the focus (by Tab, not by a click, as the dock's tabs), the arrows,
++ and −, and Home move the camera; otherwise the Teletype keeps its
+keys (U3).
+
+### U9 — Taking it apart needs the power off, and the 2D panel is always whole
+
+Nothing comes out while the machine is on, and OFF/ON refuses while
+anything is out, saying what (P6). Every other way the page switches
+the machine on - every load, Assemble, a link - puts the box back
+together first and says so; going back to 2D does too. The full table
+is V4a in [3d-view.md](3d-view.md#v4a--the-box-and-the-power-in-every-way-the-page-switches-the-machine).
+
+### U10 — The Tutorial in chapters, with Shows that point
+
+The Tutorial gains a contents row and a first chapter, *Meet the
+Machine*. A step may end with a Show chip that points at what it is
+about: an outline on the 2D panel, or in 3D a view and one of the
+Show menu's parts, lit with the rest faded, which the Views and Show
+buttons then name. A chip only shows; it never works the machine (V7). No guided
+tour overlays the page (V8): the first visit opens on the Tutorial, as
+it did, and a dot on "3D" says the view is there until it is seen.
+(Its contents row became U11's lesson bar.)
+
+### U11 — The Tutorial as lessons, one at a time, on the dark
+
+The four chapters were one long light-grey page under a row of pill
+buttons: hard to find a place in, impossible to come back to, and a
+bright block under the panel and the 3D view. Now:
+
+- **Lessons, one at a time.** A bar of numbered lessons across the top
+  of the tab (a tab list: one tab stop, the arrows move along it) opens
+  one lesson and hides the rest. It stays in sight as the lesson
+  scrolls. On a narrow dock the other lessons are their numbers alone,
+  their names their tooltips. The lesson open, and how far down each
+  was read, are remembered (`localStorage` `sim8800tutorial`), and the
+  Tutorial goes back to both on a reload and when the dock comes back
+  to it from another tab. 1.7's remembered chapter is read once.
+- **A lesson's page.** "Lesson 2 of 4", its title and a one-line lead;
+  then its steps, in a few named groups (*Enter the program*, *Enter
+  the two numbers*, *Run it*, *Read the answer*). The numbers run on
+  through a lesson's groups, as its steps refer to each other by them.
+  It ends with the way on to the next lesson. Steps are not cards: the
+  dock's tabs, then lessons, then a card for each of nineteen steps
+  would be boxes in boxes; the groups give the structure, and a number
+  down a thin line gives each step its place.
+- **Colour means one thing each,** on the dock's own dark: amber is
+  what to press (Show, and the bar's current lesson - the orange a Show
+  lights the machine with); green is what you should see (the step
+  that shows the answer); blue is the story and the asides; code sits
+  on the darkest panel. Grey is everything else, the step numbers among
+  it: they say where you are, and in amber, wrapped on a narrow dock,
+  they tangled with the Show chips beside them.
+- **Show has an eye,** Material's "visibility", before its word: look.
+  It lights up what a step is about in the view above, rather than
+  going anywhere, which an arrow would have said.
+- **One column down the middle.** A lesson is at most 780 px wide,
+  centred in the dock, and the lesson bar's tabs line up with it; the
+  References tab reads the same way.
+- **Meet the Machine opens on the real thing:** a photo of an Altair
+  8800 beside a Model 33 Teletype (Tim Colegrove, CC BY-SA 4.0,
+  credited under it, in About and in `images/tutorial/CREDITS.md`),
+  and a paragraph on why it matters - the January 1975 cover, the kit,
+  Microsoft's first product, the Homebrew Computer Club.
+- **"Quick Tutorial" is "Your First Program",** which says what it is.
+
+### U12 — The status line keeps its height
+
+The status line takes one line's height in the page, whatever it says.
+A message that needs more rises over the foot of the dock, and the
+dock's scroll gains as much room below its end, so its last line - the
+Teletype's, the dump's - can still be scrolled clear of it. Before, the
+line grew and shrank with its message, and each time a two-line
+message gave way to a one-line one - switching the machine on, in the
+3D view - the stage, and the machine drawn on it, changed size. With
+the dock folded, a long message covers part of its tabs until the next
+one.
+
+Going back to 2D, a message about the 3D view, its camera or the box's
+parts gives way to how the machine is (off, running, halted, stopped),
+rather than staying on the panel that it no longer describes. The 3D
+view's welcome is one line on a desktop: what each part does is on its
+label, and taking the machine apart is in the Tutorial.
 
 ---
 

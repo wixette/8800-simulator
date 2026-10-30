@@ -318,8 +318,10 @@ test('the references have a tab of their own, which About opens', () => {
     // The Tutorial is a lesson; the source and further reading are
     // looked up, so they get the dock's last tab rather than its foot.
     assert.deepStrictEqual(panel.TABS, ['tty', 'asm', 'debug', 'ref', 'links']);
-    assert.ok(!regionOf('tab-ref').includes('<a '),
-              'the Tutorial keeps no links');
+    // Its one photo's credit links its author and licence, as CC BY-SA
+    // asks; there is no further reading in it.
+    const tutorial = regionOf('tab-ref').replace(/<span class="photo-credit">[\s\S]*?<\/span><\/figcaption>/, '');
+    assert.ok(!tutorial.includes('<a '), 'the Tutorial keeps no links but its photo\'s credit');
     const links = regionOf('tab-links');
     assert.ok(links.includes('id="reference-title"') &&
               links.includes('github.com/wixette/8800-simulator'),

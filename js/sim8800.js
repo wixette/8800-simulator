@@ -934,8 +934,9 @@ export class Sim8800 {
 
     /**
      * Ends the RESET lamp flash and hands the LEDs back. Called by the
-     * flash's own timeout, and by anything that starts the CPU, so
-     * that a running program's display is never overwritten.
+     * flash's own timeout, by anything that starts the CPU, and by
+     * EXAMINE and DEPOSIT (showAddressAndData), so that what they show
+     * is never overwritten.
      */
     endResetFlash() {
         if (!this.resetFlashPending)
@@ -1094,9 +1095,12 @@ export class Sim8800 {
     /**
      * Shows the address and the byte at the address via LEDs. The byte
      * is read the same way the CPU reads it, so an address with no
-     * memory behind it shows FFh rather than a stray value.
+     * memory behind it shows FFh rather than a stray value. Whatever is
+     * shown this way owns the lamps, as a run does: a RESET flash still
+     * pending ends now, rather than putting it out (#23).
      */
     showAddressAndData() {
+        this.endResetFlash();
         this.busAddress = this.lastAddress;
         this.updateLamps();
         if (this.setAddressLedsCallback) {

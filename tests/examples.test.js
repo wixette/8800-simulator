@@ -473,11 +473,12 @@ test('macros: a lamp walks right, one place per delay', () => {
                        'LOOP is local to each expansion');
 });
 
-test('the README\'s assembly program makes exactly section 3\'s bytes', () => {
-    // Section 7 says so of the program it shows, which is the adder.
+test('the README\'s assembly program makes exactly the bytes toggled in by hand', () => {
+    // Write it in assembly says so of the program it shows, which is the adder.
     const readme = fs.readFileSync(
         path.join(import.meta.dirname, '..', 'README.md'), 'utf8');
-    const section = readme.slice(readme.indexOf('## 7. Write it in assembly'));
+    const section = readme.slice(readme.indexOf('### Write it in assembly'));
+    assert.ok(section.length < readme.length, 'the section is there');
     const code = section.match(/```\n([\s\S]*?)```/)[1];
     const r = Asm8080.assemble(code);
     assert.deepStrictEqual(r.errors, []);
@@ -486,5 +487,5 @@ test('the README\'s assembly program makes exactly section 3\'s bytes', () => {
     assert.deepStrictEqual(bytes, loadExample('adder').bytes);
     assert.strictEqual(loadExample('adder').hex,
                        '3a 80 00 47 3a 81 00 80 32 82 00 c3 00 00',
-                       'the bytes section 3 toggles in by hand');
+                       'the bytes Your first program, by hand, toggles in');
 });

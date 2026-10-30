@@ -13,9 +13,11 @@
  * - each file it names by src, href or srcset gets ?v=<version>: the
  *   stylesheet, the icons and images, the sounds, and js/main.js (a
  *   srcset of one file, as the page's are);
- * - its import map gives every module in js/ the same: the modules
- *   import one another by their plain names, and the map turns each
- *   into the versioned one, for the page alone.
+ * - its import map gives every module in js/ and vendor/three/ the
+ *   same: the modules import one another by their plain names, and the
+ *   map turns each into the versioned one, for the page alone. three.js
+ *   is also mapped by the names its addons use, "three" and
+ *   "three/addons/...".
  *
  * index.html itself is never cached for long (see the README), so it is
  * always the newest, and so are the names in it.
@@ -26,12 +28,29 @@ import {fileURLToPath} from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-/** The modules the page may import: every .js file in js/. */
+/**
+ * The modules the page may import: every .js file in js/ and its
+ * folders, and the three.js files in vendor/three/ (tools/vendor.mjs).
+ */
 export function moduleFiles(root = ROOT) {
-    return fs.readdirSync(path.join(root, 'js'))
-        .filter((name) => name.endsWith('.js')).sort()
-        .map((name) => 'js/' + name);
+    const files = [];
+    for (const top of ['js', 'vendor/three']) {
+        const dir = path.join(root, top);
+        if (!fs.existsSync(dir)) {
+            continue;
+        }
+        for (const name of fs.readdirSync(dir, {recursive: true})) {
+            if (name.endsWith('.js')) {
+                files.push(top + '/' + name.split(path.sep).join('/'));
+            }
+        }
+    }
+    return files.sort();
 }
+
+/** Where three.js's own names point: the library, and its addons. */
+const THREE = 'vendor/three/build/three.module.js';
+const THREE_ADDONS = 'vendor/three/examples/jsm/';
 
 /**
  * index.html, with the version in every local file name and in the
@@ -52,6 +71,14 @@ export function stamp(html, version, modules) {
     const map = {imports: {}};
     for (const file of modules) {
         map.imports['./' + file] = './' + file + v;
+    }
+    // The addons import three.js as "three", as its documentation does.
+    for (const file of modules) {
+        if (file == THREE) {
+            map.imports['three'] = './' + file + v;
+        } else if (file.startsWith(THREE_ADDONS)) {
+            map.imports['three/addons/' + file.slice(THREE_ADDONS.length)] = './' + file + v;
+        }
     }
     const json = JSON.stringify(map, null, 2).replace(/\n/g, '\n    ');
     const block = /(<script type="importmap">\n    )[\s\S]*?(\n    <\/script>)/;

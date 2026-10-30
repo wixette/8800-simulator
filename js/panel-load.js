@@ -394,6 +394,8 @@ panel.onSetMemSize = function(memSize) {
     panel.sim.setMemSize(memSize);
     // setMemSize powered the machine down; show that on the panel.
     panel.onPowerOff();
+    // And the cards in the box follow (js/box.js).
+    panel.box.setMemSize(memSize);
     panel.setStatus('status-mem-installed',
                     {size: panel.formatMemSize(memSize)}, 'warn');
 };

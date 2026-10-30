@@ -84,11 +84,13 @@ export class Dropdown {
      * Fills the list.
      * @param {Array<{value: (string|undefined), label: string,
      *     detail: (string|undefined), heading: (boolean|undefined),
-     *     disabled: (boolean|undefined)}>} items The choices, in order.
+     *     disabled: (boolean|undefined), icon: (string|undefined)}>}
+     *     items The choices, in order.
      *     An item marked heading names the group below it and cannot be
      *     chosen; the arrow keys step over it. A disabled one is greyed
      *     but still answers, and its detail - quieter text at its right
-     *     - is the place to say why.
+     *     - is the place to say why. An icon is the inside of a 24 x 24
+     *     <svg>, drawn before the label.
      */
     setItems(items) {
         if (!this.list) {
@@ -112,6 +114,15 @@ export class Dropdown {
             item.setAttribute('role', 'option');
             item.setAttribute('tabindex', '-1');
             item.dataset.value = items[i].value;
+            if (items[i].icon) {
+                let icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                icon.setAttribute('class', 'icon dropdown-icon');
+                icon.setAttribute('viewBox', '0 0 24 24');
+                icon.setAttribute('aria-hidden', 'true');
+                icon.innerHTML = items[i].icon;
+                item.appendChild(icon);
+                item.classList.add('with-icon');
+            }
             let label = document.createElement('span');
             label.className = 'dropdown-item-label';
             label.textContent = items[i].label;
@@ -164,10 +175,33 @@ export class Dropdown {
     /**
      * Sets the text on the button itself.
      * @param {string} text The label.
+     * @param {!Array<string>=} room Every label the button can show: it
+     *     keeps the width of the longest, so that a choice never moves
+     *     what sits beside the button. The others are there, unseen and
+     *     unread, only to take up their room.
      */
-    setLabel(text) {
-        if (this.label) {
+    setLabel(text, room) {
+        if (!this.label) {
+            return;
+        }
+        if (!room) {
             this.label.textContent = text;
+            return;
+        }
+        this.label.textContent = '';
+        this.label.classList.add('dropdown-label-sized');
+        var shown = document.createElement('span');
+        shown.textContent = text;
+        this.label.appendChild(shown);
+        for (const other of room) {
+            if (other === text) {
+                continue;
+            }
+            let held = document.createElement('span');
+            held.className = 'dropdown-label-room';
+            held.setAttribute('aria-hidden', 'true');
+            held.textContent = other;
+            this.label.appendChild(held);
         }
     }
 

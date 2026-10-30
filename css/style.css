@@ -553,6 +553,13 @@ a {
     right: 0;
 }
 
+/* What a Show points at on the 2D panel. */
+.tutorial-outline {
+    fill: none;
+    stroke: #f90;
+    stroke-width: 5;
+}
+
 /* The Tutorial's headings: it is a document, so it has them. */
 .subheader-bar {
     color: #eee;
@@ -581,6 +588,253 @@ a {
     flex: 1 1 0;
     min-height: 0;
     width: 100%;
+}
+
+/* The stage's top edge (docs/3d-view.md, V1): the [2D | 3D] toggle,
+   and in 3D its camera's tools, at the right. A band of its own, not
+   laid over the panel, so it costs the panel only its height. */
+#view-tools {
+    align-items: center;
+    align-self: stretch;
+    display: flex;
+    flex: none;
+    gap: 6px;
+    height: 34px;
+    justify-content: flex-end;
+    margin-bottom: 4px;
+}
+
+#view-switch {
+    border: 1px solid #555;
+    border-radius: 6px;
+    display: flex;
+    order: 2;
+    overflow: hidden;
+}
+
+.view-tab {
+    color: #aaa;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 20px;
+    padding: 3px 12px;
+    position: relative;
+}
+
+.view-tab + .view-tab {
+    border-left: 1px solid #555;
+}
+
+.view-tab:hover,
+.view-tab:focus-visible {
+    background-color: var(--hover-bg);
+    color: #fff;
+    outline: none;
+}
+
+.view-tab.selected {
+    background-color: #3a3a3a;
+    color: #f90;
+    cursor: default;
+    font-weight: bold;
+}
+
+.view-tab.disabled {
+    color: #666;
+    cursor: default;
+}
+
+/* Until the 3D view has been seen once: the dock tabs' activity dot. */
+.view-tab.has-news::after {
+    background-color: #f90;
+    border-radius: 50%;
+    content: '';
+    height: 6px;
+    position: absolute;
+    right: 3px;
+    top: 3px;
+    width: 6px;
+}
+
+#view3d-tools {
+    align-items: center;
+    display: flex;
+    gap: 2px;
+    order: 1;
+}
+
+#view3d-tools[hidden] {
+    display: none;
+}
+
+#view3d-tools .icon-button {
+    height: 30px;
+    width: 30px;
+}
+
+/* Zoom out and in, one joined pair. */
+.view-zoom {
+    display: flex;
+}
+
+#view3d-tools .icon-button.disabled,
+#view3d-tools.loading .icon-button,
+#view3d-tools.loading .tool-button {
+    color: #666;
+    cursor: default;
+}
+
+/* The 3D view's menu buttons are tool buttons, as the toolbar's are. */
+#view3d-tools .dropdown > .tool-button {
+    background: none;
+    border-radius: 6px;
+    color: #eee;
+    font-size: 13px;
+    gap: 6px;
+    height: 30px;
+    padding: 0 8px;
+}
+
+#view3d-tools .dropdown > .tool-button:hover,
+#view3d-tools .dropdown > .tool-button:focus-visible {
+    background-color: var(--hover-bg);
+    color: #fff;
+    outline: none;
+}
+
+#view3d-tools .dropdown > .tool-button[aria-expanded="true"] {
+    background-color: var(--open-bg);
+}
+
+/* A Show other than the whole machine: the button says something is
+   left out, as a changed setting does on the toolbar. */
+#view3d-tools #show-button.changed {
+    color: #f90;
+}
+
+#views-list,
+#show-list {
+    left: auto;
+    min-width: 200px;
+    right: 0;
+}
+
+/* A label as wide as the longest it can say (Dropdown.setLabel): every
+   one in the same cell, the unchosen ones taking room unseen. */
+.dropdown-label-sized {
+    display: inline-grid;
+    text-align: start;
+}
+
+.dropdown-label-sized > span {
+    grid-area: 1 / 1;
+    white-space: nowrap;
+}
+
+.dropdown-label-room {
+    visibility: hidden;
+}
+
+.dropdown li.with-icon {
+    align-items: center;
+    gap: 10px;
+    justify-content: flex-start;
+}
+
+.dropdown-icon {
+    flex: none;
+    height: 20px;
+    width: 20px;
+}
+
+/* The whole machine in 3D: it takes the room the panel would. */
+#stage3d {
+    background: radial-gradient(ellipse at 50% 40%, #3a3a3a 0%, #262626 70%);
+    border-radius: 8px;
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+}
+
+#stage3d[hidden] {
+    display: none;
+}
+
+#stage3d canvas {
+    display: block;
+    height: 100%;
+    touch-action: none;
+    width: 100%;
+}
+
+#stage3d canvas:focus-visible {
+    outline: 2px solid #f90;
+    outline-offset: -2px;
+}
+
+.stage3d-message {
+    color: #bbb;
+    font-size: 14px;
+    left: 0;
+    margin: 0;
+    padding: 0 16px;
+    position: absolute;
+    right: 0;
+    text-align: center;
+    top: 45%;
+}
+
+/* How much of the model has arrived. */
+.stage3d-progress {
+    background-color: #444;
+    border-radius: 2px;
+    height: 4px;
+    left: 25%;
+    overflow: hidden;
+    position: absolute;
+    right: 25%;
+    top: calc(45% + 32px);
+}
+
+.stage3d-progress > div {
+    background-color: #f90;
+    height: 100%;
+    transform: scaleX(var(--progress, 0));
+    transform-origin: left;
+    transition: transform 0.2s;
+}
+
+/* What the pointer is over: its name, what it does, what a click does. */
+/* What the pointer is over: beside it once it rests, gone at a press
+   (js/view3d/view3d.js places it). */
+.part-label {
+    background-color: rgba(20, 20, 20, 0.85);
+    border: 1px solid #555;
+    border-radius: 6px;
+    box-sizing: border-box;
+    color: #eee;
+    font-size: 12px;
+    max-width: min(320px, calc(100% - 16px));
+    padding: 5px 8px;
+    pointer-events: none;
+    position: absolute;
+    z-index: 2;
+}
+
+.part-label .part-name {
+    font-weight: bold;
+}
+
+.part-label .part-role {
+    color: #bbb;
+    margin-top: 2px;
+}
+
+.part-label .part-hint {
+    color: #f90;
+    margin-top: 4px;
 }
 
 /* The Switch Board Helper, a strip under the panel and as wide as its
@@ -851,6 +1105,9 @@ a {
     flex: 1 1 0;
     min-height: 0;
     overflow: auto;
+    /* Room below the end for the status message that rises over the
+       dock's foot (panel.fitStatus). */
+    padding-bottom: var(--status-rise, 0px);
 }
 
 .dock-closed #dock-body {
@@ -927,34 +1184,219 @@ a {
     padding: 5px 10px;
 }
 
-/* The Tutorial: an introduction, a program listing, numbered steps,
-   and a closing note. */
-.tutorial {
-    background-color: #ccc;
-    border-radius: 10px;
-    color: #222;
+/* The Tutorial (docs/ui-design.md, U11): a bar of numbered lessons,
+   one lesson at a time, in a column down the middle of the dock's own
+   dark. Colour means one thing each: amber is what to press (Show - the
+   orange a Show lights the machine with - and the lesson open), green
+   is what you should see, blue is the story and the asides, and code
+   sits on the darkest panel. */
+.tutorial-pane {
+    --reading-width: 780px;
+    --t-text: #e2e4e7;
+    --t-muted: #a3a8af;
+    --t-edge: #3a3e44;
+    --t-amber: #f9a23b;
+    --t-amber-bg: rgba(255, 153, 0, 0.12);
+    --t-green: #93d48c;
+    --t-green-bg: rgba(110, 190, 100, 0.11);
+    --t-blue: #8db9f2;
+    --t-blue-bg: rgba(90, 140, 220, 0.12);
+    color: var(--t-text);
+    container-type: inline-size;
     font-size: 14px;
     line-height: 1.6;
-    padding: 16px 20px;
+    padding-top: 0;
 }
 
-.tutorial-lead {
+/* The lessons, numbered, across the top: it stays in sight while a
+   lesson scrolls under it. Its rule runs the dock's width; its tabs
+   line up with the lesson's column under them. */
+.lesson-bar {
+    background-color: #262626;
+    border-bottom: 1px solid var(--t-edge);
+    display: flex;
+    gap: 4px;
+    margin: 0 -12px;
+    overflow-x: auto;
+    padding: 6px max(12px, calc((100% - var(--reading-width)) / 2 + 12px)) 0;
+    position: sticky;
+    scrollbar-width: none;
+    top: 0;
+    z-index: 1;
+}
+
+.lesson-tab {
+    align-items: center;
+    background: none;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    color: var(--t-muted);
+    cursor: pointer;
+    display: flex;
+    flex: none;
+    font: inherit;
+    font-size: 13px;
+    gap: 8px;
+    margin-bottom: -1px;
+    padding: 6px 10px 8px 6px;
+    white-space: nowrap;
+}
+
+.lesson-tab:hover,
+.lesson-tab:focus-visible {
+    color: var(--t-text);
+    outline: none;
+}
+
+.lesson-tab:focus-visible .lesson-num {
+    box-shadow: 0 0 0 2px var(--t-amber);
+}
+
+.lesson-tab.current {
+    border-bottom-color: var(--t-amber);
+    color: var(--t-text);
+}
+
+.lesson-num {
+    border: 1.5px solid currentColor;
+    border-radius: 50%;
+    box-sizing: border-box;
+    flex: none;
+    font-size: 12px;
     font-weight: bold;
-    margin: 0 0 12px 0;
+    height: 22px;
+    line-height: 19px;
+    text-align: center;
+    width: 22px;
+}
+
+.lesson-tab.current .lesson-num {
+    background-color: var(--t-amber);
+    border-color: var(--t-amber);
+    color: #222;
+}
+
+/* Narrow, the other lessons are their numbers alone; their names are
+   their tooltips. */
+@container (max-width: 560px) {
+    .lesson-tab:not(.current) .lesson-name {
+        display: none;
+    }
+}
+
+.tutorial-chapter {
+    counter-reset: step;
+    margin: 0 auto;
+    max-width: var(--reading-width);
+    padding: 16px 0 24px 0;
+}
+
+.lesson-kicker {
+    color: var(--t-muted);
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.lesson-title {
+    color: #fff;
+    font-size: 20px;
+    line-height: 1.3;
+    margin: 2px 0 6px 0;
+}
+
+.lesson-lead {
+    color: var(--t-muted);
+    margin: 0 0 16px 0;
+}
+
+/* Meet the Machine opens on the real thing, and why it matters. */
+.lesson-intro {
+    align-items: start;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    margin: 0 0 8px 0;
+}
+
+@container (max-width: 560px) {
+    .lesson-intro {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.lesson-photo {
+    margin: 0;
+}
+
+.lesson-photo img {
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+    display: block;
+    height: auto;
+    width: 100%;
+}
+
+.lesson-photo figcaption {
+    color: var(--t-muted);
+    font-size: 12px;
+    line-height: 1.45;
+    margin-top: 6px;
+}
+
+.photo-credit {
+    white-space: nowrap;
+}
+
+.photo-credit a {
+    color: var(--t-muted);
+}
+
+.photo-credit a:hover {
+    color: var(--t-text);
+}
+
+/* The story, and the asides: blue. */
+.lesson-story,
+.tutorial-note {
+    background-color: var(--t-blue-bg);
+    border-left: 3px solid var(--t-blue);
+    border-radius: 6px;
+    margin: 0;
+    padding: 10px 14px;
+}
+
+.tutorial-note {
+    margin: 20px 0 0 0;
+}
+
+/* A lesson's steps come in a few groups, each named. */
+.step-group {
+    color: var(--t-muted);
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 0.06em;
+    margin: 22px 0 10px 0;
+    text-transform: uppercase;
 }
 
 .tutorial-code {
-    background-color: #e6e6e6;
-    border-left: 3px solid #999;
-    border-radius: 6px;
+    background-color: #17191c;
+    border: 1px solid var(--t-edge);
+    border-radius: 8px;
+    color: #d6dbe0;
+    font-size: 13px;
     line-height: 1.5;
-    margin: 0 0 16px 0;
+    margin: 0 0 8px 0;
     overflow-x: auto;
-    padding: 10px 16px;
+    padding: 10px 14px;
 }
 
+/* The steps: numbered down a thin line, one lesson's numbers running on
+   from group to group, as the steps refer to each other by them. The
+   numbers are grey: they are where you are, not something to press. */
 .steps {
-    counter-reset: step;
     list-style: none;
     margin: 0;
     padding: 0;
@@ -962,43 +1404,120 @@ a {
 
 .steps > li {
     counter-increment: step;
-    margin: 0 0 8px 0;
+    margin: 0;
     min-height: 24px;
-    padding: 1px 0 0 38px;
+    padding: 1px 0 14px 38px;
     position: relative;
 }
 
-.steps > li:last-child {
-    margin-bottom: 0;
-}
-
-/* The step number, as a badge in the gutter. */
 .steps > li::before {
-    background-color: #666;
-    border-radius: 12px;
-    color: #eee;
+    border: 1.5px solid #6b7078;
+    border-radius: 50%;
+    box-sizing: border-box;
+    color: #c4c8ce;
     content: counter(step);
     font-size: 12px;
     font-weight: bold;
     height: 24px;
     left: 0;
-    line-height: 24px;
+    line-height: 21px;
     position: absolute;
     text-align: center;
     top: 0;
     width: 24px;
 }
 
-.steps .tutorial-code {
-    margin: 8px 0 4px 0;
+.steps > li:not(:last-child)::after {
+    background-color: var(--t-edge);
+    bottom: 2px;
+    content: '';
+    left: 11px;
+    position: absolute;
+    top: 28px;
+    width: 2px;
 }
 
-.tutorial-note {
-    background-color: #e6e6e6;
-    border-left: 3px solid #f90;
+.steps .tutorial-code {
+    margin: 8px 0 0 0;
+}
+
+/* What you should see: green. */
+.steps > li.result::before {
+    background-color: var(--t-green);
+    border-color: var(--t-green);
+    color: #1a1a1a;
+}
+
+.steps > li.result > span {
+    background-color: var(--t-green-bg);
     border-radius: 6px;
-    margin: 16px 0 0 0;
-    padding: 10px 16px;
+    color: var(--t-green);
+    display: inline-block;
+    padding: 1px 8px;
+}
+
+/* A step's Show: it points at what the step is about, an eye before its
+   word - look - in the amber of something to press. */
+.show-chip {
+    align-items: center;
+    background-color: var(--t-amber-bg);
+    border: 1px solid var(--t-amber);
+    border-radius: 12px;
+    color: var(--t-amber);
+    cursor: pointer;
+    display: inline-flex;
+    font: inherit;
+    font-size: 12px;
+    gap: 4px;
+    line-height: 18px;
+    margin-left: 6px;
+    padding: 0 9px 0 7px;
+    vertical-align: 1px;
+    white-space: nowrap;
+}
+
+.show-chip .icon {
+    fill: currentColor;
+    flex: none;
+    height: 14px;
+    width: 14px;
+}
+
+.show-chip:hover,
+.show-chip:focus-visible {
+    background-color: var(--t-amber);
+    color: #222;
+    outline: none;
+}
+
+/* On to the next lesson, at the end of each. */
+.lesson-next {
+    background: none;
+    border: 1px solid var(--t-edge);
+    border-radius: 8px;
+    color: var(--t-text);
+    cursor: pointer;
+    display: block;
+    font: inherit;
+    font-size: 13px;
+    margin: 24px 0 0 auto;
+    padding: 8px 14px;
+}
+
+.lesson-next:hover,
+.lesson-next:focus-visible {
+    border-color: var(--t-amber);
+    color: var(--t-amber);
+    outline: none;
+}
+
+/* The References tab reads as the Tutorial does: one column down the
+   middle of the dock (U11). */
+#tab-links > * {
+    box-sizing: border-box;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 780px;
 }
 
 /* The References tab's source code and further reading: a compact
@@ -1679,23 +2198,34 @@ a {
 /* The status line along the foot of the app. Everything the simulator
    wants to tell you - the power went off, a board was installed, a
    tape was loaded, something would not work - says it here, so there
-   is one place to look. It is never hidden (P7). */
+   is one place to look. It is never hidden (P7).
+
+   It takes one line's height in the layout, whatever it says: a message
+   that needs more grows upwards, over the foot of the dock, rather than
+   pushing the page up - which shrank the panel, and the 3D view with
+   it, each time a two-line message gave way to a one-line one. */
 #status-bar {
-    align-items: baseline;
     background-color: #333;
-    border-top: 1px solid #111;
+    box-sizing: border-box;
     color: #ccc;
-    display: flex;
     flex: none;
     font-size: 14px;
-    gap: 16px;
+    height: 33px;
     line-height: 20px;
-    min-height: 20px;
-    padding: 6px 12px;
+    position: relative;
+    z-index: 3;
 }
 
 #status-text {
-    flex: 1;
+    background-color: inherit;
+    border-top: 1px solid #111;
+    bottom: 0;
+    box-sizing: border-box;
+    left: 0;
+    min-height: 33px;
+    padding: 6px 12px;
+    position: absolute;
+    right: 0;
 }
 
 
@@ -1770,6 +2300,18 @@ a {
     #panel {
         flex: none;
         height: auto;
+    }
+
+    /* The 3D view has no shape of its own to keep: on a phone it takes
+       a near-square of the width, as the panel takes its own shape. */
+    #stage3d {
+        aspect-ratio: 5 / 4;
+        flex: none;
+        max-height: 55vh;
+    }
+
+    #view-tools {
+        height: 30px;
     }
 
     #dock-splitter {

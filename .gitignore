@@ -6,3 +6,6 @@ build/*
 dist/*
 .coverage
 .tern-port
+
+# The 3D model's build output, other than the model itself
+model/blender/out/

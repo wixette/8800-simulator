@@ -44,7 +44,7 @@ const TYPES = {
     '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.md': 'text/plain',
     '.asm': 'text/plain', '.txt': 'text/plain', '.bin': 'application/octet-stream',
     '.pdf': 'application/pdf', '.woff2': 'font/woff2', '.mp3': 'audio/mpeg',
-    '.webmanifest': 'application/manifest+json',
+    '.webmanifest': 'application/manifest+json', '.glb': 'model/gltf-binary',
 };
 
 /**

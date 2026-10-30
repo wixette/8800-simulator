@@ -1,0 +1,1106 @@
+[
+ {
+  "id": "card.ieee696.length.min",
+  "value": 9.98,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "Fig 16; along the edge connector"
+ },
+ {
+  "id": "card.ieee696.length.max",
+  "value": 10.02,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "Fig 16"
+ },
+ {
+  "id": "card.ieee696.body_height.max",
+  "value": 5.125,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "Fig 16; single height, excluding the tab (10.125 for double height)"
+ },
+ {
+  "id": "card.ieee696.tab.depth.min",
+  "value": 0.3,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "Fig 16; finger tab below the body"
+ },
+ {
+  "id": "card.ieee696.tab.depth.max",
+  "value": 0.325,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "Fig 16"
+ },
+ {
+  "id": "card.ieee696.tab.length.min",
+  "value": 6.35,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "Fig 16"
+ },
+ {
+  "id": "card.ieee696.tab.length.max",
+  "value": 6.36,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "Fig 16"
+ },
+ {
+  "id": "card.ieee696.tab.offset_pin50_end.min",
+  "value": 2.12,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "Fig 16; board end to tab on the pin-50 end"
+ },
+ {
+  "id": "card.ieee696.tab.offset_pin50_end.max",
+  "value": 2.13,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "Fig 16"
+ },
+ {
+  "id": "card.ieee696.contact_pitch",
+  "value": 0.125,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "\u00a74.2"
+ },
+ {
+  "id": "card.ieee696.contacts_per_side",
+  "value": 50,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "\u00a74.2; 100 total, pin 100 opposite pin 50"
+ },
+ {
+  "id": "card.ieee696.thickness",
+  "value": 0.062,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "\u00a74.2 nominal"
+ },
+ {
+  "id": "card.ieee696.finger_chamfer",
+  "value": 0.015,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "Fig 16; x 45 deg"
+ },
+ {
+  "id": "card.ieee696.extractor_hole.dia.min",
+  "value": 0.1,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "Fig 16; top corners"
+ },
+ {
+  "id": "card.ieee696.extractor_hole.dia.max",
+  "value": 0.11,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "Fig 16"
+ },
+ {
+  "id": "card.ieee696.extractor_hole.edge_offset.min",
+  "value": 0.245,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "Fig 16"
+ },
+ {
+  "id": "card.ieee696.extractor_hole.edge_offset.max",
+  "value": 0.255,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "Fig 16"
+ },
+ {
+  "id": "card.ieee696.component_height.max",
+  "value": 0.5,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "Fig 16 component clearance"
+ },
+ {
+  "id": "card.ieee696.total_depth.max",
+  "value": 0.65,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "\u00a74.3 text"
+ },
+ {
+  "id": "bus.ieee696.slot_pitch",
+  "value": 0.75,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "\u00a74.2.2; +/-0.01"
+ },
+ {
+  "id": "bus.ieee696.slot_pitch.min",
+  "value": 0.74,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "Fig 16 backplane"
+ },
+ {
+  "id": "bus.ieee696.card_guide.slot_width.min",
+  "value": 0.071,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "Fig 16"
+ },
+ {
+  "id": "bus.ieee696.card_guide.slot_width.max",
+  "value": 0.08,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "Fig 16"
+ },
+ {
+  "id": "bus.ieee696.card_guide.misalignment.max",
+  "value": 0.005,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "Fig 16; guide to connector centre line"
+ },
+ {
+  "id": "bus.ieee696.card_guide.span.min",
+  "value": 10.025,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "Fig 16; between guide slot bottoms"
+ },
+ {
+  "id": "bus.ieee696.card_guide.span.max",
+  "value": 10.045,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "S100-IEEE696",
+  "note": "Fig 16"
+ },
+ {
+  "id": "card.cpu.outline.length",
+  "value": 10.01,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-CPU-SCAN",
+  "note": "Rev 0 flat scan, scaled by finger pitch (37.58 px = 0.125 in)"
+ },
+ {
+  "id": "card.cpu.outline.body_height",
+  "value": 4.71,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-CPU-SCAN",
+  "note": "Same scan; disagrees with artwork (5.0); image likely resized unevenly; do not use"
+ },
+ {
+  "id": "card.cpu.outline.height_to_tips",
+  "value": 4.98,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-CPU-SCAN",
+  "note": "Same scan; artwork gives 5.40; do not use"
+ },
+ {
+  "id": "card.cpu.tab.length",
+  "value": 6.36,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-CPU-SCAN",
+  "note": "Horizontal, reliable"
+ },
+ {
+  "id": "card.cpu.tab.offset_front_end",
+  "value": 1.51,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-CPU-SCAN",
+  "note": "7805 end, toward the front of the box"
+ },
+ {
+  "id": "card.cpu.tab.offset_rear_end",
+  "value": 2.14,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-CPU-SCAN",
+  "note": "Molex end"
+ },
+ {
+  "id": "card.cpu.heatsink.above_top_edge",
+  "value": 0.25,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-CPU-SCAN",
+  "note": "7805 heat sink rises above the card's top edge"
+ },
+ {
+  "id": "card.cpu.7805.x_start",
+  "value": 0.25,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-CPU-SCAN",
+  "note": "From the front end of the card"
+ },
+ {
+  "id": "card.cpu.7805.x_end",
+  "value": 1.26,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-CPU-SCAN",
+  "note": "Heat sink extent"
+ },
+ {
+  "id": "card.cpu.8080_socket.x_start",
+  "value": 4.29,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-CPU-SCAN",
+  "note": "From the front end"
+ },
+ {
+  "id": "card.cpu.8080_socket.x_end",
+  "value": 6.32,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-CPU-SCAN",
+  "note": "40-pin socket"
+ },
+ {
+  "id": "card.cpu.8080_socket.y_start",
+  "value": 0.83,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-CPU-SCAN",
+  "note": "Below the top edge; vertical scale suspect"
+ },
+ {
+  "id": "card.cpu.8080_socket.y_end",
+  "value": 1.54,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-CPU-SCAN",
+  "note": "Vertical scale suspect"
+ },
+ {
+  "id": "card.cpu.8212.x_start",
+  "value": 8.31,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-CPU-SCAN",
+  "note": "From the front end"
+ },
+ {
+  "id": "card.cpu.8212.x_end",
+  "value": 9.59,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-CPU-SCAN",
+  "note": ""
+ },
+ {
+  "id": "card.cpu.molex8.x_start",
+  "value": 8.43,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-CPU-SCAN",
+  "note": "8-pin wafer at the rear-top corner"
+ },
+ {
+  "id": "card.cpu.molex8.x_end",
+  "value": 9.67,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-CPU-SCAN",
+  "note": ""
+ },
+ {
+  "id": "card.cpu.ic.count",
+  "value": 18,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "p.26 (scan p.41)"
+ },
+ {
+  "id": "card.sioa.tab.length",
+  "value": 6.38,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-SIO-PHOTOS",
+  "note": "88-SIOA flat scan, card length taken as 10.0 in"
+ },
+ {
+  "id": "card.sioa.tab.offset_front_end",
+  "value": 1.5,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-SIO-PHOTOS",
+  "note": ""
+ },
+ {
+  "id": "card.sioa.tab.offset_rear_end",
+  "value": 2.11,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-SIO-PHOTOS",
+  "note": ""
+ },
+ {
+  "id": "card.sioa.outline.body_height",
+  "value": 4.79,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-SIO-PHOTOS",
+  "note": "Disagrees with MITS drawing (5.0); image scaling suspect"
+ },
+ {
+  "id": "card.sioa.outline.height_to_tips",
+  "value": 5.09,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-SIO-PHOTOS",
+  "note": "Disagrees with drawing (5.3)"
+ },
+ {
+  "id": "card.sioa.heatsink.above_top_edge",
+  "value": 0.2,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MFE-SIO-PHOTOS",
+  "note": ""
+ },
+ {
+  "id": "card.8800b.outline.length",
+  "value": 254.22,
+  "unit": "mm",
+  "confidence": "layout",
+  "source": "GH-WARMECH-8800B-CPU",
+  "note": "8800b CPU, Edge.Cuts bbox; out of scope"
+ },
+ {
+  "id": "card.8800b.outline.height_to_tips",
+  "value": 134.62,
+  "unit": "mm",
+  "confidence": "layout",
+  "source": "GH-WARMECH-8800B-CPU",
+  "note": "5.300 in"
+ },
+ {
+  "id": "card.8800b.outline.body_height",
+  "value": 127.0,
+  "unit": "mm",
+  "confidence": "layout",
+  "source": "GH-WARMECH-8800B-CPU",
+  "note": "5.000 in"
+ },
+ {
+  "id": "card.8800b.tab.depth",
+  "value": 7.62,
+  "unit": "mm",
+  "confidence": "layout",
+  "source": "GH-WARMECH-8800B-CPU",
+  "note": "0.300 in"
+ },
+ {
+  "id": "card.8800b.tab.length",
+  "value": 161.8,
+  "unit": "mm",
+  "confidence": "layout",
+  "source": "GH-WARMECH-8800B-CPU",
+  "note": "6.370 in"
+ },
+ {
+  "id": "card.8800b.tab.offset_short_end",
+  "value": 38.25,
+  "unit": "mm",
+  "confidence": "layout",
+  "source": "GH-WARMECH-8800B-CPU",
+  "note": "1.506 in"
+ },
+ {
+  "id": "card.8800b.tab.offset_long_end",
+  "value": 54.17,
+  "unit": "mm",
+  "confidence": "layout",
+  "source": "GH-WARMECH-8800B-CPU",
+  "note": "2.133 in"
+ },
+ {
+  "id": "card.8800b.finger.pitch",
+  "value": 3.18,
+  "unit": "mm",
+  "confidence": "layout",
+  "source": "GH-WARMECH-8800B-CPU",
+  "note": "pad 1 to 50 = 155.82 mm"
+ },
+ {
+  "id": "card.8800b.finger.width",
+  "value": 1.7,
+  "unit": "mm",
+  "confidence": "layout",
+  "source": "GH-WARMECH-8800B-CPU",
+  "note": "pad size"
+ },
+ {
+  "id": "card.8800b.finger.length",
+  "value": 7.0,
+  "unit": "mm",
+  "confidence": "layout",
+  "source": "GH-WARMECH-8800B-CPU",
+  "note": "pad size"
+ },
+ {
+  "id": "card.8800b.thickness",
+  "value": 1.6,
+  "unit": "mm",
+  "confidence": "layout",
+  "source": "GH-WARMECH-8800B-CPU",
+  "note": "board setup"
+ },
+ {
+  "id": "card.8800b.corner_hole.dia",
+  "value": 3.0,
+  "unit": "mm",
+  "confidence": "layout",
+  "source": "GH-WARMECH-8800B-CPU",
+  "note": "two top-corner holes"
+ },
+ {
+  "id": "card.8800b.corner_hole.edge_offset",
+  "value": 6.604,
+  "unit": "mm",
+  "confidence": "layout",
+  "source": "GH-WARMECH-8800B-CPU",
+  "note": "from side and top edges"
+ },
+ {
+  "id": "card.8800b_interface.outline.length",
+  "value": 254.22,
+  "unit": "mm",
+  "confidence": "layout",
+  "source": "GH-WARMECH-8800B-IF",
+  "note": "same outline as the CPU card"
+ },
+ {
+  "id": "card.8800b_interface.outline.height_to_tips",
+  "value": 134.62,
+  "unit": "mm",
+  "confidence": "layout",
+  "source": "GH-WARMECH-8800B-IF",
+  "note": ""
+ },
+ {
+  "id": "dc_board.8800b.outline.length",
+  "value": 391.0,
+  "unit": "mm",
+  "confidence": "layout",
+  "source": "GH-WARMECH-8800B-DC",
+  "note": "8800b D/C board; NOT the 8800 board"
+ },
+ {
+  "id": "dc_board.8800b.outline.height",
+  "value": 162.0,
+  "unit": "mm",
+  "confidence": "layout",
+  "source": "GH-WARMECH-8800B-DC",
+  "note": "8800b only"
+ },
+ {
+  "id": "ec.board.length",
+  "value": 11.08,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MITS-ASM-1975",
+  "note": "scaled from foil drawing p.65 by pad pitch (160.4 px/in); along the connectors, front to back in the box"
+ },
+ {
+  "id": "ec.board.width",
+  "value": 3.41,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MITS-ASM-1975",
+  "note": "scaled from foil drawing p.65 by pad pitch (160.4 px/in); across the slots"
+ },
+ {
+  "id": "ec.slot.count",
+  "value": 4,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "p.64: up to four edge connectors"
+ },
+ {
+  "id": "ec.slot_pitch",
+  "value": 0.748,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MITS-ASM-1975",
+  "note": "scaled from foil drawing p.65 by pad pitch (160.4 px/in); 0.75 nominal"
+ },
+ {
+  "id": "ec.slot.edge_margin_first",
+  "value": 0.59,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MITS-ASM-1975",
+  "note": "scaled from foil drawing p.65 by pad pitch (160.4 px/in); board edge to first slot centre"
+ },
+ {
+  "id": "ec.slot.edge_margin_last",
+  "value": 0.58,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MITS-ASM-1975",
+  "note": "scaled from foil drawing p.65 by pad pitch (160.4 px/in)"
+ },
+ {
+  "id": "ec.connector.pin_row_spacing",
+  "value": 0.15,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MITS-ASM-1975",
+  "note": "scaled from foil drawing p.65 by pad pitch (160.4 px/in)"
+ },
+ {
+  "id": "ec.connector.pin_row_spacing",
+  "value": 0.14,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "HJ-S100BUS",
+  "note": "MITS Altair and early Altair-bus machines"
+ },
+ {
+  "id": "ec.connector.mount_hole_spacing",
+  "value": 6.8,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MITS-ASM-1975",
+  "note": "scaled from foil drawing p.65 by pad pitch (160.4 px/in); also the rail screw positions"
+ },
+ {
+  "id": "ec.connector.offset_from_board_centre",
+  "value": 0.3,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MITS-ASM-1975",
+  "note": "scaled from foil drawing p.65 by pad pitch (160.4 px/in); matches the card's off-centre tab"
+ },
+ {
+  "id": "ec.card_guide.hole_spacing",
+  "value": 0.31,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MITS-ASM-1975",
+  "note": "scaled from foil drawing p.65 by pad pitch (160.4 px/in); 2 holes per guide"
+ },
+ {
+  "id": "ec.card_guide.pair_centre_distance",
+  "value": 10.33,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MITS-ASM-1975",
+  "note": "scaled from foil drawing p.65 by pad pitch (160.4 px/in); front guide to rear guide"
+ },
+ {
+  "id": "ec.card_guide.hole_inset_from_end",
+  "value": 0.23,
+  "unit": "in",
+  "confidence": "photo",
+  "source": "MITS-ASM-1975",
+  "note": "scaled from foil drawing p.65 by pad pitch (160.4 px/in)"
+ },
+ {
+  "id": "ec.connector.pins",
+  "value": 100,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "p.64"
+ },
+ {
+  "id": "ec.thickness",
+  "value": 0.062,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "MFE-SN220081K-DOC",
+  "note": "early 4-slot backplane; later ones thicker"
+ },
+ {
+  "id": "ec.thickness_repro",
+  "value": 3.2,
+  "unit": "mm",
+  "confidence": "doc",
+  "source": "PLANET-KAUFMAN",
+  "note": "Kaufman reproduction, double thickness"
+ },
+ {
+  "id": "ec.per_case.max",
+  "value": 4,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "BYTE-1975-09",
+  "note": "1 standard + 3 more inside the main case"
+ },
+ {
+  "id": "case.cards.max",
+  "value": 16,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "BYTE-1975-09",
+  "note": "up to 16 boards inside the main case"
+ },
+ {
+  "id": "ec.mount.screw_long.length",
+  "value": 0.625,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "2 x 4-40 x 5/8 through connector ears (p.69)"
+ },
+ {
+  "id": "ec.mount.screw_short.length",
+  "value": 0.3125,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "2 x 4-40 x 5/16 (p.69)"
+ },
+ {
+  "id": "ec.mount.screw.count",
+  "value": 4,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "p.3 parts list and p.69"
+ },
+ {
+  "id": "ec.power_wire.length",
+  "value": 24,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "4 wires, holes 1, 2, 50, 52 to terminal block (p.66, 70)"
+ },
+ {
+  "id": "ec.power_wire.count",
+  "value": 4,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": ""
+ },
+ {
+  "id": "ec.ground_braid.length",
+  "value": 3,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "1/8 in braid, card rail to each expander board (grounding errata)"
+ },
+ {
+  "id": "card_rail.count",
+  "value": 2,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "p.2 case parts list; p.56-57"
+ },
+ {
+  "id": "card_rail.spacer.length",
+  "value": 0.25,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "p.57; 4 spacers"
+ },
+ {
+  "id": "card_rail.screw.length",
+  "value": 0.75,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "6-32 x 3/4, p.57"
+ },
+ {
+  "id": "card_rail.spacing",
+  "value": 6.8,
+  "unit": "in",
+  "confidence": "est",
+  "source": "MITS-ASM-1975",
+  "note": "inferred: rails sit under the connector mounting holes"
+ },
+ {
+  "id": "card_guide.per_slot",
+  "value": 2,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "one at each end; case kit has 4 (p.2)"
+ },
+ {
+  "id": "card_guide.screw.length",
+  "value": 0.375,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "6-32 x 3/8 (p.68)"
+ },
+ {
+  "id": "card_guide.length",
+  "value": 139.827,
+  "unit": "mm",
+  "confidence": "layout",
+  "source": "PLANET-KAUFMAN",
+  "note": "reproduction STL bbox; units assumed mm (5.50 in)"
+ },
+ {
+  "id": "card_guide.width",
+  "value": 12.765,
+  "unit": "mm",
+  "confidence": "layout",
+  "source": "PLANET-KAUFMAN",
+  "note": "STL bbox; units assumed mm"
+ },
+ {
+  "id": "card_guide.depth",
+  "value": 16.501,
+  "unit": "mm",
+  "confidence": "layout",
+  "source": "PLANET-KAUFMAN",
+  "note": "STL bbox; units assumed mm"
+ },
+ {
+  "id": "dc_board.harness.data_wire.count",
+  "value": 8,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "D0-D7 to the CPU (p.24)"
+ },
+ {
+  "id": "dc_board.harness.data_wire.length",
+  "value": 16,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "approx., cut length (p.24)"
+ },
+ {
+  "id": "dc_board.harness.bus_wire.length",
+  "value": 36,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "3-foot wires to the expander board (p.15)"
+ },
+ {
+  "id": "dc_board.loose_wire.count",
+  "value": 62,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "plus 2 jumpers (p.13)"
+ },
+ {
+  "id": "dc_board.connector_plug.pins",
+  "value": 10,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "female, 8 positions used (p.24)"
+ },
+ {
+  "id": "cpu.wafer_connector.pins",
+  "value": 8,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "male, rear end of the CPU card (p.33)"
+ },
+ {
+  "id": "dc_board.to_ec.bench_distance",
+  "value": 4,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "expander board placed ~4 in behind the D/C board while wiring (p.66)"
+ },
+ {
+  "id": "dc_board.led.count",
+  "value": 36,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "RL-21 LEDs (p.21)"
+ },
+ {
+  "id": "dc_board.ic.count",
+  "value": 25,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "p.5 (scan p.20)"
+ },
+ {
+  "id": "psu.transformer.count",
+  "value": 3,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "on the back panel (p.54)"
+ },
+ {
+  "id": "psu.t1.mount_screw.count",
+  "value": 4,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "#8-32 x 3/8, slotted holes"
+ },
+ {
+  "id": "psu.t1.mount_screw.length",
+  "value": 0.375,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": ""
+ },
+ {
+  "id": "psu.t2.mount_screw.count",
+  "value": 2,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "#6-32 x 3/8"
+ },
+ {
+  "id": "psu.t3.mount_screw.count",
+  "value": 2,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "#6-32 x 3/8"
+ },
+ {
+  "id": "psu.board.spacer.length",
+  "value": 0.375,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "4 metal spacers on the cross member (p.60)"
+ },
+ {
+  "id": "psu.board.spacer.count",
+  "value": 4,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": ""
+ },
+ {
+  "id": "psu.board.screw.length",
+  "value": 0.75,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "6-32, errata change from 5/8"
+ },
+ {
+  "id": "psu.cap.3300uF.count",
+  "value": 6,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-SCHEM-1975",
+  "note": "C1-C4, C9, C10; 16 V axial, lying in a row"
+ },
+ {
+  "id": "psu.cap.electrolytic.count",
+  "value": 8,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "p.52"
+ },
+ {
+  "id": "psu.cap.disc.count",
+  "value": 7,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "p.49"
+ },
+ {
+  "id": "psu.diode.count",
+  "value": 10,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "1N4004 (p.48)"
+ },
+ {
+  "id": "psu.resistor.count",
+  "value": 4,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "p.47"
+ },
+ {
+  "id": "psu.bridge.count",
+  "value": 1,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "VJ048 10 A, bolted to the cross member"
+ },
+ {
+  "id": "psu.jumper.count",
+  "value": 11,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "p.50"
+ },
+ {
+  "id": "psu.terminal_block.positions",
+  "value": 20,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "double row of ten, back panel (p.55)"
+ },
+ {
+  "id": "psu.ground_braid.width",
+  "value": 0.25,
+  "unit": "in",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "along the PSU board ground land"
+ },
+ {
+  "id": "psu.board.length",
+  "value": 8.5,
+  "unit": "in",
+  "confidence": "est",
+  "source": "MFE-SN220081K-PHOTOS",
+  "note": "top view #07 scaled by the expander board; +/-10 %"
+ },
+ {
+  "id": "psu.board.width",
+  "value": 3.3,
+  "unit": "in",
+  "confidence": "est",
+  "source": "MFE-SN220081K-PHOTOS",
+  "note": "top view #07; +/-10 %"
+ },
+ {
+  "id": "psu.t1.footprint.length",
+  "value": 3.75,
+  "unit": "in",
+  "confidence": "est",
+  "source": "MFE-SN220081K-PHOTOS",
+  "note": "top view #07; +/-15 %"
+ },
+ {
+  "id": "psu.t1.footprint.width",
+  "value": 3.0,
+  "unit": "in",
+  "confidence": "est",
+  "source": "MFE-SN220081K-PHOTOS",
+  "note": "top view #07; +/-15 %"
+ },
+ {
+  "id": "psu.t2.footprint.length",
+  "value": 3.0,
+  "unit": "in",
+  "confidence": "est",
+  "source": "MFE-SN220081K-PHOTOS",
+  "note": "top view #07; +/-15 %"
+ },
+ {
+  "id": "psu.t2.footprint.width",
+  "value": 2.3,
+  "unit": "in",
+  "confidence": "est",
+  "source": "MFE-SN220081K-PHOTOS",
+  "note": "top view #07; +/-15 %"
+ },
+ {
+  "id": "psu.t3.footprint.length",
+  "value": 2.3,
+  "unit": "in",
+  "confidence": "est",
+  "source": "MFE-SN220081K-PHOTOS",
+  "note": "top view #07; +/-15 %"
+ },
+ {
+  "id": "psu.t3.footprint.width",
+  "value": 1.3,
+  "unit": "in",
+  "confidence": "est",
+  "source": "MFE-SN220081K-PHOTOS",
+  "note": "top view #07; +/-15 %"
+ },
+ {
+  "id": "fan.count.standard",
+  "value": 0,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-OPER-1975",
+  "note": "88-FAN was an option; SN 220081K has none"
+ },
+ {
+  "id": "mem.1mcs.ram_socket.count",
+  "value": 8,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MITS-ASM-1975",
+  "note": "8101 (MA1-MD2), 1K board section (scan p.57)"
+ },
+ {
+  "id": "mem.1mcs.ram_fitted_as_shipped",
+  "value": 2,
+  "unit": "count",
+  "confidence": "est",
+  "source": "MFE-SN220081K-DOC",
+  "note": "256 bytes = 2 x 8101 (256 x 4)"
+ },
+ {
+  "id": "io.2sio.slots",
+  "value": 1,
+  "unit": "count",
+  "confidence": "doc",
+  "source": "MFE-2SIO-PHOTOS",
+  "note": "MITS tech-info sheet: 'Altair slots: One'"
+ }
+]

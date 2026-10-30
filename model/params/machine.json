@@ -1,0 +1,1214 @@
+{
+  "_schema": "Every numeric entry is {v, unit, conf, src, note?}. Units: mm and deg (Blender machine frame: origin at the centre of the base footprint on its bottom face, +X left to right seen from the front, +Y toward the back, +Z up). conf: doc = stated in a document, standard or museum record; artwork = measured on the 1:1 MITS board artwork; photo = scaled from a photo; measured = measured on an original by the person named in src; est = estimate; design = our own choice where sources are silent. Source tags are defined in research/sources/bibliography.md. The sources give inches; each note keeps the inch value. version is the parameter set's own (each .glb records it as params_version).",
+  "version": "0.2.0",
+  "fidelity_target": "B",
+  "reference_machine": "MITS Altair 8800, 1975 (original front panel, 4-slot 88-EC expander boards, fan optional); research/REPORT.md",
+  "box": {
+    "width": {
+      "v": 431.8,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "NMAH-334396, NMAH-1325625, CHM-102621982",
+      "note": "17.0 in"
+    },
+    "height": {
+      "v": 177.8,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "NMAH-334396, NMAH-1325625, CHM-102621982, HNF-E-1996-1420",
+      "note": "7.0 in"
+    },
+    "depth": {
+      "v": 444.5,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "CHM-102621982",
+      "note": "17.5 in; 18-18.5 in in other records, probably with rear parts; one measurement settles it"
+    }
+  },
+  "bezel": {
+    "opening": {
+      "v": [
+        415.29,
+        161.54
+      ],
+      "unit": "mm",
+      "conf": "photo",
+      "src": "COMMONS-FP-CROMEMCO",
+      "note": "16.35 x 6.36 in; the visible panel as the photo shows it, centred in the box front; the name plate's lettering is placed from its left edge"
+    },
+    "lip_thickness": {
+      "v": 1.2,
+      "unit": "mm",
+      "conf": "est",
+      "src": "photos",
+      "note": "sheet steel of the case bottom's front frame"
+    },
+    "face_width": {
+      "v": 4.83,
+      "unit": "mm",
+      "conf": "photo",
+      "src": "COMMONS-FP-CROMEMCO, MFE-SN220081K-PHOTOS #01; a review of the reference photos, 2026-10-30 (docs/3d-model.md, fidelity review)",
+      "note": "0.19 in: the frame's front face, all round. Seen head-on the blue border is about 0.32 in, but most of that is the retaining lip, one recess deeper"
+    },
+    "recess_depth": {
+      "v": 10.0,
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS #01, COMMONS-SI-UTHMAN; a review of the reference photos, 2026-10-30 (docs/3d-model.md, fidelity review)",
+      "note": "about 0.4 in: the frame stands this far in front of the dress panel; its inner walls run straight back to the panel, with no lip in front of it (a flange behind the panel's edge closes the gap)"
+    },
+    "return_depth": {
+      "v": 25.0,
+      "unit": "mm",
+      "conf": "design",
+      "src": "",
+      "note": "the front panel build shows only the front frame and a short return; the whole box models the whole case bottom"
+    }
+  },
+  "dress_panel": {
+    "size": {
+      "v": [
+        418.31,
+        165.89
+      ],
+      "unit": "mm",
+      "conf": "doc",
+      "src": "NMAH-FRONTPANEL",
+      "note": "16.469 x 6.531 in; 16 15/32 x 6 17/32 in, a loose original"
+    },
+    "thickness": {
+      "v": 2.39,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "NMAH-FRONTPANEL",
+      "note": "0.094 in; 3/32 in"
+    },
+    "grid_origin": {
+      "v": [
+        156.7,
+        23.6
+      ],
+      "unit": "mm",
+      "conf": "photo",
+      "src": "COMMONS-FP-CROMEMCO",
+      "note": "6.17 x 0.93 in; the A0 lamp, right of and above the centre of the visible panel; +-0.1 in"
+    },
+    "led_hole_diameter": {
+      "v": 5.4,
+      "unit": "mm",
+      "conf": "est",
+      "src": "DFF180-PANEL (5.3 mm holes)"
+    },
+    "switch_hole_clearance": {
+      "v": 0.4,
+      "unit": "mm",
+      "conf": "design",
+      "src": "",
+      "note": "the hole clears the switch nut by this much all round, so the nut sits in it"
+    },
+    "gap": {
+      "v": 0.1,
+      "unit": "mm",
+      "conf": "design",
+      "src": "",
+      "note": "between the bezel's lip and the dress panel, and between the dress panel and the sub-panel: it is held between them, not fastened, and the model's parts never touch"
+    }
+  },
+  "grid": {
+    "pitch_in_group": {
+      "v": 15.24,
+      "unit": "mm",
+      "conf": "artwork",
+      "src": "MITS-ART-DC, DFF180-PANEL, COMMONS-FP-CROMEMCO (research/sources/notes-case-and-panel.md 4.2)",
+      "note": "0.6 in"
+    },
+    "pitch_across_group": {
+      "v": 22.86,
+      "unit": "mm",
+      "conf": "artwork",
+      "src": "MITS-ART-DC, DFF180-PANEL, COMMONS-FP-CROMEMCO (research/sources/notes-case-and-panel.md 4.2)",
+      "note": "0.9 in"
+    },
+    "row_pitch": {
+      "v": 30.48,
+      "unit": "mm",
+      "conf": "artwork",
+      "src": "MITS-ART-DC, DFF180-PANEL, COMMONS-FP-CROMEMCO (research/sources/notes-case-and-panel.md 4.2)",
+      "note": "1.2 in"
+    },
+    "row_z": {
+      "v": {
+        "lamps_upper": 30.48,
+        "lamps_lower": 0.0,
+        "switches": -30.48,
+        "controls": -60.96
+      },
+      "unit": "mm",
+      "conf": "artwork",
+      "src": "MITS-ART-DC, DFF180-PANEL, COMMONS-FP-CROMEMCO (research/sources/notes-case-and-panel.md 4.2)",
+      "note": "height of each row above the A0 lamp"
+    },
+    "lamp_x": {
+      "v": {
+        "inte": -312.42,
+        "prot": -297.18,
+        "memr": -281.94,
+        "inp": -266.7,
+        "m1": -251.46,
+        "out": -236.22,
+        "hlta": -220.98,
+        "stack": -205.74,
+        "wo": -190.5,
+        "int": -175.26,
+        "d0": -0.0,
+        "d1": -15.24,
+        "d2": -30.48,
+        "d3": -53.34,
+        "d4": -68.58,
+        "d5": -83.82,
+        "d6": -106.68,
+        "d7": -121.92,
+        "wait": -312.42,
+        "hlda": -297.18,
+        "a0": -0.0,
+        "a1": -15.24,
+        "a2": -30.48,
+        "a3": -53.34,
+        "a4": -68.58,
+        "a5": -83.82,
+        "a6": -106.68,
+        "a7": -121.92,
+        "a8": -137.16,
+        "a9": -160.02,
+        "a10": -175.26,
+        "a11": -190.5,
+        "a12": -213.36,
+        "a13": -228.6,
+        "a14": -243.84,
+        "a15": -266.7
+      },
+      "unit": "mm",
+      "conf": "artwork",
+      "src": "MITS-ART-DC, DFF180-PANEL, COMMONS-FP-CROMEMCO (research/sources/notes-case-and-panel.md 4.2)",
+      "note": "x from the A0 lamp, by the simulator's lamp ids; d* and status lamps in the upper row, wait, hlda and a* in the lower"
+    },
+    "lamp_row": {
+      "v": {
+        "inte": "lamps_upper",
+        "prot": "lamps_upper",
+        "memr": "lamps_upper",
+        "inp": "lamps_upper",
+        "m1": "lamps_upper",
+        "out": "lamps_upper",
+        "hlta": "lamps_upper",
+        "stack": "lamps_upper",
+        "wo": "lamps_upper",
+        "int": "lamps_upper",
+        "d0": "lamps_upper",
+        "d1": "lamps_upper",
+        "d2": "lamps_upper",
+        "d3": "lamps_upper",
+        "d4": "lamps_upper",
+        "d5": "lamps_upper",
+        "d6": "lamps_upper",
+        "d7": "lamps_upper",
+        "wait": "lamps_lower",
+        "hlda": "lamps_lower",
+        "a0": "lamps_lower",
+        "a1": "lamps_lower",
+        "a2": "lamps_lower",
+        "a3": "lamps_lower",
+        "a4": "lamps_lower",
+        "a5": "lamps_lower",
+        "a6": "lamps_lower",
+        "a7": "lamps_lower",
+        "a8": "lamps_lower",
+        "a9": "lamps_lower",
+        "a10": "lamps_lower",
+        "a11": "lamps_lower",
+        "a12": "lamps_lower",
+        "a13": "lamps_lower",
+        "a14": "lamps_lower",
+        "a15": "lamps_lower"
+      },
+      "unit": "row",
+      "conf": "artwork",
+      "src": "MITS-ART-DC, DFF180-PANEL, COMMONS-FP-CROMEMCO (research/sources/notes-case-and-panel.md 4.2)"
+    },
+    "switch_x": {
+      "v": {
+        "s0": -0.0,
+        "s1": -15.24,
+        "s2": -30.48,
+        "s3": -53.34,
+        "s4": -68.58,
+        "s5": -83.82,
+        "s6": -106.68,
+        "s7": -121.92,
+        "s8": -137.16,
+        "s9": -160.02,
+        "s10": -175.26,
+        "s11": -190.5,
+        "s12": -213.36,
+        "s13": -228.6,
+        "s14": -243.84,
+        "s15": -266.7,
+        "off-on": -340.36,
+        "stop-run": -266.7,
+        "single": -236.22,
+        "examine": -205.74,
+        "deposit": -175.26,
+        "reset": -144.78,
+        "protect": -114.3,
+        "aux1": -83.82,
+        "aux2": -53.34
+      },
+      "unit": "mm",
+      "conf": "artwork",
+      "src": "MITS-ART-DC, DFF180-PANEL, COMMONS-FP-CROMEMCO (research/sources/notes-case-and-panel.md 4.2)",
+      "note": "x from the A0 lamp, by the simulator's switch ids; s* in the switch row, the rest in the control row"
+    }
+  },
+  "switch": {
+    "bushing_diameter": {
+      "v": 6.35,
+      "unit": "mm",
+      "conf": "est",
+      "src": "APEM-5236 (1/4-40 thread), the modern equivalent of the American Switch ST-1-1-C"
+    },
+    "bushing_bore": {
+      "v": 5.2,
+      "unit": "mm",
+      "conf": "design",
+      "src": "",
+      "note": "room for the bat to swing inside the bushing"
+    },
+    "bushing_length": {
+      "v": 7.5,
+      "unit": "mm",
+      "conf": "est",
+      "src": "APEM-5236; photos"
+    },
+    "nut_across_flats": {
+      "v": 8.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "photos (Living Computers)"
+    },
+    "body": {
+      "v": [
+        8.0,
+        12.7,
+        13.0
+      ],
+      "unit": "mm",
+      "conf": "est",
+      "src": "APEM-5236",
+      "note": "width x depth x height behind the sub-panel"
+    },
+    "bat_length": {
+      "v": 11.5,
+      "unit": "mm",
+      "conf": "est",
+      "src": "photos (MFE-SN220081K-PHOTOS #29, COMMONS-FP-CROMEMCO); APEM-5236; a review of the reference photos, 2026-10-30 (docs/3d-model.md, fidelity review)",
+      "note": "from the pivot to the tip; shorter than the 13 mm first used"
+    },
+    "bat_radius": {
+      "v": [
+        1.0,
+        1.75
+      ],
+      "unit": "mm",
+      "conf": "est",
+      "src": "photos; a review of the reference photos, 2026-10-30 (docs/3d-model.md, fidelity review)",
+      "note": "at the base and at the head: slender at the bushing, thick and rounded at the end; a short round bat (1975), not the 8800a's flat handle"
+    },
+    "pivot_behind_bushing_front": {
+      "v": 1.8,
+      "unit": "mm",
+      "conf": "design",
+      "src": "",
+      "note": "the bat's pivot inside the bushing"
+    },
+    "throw": {
+      "v": 16.0,
+      "unit": "deg",
+      "conf": "design",
+      "src": "",
+      "note": "each way from the centre"
+    },
+    "momentary_hold": {
+      "v": 0.15,
+      "unit": "s",
+      "conf": "design",
+      "src": "",
+      "note": "how long a momentary switch stays thrown before its spring brings it back"
+    }
+  },
+  "led": {
+    "diameter": {
+      "v": 5.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "DFF180-PANEL hole size; Litronix RL-21 (no datasheet found)"
+    },
+    "body_length": {
+      "v": 8.6,
+      "unit": "mm",
+      "conf": "est",
+      "src": "T-1 3/4 LED"
+    },
+    "proud": {
+      "v": 0.8,
+      "unit": "mm",
+      "conf": "design",
+      "src": "",
+      "note": "how far the dome stands in front of the dress panel"
+    }
+  },
+  "sub_panel": {
+    "size": {
+      "v": [
+        414.0,
+        160.0
+      ],
+      "unit": "mm",
+      "conf": "est",
+      "src": "",
+      "note": "behind the dress panel, inside the bezel"
+    },
+    "thickness": {
+      "v": 1.59,
+      "unit": "mm",
+      "conf": "est",
+      "src": "",
+      "note": "0.0625 in; 1/16 in aluminium"
+    }
+  },
+  "dc_board": {
+    "height": {
+      "v": 164.08,
+      "unit": "mm",
+      "conf": "artwork",
+      "src": "MITS-ART-DC",
+      "note": "6.46 in"
+    },
+    "length": {
+      "v": 403.86,
+      "unit": "mm",
+      "conf": "est",
+      "src": "MITS-ART-DC",
+      "note": "15.9 in; the two halves of the artwork are not stitched yet"
+    },
+    "thickness": {
+      "v": 1.59,
+      "unit": "mm",
+      "conf": "est",
+      "src": "",
+      "note": "0.0625 in; 1/16 in board"
+    },
+    "spacer": {
+      "v": 15.24,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "MITS-ASM-1975",
+      "note": "0.6 in; sub-panel to board"
+    }
+  },
+  "name_plate": {
+    "height": {
+      "v": 18.03,
+      "unit": "mm",
+      "conf": "photo",
+      "src": "COMMONS-SI-UTHMAN, FLICKR-DUNN-PANEL",
+      "note": "0.71 in"
+    },
+    "thickness": {
+      "v": 0.5,
+      "unit": "mm",
+      "conf": "est",
+      "src": "photos"
+    }
+  },
+  "lettering": {
+    "lamp_label_size": {
+      "v": 2.6,
+      "unit": "mm",
+      "conf": "photo",
+      "src": "FLICKR-DUNN-PANEL, COMMONS-FP-CROMEMCO",
+      "note": "cap height"
+    },
+    "lamp_label_above": {
+      "v": 5.08,
+      "unit": "mm",
+      "conf": "photo",
+      "src": "FLICKR-DUNN-PANEL, COMMONS-FP-CROMEMCO (photo overlay, docs/3d-model.md)",
+      "note": "0.2 in: label centre above the lamp centre (0.16 and 0.23 in on the two photos)"
+    },
+    "switch_label_above": {
+      "v": 7.2,
+      "unit": "mm",
+      "conf": "design",
+      "src": "FLICKR-DUNN-PANEL, COMMONS-FP-CROMEMCO (photo overlay, docs/3d-model.md)",
+      "note": "switch number (and the SENSE SW. line) above the pivot; moved clear of the switch nut's hole (r 5.0 mm) after a review against the photos, 2026-10-30; the photo gave 0.21 in"
+    },
+    "plate_text_size": {
+      "v": 11.0,
+      "unit": "mm",
+      "conf": "photo",
+      "src": "FLICKR-DUNN-PANEL",
+      "note": "cap height of ALTAIR 8800 COMPUTER (~0.43 in); the original face is a wide stencil-like display type, approximated"
+    },
+    "control_label_above": {
+      "v": 7.4,
+      "unit": "mm",
+      "conf": "design",
+      "src": "FLICKR-DUNN-PANEL, COMMONS-FP-CROMEMCO (photo overlay, docs/3d-model.md)",
+      "note": "the upper command's line nearest the switch; moved clear of the switch nut's hole (r 5.0 mm) after a review against the photos, 2026-10-30; the photo gave 0.25 in"
+    },
+    "control_label_below": {
+      "v": 7.4,
+      "unit": "mm",
+      "conf": "design",
+      "src": "FLICKR-DUNN-PANEL, COMMONS-FP-CROMEMCO (photo overlay, docs/3d-model.md)",
+      "note": "the lower command's first line; moved clear of the switch nut's hole (r 5.0 mm) after a review against the photos, 2026-10-30; the photo gave 0.2 in"
+    },
+    "group_bar_below": {
+      "v": 6.4,
+      "unit": "mm",
+      "conf": "design",
+      "src": "FLICKR-DUNN-PANEL, COMMONS-FP-CROMEMCO (photo overlay, docs/3d-model.md)",
+      "note": "the bars grouping the switches in threes, under the pivots; moved clear of the switch nut's hole (r 5.0 mm) after a review against the photos, 2026-10-30; the photo gave 0.22 in"
+    }
+  },
+  "card": {
+    "body": {
+      "v": [
+        254.0,
+        127.0
+      ],
+      "unit": "mm",
+      "conf": "doc",
+      "src": "MITS-THEORY-1975 p.26 (drawing 880-110); MITS-ART-CPU, MITS-ART-1K",
+      "note": "10.0 x 5.0 in; length along the connector x height, tab not included"
+    },
+    "tab": {
+      "v": [
+        161.92,
+        7.62
+      ],
+      "unit": "mm",
+      "conf": "doc",
+      "src": "MITS-THEORY-1975 p.26; S100-IEEE696",
+      "note": "6.375 x 0.3 in; length x depth below the body"
+    },
+    "tab_from_front": {
+      "v": 38.1,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "MITS-THEORY-1975 p.26",
+      "note": "1.5 in; the short end of the card is its front"
+    },
+    "thickness": {
+      "v": 1.57,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "S100-IEEE696",
+      "note": "0.062 in"
+    },
+    "finger_pitch": {
+      "v": 3.17,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "S100-IEEE696; MITS-ART-CPU",
+      "note": "0.125 in; 50 contacts a side"
+    }
+  },
+  "bus": {
+    "board": {
+      "v": [
+        281.43,
+        86.61
+      ],
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MITS-ASM-1975 printed p.65 (foil drawing, scaled by the pad pitch; research notes-boards-and-backplane §2)",
+      "note": "11.08 x 3.41 in; 88-EC: along the connectors (front to back) x across the slots"
+    },
+    "board_thickness": {
+      "v": 1.57,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "MFE-SN220081K-DOC",
+      "note": "0.062 in; early boards"
+    },
+    "slot_pitch": {
+      "v": 19.05,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "S100-IEEE696; MITS-ASM-1975 printed p.65 (foil drawing, scaled by the pad pitch; research notes-boards-and-backplane §2)",
+      "note": "0.75 in; measured 0.748 in"
+    },
+    "first_slot_from_edge": {
+      "v": 14.99,
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MITS-ASM-1975 printed p.65 (foil drawing, scaled by the pad pitch; research notes-boards-and-backplane §2)",
+      "note": "0.59 in; board edge to slot 0's centre"
+    },
+    "connector_offset": {
+      "v": 7.62,
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MITS-ASM-1975 printed p.65 (foil drawing, scaled by the pad pitch; research notes-boards-and-backplane §2)",
+      "note": "0.3 in; the connector's centre sits this far toward the board's front from the board's centre, matching the card's off-centre tab"
+    },
+    "guide_spacing": {
+      "v": 262.38,
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MITS-ASM-1975 printed p.65 (foil drawing, scaled by the pad pitch; research notes-boards-and-backplane §2)",
+      "note": "10.33 in; front guide to rear guide, centre to centre"
+    },
+    "guide": {
+      "v": [
+        12.9,
+        16.75,
+        139.5
+      ],
+      "unit": "mm",
+      "conf": "measured",
+      "src": "VCCA-GUIDE (an owner's measurements of an original); PLANET-KAUFMAN agrees",
+      "note": "across the slot x along the card x height; the original steps down to 9.5 mm wide and tapers to 7.5 mm deep at the top, not modelled yet"
+    },
+    "guide_slot": {
+      "v": 2.0,
+      "unit": "mm",
+      "conf": "measured",
+      "src": "VCCA-GUIDE; S100-IEEE696 (0.071-0.080 in)",
+      "note": "the channel the card's edge runs in"
+    },
+    "connector_body": {
+      "v": [
+        165.99,
+        9.4,
+        10.95
+      ],
+      "unit": "mm",
+      "conf": "doc",
+      "src": "SULLINS-CAT-2013 p.62-63 (a modern equivalent of the MITS part)",
+      "note": "6.535 x 0.370 x 0.431 in: length x width x height above the board; ears 7.075 in over, holes 6.795 in apart (the MITS expander drawing: 6.80)"
+    },
+    "connector_slot": {
+      "v": [
+        2.4,
+        7.5
+      ],
+      "unit": "mm",
+      "conf": "est",
+      "src": "",
+      "note": "width x depth of the slot the tab goes into; no source gives the width; deeper than the card goes in"
+    },
+    "guide_top_depth": {
+      "v": 7.5,
+      "unit": "mm",
+      "conf": "measured",
+      "src": "VCCA-GUIDE",
+      "note": "the guide's depth along the card at its top (16.75 mm at the base)"
+    },
+    "guide_cheek": {
+      "v": 4.6,
+      "unit": "mm",
+      "conf": "est",
+      "src": "PLANET-KAUFMAN (STL)",
+      "note": "how far the channel's cheeks reach past its floor toward the card's middle, at the base; they shrink with the guide's depth toward the top"
+    }
+  },
+  "cage": {
+    "board_centre_y": {
+      "v": -46.67,
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS, COMMONS-CHASIS, VCCA-LOSTFOUND (research/sources/notes-interior-layout.md)",
+      "note": "the seated cards' centre, front to back: the connectors sit midway between the rails (3.15 and 10.05 in behind the box front, +-0.15), and a card's centre is 0.3125 in behind its tab's; card front 0.9 +-0.3 in behind the D/C board"
+    },
+    "board0_right_edge_x": {
+      "v": 184.15,
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS, COMMONS-CHASIS, VCCA-LOSTFOUND (research/sources/notes-interior-layout.md)",
+      "note": "7.25 +-0.15 in right of the centre line (1.25 in from the right outer face)"
+    },
+    "board_gap": {
+      "v": 5.33,
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS, COMMONS-CHASIS, VCCA-LOSTFOUND (research/sources/notes-interior-layout.md)",
+      "note": "boards repeat every 3.62 +-0.05 in"
+    },
+    "rail_top_z": {
+      "v": 16.76,
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS, COMMONS-CHASIS, VCCA-LOSTFOUND (research/sources/notes-interior-layout.md)",
+      "note": "0.66 +-0.15 in above the box bottom"
+    },
+    "rail_section": {
+      "v": [
+        12.45,
+        3.17
+      ],
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS, COMMONS-CHASIS, VCCA-LOSTFOUND (research/sources/notes-interior-layout.md)",
+      "note": "flat bar 0.49 in wide (front to back) x about 0.125 in; the height is inferred from the 4-40 x 5/16 in screws"
+    },
+    "rail_span": {
+      "v": [
+        -203.2,
+        203.2
+      ],
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS, COMMONS-CHASIS, VCCA-LOSTFOUND (research/sources/notes-interior-layout.md)",
+      "note": "16.0 +-0.25 in long, side to side"
+    },
+    "seat_depth": {
+      "v": 6.73,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "SULLINS-CAT-2013",
+      "note": "0.265 in: how far the card goes into the connector; its body's bottom then sits about 0.47 in above the board"
+    },
+    "lift_out": {
+      "v": 160.0,
+      "unit": "mm",
+      "conf": "design",
+      "src": "",
+      "note": "how far a card rises to be out: its tab clears the guides' tops"
+    },
+    "lift_speed": {
+      "v": 300.0,
+      "unit": "mm/s",
+      "conf": "design",
+      "src": "",
+      "note": "how fast a card moves in and out on the page"
+    },
+    "rail_spacing": {
+      "v": 173.99,
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS, COMMONS-CHASIS, VCCA-LOSTFOUND (research/sources/notes-interior-layout.md); MITS-ASM-1975 p.69",
+      "note": "6.85 +-0.12 in centre to centre, under the connectors' mounting ears (6.795 in apart); two modified machines show 7.1 and 7.25"
+    },
+    "tape": {
+      "v": 0.1,
+      "unit": "mm",
+      "conf": "doc",
+      "src": "MITS-ASM-1975 printed p.69",
+      "note": "the tape under the expander board, so no land touches a rail; its thickness is ours"
+    }
+  },
+  "case": {
+    "sheet": {
+      "v": 1.2,
+      "unit": "mm",
+      "conf": "est",
+      "src": "photos",
+      "note": "the steel of the lid and the tray"
+    },
+    "tray_wall_height": {
+      "v": 64.77,
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS #03, #08; COMMONS-SI-UTHMAN; MITS_Altair_8800_microcomputer_-_Computer_History_Museum.jpg; a review of the reference photos, 2026-10-30 (docs/3d-model.md, fidelity review)",
+      "note": "2.55 in: the tray's side walls, 0.1 in above the lid's skirts, which hide their tops"
+    },
+    "lid_skirt_bottom": {
+      "v": 62.23,
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS #03; COMMONS-SI-UTHMAN; MITS_Altair_8800_microcomputer_-_Computer_History_Museum.jpg; a review of the reference photos, 2026-10-30 (docs/3d-model.md, fidelity review)",
+      "note": "2.45 in: how far down the lid's sides come; on the side the grey lid shows about 1.86 times the blue below it (7.0 / 2.86)"
+    },
+    "lid_front_gap": {
+      "v": 0.5,
+      "unit": "mm",
+      "conf": "design",
+      "src": "",
+      "note": "between the lid's front edge and the bezel's returns"
+    },
+    "lid_flange": {
+      "v": 25.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "MITS-ASM-1975 printed p.76",
+      "note": "the lid's rear flange, down behind the back panel, where its two screws go"
+    },
+    "louvres": {
+      "v": {
+        "count": 50,
+        "pitch": 7.5,
+        "width": 2.5,
+        "z": [
+          119.38,
+          167.64
+        ],
+        "first_y": -170.0
+      },
+      "unit": "mm",
+      "conf": "photo",
+      "src": "COMMONS-SI-UTHMAN, MITS_Altair_8800_microcomputer_-_Computer_History_Museum.jpg, MFE-SN220081K-PHOTOS #01; a review of the reference photos, 2026-10-30 (docs/3d-model.md, fidelity review)",
+      "note": "a band of vertical slits along each side of the lid, about 4.7 to 6.6 in up (1.9 in long), from about 1 in behind the lid's front edge nearly to its back; counted roughly from the photos"
+    },
+    "chassis_lift": {
+      "v": 0.2,
+      "unit": "mm",
+      "conf": "design",
+      "src": "",
+      "note": "the chassis stands this far above the tray's floor (on its screws), so the two do not touch"
+    }
+  },
+  "chassis": {
+    "width": {
+      "v": 411.48,
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS (research/sources/notes-interior-layout.md)",
+      "note": "16.2 in over the side members' webs"
+    },
+    "web_height": {
+      "v": 68.58,
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS (research/sources/notes-interior-layout.md)"
+    },
+    "flange": {
+      "v": 15.75,
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS (research/sources/notes-interior-layout.md)",
+      "note": "the side members' bottom flanges, inward"
+    },
+    "metal": {
+      "v": 1.6,
+      "unit": "mm",
+      "conf": "est",
+      "src": "",
+      "note": "1/16 in aluminium"
+    },
+    "holes": {
+      "v": {
+        "count": 52,
+        "pitch": 7.62,
+        "diameter": 4.06,
+        "inset": 9.4,
+        "first_from_back": 16.0
+      },
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS (research/sources/notes-interior-layout.md)",
+      "note": "the row of holes in each flange; the manual counts 13, 21 and 9 of them to the cross member and the rails"
+    },
+    "back_panel_y": {
+      "v": 207.01,
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS (research/sources/notes-interior-layout.md)",
+      "note": "the back panel's outer face, 16.9 in behind the box front"
+    },
+    "back_panel": {
+      "v": [
+        424.0,
+        171.45
+      ],
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS (research/sources/notes-interior-layout.md)",
+      "note": "width x height: 16.7 in, inside the tray's walls (the photo gives 16.85 +-0.2 in); the height is ours (it stands under the lid)"
+    },
+    "fan_hole": {
+      "v": {
+        "x": -20.57,
+        "z": 107.19,
+        "diameter": 101.6
+      },
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS (research/sources/notes-interior-layout.md)",
+      "note": "the fan opening, with a screen (the fan itself was the 88-FAN option)"
+    },
+    "io_cutouts": {
+      "v": [
+        {
+          "x": -113.28,
+          "z": 139.7
+        },
+        {
+          "x": -172.72,
+          "z": 139.7
+        },
+        {
+          "x": -113.28,
+          "z": 111.51
+        },
+        {
+          "x": -172.72,
+          "z": 111.51
+        },
+        {
+          "x": -113.28,
+          "z": 82.55
+        },
+        {
+          "x": -172.72,
+          "z": 82.55
+        },
+        {
+          "x": -113.28,
+          "z": 54.61
+        },
+        {
+          "x": -172.72,
+          "z": 54.61
+        }
+      ],
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS #03, #09; a review of the reference photos, 2026-10-30 (docs/3d-model.md, fidelity review)",
+      "note": "eight DB-25 openings, 4 rows x 2, beside the fan opening on the side away from the transformers (4.46 and 6.80 in from the centre; 5.50, 4.39, 3.25 and 2.15 in up)"
+    },
+    "io_cutout_size": {
+      "v": [
+        43.0,
+        11.0
+      ],
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS #03",
+      "note": "1.7 x 0.43 in, width x height"
+    },
+    "io_screen": {
+      "v": {
+        "x": [
+          -198.0,
+          -88.0
+        ],
+        "z": [
+          44.0,
+          150.0
+        ]
+      },
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS #09",
+      "note": "the mesh screen behind the DB-25 openings, on the panel's inside"
+    },
+    "fan_screen": {
+      "v": 124.0,
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS #09",
+      "note": "the square mesh screen over the fan opening, on the panel's inside (about 4.9 in)"
+    },
+    "cord_hole": {
+      "v": {
+        "x": 97.0,
+        "z": 37.0,
+        "diameter": 10.0
+      },
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS #03",
+      "note": "the power cord's hole and grommet, 3.8 in right of the centre seen from the front, 1.5 in up"
+    },
+    "cross_member": {
+      "v": {
+        "front_y": 99.06,
+        "top_z": 27.94
+      },
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS (research/sources/notes-interior-layout.md)",
+      "note": "its front face and top; the top is the weakest value (1.1 or 2.0 in, two methods disagree)"
+    }
+  },
+  "psu": {
+    "t1": {
+      "v": {
+        "x": 161.29,
+        "size": [
+          78.74,
+          73.66,
+          76.2
+        ]
+      },
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS (research/sources/notes-interior-layout.md)",
+      "note": "centre x; width x depth (from the back panel) x height; it rests on the cross member. The photos put its top at 4.4 in, against T2's bottom at 4.3 in; the model makes it 3.0 in tall (top 4.1 in), so its coil clears T2 by about 9 mm. Separated after a review against the photos (2026-10-30): the three transformers stand apart, as in #07 and #09."
+    },
+    "t2": {
+      "v": {
+        "x": 160.02,
+        "size": [
+          76.2,
+          58.42,
+          54.61
+        ],
+        "top_z": 167.64
+      },
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS (research/sources/notes-interior-layout.md)",
+      "note": "above T1, against the back panel; its top 6.6 in up"
+    },
+    "t3": {
+      "v": {
+        "x": 98.0,
+        "z": 124.46,
+        "size": [
+          33.02,
+          50.8,
+          48.26
+        ]
+      },
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS (research/sources/notes-interior-layout.md)",
+      "note": "on its U bracket, left of T1 and T2; centre 3.86 in right, about 8 mm clear of T1 and T2. Separated after a review against the photos (2026-10-30): the three transformers stand apart, as in #07 and #09."
+    },
+    "board": {
+      "v": {
+        "x": [
+          -92.71,
+          119.38
+        ],
+        "y": [
+          106.68,
+          184.15
+        ],
+        "spacer": 9.52
+      },
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS (research/sources/notes-interior-layout.md); MITS-ASM-1975",
+      "note": "8.35 x 3.0 in, on 0.375 in spacers on the cross member"
+    },
+    "terminal_block": {
+      "v": {
+        "x": [
+          42.5,
+          78.5
+        ],
+        "z": [
+          62.0,
+          130.0
+        ],
+        "depth": 15.0
+      },
+      "unit": "mm",
+      "conf": "est",
+      "src": "MITS-ASM-1975 printed p.55",
+      "note": "two rows of ten, on the back panel between the fan's screen and T3"
+    },
+    "fan": {
+      "v": {
+        "size": 119.0,
+        "depth": 38.0
+      },
+      "unit": "mm",
+      "conf": "est",
+      "src": "MITS 88-FAN option; a 4.7 in muffin fan; MFE-SN220081K-PHOTOS #09; a review of the reference photos, 2026-10-30 (docs/3d-model.md, fidelity review)",
+      "note": "on the inside of the back panel, over its screen, centred on the fan opening; it hangs over the six filter capacitors"
+    }
+  },
+  "harness": {
+    "bundle_diameter": {
+      "v": 12.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "MFE-SN220081K-PHOTOS",
+      "note": "the laced bundle of the panel's bus wires"
+    },
+    "cable_diameter": {
+      "v": 5.0,
+      "unit": "mm",
+      "conf": "est",
+      "src": "MITS-ASM-1975",
+      "note": "the 8-wire data cable"
+    },
+    "plug_unplugged": {
+      "v": 8.0,
+      "unit": "mm",
+      "conf": "design",
+      "src": "",
+      "note": "how far the data plug comes off the CPU's wafer, away from the card"
+    },
+    "power_cord_diameter": {
+      "v": 7.5,
+      "unit": "mm",
+      "conf": "est",
+      "src": "MFE-SN220081K-PHOTOS #03",
+      "note": "the AC cord; a short piece outside the back panel"
+    }
+  },
+  "paths": {
+    "v": {
+      "case.top": [
+        [
+          0,
+          20,
+          0
+        ],
+        [
+          0,
+          0,
+          260
+        ]
+      ],
+      "harness.data_plug": [
+        [
+          8,
+          0,
+          0
+        ]
+      ],
+      "psu.t2": [
+        [
+          0,
+          -45,
+          0
+        ],
+        [
+          0,
+          0,
+          220
+        ],
+        [
+          0,
+          -120,
+          0
+        ]
+      ],
+      "psu.t1": [
+        [
+          0,
+          -30,
+          0
+        ],
+        [
+          0,
+          0,
+          220
+        ]
+      ],
+      "psu.t3": [
+        [
+          0,
+          -45,
+          0
+        ],
+        [
+          0,
+          0,
+          200
+        ]
+      ],
+      "psu.fan": [
+        [
+          0,
+          -3,
+          0
+        ],
+        [
+          0,
+          0,
+          200
+        ]
+      ],
+      "psu.board": [
+        [
+          0,
+          0,
+          160
+        ]
+      ],
+      "psu.terminal_block": [
+        [
+          0,
+          -20,
+          0
+        ],
+        [
+          0,
+          0,
+          160
+        ]
+      ],
+      "chassis.frame": [
+        [
+          0,
+          470,
+          0
+        ]
+      ],
+      "panel.dress": [
+        [
+          0,
+          -40,
+          0
+        ],
+        [
+          0,
+          0,
+          200
+        ]
+      ]
+    },
+    "unit": "mm",
+    "conf": "design",
+    "src": "MITS-ASM-1975 (the order); docs/3d-model.md",
+    "note": "each unit's way out, as moves in the machine frame from its seated place; T2 parks forward of T1's way up, above the lifted cards"
+  },
+  "prereqs": {
+    "v": {
+      "case.top": [],
+      "harness.data_plug": [
+        "case.top"
+      ],
+      "psu.t2": [
+        "case.top"
+      ],
+      "psu.t1": [
+        "case.top",
+        "psu.t2"
+      ],
+      "psu.t3": [
+        "case.top"
+      ],
+      "psu.fan": [
+        "case.top"
+      ],
+      "psu.board": [
+        "case.top",
+        "psu.t3",
+        "psu.fan"
+      ],
+      "psu.terminal_block": [
+        "case.top"
+      ],
+      "chassis.frame": [
+        "case.top"
+      ],
+      "panel.dress": [
+        "chassis.frame"
+      ]
+    },
+    "unit": "units",
+    "conf": "design",
+    "src": "MITS-ASM-1975; docs/3d-model.md",
+    "note": "what must be out before a unit can come out; the cards' own rules are in js/sim/box.js"
+  }
+}

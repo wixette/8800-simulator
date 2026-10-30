@@ -242,3 +242,35 @@ test('a size too small for the program is reported in bytes', () => {
         queryToState('mem=256&hex=' + '00'.repeat(300) + '76').params,
         {bytes: 301, size: 256});
 });
+
+// ---- view=3d (since v1.8.0) ----
+
+test('a link can open the 3D view, alone or beside a program', () => {
+    assert.strictEqual(Link.queryToView('?view=3d'), '3d');
+    assert.strictEqual(Link.queryToView('#hex=3E8CD3FF76&view=3d'), '3d');
+    assert.strictEqual(Link.queryToView('view=2d'), '2d');
+    // Alone, it is no machine, so nothing is loaded.
+    assert.strictEqual(Link.queryToState('view=3d', SIZES), null);
+    assert.deepStrictEqual(Link.queryToState('hex=3E8C&view=3d', SIZES).bytes, [0x3e, 0x8c]);
+});
+
+test('a view written by hand is read forgivingly, and anything else is no view', () => {
+    assert.strictEqual(Link.queryToView('view=3D'), '3d');
+    assert.strictEqual(Link.queryToView('view= 3d '), '3d');
+    for (const query of ['', 'hex=00', 'view=', 'view=4d', 'view=three']) {
+        assert.strictEqual(Link.queryToView(query), null, query);
+    }
+});
+
+test('a copied link names the 3D view, and leaves the 2D view out', () => {
+    const state = {memSize: 256, bytes: [0x3e, 0x8c], cpu: null, switches: 0};
+    assert.strictEqual(Link.stateToQuery(Object.assign({view: '3d'}, state), SIZES),
+                       'hex=3E8C&view=3d');
+    assert.strictEqual(Link.stateToQuery(Object.assign({view: '2d'}, state), SIZES), 'hex=3E8C');
+    assert.strictEqual(Link.stateToQuery(state, SIZES), 'hex=3E8C');
+    const cpu = {pc: 2, sp: 0, a: 0, b: 0, c: 0, d: 0, e: 0, f: 2, h: 0, l: 0};
+    const running = Object.assign({}, state, {view: '3d', cpu: cpu, switches: 1});
+    assert.strictEqual(Link.stateToQuery(running, SIZES), 'hex=3E8C&view=3d&pc=0002&sw=0001',
+                       'the fields before it keep their places');
+    assert.strictEqual(Link.queryToView(Link.stateToQuery(running, SIZES)), '3d');
+});

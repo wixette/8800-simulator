@@ -1115,7 +1115,6 @@ asmtab.load = function(result) {
     if (result.entry) {
         CPU8080.set('PC', result.entry);
         panel.sim.lastAddress = result.entry;
-        panel.sim.endResetFlash();
         panel.sim.showAddressAndData();
     }
     panel.sim.flushDump(true);

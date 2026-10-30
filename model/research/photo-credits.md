@@ -1,0 +1,39 @@
+# Reference photo credits
+
+The photos the 3D model's dimensions were checked against and scaled from. **The photos are not in this repository:** each one is listed here with its author, its licence and the page it came from, so that anyone can fetch it and check the work. None is NC or ND. Files from Wikimedia Commons were saved under their Commons filenames (spaces as underscores); Flickr files were prefixed `Flickr_<user>_<photo id>_`. The research and the params cite the photos by these names. Commons images wider than 1600 px were scaled to 1600 px wide; nothing else was changed. What each image shows is in [data/photo_catalog.json](data/photo_catalog.json).
+
+The 3D model uses no photo as a texture.
+
+| File | Author | Licence | Source |
+|---|---|---|---|
+| `commons/Altair_8800_Computer.jpg` | Michael Holley (Commons/en.wikipedia user Swtpc6800) | Public domain (released by the author) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:Altair_8800_Computer.jpg) |
+| `commons/Altair_8800_chasis.jpg` | Paul jTerrell | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:Altair_8800_chasis.jpg) |
+| `commons/Altairinside.JPG` | Joho345 | Public domain (released by the author) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:Altairinside.JPG) |
+| `other/Flickr_believekevin_5369047617_DSC09835.jpg` | kevin (Flickr: believekevin) | [CC-BY-2.0](https://creativecommons.org/licenses/by/2.0/) | [www.flickr.com](https://www.flickr.com/photos/believekevin/5369047617/) |
+| `other/Flickr_believekevin_5370736820_DSC09844.jpg` | kevin (Flickr: believekevin) | [CC-BY-2.0](https://creativecommons.org/licenses/by/2.0/) | [www.flickr.com](https://www.flickr.com/photos/believekevin/5370736820/) |
+| `other/Flickr_mwichary_2297954314_Altair_8800_HNF_display.jpg` | Marcin Wichary (Flickr: mwichary) | [CC-BY-2.0](https://creativecommons.org/licenses/by/2.0/) | [www.flickr.com](https://www.flickr.com/photos/mwichary/2297954314/) |
+| `commons/Altair_8800b_Computer.jpg` | Michael Holley (Commons/en.wikipedia user Swtpc6800) | Public domain (released by the author) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:Altair_8800b_Computer.jpg) |
+| `commons/Altair_8800b_Computer_Front.jpg` | Michael Holley (Commons/en.wikipedia user Swtpc6800) | Public domain (released by the author) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:Altair_8800b_Computer_Front.jpg) |
+| `other/Flickr_brouhaha_49762967763_Altair_8800b_CPU_board_front.jpg` | _brouhaha_ (Flickr: _brouhaha_) | [CC-BY-SA-2.0](https://creativecommons.org/licenses/by-sa/2.0/) | [www.flickr.com](https://www.flickr.com/photos/_brouhaha_/49762967763/) |
+| `other/Flickr_brouhaha_49763496611_Altair_8800b_CPU_board_rear.jpg` | _brouhaha_ (Flickr: _brouhaha_) | [CC-BY-SA-2.0](https://creativecommons.org/licenses/by-sa/2.0/) | [www.flickr.com](https://www.flickr.com/photos/_brouhaha_/49763496611/) |
+| `commons/Altair_8800_at_the_Intel_Museum_20131230.jpg` | Don DeBold | [CC-BY-2.0](https://creativecommons.org/licenses/by/2.0/) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:Altair_8800_at_the_Intel_Museum_20131230.jpg) |
+| `commons/CPU_Altair_8800.jpg` | Stahlkocher | [CC-BY-SA-3.0 OR GFDL-1.2-or-later](https://creativecommons.org/licenses/by-sa/3.0/) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:CPU_Altair_8800.jpg) |
+| `commons/Living_Computers_-_Altair_8800_(39802981903).jpg` | Michael Dunn from Silicon Valley, USA | [CC-BY-2.0](https://creativecommons.org/licenses/by/2.0/) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:Living_Computers_-_Altair_8800_(39802981903).jpg) |
+| `commons/MITS_Altair_8800_Front_Panel.jpg` | Cromemco | [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:MITS_Altair_8800_Front_Panel.jpg) |
+| `commons/Altair_8800,_Smithsonian_Museum.jpg` | Ed Uthman from Houston, TX, USA | [CC-BY-SA-2.0](https://creativecommons.org/licenses/by-sa/2.0/) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:Altair_8800,_Smithsonian_Museum.jpg) |
+| `commons/Altair_8800-Computer.jpg` | Dr. Bernd Gross | [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:Altair_8800-Computer.jpg) |
+| `commons/Altair_8800_-_MfK_Bern.jpg` | Sandstein | [CC-BY-SA-3.0](https://creativecommons.org/licenses/by-sa/3.0/) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:Altair_8800_-_MfK_Bern.jpg) |
+| `commons/Altair_8800_and_Model_33_ASR_Teletype.jpg` | Tim Colegrove | [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:Altair_8800_and_Model_33_ASR_Teletype.jpg) |
+| `commons/Altair_8800_computer_at_CHM.jpg` | Tomwsulcer | [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:Altair_8800_computer_at_CHM.jpg) |
+| `commons/Altair_PC_(3803232519).jpg` | tomislav medak | [CC-BY-2.0](https://creativecommons.org/licenses/by/2.0/) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:Altair_PC_(3803232519).jpg) |
+| `commons/Computer_History_Museum_–_Altair_8800.jpg` | Punteador | [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:Computer_History_Museum_%E2%80%93_Altair_8800.jpg) |
+| `commons/Computer_Museum_of_America_(71).jpg` | Bubba73 | [CC-BY-SA-3.0](https://creativecommons.org/licenses/by-sa/3.0/) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:Computer_Museum_of_America_(71).jpg) |
+| `commons/MIC_Torino-altair8800.png` | MIC Torino (Russel2) | [CC-BY-3.0](https://creativecommons.org/licenses/by/3.0/) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:MIC_Torino-altair8800.png) |
+| `commons/MITS_Altair_8800_Computer_(1975).jpg` | Cromemco | [CC-BY-SA-4.0](https://creativecommons.org/licenses/by-sa/4.0/) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:MITS_Altair_8800_Computer_(1975).jpg) |
+| `commons/MITS_Altair_8800_microcomputer_-_Computer_History_Museum.jpg` | Michael Hicks from Saint Paul, MN, USA | [CC-BY-2.0](https://creativecommons.org/licenses/by/2.0/) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:MITS_Altair_8800_microcomputer_-_Computer_History_Museum.jpg) |
+| `commons/Altair_4K_Static_-_Apr_1976_Byte_advert.jpg` | Micro Instrumentation and Telemetry Systems | Public domain (US, no copyright notice) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:Altair_4K_Static_-_Apr_1976_Byte_advert.jpg) |
+| `commons/Altair_4K_memory_boards_&_Altair_IO_Cards_-_Jan_1976_Byte_advert.jpg` | Micro Instrumentation and Telemetry Systems | Public domain (US, no copyright notice) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:Altair_4K_memory_boards_%26_Altair_IO_Cards_-_Jan_1976_Byte_advert.jpg) |
+| `commons/Altair_Computer_Ad_August_1975.jpg` | Micro Instrumentation and Telemetry Systems (MITS); scan by Michael Holley | Public domain (US, no copyright notice) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:Altair_Computer_Ad_August_1975.jpg) |
+| `commons/Altair_Computer_Ad_May_1975.jpg` | Micro Instrumentation and Telemetry Systems (MITS); scan by Michael Holley | Public domain (US, no copyright notice) | [commons.wikimedia.org](https://commons.wikimedia.org/wiki/File:Altair_Computer_Ad_May_1975.jpg) |
+
+When reusing a CC BY or CC BY-SA image, credit the author as listed, link the licence, and say if it was changed. CC BY-SA images passed on in modified form, such as a texture made from one, must keep CC BY-SA.

@@ -16,5 +16,5 @@
     "strictNullChecks": true,
     "noUnusedLocals": true
   },
-  "include": ["js/*.js"]
+  "include": ["js/**/*.js"]
 }

@@ -266,6 +266,11 @@ panel.applyDock = function() {
         panel.setNavActivity(false);
         panel.renderTeletype();
     }
+    // The tabs share one scroll: the Tutorial goes back to where its
+    // lesson was read to.
+    if (dock.open && dock.tab == 'ref' && panel.restoreLessonScroll) {
+        panel.restoreLessonScroll();
+    }
     // The teletype's hidden input is deliberately not focused here:
     // focusing it on a phone raises the keyboard. Keys are handled on
     // document, and tapping the paper focuses it when the soft

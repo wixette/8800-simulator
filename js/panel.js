@@ -18,6 +18,7 @@
  */
 
 import {asmtab} from './asmtab.js';
+import {Box} from './box.js';
 import {Dialog} from './dialog.js';
 import {Dropdown} from './dropdown.js';
 import {l10n} from './l10n.js';
@@ -185,6 +186,11 @@ panel.setStatus = function(id, params, severity = '', afterPowerOn = false,
     panel.statusParams = params || {};
     panel.statusSeverity = severity;
     panel.statusAfterPowerOn = afterPowerOn;
+    // The power-up this reports may have put the box together first.
+    panel.statusAfterReassemble = afterPowerOn && panel.reassembledForPowerOn;
+    if (afterPowerOn) {
+        panel.reassembledForPowerOn = false;
+    }
     panel.statusAfterUnprotect = afterUnprotect;
     panel.refreshStatus();
 };
@@ -216,7 +222,9 @@ panel.refreshStatus = function() {
     // after their full stop; a space there reads as a hole in the middle
     // of the line.
     var notes = [];
-    if (panel.statusAfterPowerOn) {
+    if (panel.statusAfterReassemble) {
+        notes.push('reassembled-first');
+    } else if (panel.statusAfterPowerOn) {
         notes.push('powered-on-first');
     }
     if (panel.statusAfterUnprotect) {
@@ -227,6 +235,24 @@ panel.refreshStatus = function() {
         msg = note + (/\u3002$/.test(note) ? '' : ' ') + msg;
     }
     text.textContent = msg;
+    panel.fitStatus();
+};
+
+/**
+ * The status line keeps one line's height in the page, and a longer
+ * message rises over the foot of the dock (css/style.css, #status-bar):
+ * the dock's scroll gains as much room below its end, so that its last
+ * line - the Teletype's, the dump's - can still be scrolled clear of it.
+ */
+panel.fitStatus = function() {
+    var bar = document.getElementById('status-bar');
+    var text = document.getElementById('status-text');
+    var app = document.getElementById('app');
+    if (!bar || !text || !app || !app.style) {
+        return;
+    }
+    var rise = Math.max(0, text.offsetHeight - bar.offsetHeight);
+    app.style.setProperty('--status-rise', rise + 'px');
 };
 
 /**
@@ -248,9 +274,22 @@ panel.ensurePoweredOn = function() {
     if (panel.isPoweredOn) {
         return false;
     }
+    // A machine taken apart in the 3D view goes back together first:
+    // the reader asked for a program, not for a refusal from a view
+    // they may not be looking at (docs/3d-view.md, V4). The OFF/ON
+    // switch itself refuses instead (panel.onToggle).
+    panel.reassembledForPowerOn = panel.box.snapTogether();
     panel.onPowerOn();
     return true;
 };
+
+/**
+ * Whether the last ensurePoweredOn() had to put the box back together
+ * before switching on, for the status line to say so. Taken by the
+ * next message that reports that power-up.
+ * @type {boolean}
+ */
+panel.reassembledForPowerOn = false;
 
 /**
  * Reads the version out of package.json, which is the one place it is
@@ -319,6 +358,29 @@ panel.escapeHtml = function(text) {
 /** If the power is turned on. */
 panel.isPoweredOn = false;
 
+/**
+ * The machine's box: which parts are taken out in the 3D view, and so
+ * whether the machine may be switched on (js/box.js). There is one
+ * whether or not the 3D view has been opened; without it, the box
+ * stays whole.
+ * @type {!Box}
+ */
+panel.box = new Box(256);
+
+/**
+ * A refusal from the box, with the part it names in the reader's
+ * language, for setStatus().
+ * @param {{id: string, params: !Object<string, string>}} why The refusal.
+ * @param {string=} severity The status line's severity.
+ */
+panel.sayBox = function(why, severity = 'warn') {
+    var params = {};
+    if (why.params.part) {
+        params.part = l10n.getMessage('part-' + why.params.part);
+    }
+    panel.setStatus(why.id, params, severity);
+};
+
 /** The simulator object. */
 panel.sim = null;
 
@@ -353,7 +415,10 @@ panel.init = function() {
         }
     });
     panel.initDockSplitter();
-    window.addEventListener('resize', function() { panel.applyDock(); },
+    window.addEventListener('resize', function() {
+        panel.applyDock();
+        panel.fitStatus();
+    },
                             false);
 
     // Initializes svg components for all LEDs.
@@ -470,6 +535,8 @@ panel.init = function() {
         panel.renderInstrPane();
         panel.refreshDockToggle();
         panel.refreshStripTab();
+        panel.refreshViewSwitch();
+        panel.refreshTutorial();
         if (panel.memoryMenu) {
             panel.memoryMenu.setItems(panel.memoryMenuItems());
             panel.updateMemoryControls();
@@ -505,6 +572,9 @@ panel.init = function() {
     // The machine comes up switched off, and the empty dump and dark
     // panel should say why rather than look broken.
     panel.setStatus('status-off');
+    // The 2D or the 3D view: a link's, or the reader's last.
+    panel.initView();
+    panel.initTutorial();
     // A link to a program, or to a machine part way through one.
     panel.loadFromLink();
     // A link pasted into the address bar while the page is open only

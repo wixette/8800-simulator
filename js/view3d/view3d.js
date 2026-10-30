@@ -1,0 +1,743 @@
+/**
+ *   Copyright 2020-2026 wixette@gmail.com
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ *
+ * @fileoverview The 3D view (docs/3d-view.md): the whole machine, its
+ * front panel working as the 2D one does, fading and hiding parts, and
+ * taking it apart. js/panel-view.js loads this the first time the
+ * reader chooses 3D, so a page that never shows it never fetches
+ * three.js or the model (M5).
+ *
+ * It draws the page's own machine and box. Every switch it throws goes
+ * through panel.operate(), every part it moves through panel.box, so
+ * what it allows and refuses is what the rest of the page allows and
+ * refuses (M4).
+ */
+
+import * as THREE from 'three';
+import {Dropdown} from '../dropdown.js';
+import {l10n} from '../l10n.js';
+import {BoxBinding} from './boxBind.js';
+import {corners, frame, frameShowingTop} from './framing.js';
+import {PanelBinding} from './panelBind.js';
+import {Viewer} from './viewer.js';
+import {HOME_VIEW, SHOWS, VIEWS, WIRED, partKey, showButton,
+        switchName} from './views.js';
+
+/** A press and release this close together, in px and ms, is a click. */
+const CLICK_PX = 5;
+const CLICK_MS = 500;
+
+/** The camera's field of view, in degrees. */
+const FOV = 35;
+
+/** What each view keeps clear of the canvas's edges, in CSS pixels. */
+const GAP = 8;
+
+/** How far one press of an arrow key turns the view. */
+const TURN = 8 * Math.PI / 180;
+
+/** And Shift with an arrow moves it, as a share of the distance. */
+const PAN_STEP = 0.06;
+
+/** And + or − zooms it, as a factor of the distance. */
+const ZOOM_STEP = 1.25;
+
+/** How long the mouse rests on a part before its label shows, in ms. */
+const LABEL_REST_MS = 400;
+
+/** How far the label stands from the pointer, and from the stage's edge, in px. */
+const LABEL_OFFSET = 16;
+const LABEL_INSET = 8;
+
+/**
+ * The 3D view, once loaded.
+ */
+export class Stage {
+    /**
+     * @param {!Object} panel The page's panel.
+     * @param {!HTMLElement} host Where the canvas goes.
+     */
+    constructor(panel, host) {
+        this.panel = panel;
+        this.host = host;
+        this.viewer = new Viewer(host);
+        this.canvas = this.viewer.canvas;
+        this.canvas.id = 'stage3d-canvas';
+        this.canvas.tabIndex = 0;
+        /** The view on show, and whether the camera is still where it put it. */
+        this.view = HOME_VIEW;
+        this.fitted = HOME_VIEW;
+        /** Whether Taken apart moved the parts out (V4). */
+        this.apart = false;
+        this.root = null;
+        this.panelBind = null;
+        this.boxBind = null;
+        this.label = document.getElementById('part-label');
+        this.labelTimer = 0;
+        /** @type {?string} What the label is for, shown or on its way. */
+        this.labelKey = null;
+        /** @type {?string} The part a press put the label away for. */
+        this.pressedOn = null;
+        /** @type {{x: number, y: number}} Where the mouse last was. */
+        this.pointerAt = {x: 0, y: 0};
+    }
+
+    /**
+     * Loads the model and binds it to the page's machine.
+     * @param {string} url The .glb.
+     * @param {function(number)} onProgress The share of it loaded.
+     * @return {!Promise}
+     */
+    async load(url, onProgress) {
+        this.root = await this.viewer.load(url, onProgress);
+        const invalidate = () => this.viewer.invalidate();
+        // The box first: it gives every part materials of its own, which
+        // the panel's lamps then light.
+        this.boxBind = new BoxBinding(this.root, this.panel.box);
+        this.panelBind = new PanelBinding(this.root, this.panel, invalidate);
+        this.panel.box.onChange = () => {
+            this.boxBind.pose();
+            invalidate();
+        };
+        this.viewer.fitShadow(new THREE.Box3().setFromObject(this.root));
+        this.viewer.onFrame.push((dt) => this.frame(dt));
+        this.viewer.onResize.push(() => this.refit());
+        this.viewer.controls.addEventListener('start', () => {
+            // The reader took the camera; it stays where they put it.
+            this.fitted = null;
+            this.pressLabel();
+        });
+        this.viewer.controls.addEventListener('change', () => this.refreshZoom());
+        this.initPointer();
+        this.initKeys();
+        this.initTools();
+        this.place(HOME_VIEW, false);
+    }
+
+    /** Shows the view: starts drawing, and catches up with the box. */
+    show() {
+        this.boxBind.pose();
+        this.viewer.start();
+        this.refit();
+    }
+
+    /** Hides the view: stops drawing. */
+    hide() {
+        this.hideLabel();
+        this.viewer.stop();
+    }
+
+    // ---- each frame ----
+
+    /** @private */
+    frame(dt) {
+        let moved = this.panelBind.update(dt);
+        const box = this.panel.box;
+        if (box.isBusy()) {
+            box.update(dt);
+            this.boxBind.pose();
+            moved = true;
+            if (!box.isBusy()) {
+                // Taken apart says how to put it back once the last part is out.
+                if (this.apart) {
+                    this.panel.setStatus('view-apart-done');
+                }
+                // A view the page chose takes in the parts where they stopped.
+                if (this.fitted) {
+                    const f = this.framing(this.fitted);
+                    this.viewer.flyTo(f.position, f.target, 0.5);
+                }
+            }
+        }
+        if (moved) {
+            this.viewer.invalidate();
+        }
+        return moved;
+    }
+
+    // ---- the views ----
+
+    /**
+     * Shows a view from the Views menu, or Reset view.
+     * @param {string} id The view.
+     */
+    setView(id) {
+        if (id == 'apart') {
+            if (this.panel.isPoweredOn) {
+                this.panel.setStatus('box-switch-off', {}, 'warn');
+                return;
+            }
+            const why = this.panel.box.takeAllApart(false);
+            if (why) {
+                this.panel.sayBox(why);
+                return;
+            }
+            this.apart = true;
+        } else if (this.apart) {
+            // Leaving Taken apart puts back what it took out (V4).
+            this.apart = false;
+            this.panel.box.snap();
+            this.panel.box.putAllBack(true);
+            this.panel.setStatus('view-reassembling');
+        }
+        this.place(id, true);
+        this.refreshTools();
+    }
+
+    /**
+     * Puts the camera on a view.
+     * @private
+     * @param {string} id The view.
+     * @param {boolean} fly Whether to fly there, or jump.
+     */
+    place(id, fly) {
+        this.view = id;
+        this.fitted = id;
+        const f = this.framing(id);
+        if (fly) {
+            this.viewer.flyTo(f.position, f.target);
+        } else {
+            this.viewer.jumpTo(f.position, f.target);
+        }
+        this.refreshTools();
+    }
+
+    /**
+     * Where the camera goes for a view, framing its parts where they are
+     * going to be: Taken apart, all out; otherwise where the box will
+     * have them once what is moving stops.
+     * @param {string} id The view.
+     * @return {{position: !Array<number>, target: !Array<number>}}
+     */
+    framing(id) {
+        const view = VIEWS.find((v) => v.id == id);
+        const box = this.panel.box;
+        this.boxBind.pose(id == 'apart' ? () => 1 : (unit) => box.destination(unit));
+        const points = corners(this.boxBind.boxes());
+        // The case's bottom half never moves, and stands the box's full
+        // height: the front and top that topShare measures.
+        const shell = this.boxBind.boxes((node) => this.boxBind.modelName(node) == 'case.bottom')[0];
+        this.boxBind.pose();
+        const {width, height} = this.viewer.size();
+        const insets = {top: GAP, right: GAP, bottom: GAP, left: GAP};
+        if (view.topShare && shell) {
+            return frameShowingTop(points, shell, view.topShare, view.dir, FOV, width, height, insets);
+        }
+        return frame(points, view.dir, FOV, width, height, insets);
+    }
+
+    /** The canvas changed size: a view the page chose fits it again. */
+    refit() {
+        if (this.fitted && !this.viewer.isFlying() && this.root) {
+            const f = this.framing(this.fitted);
+            this.viewer.jumpTo(f.position, f.target);
+        }
+    }
+
+    /**
+     * Fades or hides parts (V3).
+     * @param {string} id The Show preset.
+     */
+    setShow(id) {
+        this.boxBind.setShow(id);
+        this.hideLabel();
+        this.viewer.invalidate();
+        this.refreshTools();
+    }
+
+    // ---- the camera, by keys and buttons (V2) ----
+
+    /** Zooms by a factor of the distance to what the camera looks at. */
+    zoom(factor) {
+        const {camera, controls} = this.viewer;
+        const off = camera.position.clone().sub(controls.target);
+        const d = THREE.MathUtils.clamp(off.length() * factor, controls.minDistance,
+                                        controls.maxDistance);
+        this.step(controls.target.clone().addScaledVector(off.normalize(), d),
+                  controls.target.clone());
+    }
+
+    /** Turns the camera round what it looks at, across and up, within its limits. */
+    orbit(dTheta, dPhi) {
+        const {camera, controls} = this.viewer;
+        const s = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+        s.theta += dTheta;
+        s.phi = THREE.MathUtils.clamp(s.phi + dPhi, 0.05, Math.min(Math.PI - 0.05,
+                                                                   controls.maxPolarAngle));
+        this.step(controls.target.clone().add(new THREE.Vector3().setFromSpherical(s)),
+                  controls.target.clone());
+    }
+
+    /** Moves the camera and what it looks at together, across and up the screen. */
+    pan(dx, dy) {
+        const {camera, controls} = this.viewer;
+        const d = camera.position.distanceTo(controls.target);
+        camera.updateMatrixWorld();
+        const move = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0)
+              .multiplyScalar(dx * d);
+        move.addScaledVector(new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1), dy * d);
+        this.step(camera.position.clone().add(move), controls.target.clone().add(move));
+    }
+
+    /** @private A small move the reader asked for: the camera is theirs now. */
+    step(position, target) {
+        this.fitted = null;
+        this.viewer.flyTo(position.toArray(), target.toArray(), 0.18);
+    }
+
+    /** @return {{nearer: boolean, farther: boolean}} Room to zoom each way. */
+    zoomRoom() {
+        const {camera, controls} = this.viewer;
+        const d = camera.position.distanceTo(controls.target);
+        return {nearer: d > controls.minDistance * 1.01, farther: d < controls.maxDistance * 0.99};
+    }
+
+    // ---- the pointer: throwing switches, taking parts out, labels ----
+
+    /**
+     * What is under a point on the screen.
+     * @param {{clientX: number, clientY: number}} e The point.
+     * @return {?THREE.Intersection} The first solid part there, if any.
+     */
+    hitAt(e) {
+        const r = this.canvas.getBoundingClientRect();
+        this.ndc.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+        this.raycaster.setFromCamera(this.ndc, this.viewer.camera);
+        // Faded and hidden parts are context, not obstacles: a click goes
+        // through them (V3).
+        return this.raycaster.intersectObject(this.root, true).find((h) => this.isSolid(h.object)) || null;
+    }
+
+    /** @private */
+    initPointer() {
+        this.raycaster = new THREE.Raycaster();
+        this.ndc = new THREE.Vector2();
+        const hitAt = (e) => this.hitAt(e);
+        let down = null;
+        // A click does not take the keyboard from the Teletype: the view
+        // takes the focus by Tab, as the dock's tabs do (U3).
+        this.canvas.addEventListener('mousedown', (e) => e.preventDefault());
+        this.canvas.addEventListener('pointerdown', (e) => {
+            down = {x: e.clientX, y: e.clientY, t: performance.now()};
+            // A press puts the label away, so that it never covers the
+            // lamps the click is about to change (U8).
+            this.pressLabel();
+        });
+        this.canvas.addEventListener('pointerup', (e) => {
+            const d = down;
+            down = null;
+            if (!d || Math.hypot(e.clientX - d.x, e.clientY - d.y) > CLICK_PX ||
+                performance.now() - d.t > CLICK_MS) {
+                return;
+            }
+            const hit = hitAt(e);
+            if (hit) {
+                this.onClick(hit);
+                // No hover on a touch screen: a tap on a part shows its
+                // label. A tap on a switch shows itself, by throwing it.
+                if (e.pointerType != 'mouse' && !this.panelBind.pick(hit.object, hit.point, this.viewer.camera) &&
+                    !this.isLamp(hit.object)) {
+                    this.showLabel(hit, 2500);
+                }
+            }
+        });
+        this.canvas.addEventListener('pointermove', (e) => {
+            if (e.pointerType == 'mouse' && !e.buttons) {
+                this.hover(hitAt(e), e);
+            }
+        });
+        this.canvas.addEventListener('pointerleave', () => this.hideLabel());
+    }
+
+    /** @private */
+    isSolid(object) {
+        for (let n = object; n; n = n.parent) {
+            if (!n.visible) {
+                return false;
+            }
+            if (n.userData.label_en) {
+                return !n.userData.seeThrough;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * What a click on the model does: throws the switch it is on, or
+     * takes out or puts back the part it is on.
+     * @param {!THREE.Intersection} hit Where it landed.
+     */
+    onClick(hit) {
+        const thrown = this.panelBind.pick(hit.object, hit.point, this.viewer.camera);
+        if (thrown) {
+            this.panel.operate(thrown.id, thrown.dir);
+            return;
+        }
+        const at = this.boxBind.partAt(hit.object);
+        if (!at) {
+            return;
+        }
+        if (at.unit) {
+            this.toggleUnit(at.unit);
+        } else if (WIRED.includes(at.part)) {
+            this.panel.setStatus('box-fixed', {part: this.partName(at.part)});
+        }
+    }
+
+    /**
+     * Takes a unit out, or puts it back.
+     * @param {string} unit The unit.
+     */
+    toggleUnit(unit) {
+        const box = this.panel.box;
+        const out = box.position(unit) > 0;
+        const why = out ? box.putBack(unit) : box.takeOut(unit, this.panel.isPoweredOn);
+        if (why) {
+            this.panel.sayBox(why);
+            return;
+        }
+        this.panel.setStatus(out ? 'box-put-back' : 'box-taken-out',
+                             {part: this.partName(unit)});
+    }
+
+    /** @return {string} A part's name, in the reader's language. */
+    partName(node) {
+        return l10n.getMessage('part-' + partKey(node));
+    }
+
+    /**
+     * The label for what the pointer is over: its name, what it does,
+     * and what a click will do.
+     * @param {?THREE.Intersection} hit What it is over.
+     * @return {?{name: string, role: string, hint: string, acts: boolean}}
+     */
+    describe(hit) {
+        if (!hit) {
+            return null;
+        }
+        const thrown = this.panelBind.pick(hit.object, hit.point, this.viewer.camera);
+        if (thrown) {
+            return {name: l10n.getMessage('label-switch').replace('{name}', switchName(thrown.id)),
+                    role: '', hint: l10n.getMessage('hint-throw'), acts: true};
+        }
+        const lamp = this.isLamp(hit.object);
+        if (lamp) {
+            return {name: l10n.getMessage('label-lamp').replace('{name}', lamp.toUpperCase()),
+                    role: '', hint: '', acts: false};
+        }
+        const at = this.boxBind.partAt(hit.object);
+        if (!at) {
+            return null;
+        }
+        const node = at.unit || at.part;
+        return Object.assign({name: this.partName(node), role: l10n.getMessage('role-' + partKey(node))},
+                             at.unit ? this.unitHint(at.unit) : {hint: '', acts: false});
+    }
+
+    /**
+     * @private
+     * @param {!THREE.Object3D} object What the pointer is over.
+     * @return {?string} The lamp it is, if it is one.
+     */
+    isLamp(object) {
+        for (let n = object; n; n = n.parent) {
+            if (n.userData.lamp_id) {
+                return n.userData.lamp_id;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * What a click on a unit will do, or why it will not: the hint says
+     * so, rather than offer a click that only gets a refusal.
+     * @private
+     * @param {string} unit The unit.
+     * @return {{hint: string, acts: boolean}}
+     */
+    unitHint(unit) {
+        const box = this.panel.box;
+        const out = box.position(unit) > 0;
+        const why = out ? box.whyNotIn(unit) : box.whyNotOut(unit, this.panel.isPoweredOn);
+        if (!why) {
+            return {hint: l10n.getMessage(out ? 'hint-put-back' : 'hint-take-out'), acts: true};
+        }
+        if (why.id == 'box-switch-off') {
+            return {hint: l10n.getMessage('hint-off-first'), acts: false};
+        }
+        if (why.params.part) {
+            return {hint: l10n.getMessage(why.id).replace('{part}', this.partName(why.params.part)),
+                    acts: false};
+        }
+        return {hint: '', acts: false};
+    }
+
+    /**
+     * @private What the mouse is over: the hand at once where a click
+     * acts, and, as a tooltip does, the label beside the pointer once it
+     * rests on the same thing for LABEL_REST_MS - so that sliding across
+     * the panel to a switch shows no labels flicking from part to part.
+     * After a press, the label stays away until the pointer is over
+     * something else.
+     * @param {?THREE.Intersection} hit What it is over.
+     * @param {{clientX: number, clientY: number}} e Where the pointer is.
+     */
+    hover(hit, e) {
+        const text = this.describe(hit);
+        this.canvas.style.cursor = text && text.acts ? 'pointer' : '';
+        this.pointerAt = {x: e.clientX, y: e.clientY};
+        if (text && this.pressedOn == text.name) {
+            return;
+        }
+        this.pressedOn = null;
+        const key = text ? JSON.stringify(text) : null;
+        if (key == this.labelKey) {
+            return;
+        }
+        this.labelKey = key;
+        window.clearTimeout(this.labelTimer);
+        this.label.hidden = true;
+        if (text) {
+            this.labelTimer = window.setTimeout(() => this.drawLabel(text, this.pointerAt),
+                                                LABEL_REST_MS);
+        }
+    }
+
+    /** @private A press: the label goes, until the pointer moves on. */
+    pressLabel() {
+        window.clearTimeout(this.labelTimer);
+        this.label.hidden = true;
+        // Both the camera's grab and the click's own press come here:
+        // the second finds the label already put away.
+        if (this.labelKey) {
+            this.pressedOn = JSON.parse(this.labelKey).name;
+            this.labelKey = null;
+        }
+    }
+
+    /**
+     * @private Shows what a tap landed on, for a while: no hover on a
+     * touch screen.
+     * @param {!THREE.Intersection} hit What it landed on.
+     * @param {number} ms How long the label stays.
+     */
+    showLabel(hit, ms) {
+        const text = this.describe(hit);
+        window.clearTimeout(this.labelTimer);
+        this.labelKey = null;
+        if (!text) {
+            this.hideLabel();
+            return;
+        }
+        // No pointer to stand beside, and a finger over the spot: the
+        // stage's top left corner, over the case top.
+        this.drawLabel(text, null);
+        this.labelTimer = window.setTimeout(() => this.hideLabel(), ms);
+    }
+
+    /**
+     * @private
+     * @param {{name: string, role: string, hint: string}} text What it says.
+     * @param {?{x: number, y: number}} at The pointer, which it goes below
+     *     and to the right of, kept inside the stage; or null, the corner.
+     */
+    drawLabel(text, at) {
+        const label = this.label;
+        label.textContent = '';
+        for (const [cls, line] of [['part-name', text.name], ['part-role', text.role],
+                                   ['part-hint', text.hint]]) {
+            if (line) {
+                const div = document.createElement('div');
+                div.className = cls;
+                div.textContent = line;
+                label.appendChild(div);
+            }
+        }
+        label.hidden = false;
+        let x = LABEL_INSET;
+        let y = LABEL_INSET;
+        if (at) {
+            const host = this.host.getBoundingClientRect();
+            x = Math.max(LABEL_INSET, Math.min(at.x - host.left + LABEL_OFFSET,
+                                               host.width - label.offsetWidth - LABEL_INSET));
+            y = at.y - host.top + LABEL_OFFSET;
+            if (y + label.offsetHeight > host.height - LABEL_INSET) {
+                // No room below: above the pointer instead.
+                y = Math.max(LABEL_INSET, at.y - host.top - LABEL_OFFSET - label.offsetHeight);
+            }
+        }
+        label.style.left = x + 'px';
+        label.style.top = y + 'px';
+    }
+
+    /** @private */
+    hideLabel() {
+        window.clearTimeout(this.labelTimer);
+        this.labelKey = null;
+        this.pressedOn = null;
+        if (this.label) {
+            this.label.hidden = true;
+        }
+        if (this.canvas) {
+            this.canvas.style.cursor = '';
+        }
+    }
+
+    /**
+     * Where a part of the model is on the screen: for the browser
+     * checks, which click the 3D panel as a reader would.
+     * @param {string} name A node in the model, such as 'panel.switch.s0'.
+     * @param {!Array<number>|string=} where A point in the node's own
+     *     frame, in metres; 'top', the middle of the top of its own
+     *     geometry, as it is now; or 'upper' or 'lower', a point a
+     *     quarter of the way down or up it as drawn - a bat's halves.
+     * @return {{x: number, y: number}} In client pixels.
+     */
+    screenPoint(name, where = [0, 0, 0]) {
+        const node = this.boxBind.find(name);
+        this.root.updateMatrixWorld(true);
+        this.viewer.camera.updateMatrixWorld();
+        let world;
+        if (where == 'upper' || where == 'lower') {
+            // A quarter of the way down, or up, the part as drawn.
+            const b = new THREE.Box3().setFromObject(node);
+            const ends = corners([{min: b.min.toArray(), max: b.max.toArray()}])
+                  .map((c) => new THREE.Vector3().fromArray(c).project(this.viewer.camera));
+            const top = Math.max(...ends.map((e) => e.y));
+            const bottom = Math.min(...ends.map((e) => e.y));
+            const r = this.canvas.getBoundingClientRect();
+            const x = ends.reduce((sum, e) => sum + e.x, 0) / ends.length;
+            const y = where == 'upper' ? top - (top - bottom) / 4 : bottom + (top - bottom) / 4;
+            return {x: r.left + (x + 1) / 2 * r.width, y: r.top + (1 - y) / 2 * r.height};
+        } else if (where == 'top') {
+            const b = new THREE.Box3();
+            for (const mesh of this.boxBind.ownMeshes(node)) {
+                b.expandByObject(mesh, true);
+            }
+            world = new THREE.Vector3((b.min.x + b.max.x) / 2, b.max.y - 0.0005,
+                                      (b.min.z + b.max.z) / 2);
+        } else {
+            world = new THREE.Vector3().fromArray(where).applyMatrix4(node.matrixWorld);
+        }
+        const p = world.project(this.viewer.camera);
+        const r = this.canvas.getBoundingClientRect();
+        return {x: r.left + (p.x + 1) / 2 * r.width, y: r.top + (1 - p.y) / 2 * r.height};
+    }
+
+    // ---- the keyboard (V2) ----
+
+    /** @private */
+    initKeys() {
+        this.canvas.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey || e.altKey) {
+                return;
+            }
+            const act = {
+                ArrowLeft: () => e.shiftKey ? this.pan(PAN_STEP, 0) : this.orbit(-TURN, 0),
+                ArrowRight: () => e.shiftKey ? this.pan(-PAN_STEP, 0) : this.orbit(TURN, 0),
+                ArrowUp: () => e.shiftKey ? this.pan(0, -PAN_STEP) : this.orbit(0, -TURN),
+                ArrowDown: () => e.shiftKey ? this.pan(0, PAN_STEP) : this.orbit(0, TURN),
+                '+': () => this.zoom(1 / ZOOM_STEP),
+                '=': () => this.zoom(1 / ZOOM_STEP),
+                '-': () => this.zoom(ZOOM_STEP),
+                '_': () => this.zoom(ZOOM_STEP),
+                Home: () => this.setView(HOME_VIEW),
+            }[e.key];
+            if (act) {
+                e.preventDefault();
+                act();
+            }
+        });
+    }
+
+    // ---- the tools on the stage's top edge ----
+
+    /** @private */
+    initTools() {
+        this.viewsMenu = new Dropdown('views-dropdown', (id) => this.setView(id),
+                                      () => this.refreshViewsMenu());
+        this.showMenu = new Dropdown('show-dropdown', (id) => this.setShow(id),
+                                     () => this.refreshShowMenu());
+        const press = (id, fn) => this.panel.makePressable(document.getElementById(id), fn);
+        press('view-reset', () => this.setView(HOME_VIEW));
+        press('view-zoom-in', () => this.zoom(1 / ZOOM_STEP));
+        press('view-zoom-out', () => this.zoom(ZOOM_STEP));
+        this.refreshTools();
+    }
+
+    /** @private Fills the Views menu as things stand. */
+    refreshViewsMenu() {
+        const busy = this.panel.isPoweredOn && !this.apart;
+        this.viewsMenu.setItems(VIEWS.map((v) => ({
+            value: v.id,
+            label: l10n.getMessage('view-' + v.id),
+            disabled: v.id == 'apart' && busy,
+            detail: v.id == 'apart' && busy ? l10n.getMessage('view-apart-detail') : undefined,
+        })));
+        this.viewsMenu.setSelected(this.view);
+    }
+
+    /**
+     * @private Fills the Show menu: what to fade or hide, then the key
+     * parts to pick out (V3, V7).
+     */
+    refreshShowMenu() {
+        const items = [];
+        for (const s of SHOWS) {
+            if (s.parts.length && !items.some((item) => item.heading)) {
+                items.push({heading: true, label: l10n.getMessage('show-heading-parts')});
+            }
+            items.push({value: s.id, label: l10n.getMessage('show-' + s.id), icon: s.icon});
+        }
+        this.showMenu.setItems(items);
+        this.showMenu.setSelected(this.boxBind.show);
+    }
+
+    /** Redraws the tools in the reader's language, as things stand. */
+    refreshTools() {
+        if (!this.viewsMenu) {
+            return;
+        }
+        // The Views button is as wide as its longest view, whichever it
+        // names, so that the tools beside it stay put (U8).
+        this.viewsMenu.setLabel(l10n.getMessage('view-' + this.view),
+                                VIEWS.map((v) => l10n.getMessage('view-' + v.id)));
+        if (this.viewsMenu.isOpen()) {
+            this.refreshViewsMenu();
+        }
+        // The Show button is the chosen Show's icon and, when that is
+        // not the whole machine, in the colour of a setting changed.
+        const state = showButton(this.boxBind.show);
+        const button = document.getElementById('show-button');
+        const name = l10n.getMessage('show-menu-current')
+              .replace('{show}', l10n.getMessage('show-' + this.boxBind.show));
+        document.getElementById('show-current').innerHTML = state.icon;
+        button.classList.toggle('changed', state.changed);
+        button.title = name;
+        button.setAttribute('aria-label', name);
+        if (this.showMenu.isOpen()) {
+            this.refreshShowMenu();
+        }
+        this.refreshZoom();
+        this.canvas.setAttribute('aria-label', l10n.getMessage('view3d-canvas-label'));
+    }
+
+    /** @private */
+    refreshZoom() {
+        const room = this.zoomRoom();
+        document.getElementById('view-zoom-in').classList.toggle('disabled', !room.nearer);
+        document.getElementById('view-zoom-out').classList.toggle('disabled', !room.farther);
+    }
+}

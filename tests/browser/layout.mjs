@@ -78,11 +78,17 @@ export async function versioned(h) {
     const fetched = (f) => /^(package\.json|examples\/|roms\/)/.test(f);
     const unversioned = files.filter((f) => !fetched(f) && !f.endsWith('?v=' + version));
     verify('every file is asked for with ?v=' + version, unversioned.length == 0, unversioned.join(' '));
-    const modules = files.filter((f) => f.startsWith('js/'));
+    // The 3D view's modules and three.js wait until the view is first
+    // opened (docs/3d-view.md, M5); every other module comes with the page.
+    const lazy = (f) => /^(\.\/)?(js\/view3d\/|vendor\/three\/)|^three(\/|$)/.test(f);
+    const modules = files.filter((f) => f.startsWith('js/') || f.startsWith('vendor/'));
     const mapped = await js(`Object.keys(JSON.parse(document.querySelector(
-        'script[type=importmap]').textContent).imports).length`);
-    verify('every module in the import map is loaded', modules.length == mapped,
-           modules.length + ' of ' + mapped);
+        'script[type=importmap]').textContent).imports)`);
+    const eager = mapped.filter((f) => !lazy(f));
+    verify('every module in the import map that the page needs at once is loaded',
+           modules.length == eager.length, modules.length + ' of ' + eager.length);
+    verify('and none of the 3D view\'s, nor three.js, until it is opened',
+           !modules.some(lazy), modules.filter(lazy).join(' '));
     const names = modules.map((f) => f.replace(/\?.*/, ''));
     verify('each once, by one name', new Set(names).size == names.length, names.join(' '));
     verify('and the examples are fetched too, without a version',
@@ -148,12 +154,14 @@ export async function logo(h) {
 
 /**
  * About: headed by the logo, its licences one line each on a wide
- * screen, and no taller than before the logo was added (v1.7.0).
+ * screen, and no taller than before the logo was added (v1.7.0), but
+ * for the two licence lines the 3D view brought and the Tutorial's
+ * photo's (v1.8.0), at about 21px each.
  */
 export async function about(h) {
     const {js, viewport, fresh, press, verify, sleep} = h;
     await viewport(1280, 860); await fresh();
-    for (const [locale, before] of [['en', 570], ['de', 591]]) {
+    for (const [locale, before] of [['en', 614], ['de', 635]]) {
         await js(`l10n.setLocale('${locale}')`); await sleep(150);
         await press('#about-button'); await sleep(500);
         const m = await js(`(() => { const d = document.getElementById('about-dialog'), l = document.getElementById('about-logo');
@@ -165,7 +173,7 @@ export async function about(h) {
         verify(locale + ': the logo heads About, centred', m.logo && m.centred, JSON.stringify(m));
         verify(locale + ': its alt text is the translated name', m.alt == await js(`l10n.getMessage('header-title')`), m.alt);
         verify(locale + ': the title band says About', m.title == await js(`l10n.getMessage('about-button')`), m.title);
-        verify(locale + ': each licence on one line', m.rows.length == 4 && m.rows.every((r) => r == m.rows[0]), m.rows.join(' '));
+        verify(locale + ': each licence on one line', m.rows.length == 7 && m.rows.every((r) => r == m.rows[0]), m.rows.join(' '));
         verify(locale + ': no taller than the ' + before + 'px it was', m.height <= before, m.height);
         await press('#about-ok'); await sleep(300);
     }
