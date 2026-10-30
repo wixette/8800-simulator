@@ -334,3 +334,23 @@ test('a box refusal names its part in the reader\'s language', (t) => {
         assert.ok(l10n.MESSAGES['part-' + unit], unit + ' has a name');
     }
 });
+
+test('a box says where each unit will be once it stops: what a view frames', () => {
+    const box = new Box();
+    box.takeOut('case.top', false);
+    assert.strictEqual(box.destination('case.top'), 1, 'on its way out');
+    box.update(MOVE_S / 2);
+    assert.strictEqual(box.destination('case.top'), 1);
+    box.snap();
+    box.takeAllApart(false);
+    assert.ok(box.units().every((unit) => box.destination(unit) == 1), 'all, once the plan is done');
+    box.snap();
+    box.putAllBack();
+    assert.ok(box.units().every((unit) => box.destination(unit) == 0));
+    box.snap();
+    box.takeOut('case.top', false);
+    box.snap();
+    box.setMemSize(4096);
+    assert.strictEqual(box.destination('card.mem4k_0'), 0, 'a new card comes down into its slot');
+    assert.strictEqual(box.destination('card.mem1k'), 1, 'the one that leaves goes up');
+});

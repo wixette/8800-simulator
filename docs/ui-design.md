@@ -17,7 +17,8 @@ principle here first, with its reason.**
 [U1](#u1--the-front-panel-and-a-dock-replace-the-four-tabs) replaced
 the four tabs, [U2](#u2--where-10s-features-go) put #10's features
 in their places, and U3 to U5 came of the first review of both, which
-also gave P10. U6 came of @cj0ne5's review of #11. The questions U1 left open were settled as listed in
+also gave P10. U6 came of @cj0ne5's review of #11. U7 to U10 came with
+the 3D view in v1.8.0 ([3d-view.md](3d-view.md)). The questions U1 left open were settled as listed in
 [Part 4](#part-4--open-questions), and remain open to revision once the
 layout has been used for a while.
 
@@ -440,6 +441,54 @@ its bottom.
   five tabs as icons alone, the names kept for screen readers and as
   tooltips, and the row scrolls under the pinned fold button at any
   width, should it ever need to.
+
+### U7 — Two views of the one machine, chosen on the stage's top edge
+
+*Since v1.8.0.* The stage shows the front panel in 2D or the whole
+machine in 3D, one at a time, chosen from a `[2D | 3D]` toggle at the
+stage's top right, on a band of its own (V1 in
+[3d-view.md](3d-view.md#v1--switching-views-a-2d--3d-toggle-at-the-stages-top-right)).
+
+- **P1 holds in both:** in 3D, the 3D front panel is the primary
+  surface; its lamps and switches are the panel's, through one seam
+  (`panel.operate()`, `panel.onPanelChange()`), so they cannot disagree.
+- **P2 holds:** a click on a 3D switch and on a 2D switch are two ways
+  to the same operation, not two copies. The Switch Board Helper stays
+  under the stage in both views.
+- **The band** costs the 2D panel only its height (about 32 px), and
+  nothing on a phone, where the panel is limited by its width.
+  *Rejected:* shrinking the panel to 85 % to make room round it; the
+  toggle in the top bar, which is for occasional actions (P4) and is
+  full on phones.
+- **Remembered**, and a link can carry it as `view=3d` (P8).
+
+### U8 — The 3D view's tools follow its view, not its machine
+
+In 3D the band also holds ⌂ (reset view), zoom − / +, and one Views
+menu (P10: items only): five views, and four Show presets (V2, V3).
+The views and presets change how the machine is drawn, never what it
+does, so the machine keeps running in all of them. Taking parts out is
+the one thing that needs it off (U9). Keyboard: once the 3D view has
+the focus (by Tab, not by a click, as the dock's tabs), the arrows,
++ and −, and Home move the camera; otherwise the Teletype keeps its
+keys (U3).
+
+### U9 — Taking it apart needs the power off, and the 2D panel is always whole
+
+Nothing comes out while the machine is on, and OFF/ON refuses while
+anything is out, saying what (P6). Every other way the page switches
+the machine on - every load, Assemble, a link - puts the box back
+together first and says so; going back to 2D does too. The full table
+is V4a in [3d-view.md](3d-view.md#v4a--the-box-and-the-power-in-every-way-the-page-switches-the-machine).
+
+### U10 — The Tutorial in chapters, with Shows that point
+
+The Tutorial gains a contents row and a first chapter, *Meet the
+Machine*. A step may end with a Show chip that points at what it is
+about (an outline on the 2D panel, or parts lit in 3D with the rest
+faded). A chip only shows; it never works the machine (V7). No guided
+tour overlays the page (V8): the first visit opens on the Tutorial, as
+it did, and a dot on "3D" says the view is there until it is seen.
 
 ---
 

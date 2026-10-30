@@ -159,6 +159,8 @@ tools below it, and a status line along the foot.
   arriving.
 - **The status line** says what just happened, and why a greyed-out
   control is greyed out.
+- **2D | 3D**, at the top right of the panel, swaps the front panel for
+  the whole machine in 3D, and back (below).
 
 The **Debugger** is a view the real Altair never had. Step through a
 program with SINGLE STEP and watch it work:
@@ -177,6 +179,40 @@ program with SINGLE STEP and watch it work:
   dump and type two hex digits. The byte changes and the next one is
   picked, so `3e8cd3ff` fills four in a row; the arrow keys move, and
   Esc stops. A protected board refuses, as it refuses DEPOSIT.
+
+### The machine in 3D
+
+**3D** shows the whole box: the case, the chassis, the power supply,
+the bus, and each card in its slot. It is the same machine as the 2D
+panel, not a picture of it: click a switch on it and it does what the
+2D switch does, and its lamps light as the 2D lamps do.
+
+![The 3D view of the Altair 8800, switched off and opened: the grey lid lifted off above the box, a memory card pulled up out of its slot, the CPU and serial cards in the card cage behind the front panel, and the power supply at the back](./screenshots/3d.png)
+
+- **Look around:** drag to turn it, right-drag or two fingers to move
+  it, scroll or pinch to zoom; ⌂ brings it back. With the view
+  focused (Tab), the arrow keys turn it, Shift and the arrows move it,
+  and + and − zoom.
+- **Views** picks where to look from - the front panel, the whole
+  machine, inside from above, the rear - and what to show: everything,
+  the case faded or hidden, or the electronics alone. Pointing at a
+  part names it and says what it does.
+- **Take it apart:** switch the machine OFF, then click the lid to
+  take it off, then a card to pull it, a transformer, the chassis...
+  in the order the real machine allows; a part in the way says so.
+  Click a part again to put it back. **Views ▸ Taken apart** takes
+  everything out at once, and any other view puts it back.
+- **No power while it is apart.** OFF/ON will not switch on a machine
+  with anything out. Loading a program puts it back together first,
+  and so does going back to 2D.
+- The cards follow the **Memory** menu: 256 bytes is the 1K card, 4 KB
+  one 88-4MCS, 8 KB two.
+- The Tutorial's first chapter, **Meet the Machine**, walks through
+  the panel and the parts behind it, pointing at each one.
+
+The 3D view needs WebGL 2, and loads only the first time you choose
+it (about 5 MB). How the model was made, and from what, is in
+[docs/3d-model.md](docs/3d-model.md).
 
 ## 5. The Teletype
 
@@ -403,16 +439,23 @@ favicon still has the logo's drawing.
 | [js/link.js](js/link.js) | The program link format |
 | [js/asm8080.js](js/asm8080.js), [js/asmtab.js](js/asmtab.js) | The 8080 assembler, and its tab |
 | [js/dropdown.js](js/dropdown.js), [js/dialog.js](js/dialog.js) | The menus and the dialogs |
-| [js/l10n.js](js/l10n.js) | Every message, in ten languages |
-| [tools/stamp.mjs](tools/stamp.mjs), [tools/icons.mjs](tools/icons.mjs) | Not part of the page: the version stamp, and drawing the icons from the logo |
+| [js/l10n.js](js/l10n.js), [js/l10n-3d.js](js/l10n-3d.js) | Every message, in ten languages |
+| [js/panel-view.js](js/panel-view.js), [js/panel-tutorial.js](js/panel-tutorial.js) | The 2D / 3D toggle; the Tutorial's chapters and Show chips |
+| [js/box.js](js/box.js) | The machine's box: which parts are out, in what order they come out, and so whether it may switch on |
+| [js/view3d/](js/view3d/) | The 3D view, loaded when first chosen: the renderer and camera, the 3D panel, the box's parts, the Views menu |
+| [model/](model/) | The 3D model: its params, its Blender build (`npm run build:model`), its research, and the built `.glb` |
+| [vendor/three/](vendor/three/) | three.js, pinned (`node tools/vendor.mjs`) |
+| [tools/stamp.mjs](tools/stamp.mjs), [tools/icons.mjs](tools/icons.mjs), [tools/vendor.mjs](tools/vendor.mjs) | Not part of the page: the version stamp, drawing the icons from the logo, and vendoring three.js |
 
 The design notes say why things are the way they are:
 [docs/ui-design.md](docs/ui-design.md) for the layout and its
 principles, [docs/ms-basic-4k.md](docs/ms-basic-4k.md) for the
 memory, the serial boards, the Teletype and BASIC,
 [docs/assembler.md](docs/assembler.md) for the assembler and the
-language it takes, and [docs/kill-the-bit.md](docs/kill-the-bit.md)
-for the address-bus trick Kill the Bit relies on.
+language it takes, [docs/kill-the-bit.md](docs/kill-the-bit.md)
+for the address-bus trick Kill the Bit relies on, and
+[docs/3d-view.md](docs/3d-view.md) and [docs/3d-model.md](docs/3d-model.md)
+for the 3D view and its model.
 
 ### Tests
 
@@ -423,8 +466,10 @@ npm test
 Node.js 24, nothing to install. The suite covers the 8080 CPU, the
 front panel, the serial boards and the Teletype, the page's own logic
 and translations, the link format, the assembler against Intel's
-manual, every program in [examples/](examples/), and 4K BASIC booting
-and running end to end. It runs on each push and pull request.
+manual, every program in [examples/](examples/), 4K BASIC booting
+and running end to end, and the 3D view's logic: the box and the
+power, the model against its params, framing, and the toggle. It runs
+on each push and pull request.
 
 The page itself - clicks, menus, the Assembler's editor, the layout -
 is checked in a headless Chrome:
@@ -447,7 +492,8 @@ npm run typecheck
 ```
 
 Only the files that start with `// @ts-check` are checked, so far
-`js/asm8080.js` and `js/sim8800.js`; [tsconfig.json](tsconfig.json)
+`js/asm8080.js`, `js/sim8800.js`, `js/box.js` and the 3D view's
+framing and views; [tsconfig.json](tsconfig.json)
 says how strictly.
 
 ### The link format
@@ -482,6 +528,7 @@ Every field is optional:
 | `pc`, `sp` | The 16-bit registers, in hex |
 | `a`, `b`, `c`, `d`, `e`, `h`, `l`, `f` | The 8-bit registers, in hex, `f` being the flags |
 | `sw` | The address switches, A15–A0, as a 16-bit hex word |
+| `view` | `3d` to open in the 3D view, `2d` for the front panel (since v1.8.0); a link from Share in 3D carries `view=3d` |
 
 A linked machine always opens stopped. The Teletype's paper and the
 interrupt enable are not in the link. The format is a promise to
@@ -507,6 +554,15 @@ never renamed or read differently ([js/link.js](js/link.js)).
 ## Acknowledgements
 
 The Intel 8080 CPU core is [maly/8080js](https://github.com/maly/8080js).
+
+The 3D view is drawn with [three.js](https://threejs.org) (MIT). Its
+model rests on MITS's 1975-76 manuals and board artwork (archived by
+bitsavers.org and deramp.com; facts only), the Smithsonian's and the
+Computer History Museum's records, and freely licensed photographs by
+Wikimedia Commons and Flickr contributors, credited in
+[model/research/photo-credits.md](model/research/photo-credits.md).
+The model and its data are CC BY-SA 4.0 ([model/LICENSE](model/LICENSE));
+the rest of this repository, apart from the BASIC tape, is Apache 2.0.
 
 The Quick Tutorial in the simulator uses an example program from the original [Altair 8800 Operator's Manual](https://altairclone.com/downloads/manuals/Altair%208800%20Operator's%20Manual.pdf).
 

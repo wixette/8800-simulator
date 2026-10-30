@@ -11,11 +11,12 @@ table of dimensions, each with its source. This document covers how
 the model comes into this repository, how the view is built around the
 simulator's existing machine, and where it sits in the page.
 
-**Status.** Being built on branch `v1.8.0` (W1-W9 done; see Part 6). Decisions
-are numbered so that the code can cite them: **M** for the model and
-its sources, **V** for the view, **W** for the work plan. The questions
-the first draft left open are settled in
-[Part 5](#part-5--settled-questions).
+**Status.** Built on branch `v1.8.0`: W1 to W10 are done, and W11,
+the release review, is next (Part 6). Where building changed a
+decision, the decision says so. Decisions are numbered so that the
+code can cite them: **M** for the model and its sources, **V** for the
+view, **W** for the work plan. The questions the first draft left open
+are settled in [Part 5](#part-5--settled-questions).
 
 ---
 

@@ -136,9 +136,16 @@ export class Stage {
             box.update(dt);
             this.boxBind.pose();
             moved = true;
-            // Taken apart says how to put it back once the last part is out.
-            if (!box.isBusy() && this.apart) {
-                this.panel.setStatus('view-apart-done');
+            if (!box.isBusy()) {
+                // Taken apart says how to put it back once the last part is out.
+                if (this.apart) {
+                    this.panel.setStatus('view-apart-done');
+                }
+                // A view the page chose takes in the parts where they stopped.
+                if (this.fitted) {
+                    const f = this.framing(this.fitted);
+                    this.viewer.flyTo(f.position, f.target, 0.5);
+                }
             }
         }
         if (moved) {
@@ -197,14 +204,15 @@ export class Stage {
 
     /**
      * Where the camera goes for a view, framing its parts where they are
-     * going to be: taken apart, all out; otherwise, all in place.
+     * going to be: Taken apart, all out; otherwise where the box will
+     * have them once what is moving stops.
      * @param {string} id The view.
      * @return {{position: !Array<number>, target: !Array<number>}}
      */
     framing(id) {
         const view = VIEWS.find((v) => v.id == id);
-        const out = id == 'apart';
-        this.boxBind.pose(() => out ? 1 : 0);
+        const box = this.panel.box;
+        this.boxBind.pose(id == 'apart' ? () => 1 : (unit) => box.destination(unit));
         const which = view.subject == 'panel' ?
               (node) => {
                   const name = this.boxBind.modelName(node);

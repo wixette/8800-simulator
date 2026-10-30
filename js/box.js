@@ -199,6 +199,31 @@ export class Box {
         return this.at[unit];
     }
 
+    /**
+     * Where a unit will be once the moves now under way, and the plan,
+     * are done: what a view frames.
+     * @param {string} unit The unit.
+     * @return {number} 0 in, 1 out.
+     */
+    destination(unit) {
+        const going = this.going.get(unit);
+        let at = going === undefined ? this.at[unit] : going;
+        for (const [planned, to] of this.plan) {
+            if (planned == unit) {
+                at = to;
+            }
+        }
+        const moves = this.refits.get(unit);
+        if (moves) {
+            for (const move of moves) {
+                if ('to' in move) {
+                    at = move.to;
+                }
+            }
+        }
+        return at;
+    }
+
     /** @param {string} unit @return {boolean} Whether it is in, and still. */
     isIn(unit) {
         return this.at[unit] == 0 && !this.going.has(unit) && !this.refits.has(unit);
