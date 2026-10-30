@@ -17,6 +17,7 @@
  */
 
 import {Dropdown} from './dropdown.js';
+import {MESSAGES_3D} from './l10n-3d.js';
 
 /**
  * Simple namespace.
@@ -3333,6 +3334,9 @@ l10n.restoreLocale = function() {
  * @type {?function()}
  */
 l10n.onUpdate = null;
+
+// The 3D view's and the box's messages, kept in their own file.
+Object.assign(l10n.MESSAGES, MESSAGES_3D);
 
 /**
  * Looks up one message in the current locale.

@@ -78,11 +78,17 @@ export async function versioned(h) {
     const fetched = (f) => /^(package\.json|examples\/|roms\/)/.test(f);
     const unversioned = files.filter((f) => !fetched(f) && !f.endsWith('?v=' + version));
     verify('every file is asked for with ?v=' + version, unversioned.length == 0, unversioned.join(' '));
-    const modules = files.filter((f) => f.startsWith('js/'));
+    // The 3D view's modules and three.js wait until the view is first
+    // opened (docs/3d-view.md, M5); every other module comes with the page.
+    const lazy = (f) => /^(\.\/)?(js\/view3d\/|vendor\/three\/)|^three(\/|$)/.test(f);
+    const modules = files.filter((f) => f.startsWith('js/') || f.startsWith('vendor/'));
     const mapped = await js(`Object.keys(JSON.parse(document.querySelector(
-        'script[type=importmap]').textContent).imports).length`);
-    verify('every module in the import map is loaded', modules.length == mapped,
-           modules.length + ' of ' + mapped);
+        'script[type=importmap]').textContent).imports)`);
+    const eager = mapped.filter((f) => !lazy(f));
+    verify('every module in the import map that the page needs at once is loaded',
+           modules.length == eager.length, modules.length + ' of ' + eager.length);
+    verify('and none of the 3D view\'s, nor three.js, until it is opened',
+           !modules.some(lazy), modules.filter(lazy).join(' '));
     const names = modules.map((f) => f.replace(/\?.*/, ''));
     verify('each once, by one name', new Set(names).size == names.length, names.join(' '));
     verify('and the examples are fetched too, without a version',

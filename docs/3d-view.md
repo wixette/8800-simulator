@@ -306,17 +306,20 @@ One menu (P10: items only), whose button names the view on show:
   status line says what blocks it ("Take the lid off first"). Putting
   a unit back that others depend on says which must go back first.
 - **Taken apart** in the Views menu takes every unit out, in order,
-  and flies the camera to fit the parts out on the table. Choosing any
-  other view puts it back together, in reverse.
+  and flies the camera to fit the parts out on the table. It is the
+  one view that moves parts: leaving it for another view puts them all
+  back, in reverse. The other views never move a part, so a lid taken
+  off by hand stays off while the reader looks from above.
 - **Labels:** hovering (or tapping, on a phone) a part shows its name
   and one line on what it does, translated (P5: the panel's own
   lettering stays as it is). Clicking an operable part does it. The
   cursor and the label say what a click will do.
 - **The Memory menu shows in the cage.** The fitted cards follow the
   memory size (with the CPU, SIO and 2SIO always in: the 1K board for
-  256 B, one 88-4MCS in its place for 4 KB, two for 8 KB). Changing the size already powers the machine off; while
-  any unit is out, the menu greys and says to put the machine back
-  together first.
+  256 B, one 88-4MCS in its place for 4 KB, two for 8 KB). Changing
+  the size already powers the machine off, and it works at any time:
+  with the lid on the cards change out of sight; with it off they are
+  seen to (V4a).
 
 **Should the machine run while taken apart? No**, as in the Leibniz
 simulator and the model's own rule:
@@ -336,6 +339,30 @@ simulator and the model's own rule:
 - The one licence taken, which the docs name: on the real machine the
   lid could come off a running box. Here it can't, but Case hidden
   shows the same thing.
+
+### V4a — The box and the power, in every way the page switches the machine
+
+The simulator switches the machine on and off in many ways besides
+the OFF/ON switch, and the 2D view shows no box at all. The box's
+state lives in the page, not in the 3D view (`js/box.js`, one
+`panel.box`, loaded with the page), so every one of those ways can
+ask it, and it obeys one rule: **the 2D view always shows a whole
+machine, and nothing switches on a machine that is taken apart.**
+
+| What happens | With the box taken apart (anything out, or moving) |
+|---|---|
+| The OFF/ON switch thrown to ON, on the 2D panel, the Switch Board Helper or the 3D panel | **Refused**: the lever stays at OFF, and the status line names a part that is out. This can only happen in the 3D view, where the parts are in sight. |
+| A load that switches the machine on: Load menu (hex bytes, a binary file, 4K BASIC, the examples), Assemble, a program link | The box is **put back together at once**, then the machine goes on, and the status line says so ("…was put back together and switched on first", in place of "…was switched on first"). The reader asked for a program; refusing it over a view they may not be looking at would be wrong. |
+| Switching to the 2D view | The box is **put back together at once** (it is off, so nothing else changes). The 2D panel never stands for a machine with its cards out. |
+| A link with `view=3d`, or a reload | The box starts whole, as the machine starts afresh. |
+| The Memory menu (switches the machine off) | Allowed. The cards follow the new size; the rest of the box stays as it is. |
+| OFF, by the switch or by the Memory menu | Nothing changes in the box. |
+| Any other switch on a machine that is off | As today: it does nothing, and says the machine is off. Address switches still latch. |
+
+Taking anything out needs the machine off (V4); the status line says
+"Switch the machine OFF before taking it apart". All of this is in
+`tests/box.test.js` and `tests/seam.test.js`, which also hold every
+caller of `panel.onPowerOn()` to the two that ask the box.
 
 ### V5 — The 3D front panel works as the 2D one
 
