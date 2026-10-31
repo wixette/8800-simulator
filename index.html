@@ -20,17 +20,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!-- What a search result shows under the title. In English only, as
          the page is before any script runs, which is how it is read. -->
-    <meta name="description" content="The 1975 Altair 8800 in your browser: toggle programs in on its front panel, write them in 8080 assembly, and run Microsoft&#39;s original 4K BASIC on a Teletype.">
+    <meta name="description" content="The 1975 Altair 8800 in your browser: toggle programs in on its panel, take it apart in 3D, write 8080 assembly, and run Microsoft&#39;s 4K BASIC on a Teletype.">
     <title id="title" class="l10n">Altair 8800 Simulator: Front Panel, 8080 Assembler and 4K BASIC</title>
     <!-- The icons, all drawn from images/8800-simulator-logo.svg by npm
          run icons (tools/icons.mjs). A browser that takes an SVG icon
          takes the second; sizes="32x32" on the first keeps Chrome from
          picking the .ico over it. -->
-    <link rel="icon" href="images/favicon.ico?v=1.8.0" sizes="32x32">
-    <link rel="icon" href="images/favicon.svg?v=1.8.0" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="images/apple-touch-icon.png?v=1.8.0">
-    <link rel="manifest" href="manifest.webmanifest?v=1.8.0">
-    <link rel="stylesheet" href="css/style.css?v=1.8.0">
+    <link rel="icon" href="images/favicon.ico?v=1.8.1" sizes="32x32">
+    <link rel="icon" href="images/favicon.svg?v=1.8.1" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png?v=1.8.1">
+    <link rel="manifest" href="manifest.webmanifest?v=1.8.1">
+    <link rel="stylesheet" href="css/style.css?v=1.8.1">
     <!-- Every file name here carries the version (?v=), and so does each
          module the scripts import, through this map: a release asks for
          new names, so no cache can serve an old file to a new page.
@@ -39,46 +39,47 @@
     <script type="importmap">
     {
       "imports": {
-        "./js/8080.js": "./js/8080.js?v=1.8.0",
-        "./js/app.js": "./js/app.js?v=1.8.0",
-        "./js/asm8080.js": "./js/asm8080.js?v=1.8.0",
-        "./js/asmtab.js": "./js/asmtab.js?v=1.8.0",
-        "./js/box.js": "./js/box.js?v=1.8.0",
-        "./js/dialog.js": "./js/dialog.js?v=1.8.0",
-        "./js/dropdown.js": "./js/dropdown.js?v=1.8.0",
-        "./js/l10n-3d.js": "./js/l10n-3d.js?v=1.8.0",
-        "./js/l10n.js": "./js/l10n.js?v=1.8.0",
-        "./js/link.js": "./js/link.js?v=1.8.0",
-        "./js/main.js": "./js/main.js?v=1.8.0",
-        "./js/panel-debug.js": "./js/panel-debug.js?v=1.8.0",
-        "./js/panel-dock.js": "./js/panel-dock.js?v=1.8.0",
-        "./js/panel-front.js": "./js/panel-front.js?v=1.8.0",
-        "./js/panel-link.js": "./js/panel-link.js?v=1.8.0",
-        "./js/panel-load.js": "./js/panel-load.js?v=1.8.0",
-        "./js/panel-tty.js": "./js/panel-tty.js?v=1.8.0",
-        "./js/panel-tutorial.js": "./js/panel-tutorial.js?v=1.8.0",
-        "./js/panel-view.js": "./js/panel-view.js?v=1.8.0",
-        "./js/panel.js": "./js/panel.js?v=1.8.0",
-        "./js/sim8800.js": "./js/sim8800.js?v=1.8.0",
-        "./js/sio.js": "./js/sio.js?v=1.8.0",
-        "./js/teletype.js": "./js/teletype.js?v=1.8.0",
-        "./js/view3d/boxBind.js": "./js/view3d/boxBind.js?v=1.8.0",
-        "./js/view3d/framing.js": "./js/view3d/framing.js?v=1.8.0",
-        "./js/view3d/panelBind.js": "./js/view3d/panelBind.js?v=1.8.0",
-        "./js/view3d/view3d.js": "./js/view3d/view3d.js?v=1.8.0",
-        "./js/view3d/viewer.js": "./js/view3d/viewer.js?v=1.8.0",
-        "./js/view3d/views.js": "./js/view3d/views.js?v=1.8.0",
-        "./vendor/three/build/three.core.js": "./vendor/three/build/three.core.js?v=1.8.0",
-        "./vendor/three/build/three.module.js": "./vendor/three/build/three.module.js?v=1.8.0",
-        "./vendor/three/examples/jsm/controls/OrbitControls.js": "./vendor/three/examples/jsm/controls/OrbitControls.js?v=1.8.0",
-        "./vendor/three/examples/jsm/loaders/GLTFLoader.js": "./vendor/three/examples/jsm/loaders/GLTFLoader.js?v=1.8.0",
-        "./vendor/three/examples/jsm/utils/BufferGeometryUtils.js": "./vendor/three/examples/jsm/utils/BufferGeometryUtils.js?v=1.8.0",
-        "./vendor/three/examples/jsm/utils/SkeletonUtils.js": "./vendor/three/examples/jsm/utils/SkeletonUtils.js?v=1.8.0",
-        "three": "./vendor/three/build/three.module.js?v=1.8.0",
-        "three/addons/controls/OrbitControls.js": "./vendor/three/examples/jsm/controls/OrbitControls.js?v=1.8.0",
-        "three/addons/loaders/GLTFLoader.js": "./vendor/three/examples/jsm/loaders/GLTFLoader.js?v=1.8.0",
-        "three/addons/utils/BufferGeometryUtils.js": "./vendor/three/examples/jsm/utils/BufferGeometryUtils.js?v=1.8.0",
-        "three/addons/utils/SkeletonUtils.js": "./vendor/three/examples/jsm/utils/SkeletonUtils.js?v=1.8.0"
+        "./js/8080.js": "./js/8080.js?v=1.8.1",
+        "./js/app.js": "./js/app.js?v=1.8.1",
+        "./js/asm8080.js": "./js/asm8080.js?v=1.8.1",
+        "./js/asmtab.js": "./js/asmtab.js?v=1.8.1",
+        "./js/box.js": "./js/box.js?v=1.8.1",
+        "./js/dialog.js": "./js/dialog.js?v=1.8.1",
+        "./js/dropdown.js": "./js/dropdown.js?v=1.8.1",
+        "./js/l10n-3d.js": "./js/l10n-3d.js?v=1.8.1",
+        "./js/l10n.js": "./js/l10n.js?v=1.8.1",
+        "./js/link.js": "./js/link.js?v=1.8.1",
+        "./js/main.js": "./js/main.js?v=1.8.1",
+        "./js/panel-debug.js": "./js/panel-debug.js?v=1.8.1",
+        "./js/panel-dock.js": "./js/panel-dock.js?v=1.8.1",
+        "./js/panel-front.js": "./js/panel-front.js?v=1.8.1",
+        "./js/panel-link.js": "./js/panel-link.js?v=1.8.1",
+        "./js/panel-load.js": "./js/panel-load.js?v=1.8.1",
+        "./js/panel-tty.js": "./js/panel-tty.js?v=1.8.1",
+        "./js/panel-tutorial.js": "./js/panel-tutorial.js?v=1.8.1",
+        "./js/panel-view.js": "./js/panel-view.js?v=1.8.1",
+        "./js/panel.js": "./js/panel.js?v=1.8.1",
+        "./js/sim8800.js": "./js/sim8800.js?v=1.8.1",
+        "./js/sio.js": "./js/sio.js?v=1.8.1",
+        "./js/teletype.js": "./js/teletype.js?v=1.8.1",
+        "./js/view3d/boxBind.js": "./js/view3d/boxBind.js?v=1.8.1",
+        "./js/view3d/framing.js": "./js/view3d/framing.js?v=1.8.1",
+        "./js/view3d/panelBind.js": "./js/view3d/panelBind.js?v=1.8.1",
+        "./js/view3d/stage-state.js": "./js/view3d/stage-state.js?v=1.8.1",
+        "./js/view3d/view3d.js": "./js/view3d/view3d.js?v=1.8.1",
+        "./js/view3d/viewer.js": "./js/view3d/viewer.js?v=1.8.1",
+        "./js/view3d/views.js": "./js/view3d/views.js?v=1.8.1",
+        "./vendor/three/build/three.core.js": "./vendor/three/build/three.core.js?v=1.8.1",
+        "./vendor/three/build/three.module.js": "./vendor/three/build/three.module.js?v=1.8.1",
+        "./vendor/three/examples/jsm/controls/OrbitControls.js": "./vendor/three/examples/jsm/controls/OrbitControls.js?v=1.8.1",
+        "./vendor/three/examples/jsm/loaders/GLTFLoader.js": "./vendor/three/examples/jsm/loaders/GLTFLoader.js?v=1.8.1",
+        "./vendor/three/examples/jsm/utils/BufferGeometryUtils.js": "./vendor/three/examples/jsm/utils/BufferGeometryUtils.js?v=1.8.1",
+        "./vendor/three/examples/jsm/utils/SkeletonUtils.js": "./vendor/three/examples/jsm/utils/SkeletonUtils.js?v=1.8.1",
+        "three": "./vendor/three/build/three.module.js?v=1.8.1",
+        "three/addons/controls/OrbitControls.js": "./vendor/three/examples/jsm/controls/OrbitControls.js?v=1.8.1",
+        "three/addons/loaders/GLTFLoader.js": "./vendor/three/examples/jsm/loaders/GLTFLoader.js?v=1.8.1",
+        "three/addons/utils/BufferGeometryUtils.js": "./vendor/three/examples/jsm/utils/BufferGeometryUtils.js?v=1.8.1",
+        "three/addons/utils/SkeletonUtils.js": "./vendor/three/examples/jsm/utils/SkeletonUtils.js?v=1.8.1"
       }
     }
     </script>
@@ -120,8 +121,8 @@
         <div id="header-title">
           <picture>
             <source media="(max-width: 700px)"
-                    srcset="images/8800-simulator-logo.svg?v=1.8.0">
-            <img id="header-logo" class="logo" src="images/8800-simulator-logo-text-white.svg?v=1.8.0"
+                    srcset="images/8800-simulator-logo.svg?v=1.8.1">
+            <img id="header-logo" class="logo" src="images/8800-simulator-logo-text-white.svg?v=1.8.1"
                  alt="Altair 8800 Simulator" draggable="false">
           </picture>
         </div>
@@ -203,22 +204,28 @@
 
         <svg id="panel" width="100%" height="100%" viewBox="0 0 1440 644" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;">
           <!-- Panel artwork. Edit images/panel.svg to change it. -->
-          <image x="0" y="0" width="1440" height="644" href="images/panel.svg?v=1.8.0"/>
+          <image x="0" y="0" width="1440" height="644" href="images/panel.svg?v=1.8.1"/>
 
           <!-- Sprites cloned by panel.js for every LED and switch. -->
-          <image id="led-on" x="0" y="0" width="20" height="20" href="images/led-on.svg?v=1.8.0"/>
-          <image id="led-off" x="0" y="0" width="20" height="20" href="images/led-off.svg?v=1.8.0"/>
-          <image id="switch-up" x="0" y="0" width="20" height="30" href="images/switch-up.svg?v=1.8.0"/>
-          <image id="switch-mid" x="0" y="0" width="20" height="30" href="images/switch-mid.svg?v=1.8.0"/>
-          <image id="switch-down" x="0" y="0" width="20" height="30" href="images/switch-down.svg?v=1.8.0"/>
+          <image id="led-on" x="0" y="0" width="20" height="20" href="images/led-on.svg?v=1.8.1"/>
+          <image id="led-off" x="0" y="0" width="20" height="20" href="images/led-off.svg?v=1.8.1"/>
+          <image id="switch-up" x="0" y="0" width="20" height="30" href="images/switch-up.svg?v=1.8.1"/>
+          <image id="switch-mid" x="0" y="0" width="20" height="30" href="images/switch-mid.svg?v=1.8.1"/>
+          <image id="switch-down" x="0" y="0" width="20" height="30" href="images/switch-down.svg?v=1.8.1"/>
         </svg>
 
         <!-- The whole machine in 3D, drawn by js/view3d/ once it is first
              chosen: three.js and the model load only then (M5). -->
-        <div id="stage3d" data-src="model/altair-8800.glb?v=1.8.0" hidden>
+        <div id="stage3d" data-src="model/altair-8800.glb?v=1.8.1" hidden>
           <div id="stage3d-progress" class="stage3d-progress" hidden><div></div></div>
           <p id="stage3d-message" class="stage3d-message" hidden></p>
           <div id="part-label" class="part-label" hidden></div>
+          <!-- There whenever a part is out: the one way back from anything
+               taken apart, by hand or at once (V4). -->
+          <button id="box-restore" class="box-restore" type="button" hidden>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"/></svg>
+            <span id="view-put-back" class="l10n">Put it all back</span>
+          </button>
         </div>
 
         <!-- The Switch Board Helper: the panel's switches again, large
@@ -393,7 +400,7 @@
           </header>
           <div class="lesson-intro">
             <figure class="lesson-photo">
-              <img src="images/tutorial/altair-8800-and-teletype.jpg?v=1.8.0" width="960" height="720" alt="" loading="lazy" draggable="false">
+              <img src="images/tutorial/altair-8800-and-teletype.jpg?v=1.8.1" width="960" height="720" alt="" loading="lazy" draggable="false">
               <figcaption><span id="tut-meet-photo" class="l10n">An Altair 8800 beside a Model 33 Teletype.</span>
                 <span class="photo-credit"><span id="tutorial-photo-by" class="l10n">Photo:</span> <a href="https://commons.wikimedia.org/wiki/File:Altair_8800_and_Model_33_ASR_Teletype.jpg" target="_blank" rel="noopener">Tim Colegrove</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a></span></figcaption>
             </figure>
@@ -418,7 +425,7 @@
           </ol>
           <h4 id="tut-meet-g3" class="step-group l10n">Your turn</h4>
           <ol class="steps">
-            <li><span id="tut-meet-12" class="l10n">Now take it apart yourself: switch OFF, click the lid, then a card. Views ▸ Taken apart shows every part; any other view puts it back. Drag to turn it, scroll to zoom.</span></li>
+            <li><span id="tut-meet-12" class="l10n">Now take it apart yourself: switch OFF, click the lid, then a card; click a part again to put it back, or press Put it all back. Views ▸ Taken apart shows every part. Drag to turn it, scroll to zoom.</span></li>
           </ol>
         </section>
 
@@ -641,7 +648,7 @@ RUN</pre>
       </div>
       <div class="dialog-body">
         <!-- The logo names the app, so the title band only says About. -->
-        <img id="about-logo" class="logo" src="images/8800-simulator-logo-text-white.svg?v=1.8.0"
+        <img id="about-logo" class="logo" src="images/8800-simulator-logo-text-white.svg?v=1.8.1"
              alt="Altair 8800 Simulator" draggable="false">
         <p class="dialog-text about-version"><span id="about-version" class="l10n">Version</span> <span id="app-version"></span></p>
         <p id="about-desc" class="dialog-text l10n">An Altair 8800 you can switch on in a web page: its front panel, a teletype running Microsoft's 4K BASIC, an 8080 assembler, and a debugger the real one never had.</p>
@@ -676,10 +683,10 @@ RUN</pre>
       </div>
     </dialog>
 
-    <audio id="sound-beepbeep" src="audio/beepbeep.mp3?v=1.8.0"></audio>
-    <audio id="sound-switch" src="audio/switch.mp3?v=1.8.0"></audio>
-    <audio id="sound-toggle" src="audio/toggle.mp3?v=1.8.0"></audio>
+    <audio id="sound-beepbeep" src="audio/beepbeep.mp3?v=1.8.1"></audio>
+    <audio id="sound-switch" src="audio/switch.mp3?v=1.8.1"></audio>
+    <audio id="sound-toggle" src="audio/toggle.mp3?v=1.8.1"></audio>
 
-    <script type="module" src="js/main.js?v=1.8.0"></script>
+    <script type="module" src="js/main.js?v=1.8.1"></script>
   </body>
 </html>

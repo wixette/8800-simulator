@@ -1,5 +1,5 @@
 ;;; name: Bouncing light
-;;; desc: Walks a single dark bit back and forth across the data lamps, at a speed set by the sense switches.
+;;; desc: Walks a dark bit across the data lamps, at a sense-switch speed.
 ;;; device: panel
 ;
 ; RUN: one dark lamp travels from D1 up to D7, turns around, travels

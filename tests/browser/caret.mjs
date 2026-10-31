@@ -31,6 +31,10 @@ async function editorCaret(h, roomy) {
     await press('#nav-asm'); await sleep(300);
     await press('#asm-examples-button'); await sleep(500);
     await press('#asm-examples-list li[data-value="guess-letter"]'); await sleep(400);
+    // Examples fit the editor: a line that does not brings its scrollbar.
+    await js(`(() => { const s = document.getElementById('asm-source');
+        s.value = ';' + '-'.repeat(200) + '\\n' + s.value; s.dispatchEvent(new Event('input')); })()`);
+    await sleep(300);
     const layers = () => js(`(() => {
         const s = document.getElementById('asm-source');
         return {source: [s.scrollTop, s.scrollLeft],

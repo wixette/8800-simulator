@@ -837,6 +837,39 @@ a {
     margin-top: 4px;
 }
 
+.box-restore {
+    align-items: center;
+    background-color: #f90;
+    border: 0;
+    border-radius: 18px;
+    bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    color: #222;
+    cursor: pointer;
+    display: flex;
+    font: inherit;
+    font-size: 14px;
+    font-weight: bold;
+    gap: 6px;
+    left: 50%;
+    padding: 7px 16px 7px 12px;
+    position: absolute;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    z-index: 3;
+}
+
+.box-restore[hidden] {
+    display: none;
+}
+
+.box-restore:hover,
+.box-restore:focus-visible {
+    background-color: #ffb340;
+    outline: 2px solid #fff;
+    outline-offset: 1px;
+}
+
 /* The Switch Board Helper, a strip under the panel and as wide as its
    artwork (panel.fitSwitchStrip). Its tab, on its top edge, folds it
    away; folded, the tab is all that is left. */

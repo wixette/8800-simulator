@@ -42,6 +42,14 @@ test('examples/ holds the programs, each with its header', () => {
     }
 });
 
+test('every line of every example fits the editor, at 80 characters', () => {
+    for (const example of EXAMPLES) {
+        for (const [i, line] of example.text.split('\n').entries()) {
+            assert.ok([...line].length <= 80, example.id + ':' + (i + 1) + ' is too long');
+        }
+    }
+});
+
 test('examples/README.md lists every program and its bytes', () => {
     const readme = fs.readFileSync(
         path.join(EXAMPLES_DIR, 'README.md'), 'utf8');

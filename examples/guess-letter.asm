@@ -1,5 +1,5 @@
 ;;; name: Guess my letter
-;;; desc: The machine picks a letter and tells you whether yours is higher or lower, counting how many tries it takes you.
+;;; desc: Picks a letter, says higher or lower, and counts your tries.
 ;;; device: teletype
 ;
 ; RUN, and play on the Teletype. It asks for a key to start, then

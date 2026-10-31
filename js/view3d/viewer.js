@@ -69,6 +69,16 @@ const SHADOW_MIN_RADIUS = 0.004;
 /** Below this rate while anything moves, quality drops to lite, once. */
 const LITE_BELOW_FPS = 25;
 
+/**
+ * How near the camera comes to what it looks at, in metres: the machine's
+ * middle, a little over 0.2 m behind its front panel, so a part still
+ * has enough round it to tell what it is.
+ */
+const MIN_DISTANCE = 0.35;
+
+/** How far it goes: the machine small, but not lost. */
+const MAX_DISTANCE = 2;
+
 /** @return {boolean} Whether the reader asked for less motion. */
 export function reducedMotion() {
     return !!(window.matchMedia &&
@@ -131,8 +141,8 @@ export class Viewer {
         this.controls = new OrbitControls(this.camera, this.canvas);
         this.controls.enableDamping = true;
         this.controls.screenSpacePanning = true;
-        this.controls.minDistance = 0.12;
-        this.controls.maxDistance = 3;
+        this.controls.minDistance = MIN_DISTANCE;
+        this.controls.maxDistance = MAX_DISTANCE;
         // A little below the table, never from underneath.
         this.controls.maxPolarAngle = Math.PI * 0.62;
         this.controls.addEventListener('change', () => this.invalidate());

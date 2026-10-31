@@ -183,9 +183,15 @@ panel.makePressable = function(elem, action) {
  */
 panel.showTab = function(name) {
     var arriving = name == 'asm' && !(panel.dock.tab == 'asm' && panel.dock.open);
+    var changed = name != panel.dock.tab;
     panel.dock.tab = name;
     panel.dock.open = true;
     panel.applyDock();
+    // The tabs share one scroll: a tab opens at its top, not at however
+    // far down the last was read. The Tutorial goes back to its place.
+    if (changed && name != 'ref') {
+        document.getElementById('dock-body').scrollTop = 0;
+    }
     // Opening the Assembler is coming to look: its PC line, once.
     if (arriving) {
         panel.followPc(true);

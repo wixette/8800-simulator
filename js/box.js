@@ -66,6 +66,14 @@ for (const card of CARD_IDS) {
 }
 
 /**
+ * The units a click takes out only once what they need is already out,
+ * rather than clearing the way: the dress panel lies among the switches,
+ * and a click that missed one must not take the machine to pieces.
+ * @type {!Array<string>}
+ */
+export const WAITS = ['panel.dress'];
+
+/**
  * What must be in before a unit can go back, besides what depends on
  * it: the data cable's plug goes onto the CPU card's wafer.
  * @type {!Object<string, !Array<string>>}
@@ -153,8 +161,8 @@ export class Box {
          */
         this.refits = new Map();
         /**
-         * What "take it all apart" or "put it all back" still has to do,
-         * one unit after another: [unit, 0 or 1].
+         * What a click, "take it all apart" or "put it all back" still has
+         * to do, one unit after another: [unit, 0 or 1].
          * @private @type {!Array<!Array<*>>}
          */
         this.plan = [];
@@ -162,6 +170,8 @@ export class Box {
         this.moveS = MOVE_S;
         /** Whether what is going is the plan's, at its pace. @private */
         this.planning = false;
+        /** Whether Take it all apart was the last word on the box. @private */
+        this.takenApart = false;
         /** The memory size the cards are fitted for. */
         this.memSize = memSize;
         /**
@@ -256,6 +266,26 @@ export class Box {
         return !this.isBusy() && this.units().every((unit) => this.at[unit] == 0);
     }
 
+    /** @return {boolean} Whether every unit will be in once what moves stops. */
+    endsWhole() {
+        return this.units().every((unit) => this.destination(unit) == 0);
+    }
+
+    /** @return {boolean} Whether every unit is out and nothing moves. */
+    isAllOut() {
+        return !this.isBusy() && this.units().every((unit) => this.at[unit] == 1);
+    }
+
+    /**
+     * Whether the box is taken apart as a whole, by takeAllApart(), and
+     * has not since been put back together, however that came about: the
+     * one place the Taken apart view asks.
+     * @return {boolean}
+     */
+    isTakenApart() {
+        return this.takenApart && !this.endsWhole();
+    }
+
     /**
      * Why the machine cannot be switched on now: anything not in place.
      * @return {?Refusal} Why, or null if it can be.
@@ -264,13 +294,18 @@ export class Box {
         if (this.isWhole()) {
             return null;
         }
+        // On its way back together: there is nothing to do but wait.
+        if (this.endsWhole()) {
+            return refusal('box-busy');
+        }
         const out = this.units().find((unit) => this.at[unit] != 0 ||
                                       this.going.has(unit) || this.refits.has(unit));
         return refusal('box-power-apart', out);
     }
 
     /**
-     * Why a unit cannot come out now.
+     * Why a click cannot take a unit out now. What is in its way is no
+     * reason: that comes out first (routeOut).
      * @param {string} unit The unit.
      * @param {boolean} poweredOn Whether the machine is on.
      * @return {?Refusal} Why, or null if it can.
@@ -283,29 +318,60 @@ export class Box {
             return refusal('box-busy');
         }
         const blocking = PREREQS[unit].filter((other) => !this.isOut(other));
-        return blocking.length ? refusal('box-out-first', blocking[0]) : null;
+        return WAITS.includes(unit) && blocking.length ? refusal('box-out-first', blocking[0]) : null;
     }
 
     /**
-     * Why a unit cannot go back now.
+     * Why a click cannot put a unit back now. What is in its way is no
+     * reason: that goes back first (routeIn).
      * @param {string} unit The unit.
      * @return {?Refusal} Why, or null if it can.
      */
     whyNotIn(unit) {
-        if (this.isBusy()) {
-            return refusal('box-busy');
-        }
-        const blocking = this.units().filter((other) =>
-            PREREQS[other].includes(unit) && !this.isIn(other))
-              .concat((NEEDS_IN[unit] || []).filter((other) => !this.isIn(other)));
-        return blocking.length ? refusal('box-in-first', blocking[0]) : null;
+        return this.isBusy() ? refusal('box-busy') : null;
     }
 
     /**
-     * Starts a unit on its way out.
+     * What has to come out for a unit to, in order.
+     * @param {string} unit The unit.
+     * @return {!Array<string>} The units not yet out, ending with it.
+     */
+    routeOut(unit) {
+        const route = [];
+        const visit = (next) => {
+            if (!this.isOut(next) && !route.includes(next)) {
+                PREREQS[next].forEach(visit);
+                route.push(next);
+            }
+        };
+        visit(unit);
+        return route;
+    }
+
+    /**
+     * What has to go back for a unit to, in order: what depends on it,
+     * and what it needs in.
+     * @param {string} unit The unit.
+     * @return {!Array<string>} The units not yet in, ending with it.
+     */
+    routeIn(unit) {
+        const route = [];
+        const visit = (next) => {
+            if (!this.isIn(next) && !route.includes(next)) {
+                this.units().reverse().filter((other) => PREREQS[other].includes(next))
+                    .concat(NEEDS_IN[next] || []).forEach(visit);
+                route.push(next);
+            }
+        };
+        visit(unit);
+        return route;
+    }
+
+    /**
+     * Takes a unit out, after whatever is in its way.
      * @param {string} unit The unit.
      * @param {boolean} poweredOn Whether the machine is on.
-     * @return {?Refusal} Why not, or null if it is coming out.
+     * @return {?Refusal} Why not, or null if it has started.
      */
     takeOut(unit, poweredOn) {
         if (this.isOut(unit)) {
@@ -315,15 +381,17 @@ export class Box {
         if (why) {
             return why;
         }
-        this.going.set(unit, 1);
-        this.changed();
+        this.moveS = MOVE_S;
+        this.plan = this.routeOut(unit).map((next) => [next, 1]);
+        this.step();
         return null;
     }
 
     /**
-     * Starts a unit on its way back in.
+     * Puts a unit back, after whatever has to go first: by itself at
+     * MOVE_S, several at QUICK_MOVE_S, as when the whole box goes back.
      * @param {string} unit The unit.
-     * @return {?Refusal} Why not, or null if it is going in.
+     * @return {?Refusal} Why not, or null if it has started.
      */
     putBack(unit) {
         if (this.isIn(unit)) {
@@ -333,8 +401,12 @@ export class Box {
         if (why) {
             return why;
         }
-        this.going.set(unit, 0);
-        this.changed();
+        const route = this.routeIn(unit);
+        this.moveS = route.length > 1 ? QUICK_MOVE_S : MOVE_S;
+        this.plan = route.map((next) => [next, 0]);
+        // The last of Taken apart: what comes out after this is by hand.
+        this.takenApart = this.takenApart && !this.endsWhole();
+        this.step();
         return null;
     }
 
@@ -352,6 +424,7 @@ export class Box {
             return refusal('box-busy');
         }
         this.moveS = MOVE_S;
+        this.takenApart = true;
         this.plan = this.units().filter((unit) => !this.isOut(unit))
             .map((unit) => [unit, 1]);
         this.step();
@@ -368,10 +441,21 @@ export class Box {
             return refusal('box-busy');
         }
         this.moveS = quick ? QUICK_MOVE_S : MOVE_S;
+        this.takenApart = false;
         this.plan = this.units().reverse().filter((unit) => !this.isIn(unit))
             .map((unit) => [unit, 0]);
         this.step();
         return null;
+    }
+
+    /**
+     * Stops a plan where it has got to: what is moving finishes, and the
+     * rest stays as it is. To go the other way from part of the way
+     * through, rather than to the end first.
+     */
+    stopPlan() {
+        this.plan = [];
+        this.snap();
     }
 
     /**
@@ -384,6 +468,7 @@ export class Box {
         const apart = !this.isWhole();
         this.plan = [];
         this.planning = false;
+        this.takenApart = false;
         this.moveS = MOVE_S;
         this.going.clear();
         this.refits.clear();
@@ -408,20 +493,19 @@ export class Box {
      * those no longer wanted come up and leave, those that change slot
      * come up, move across and go down, and new ones come down into
      * their slots. A card that was out stays out, in its new slot.
+     * Anything moving finishes first, so that no unit is left part of
+     * the way out, and a plan is carried through.
      * @param {number} memSize The new memory size, in bytes.
      */
     setMemSize(memSize) {
+        this.snap();
         this.memSize = memSize;
         const want = fittedFor(memSize);
         const seen = !this.isIn('case.top');
-        this.plan = [];
-        this.planning = false;
-        this.moveS = MOVE_S;
         for (const card of CARD_IDS) {
             const unit = 'card.' + card;
             const now = this.slots[card];
             const next = want[card] || null;
-            this.going.delete(unit);
             if (!seen) {
                 this.slots[card] = next;
                 this.at[unit] = 0;
@@ -449,8 +533,8 @@ export class Box {
      */
     update(dt) {
         const step = dt / MOVE_S;
-        // The units of a plan move at its pace; one taken out or put
-        // back by itself, and the cards a refit moves, at MOVE_S.
+        // The units of a plan move at its pace; the cards a refit moves
+        // at MOVE_S.
         const planned = dt / this.moveS;
         let moved = false;
         let ended = false;

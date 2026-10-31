@@ -32,13 +32,15 @@
  * stage so that the band is topShare of the front's height on every
  * screen (framing.js, frameShowingTop). Taken apart looks from the
  * right and behind, where the cards show their chips, not their bare
- * backs, and the lifted lid is off to one side.
- * @type {!Array<{id: string, dir: !Array<number>, topShare?: number}>}
+ * backs, and the lifted lid is off to one side. Inside is the one view
+ * that brings a Show: from above, a closed lid shows only a lid (V3).
+ * @type {!Array<{id: string, dir: !Array<number>, topShare?: number,
+ *                 show?: string}>}
  */
 export const VIEWS = [
     {id: 'front', dir: [0, 0.3, 1], topShare: 0.15},
     {id: 'whole', dir: [0.75, 0.62, 1]},
-    {id: 'above', dir: [0, 1, 0.42]},
+    {id: 'above', dir: [0, 1, 0.42], show: 'case-faded'},
     {id: 'rear', dir: [-0.55, 0.42, -1]},
     {id: 'apart', dir: [1, 0.9, -0.3]},
 ];

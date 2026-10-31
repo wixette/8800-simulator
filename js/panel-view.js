@@ -85,15 +85,15 @@ panel.initView = function() {
     panel.has3d = panel.canDraw3d();
     panel.VIEWS.forEach(function(view) {
         var tab = document.getElementById('view-' + view);
-        panel.makePressable(tab, function(byKey) {
-            panel.chooseView(view, byKey);
+        panel.makePressable(tab, function() {
+            panel.chooseView(view);
         });
         tab.addEventListener('keydown', function(event) {
             // The toggle is a pair of tabs: the arrows move between them.
             if (event.key == 'ArrowLeft' || event.key == 'ArrowRight') {
                 event.preventDefault();
                 var other = view == '2d' ? '3d' : '2d';
-                panel.chooseView(other, true);
+                panel.chooseView(other);
                 document.getElementById('view-' + other).focus();
             }
         }, false);
@@ -113,9 +113,8 @@ panel.initView = function() {
 /**
  * When the reader presses a tab of the toggle.
  * @param {string} view '2d' or '3d'.
- * @param {boolean=} byKey Whether by the keyboard.
  */
-panel.chooseView = function(view, byKey) {
+panel.chooseView = function(view) {
     if (view == '3d' && !panel.has3d) {
         panel.setStatus('view3d-no-webgl', {}, 'warn');
         return;
@@ -156,7 +155,7 @@ panel.setView = function(view, save) {
         panel.refreshViewSwitch();
         panel.open3d();
     } else {
-        if (panel.stage3d && panel.stage3d.hide) {
+        if (panel.stage3d) {
             panel.stage3d.hide();
         }
         // The 2D panel always stands for a whole machine (V4a).
@@ -209,7 +208,10 @@ panel.open3d = function() {
             message.hidden = true;
             if (panel.view == '3d') {
                 stage.show();
-                panel.setStatus('view3d-ready');
+                // Not over what was said since: a link's program, say.
+                if (panel.statusId == 'view3d-loading') {
+                    panel.setStatus('view3d-ready');
+                }
             }
         });
     }).catch(function(e) {
@@ -268,29 +270,34 @@ panel.refreshViewSwitch = function() {
     three.classList.toggle('has-news', !seen && panel.has3d);
     document.getElementById('view-switch').setAttribute(
         'aria-label', l10n.getMessage('view-switch-label'));
-    var tooltips = {'view-reset': 'view-reset', 'view-zoom-in': 'view-zoom-in',
-                    'view-zoom-out': 'view-zoom-out'};
-    for (let id in tooltips) {
-        let elem = document.getElementById(id);
-        elem.title = l10n.getMessage(tooltips[id]);
-        elem.setAttribute('aria-label', l10n.getMessage(tooltips[id]));
-    }
+    ['view-reset', 'view-zoom-in', 'view-zoom-out'].forEach(function(id) {
+        var elem = document.getElementById(id);
+        elem.title = l10n.getMessage(id);
+        elem.setAttribute('aria-label', l10n.getMessage(id));
+    });
     var views = document.getElementById('views-button');
     views.title = l10n.getMessage('views-menu');
     if (panel.stage3d) {
         panel.stage3d.refreshTools();
+    } else {
+        // Named while it loads, not an empty button that fills in later.
+        document.getElementById('views-current').textContent = l10n.getMessage('view-front');
     }
 };
 
 /**
  * Something on the 3D view's top band that cannot be used yet answers
- * with why (P6).
- * @return {boolean} Whether it is still loading, and that was said.
+ * with why (P6): it is loading, or it could not be loaded.
+ * @return {boolean} Whether it is not there yet, and that was said.
  */
 panel.reportIf3dLoading = function() {
     if (panel.stage3d) {
         return false;
     }
-    panel.setStatus('view3d-wait', {}, 'warn');
+    if (panel.stage3dLoading) {
+        panel.setStatus('view3d-wait', {}, 'warn');
+    } else {
+        panel.setStatus('view3d-failed', {}, 'error');
+    }
     return true;
 };

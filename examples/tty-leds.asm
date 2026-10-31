@@ -1,5 +1,5 @@
 ;;; name: Teletype echo with lamps
-;;; desc: Echoes what you type and shows the character's ASCII code in binary on the data lamps at the same time.
+;;; desc: Echoes what you type and shows its ASCII code on the data lamps.
 ;;; device: teletype
 ;
 ; RUN, and type on the Teletype. Press A and the data lamps read
