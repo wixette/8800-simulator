@@ -488,9 +488,9 @@ is V4a in [3d-view.md](3d-view.md#v4a--the-box-and-the-power-in-every-way-the-pa
 **Put it all back** stands on the stage, in amber, whenever anything
 is out (P6: never a dead end): one press to a machine that switches
 on. Choosing a view leaves parts where the reader put them, so that a
-lid can stay off to look inside. A part that a Show fades or hides
-cannot be clicked, so when one is in the way the status line says to
-choose Everything. The state machine behind all this is
+lid can stay off to look inside. A click on a part brings out what is
+in its way first, whether a Show draws it or not, so the reader never
+has to reach a faded or hidden part. The state machine behind all this is
 [V4b](3d-view.md#v4b--the-state-machine).
 
 ### U10 — The Tutorial in chapters, with Shows that point

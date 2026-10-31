@@ -15,9 +15,9 @@ simulator's existing machine, and where it sits in the page.
 release review being the owner's hands-on passes, several rounds of
 them, and the full test suites. The Chromebook-class performance check
 was not measured; the view drops to a lighter quality below 25 fps.
-v1.8.1 followed a review of the states after a reader got lost with a
-part taken out: V4b is the state machine it wrote down, and V4's one
-rule for taking parts out came of it.
+Released in v1.8.1: a review of the states after a reader got lost
+with a part taken out, of which V4b's state machine and V4's one rule
+for taking parts out came.
 Where building changed a
 decision, the decision says so. Decisions are numbered so that the
 code can cite them: **M** for the model and its sources, **V** for the

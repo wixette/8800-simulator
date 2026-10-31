@@ -208,8 +208,8 @@ panel, not a picture of it: click a switch on it and it does what the
   focused (Tab), the arrow keys turn it, Shift and the arrows move it,
   and + and − zoom.
 - **Views** picks where to look from - the front panel, the whole
-  machine, inside from above with the case faded, the rear. **Show**, the icon beside it,
-  picks what is drawn: everything, the case faded or hidden, the
+  machine, inside from above with the case faded, the rear. **Show**,
+  the icon beside it, picks what is drawn: everything, the case faded or hidden, the
   electronics alone, or one key part - the CPU card, the memory, the
   serial cards, the bus, the power supply - glowing in a faded machine;
   it turns orange while the machine is not drawn whole. Pointing at a part names it and says what it does.
