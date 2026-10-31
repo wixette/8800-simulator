@@ -1,5 +1,5 @@
 ;;; name: Kill the Bit
-;;; desc: The classic Altair 8800 game by Dean McDaniel, 1975. A bit rotates across the upper address lamps and you kill it with the sense switch underneath.
+;;; desc: The classic 1975 game by Dean McDaniel: kill the bit with its switch.
 ;;; device: panel
 ;
 ; See kill-the-bit.md for how to play, and why you have to flip the

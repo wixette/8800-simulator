@@ -1,5 +1,5 @@
 ;;; name: Macros
-;;; desc: A lamp walks across the data lamps, in a program built from three macros.
+;;; desc: A lamp walks across the data lamps, built from three macros.
 ;;; device: panel
 ;
 ; Chapter 3 of Intel's manual: a macro names a group of instructions,

@@ -1,5 +1,5 @@
 ;;; name: Print a number
-;;; desc: Prints the byte at 0080H in decimal on the Teletype, three digits, then halts.
+;;; desc: Prints the byte at 0080H in decimal on the Teletype, then halts.
 ;;; device: teletype
 ;
 ; Turning a byte into decimal digits: how many hundreds fit, then how

@@ -260,7 +260,13 @@ and other 3D tools keep theirs.
 
 - Drag to orbit, right-drag or two fingers to pan, wheel or pinch to
   zoom. Movement is damped and limited (never from underneath, never
-  too near or too far), so the machine can't be lost.
+  too near or too far), so the machine can't be lost. The camera stays
+  0.35 m to 2 m from what it looks at, which is the machine's middle
+  until the reader moves it: near enough for a chip or a switch, with
+  enough round it to tell what it is, and far enough to see the machine
+  whole and still make it out. Every view fits inside that on every
+  stage: Taken apart, the furthest, stands about 1.7 m off at most.
+  *Changed in v1.8.1:* from 0.12 m, inside the box, and 3 m.
 - ⌂ Reset view, and a joined zoom − / + pair. Reset is the whole way
   home: the front view, the whole machine shown, every part back (V4b).
   The Home key does the same.

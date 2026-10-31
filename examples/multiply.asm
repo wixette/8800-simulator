@@ -1,5 +1,5 @@
 ;;; name: Multiply
-;;; desc: Multiplies the bytes at 0080H and 0081H by shifting and adding, and stores the 16-bit product at 0082H.
+;;; desc: Multiplies the bytes at 0080H and 0081H; the product goes at 0082H.
 ;;; device: panel
 ;
 ; The 8080 cannot multiply, so this is done as on paper, in binary: for

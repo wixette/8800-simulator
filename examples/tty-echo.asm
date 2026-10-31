@@ -1,5 +1,5 @@
 ;;; name: Teletype echo
-;;; desc: Reads a character from the Teletype and prints it straight back, the smallest program that uses the serial board.
+;;; desc: Echoes each Teletype character: the smallest serial-board program.
 ;;; device: teletype
 ;
 ; RUN, and type on the Teletype. Every key you press appears on the

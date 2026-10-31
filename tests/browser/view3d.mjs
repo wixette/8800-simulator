@@ -144,6 +144,14 @@ export default async function(h) {
     verify('Home puts it back', await js(`panel.stage3d.fitted`) === 'front');
     await press('#view-zoom-in'); await sleep(300);
     verify('the zoom buttons zoom', await js(`panel.stage3d.fitted`) === null);
+    const away = `(() => { const v = panel.stage3d.viewer; return v.camera.position.distanceTo(v.controls.target); })()`;
+    await js(`panel.stage3d.zoom(100)`); await sleep(700);
+    verify('zooming out stops with the machine still to be seen', Math.abs(await js(away) - 2) < 0.02, String(await js(away)));
+    await js(`panel.stage3d.zoom(0.01)`); await sleep(700);
+    verify('zooming in stops outside the box', Math.abs(await js(away) - 0.35) < 0.02, String(await js(away)));
+    await h.send('Input.dispatchKeyEvent', {type: 'keyDown', key: 'Home', code: 'Home', windowsVirtualKeyCode: 36});
+    await h.send('Input.dispatchKeyEvent', {type: 'keyUp', key: 'Home', code: 'Home', windowsVirtualKeyCode: 36});
+    await sleep(1000);
 
     // Back to 2D, with the box apart.
     await js(`panel.box.takeOut('case.top', false); panel.box.snap()`);
