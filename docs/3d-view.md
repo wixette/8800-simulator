@@ -16,7 +16,8 @@ release review being the owner's hands-on passes, several rounds of
 them, and the full test suites. The Chromebook-class performance check
 was not measured; the view drops to a lighter quality below 25 fps.
 v1.8.1 followed a review of the states after a reader got lost with a
-part taken out: V4b is the state machine it wrote down.
+part taken out: V4b is the state machine it wrote down, and V4's one
+rule for taking parts out came of it.
 Where building changed a
 decision, the decision says so. Decisions are numbered so that the
 code can cite them: **M** for the model and its sources, **V** for the
@@ -365,7 +366,10 @@ language, so that choosing a view never moves the tools beside it.
 - **One exception, the dress panel.** It lies among the switches on the
   machine's face, so a click that missed one would otherwise take off
   the lid and the chassis behind it. It comes out only once the chassis
-  is out, and says so. *Changed in v1.8.1:* a blocked unit used to
+  is out, and says so. What shows through the holes in it counts as
+  it: the chassis behind can be seen round the switches, and must not
+  be what a slip reaches. Unless a Show fades the panel, when a click
+  goes through it as through any faded part. *Changed in v1.8.1:* a blocked unit used to
   refuse and name what blocked it, and under Case faded or Case hidden
   that was a lid the reader could not see or click.
 - **Taken apart** in the Views menu takes every unit out, in order,

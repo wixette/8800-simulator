@@ -78,19 +78,6 @@ export const MESSAGES_3D = {
         'ko': '이것을 먼저 빼세요: {part}.',
     },
 
-    'box-in-first': {
-        'en': 'Put this back first: {part}.',
-        'es': 'Vuelve a poner esto primero: {part}.',
-        'fr': 'Remettez d’abord ceci : {part}.',
-        'de': 'Zuerst wieder einbauen: {part}.',
-        'it': 'Rimetti prima questo: {part}.',
-        'pt-BR': 'Recoloque isto primeiro: {part}.',
-        'zh': '请先装回：{part}。',
-        'zh-TW': '請先裝回：{part}。',
-        'ja': '先にこれを戻してください：{part}。',
-        'ko': '이것을 먼저 다시 넣으세요: {part}.',
-    },
-
     'reassembled-first': {
         'en': 'The machine was taken apart and off, so it was put back together and switched on first.',
         'es': 'La máquina estaba desmontada y apagada, así que primero se volvió a montar y se encendió.',
@@ -652,19 +639,6 @@ export const MESSAGES_3D = {
         'zh-TW': '已裝回：現在可以開機了。',
         'ja': '組み立て直しました。電源を入れられます。',
         'ko': '다시 조립했습니다. 이제 켤 수 있습니다.',
-    },
-
-    'box-first-unseen': {
-        'en': 'Move this first: {part}. It is faded or hidden here: choose Everything under Show to reach it.',
-        'es': 'Mueve esto primero: {part}. Aquí no se puede alcanzar: elige Todo en Mostrar.',
-        'fr': 'Déplacez d’abord ceci : {part}. Inaccessible ici : choisissez Tout dans Afficher.',
-        'de': 'Zuerst bewegen: {part}. Hier nicht erreichbar: Wählen Sie unter Zeigen „Alles“.',
-        'it': 'Sposta prima questo: {part}. Qui non è raggiungibile: scegli Tutto in Mostra.',
-        'pt-BR': 'Mova isto primeiro: {part}. Aqui não dá para alcançar: escolha Tudo em Mostrar.',
-        'zh': '请先移动：{part}。它在当前显示方式下无法点到，请在“显示”中选择“全部”。',
-        'zh-TW': '請先移動：{part}。它在目前顯示方式下無法點到，請在「顯示」中選擇「全部」。',
-        'ja': '先に動かしてください：{part}。この表示では届かないので、「表示」で「すべて」を選んでください。',
-        'ko': '먼저 옮기세요: {part}. 지금 표시로는 닿지 않으니 ‘표시’에서 ‘전체’를 고르세요.',
     },
 
     'hint-put-back-first': {

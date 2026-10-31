@@ -12,7 +12,7 @@ import test from 'node:test';
 import assert from 'node:assert';
 import fs from 'node:fs';
 import path from 'node:path';
-import {Box, CARD_IDS, MOVE_S, NEEDS_IN, PARTS, PREREQS, QUICK_MOVE_S, fittedFor} from '../js/box.js';
+import {Box, CARD_IDS, MOVE_S, NEEDS_IN, PARTS, PREREQS, QUICK_MOVE_S, WAITS, fittedFor} from '../js/box.js';
 import {l10n} from '../js/l10n.js';
 import {panel} from '../js/app.js';
 import {stub} from './stub.js';
@@ -93,44 +93,60 @@ test('nothing comes out while the machine is on', () => {
     assert.ok(box.isWhole(), 'and nothing moved');
 });
 
-test('a unit comes out only after what it needs out, and says what that is', () => {
+test('a unit comes out after what it needs out, in order', () => {
     const box = new Box();
-    assert.deepStrictEqual(box.takeOut('card.mem1k', false),
-                           {id: 'box-out-first', params: {part: 'case.top'}});
-    assert.strictEqual(box.takeOut('case.top', false), null);
+    assert.deepStrictEqual(box.routeOut('card.mem1k'), ['case.top', 'card.mem1k']);
+    assert.deepStrictEqual(box.routeOut('card.cpu'), ['case.top', 'harness.data_plug', 'card.cpu']);
+    assert.deepStrictEqual(box.routeOut('psu.board'), ['case.top', 'psu.t3', 'psu.fan', 'psu.board']);
+    assert.strictEqual(box.takeOut('card.cpu', false), null);
     assert.deepStrictEqual(box.takeOut('psu.t2', false), {id: 'box-busy', params: {}},
                            'one move at a time');
-    box.snap();
-    assert.ok(box.isOut('case.top'));
-    assert.deepStrictEqual(box.takeOut('card.cpu', false),
-                           {id: 'box-out-first', params: {part: 'harness.data_plug'}});
-    assert.deepStrictEqual(box.takeOut('psu.t1', false),
-                           {id: 'box-out-first', params: {part: 'psu.t2'}});
-    assert.deepStrictEqual(box.takeOut('panel.dress', false),
-                           {id: 'box-out-first', params: {part: 'chassis.frame'}});
-    assert.strictEqual(box.takeOut('card.mem1k', false), null);
-    box.snap();
-    assert.ok(box.isOut('card.mem1k'));
+    assert.deepStrictEqual(runChecked(box).map(([unit]) => unit),
+                           ['case.top', 'harness.data_plug', 'card.cpu']);
+    assert.deepStrictEqual(box.routeOut('card.mem1k'), ['card.mem1k'], 'what is out needs no second go');
 });
 
-test('a unit goes back only after what depends on it, and the plug after its card', () => {
+test('the dress panel waits for the chassis, and nothing else waits', () => {
     const box = new Box();
-    for (const unit of ['case.top', 'harness.data_plug', 'card.cpu']) {
-        assert.strictEqual(box.takeOut(unit, false), null, unit);
-        box.snap();
+    assert.deepStrictEqual(box.takeOut('panel.dress', false),
+                           {id: 'box-out-first', params: {part: 'chassis.frame'}});
+    assert.ok(box.isWhole(), 'and a slip among the switches moves nothing');
+    for (const unit of box.units().filter((unit) => !WAITS.includes(unit))) {
+        assert.strictEqual(box.whyNotOut(unit, false), null, unit);
     }
-    assert.deepStrictEqual(box.putBack('case.top'),
-                           {id: 'box-in-first', params: {part: 'harness.data_plug'}});
-    assert.deepStrictEqual(box.putBack('harness.data_plug'),
-                           {id: 'box-in-first', params: {part: 'card.cpu'}},
+    assert.strictEqual(box.takeOut('chassis.frame', false), null);
+    box.snap();
+    assert.strictEqual(box.takeOut('panel.dress', false), null);
+});
+
+test('a unit goes back after what depends on it, and the plug after its card', () => {
+    const box = new Box();
+    box.takeOut('card.cpu', false);
+    box.snap();
+    assert.deepStrictEqual(box.routeIn('harness.data_plug'), ['card.cpu', 'harness.data_plug'],
                            'the plug goes onto the CPU card\'s wafer');
-    assert.strictEqual(box.putBack('card.cpu'), null);
-    box.snap();
-    assert.strictEqual(box.putBack('harness.data_plug'), null);
-    box.snap();
+    assert.deepStrictEqual(box.routeIn('case.top'), ['card.cpu', 'harness.data_plug', 'case.top']);
     assert.strictEqual(box.putBack('case.top'), null);
-    box.snap();
+    assert.deepStrictEqual(runChecked(box).map(([unit]) => unit),
+                           ['card.cpu', 'harness.data_plug', 'case.top']);
     assert.ok(box.isWhole());
+});
+
+test('a unit goes back by itself at MOVE_S, several quickly', () => {
+    const box = new Box();
+    box.takeOut('card.cpu', false);
+    box.snap();
+    const whole = box.position('card.cpu');
+    assert.strictEqual(whole, 1);
+    box.putBack('card.cpu');
+    box.update(QUICK_MOVE_S);
+    assert.ok(box.position('card.cpu') > 0.5, 'by itself it is watched');
+    box.snap();
+    box.takeOut('card.cpu', false);
+    box.snap();
+    box.putBack('case.top');
+    box.update(QUICK_MOVE_S);
+    assert.strictEqual(box.position('card.cpu'), 0, 'with others it is quick');
 });
 
 test('taken all apart and put all back, every move is one the rules allow', () => {

@@ -208,15 +208,16 @@ panel, not a picture of it: click a switch on it and it does what the
   focused (Tab), the arrow keys turn it, Shift and the arrows move it,
   and + and − zoom.
 - **Views** picks where to look from - the front panel, the whole
-  machine, inside from above, the rear. **Show**, the icon beside it,
+  machine, inside from above with the case faded, the rear. **Show**, the icon beside it,
   picks what is drawn: everything, the case faded or hidden, the
   electronics alone, or one key part - the CPU card, the memory, the
   serial cards, the bus, the power supply - glowing in a faded machine;
   it turns orange while the machine is not drawn whole. Pointing at a part names it and says what it does.
 - **Take it apart:** switch the machine OFF, then click the lid to
   take it off, then a card to pull it, a transformer, the chassis...
-  in the order the real machine allows; a part in the way says so.
-  Click a part again to put it back, or press **Put it all back**,
+  Whatever is in a part's way comes out first, in the order the real
+  machine allows, so a click on a card under a faded lid lifts the lid
+  too. Click a part again to put it back, or press **Put it all back**,
   which is on the stage whenever anything is out. **Views ▸ Taken
   apart** takes everything out at once.
 - **No power while it is apart.** OFF/ON will not switch on a machine

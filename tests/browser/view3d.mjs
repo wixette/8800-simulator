@@ -83,7 +83,9 @@ export default async function(h) {
     verify('and ON is refused while it is off', !(await js(`panel.isPoweredOn`)) &&
            (await statusText()).startsWith('The machine is taken apart'), await statusText());
     await click(h, 'card.cpu', 'top');
-    verify('the CPU card waits for its data plug', (await statusText()).startsWith('Take this out first: Data cable plug'), await statusText());
+    verify('the CPU card brings its data plug out first', (await statusText()).startsWith('Taken out: CPU card'), await statusText());
+    await sleep(2100);
+    verify('and comes out after it', await js(`panel.box.isOut('harness.data_plug') && panel.box.isOut('card.cpu')`));
     // Show is a menu of its own, and its button shows which.
     const showButton = `(() => { const b = document.getElementById('show-button'); return {changed: b.classList.contains('changed'), title: b.title, icon: document.getElementById('show-current').innerHTML}; })()`;
     const plain = await js(showButton);
@@ -97,8 +99,11 @@ export default async function(h) {
     verify('choosing one shows its icon, marked as a change', after.changed && after.icon != plain.icon && after.title == 'Show: Case faded', JSON.stringify(after));
     await js(`panel.box.snapTogether()`); await sleep(300);
     await click(h, 'card.mem1k', 'top');
-    verify('a click goes through the faded lid to the card under it, and says how to reach the lid',
-           (await statusText()).startsWith('Move this first: Case top') && (await statusText()).includes('Everything'), await statusText());
+    verify('a click goes through the faded lid to the card under it',
+           (await statusText()).startsWith('Taken out: 1K memory card'), await statusText());
+    await sleep(2000);
+    verify('and the lid, that no click could reach, comes off first', await js(`panel.box.isOut('case.top') && panel.box.isOut('card.mem1k')`));
+    await js(`panel.box.snapTogether()`); await sleep(300);
     await press('#show-button');
     await press('#show-list [data-value="all"]');
     verify('and the whole machine again is no change', !(await js(showButton)).changed);
@@ -336,6 +341,18 @@ export async function views(h) {
         return null;
     })()`);
     verify('the dress panel shows between the switches', !!bare);
+    // The chassis shows through the holes in the panel: a slip among the
+    // switches must not reach it, or it would take the lid off with it.
+    const reached = await js(`(() => { const s = panel.stage3d, r = s.canvas.getBoundingClientRect(), cam = s.viewer.camera, found = new Set();
+        const ys = [...s.panelBind.bats.values()].map((bat) => (1 - bat.node.getWorldPosition(bat.node.position.clone()).project(cam).y) / 2 * r.height + r.top);
+        for (let y = Math.min(...ys) - 40; y < Math.max(...ys) + 40; y += 4) {
+            for (let x = r.left; x < r.right; x += 4) {
+                const hit = s.hitAt({clientX: x, clientY: y});
+                const at = hit && !s.panelBind.pick(hit.object, hit.point, cam) && s.partHit(hit);
+                if (at && at.unit) { found.add(at.unit); }
+            } }
+        return [...found]; })()`);
+    verify('among the switches, a click reaches only the panel', !reached.includes('chassis.frame'), JSON.stringify(reached));
     if (bare) {
         await move(bare.x, bare.y);
         await sleep(450);
@@ -392,11 +409,25 @@ export async function states(h) {
     verify('OFF/ON refuses, and says what to press', (await statusText()).includes('Put it all back') && !(await js(`panel.isPoweredOn`)), await statusText());
     await js(`panel.stage3d.setView('above')`); await settle();
     verify('another view leaves the lid off, to look inside', await js(`panel.box.isOut('case.top')`) && await js(button));
+    verify('Inside brings Case faded', await js(`panel.stage3d.boxBind.show`) === 'case-faded');
     await press('#box-restore'); await settle();
     verify('Put it all back puts it back', await js(`panel.box.isWhole()`));
     verify('and goes', !(await js(button)));
     verify('and says it can be switched on', (await statusText()).startsWith('Back together'), await statusText());
     verify('in the view it was in', await js(viewName) === 'Inside');
+    await js(`panel.stage3d.setView('front')`); await settle();
+    verify('and leaving Inside takes its Show away', await js(`panel.stage3d.boxBind.show`) === 'all');
+    await js(`panel.stage3d.setShow('cpu')`); await js(`panel.stage3d.setView('above')`); await settle();
+    verify('but Inside leaves a Show chosen', await js(`panel.stage3d.boxBind.show`) === 'cpu');
+    await js(`panel.stage3d.setView('front')`); await settle();
+    verify('and so does leaving it', await js(`panel.stage3d.boxBind.show`) === 'cpu');
+    await js(`panel.stage3d.setShow('all')`);
+    await js(`panel.stage3d.setView('above')`); await settle();
+    const clicked = await js(`panel.stage3d.screenPoint('card.mem1k', 'top')`);
+    await clickAt(clicked); await settle();
+    verify('a card clicked on Inside comes out, its lid with it', await js(`panel.box.isOut('case.top') && panel.box.cards().some((card) => panel.box.isOut('card.' + card))`), await statusText());
+    await press('#box-restore'); await settle();
+    await js(`panel.stage3d.setView('front')`); await settle();
     await js(`panel.onToggle('off-on')`);
     verify('and it does switch on', await js(`panel.isPoweredOn`));
     await js(`panel.onPowerOff()`);

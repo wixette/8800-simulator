@@ -138,8 +138,8 @@ export class Stage {
             refit: () => this.refitToParts(),
             refreshBox: () => this.refreshBox(),
             partName: (name) => this.partName(name),
-            isUnseen: (name) => !!this.boxBind.find(name).userData.seeThrough,
-            showAll: () => this.setShow('all'),
+            shown: () => this.boxBind.show,
+            drawShow: (id) => this.drawShow(id),
         };
     }
 
@@ -253,6 +253,14 @@ export class Stage {
      * @param {string} id The Show preset.
      */
     setShow(id) {
+        this.state.chooseShow(id);
+    }
+
+    /**
+     * @private
+     * @param {string} id The Show preset.
+     */
+    drawShow(id) {
         this.boxBind.setShow(id);
         this.hideLabel();
         this.viewer.invalidate();
@@ -424,7 +432,7 @@ export class Stage {
             this.panel.operate(thrown.id, thrown.dir);
             return;
         }
-        const at = this.boxBind.partAt(hit.object);
+        const at = this.partHit(hit);
         if (!at) {
             return;
         }
@@ -433,6 +441,25 @@ export class Stage {
         } else if (WIRED.includes(at.part)) {
             this.panel.setStatus('box-fixed', {part: this.partName(at.part)});
         }
+    }
+
+    /**
+     * The part a hit from hitAt() is on. What shows through the holes in
+     * the front panel counts as the panel, so that a click among the
+     * switches cannot reach the chassis behind (V4).
+     * @private
+     * @param {!THREE.Intersection} hit Where it landed.
+     * @return {?{unit: (string|undefined), part: (string|undefined)}}
+     */
+    partHit(hit) {
+        const at = this.boxBind.partAt(hit.object);
+        const dress = this.boxBind.find('panel.dress');
+        if (!at || !at.unit || at.unit == 'panel.dress' || dress.userData.seeThrough) {
+            return at;
+        }
+        const ray = this.raycaster.ray;
+        const through = ray.intersectBox(new THREE.Box3().setFromObject(dress), new THREE.Vector3());
+        return through && through.distanceTo(ray.origin) < hit.distance ? {unit: 'panel.dress'} : at;
     }
 
     /** @return {string} A part's name, in the reader's language. */
@@ -463,7 +490,7 @@ export class Stage {
             return {name: l10n.getMessage('label-lamp').replace('{name}', lamp.toUpperCase()),
                     role: '', hint: '', acts: false};
         }
-        const at = this.boxBind.partAt(hit.object);
+        const at = this.partHit(hit);
         if (!at) {
             return null;
         }

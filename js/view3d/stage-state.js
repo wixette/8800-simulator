@@ -20,7 +20,7 @@
  * Node. js/view3d/view3d.js is the host, which draws what this decides.
  */
 
-import {HOME_VIEW} from './views.js';
+import {HOME_VIEW, VIEWS} from './views.js';
 
 /**
  * What the state needs of the page and the drawing.
@@ -33,9 +33,9 @@ import {HOME_VIEW} from './views.js';
  *     they are now, if it is still where a view put it.
  * @property {function(): void} refreshBox Shows or hides Put it all back.
  * @property {function(string): string} partName A part's name, in words.
- * @property {function(string): boolean} isUnseen Whether the Show on
- *     view fades or hides a part, so that a click cannot reach it.
- * @property {function(): void} showAll Shows the whole machine.
+ * @property {function(): string} shown The Show on view.
+ * @property {function(string): void} drawShow Draws the machine as a
+ *     Show says.
  */
 
 export class StageState {
@@ -53,6 +53,12 @@ export class StageState {
          * @private @type {?string}
          */
         this.saying = null;
+        /**
+         * The Show Inside chose, while it is on view, to take away again
+         * on leaving; a Show chosen by anyone else stays.
+         * @type {?string}
+         */
+        this.viewShow = null;
     }
 
     /**
@@ -73,6 +79,9 @@ export class StageState {
         } else if (box.isTakenApart()) {
             this.reassemble();
         }
+        if (id != this.view) {
+            this.bringShow(id);
+        }
         this.view = id;
         this.host.place(id);
         // Taken apart again, with everything already out: nothing moves,
@@ -82,9 +91,35 @@ export class StageState {
         }
     }
 
+    /**
+     * A Show chosen by the reader or a Tutorial chip: theirs from now on.
+     * @param {string} id The Show.
+     */
+    chooseShow(id) {
+        this.viewShow = null;
+        this.host.drawShow(id);
+    }
+
+    /**
+     * @private Takes away the Show the last view chose, and brings the
+     * one the next view wants, if the reader has not chosen another.
+     * @param {string} id The view being gone to.
+     */
+    bringShow(id) {
+        if (this.viewShow) {
+            this.viewShow = null;
+            this.host.drawShow('all');
+        }
+        const show = VIEWS.find((view) => view.id == id)?.show;
+        if (show && this.host.shown() == 'all') {
+            this.viewShow = show;
+            this.host.drawShow(show);
+        }
+    }
+
     /** Reset view: the front, the whole machine, every part in place. */
     home() {
-        this.host.showAll();
+        this.chooseShow('all');
         this.reassemble();
         this.setView(HOME_VIEW);
     }
@@ -116,7 +151,8 @@ export class StageState {
     }
 
     /**
-     * A click on a unit: takes it out, or puts it back.
+     * A click on a unit: takes it out, or puts it back, and whatever is
+     * in its way with it.
      * @param {string} unit The unit.
      */
     click(unit) {
@@ -126,9 +162,6 @@ export class StageState {
         if (!why) {
             this.host.say(out ? 'box-put-back' : 'box-taken-out',
                           {part: this.host.partName(unit)});
-        } else if (why.params.part && this.host.isUnseen(why.params.part)) {
-            // What is in the way cannot be clicked: say how to reach it.
-            this.host.say('box-first-unseen', {part: this.host.partName(why.params.part)}, 'warn');
         } else {
             this.host.sayBox(why);
         }
