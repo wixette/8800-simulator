@@ -39,13 +39,14 @@ The case is a stock **Optima** enclosure (MITS part 100505, $130 in the March 19
 
 | Part | What it is | How it fastens | Source |
 |---|---|---|---|
-| Case top | C-shaped lid: the top and both sides. Louvres on the upper sides. Grey on museum machines. | Slides on from the rear. Two #6-32 screws at the rear, into the back panel. | MITS-ASM-1975 printed p.76; COMMONS-SI-UTHMAN; WIKIPEDIA-ALTAIR |
+| Case top | C-shaped lid: the top and both sides. Louvres on the upper sides. Grey on museum machines. It reaches past the back panel, the same depth as the case bottom. | Slides on from the rear. Two #6-32 screws at the rear, into the back panel (how, with no flange in view, is not known). | MITS-ASM-1975 printed p.76; COMMONS-SI-UTHMAN; WIKIPEDIA-ALTAIR; DOUGLAS-REVIEW-2026 |
 | Case bottom | Base tray with the lower sides and the front frame (bezel). Blue. | The chassis screws to it (below). | MITS-ASM-1975 p.16–17; photos |
-| Front bezel | The blue frame around the panel, part of the case bottom. Its lip holds the dress panel in place. | Part of the case bottom. | MITS-ASM-1975 p.16 ("the Dress-Panel should fall free when the chassis is removed") |
+| Side trim | A 1/4 in aluminium strip along each side, built onto the chassis. It rests on the side lip of the case bottom and divides the lid from the blue. | Part of the chassis. | DOUGLAS-REVIEW-2026 |
+| Front bezel | The blue frame around the panel, part of the case bottom. Its opening is slightly smaller than the dress panel, so the panel bears on the back of it. There is no lip behind the panel. | Part of the case bottom. | MITS-ASM-1975 p.16 ("the Dress-Panel should fall free when the chassis is removed"); DOUGLAS-REVIEW-2026 |
 | Chassis | Inner aluminium sub-chassis (anodised) with the back panel, side rails, two card rails and a cross member under the transformers. | Slides in from the rear. Four #6-32 screws, two each side, through the case bottom. | MITS-ASM-1975 p.16–17, p.56; grounding note ("remove the anodizing") |
-| Sub-panel | Metal plate behind the dress panel. The 25 switches mount through it with their nuts. | Four screws to the front of the chassis. | MITS-ASM-1975 p.16–19 |
+| Sub-panel | Metal plate behind the dress panel. The 25 switches mount through it with their nuts, which are typically hidden behind the dress panel. | Four screws to the front of the chassis. | MITS-ASM-1975 p.16–19; DOUGLAS-REVIEW-2026 |
 | Display/Control board | The front panel PCB, behind the sub-panel. | #6-32 × 1 in screws and four 0.6 in spacers to the sub-panel. The switches are also soldered to it. | MITS-ASM-1975 p.18–19 |
-| Dress panel | Painted metal plate with the lettering, 3/32 in thick. It has holes for 25 switch bushings and 36 LEDs. | No fasteners. It slips over the switch bushings and is held between the sub-panel and the bezel lip. | NMAH-FRONTPANEL; MITS-ASM-1975 p.16, p.22 |
+| Dress panel | Painted metal plate with the lettering, 3/32 in thick. It has holes for 25 switch bushings and 36 LEDs. | No fasteners. It goes in from behind, slips over the switch bushings and is held between the switch nuts and the back of the bezel. | NMAH-FRONTPANEL; MITS-ASM-1975 p.16, p.22; DOUGLAS-REVIEW-2026 |
 | Name plate | "8800 name plate" (part 101759). On museum machines it is a brushed-aluminium strip across the bottom of the panel, with black "ALTAIR 8800 COMPUTER" and the MITS logo. Some machines have none. | Self-adhesive on the Clone; on the original, probably the same (not stated). | MITS-ASM-1975; COMMONS-SI-UTHMAN; CLONE-ASSEMBLY |
 | Back panel | Part of the chassis. It carries the three transformers, a 10-terminal block (four #6-32 × 5/8 screws), the power cord with a strain relief, a fan opening and I/O connector openings with a small screen. | Part of the chassis. | MITS-ASM-1975 p.54–55, errata p.ii |
 | Feet | Two small rubber feet are in the parts list. One very early machine has feet screwed into PEM nuts in the case bottom. | Screws or adhesive. | MITS-ASM-1975; DERAMP-EARLY |
@@ -55,7 +56,9 @@ The case is a stock **Optima** enclosure (MITS part 100505, $130 in the March 19
 - **Fuse:** a 3AG 1 A fuse in clips on the power supply board, not in a rear holder (MITS-ASM-1975).
 - **Power switch:** one of the front-panel toggles. It switches 120 V AC directly (RETROTECH-ALLISON).
 - **Fan:** the 8800 had no standard fan; the 88-FAN was an option. The errata say later back panels have slots for the fan opening. The early unit at DERAMP-EARLY has an open fan grille. The fan became standard on the 8800a (BYTE-1976-10).
-- **I/O openings:** the back-panel drawing seems to show four connector cut-outs in a column (my count on a small sketch; check it on a photo). Very early units have sharp-cornered cut-outs (DERAMP-EARLY). The Clone has eight DB-25 cut-outs; that is not the original.
+- **I/O openings:** the back-panel drawing seems to show four connector cut-outs in a column (my count on a small sketch; check it on a photo). Very early units have sharp-cornered cut-outs (DERAMP-EARLY); the usual ones are D-shaped, with a screw hole on each side (DOUGLAS-REVIEW-2026). The Clone has eight DB-25 cut-outs; SN 220081K's rear shows eight too.
+- **Terminal block:** taller than a first look suggests: about 5 in, ten terminals on the back panel (DOUGLAS-REVIEW-2026; MFE-SN220081K-PHOTOS #09).
+- **Transformer brackets, without their ears:** vertical (T3) 2 × 0.75 in, top horizontal (T2) 2.375 × 1 in, bottom horizontal (T1) 3 × 1.375 in (DOUGLAS-REVIEW-2026). Read here as the strap's length by its width.
 
 **Colours and finish.** No paint specification was found. On museum and owner photos, the case top is light-to-mid grey and the case bottom and bezel are mid blue. The dress panel is a dark charcoal grey; a pixel sample on the NMAH photo is about #4C4C4C, but that depends on the lighting. The lettering is white. The name plate is brushed aluminium. Colours from photos are only a guide.
 
@@ -96,7 +99,16 @@ The table gives centres in inches, relative to the **A0 lamp**, with x to the ri
 
 ### 4.3 Lettering and marks on the dress panel
 
-These come from photos (COMMONS-FP-CROMEMCO, COMMONS-SI-UTHMAN). Each lamp has its name above it. A line runs under the STATUS lamps (MEMR to INT, not INTE or PROT), with "STATUS" below it. Dashed lines run down from the D lamps to the A lamps, and from the A lamps to their switches. Each switch has its number above it. "SENSE SW." and a line run along the upper eight switches. Bars group the switches in octal threes. "Data" and "Address" sit at the right end of the switch row. The control switches carry their names: the upper function above, the lower one below. Very early units have a straight Sense Switch line (DERAMP-EARLY). I have not measured the font or the size of the letters.
+These come from photos (COMMONS-FP-CROMEMCO, COMMONS-SI-UTHMAN). Each lamp has its name above it. A line runs under the STATUS lamps (MEMR to INT, not INTE or PROT), with "STATUS" below it. Dashed lines run down from the D lamps to the A lamps, and from the A lamps to their switches. Each switch has its number above it. "SENSE SW." and a line run along the upper eight switches. Bars group the switches in octal threes. "Data" and "Address" sit at the right end of the switch row. The control switches carry their names: the upper function above, the lower one below. I have not measured the font or the size of the letters.
+
+**Two drawings.** Very early units have a straight Sense Switch line (DERAMP-EARLY): short pieces between the switch numbers, with the bars running straight out to Data and Address. A later drawing bends the line down below the switches, runs it on with small ticks to switch 8, and steps the two lines up to Data and Address. In both, the doubled line covers switches 7 to 0, not 8 (DOUGLAS-REVIEW-2026 for SN 220081K; photos for the other).
+
+| Drawing | Machines (photos) |
+|---|---|
+| Straight | SN 220081K (MFE-SN220081K-PHOTOS #02); COMMONS-FP-CROMEMCO; Intel Museum; MfK Bern; Colegrove; the rack-mounted machine; the May 1975 MITS advert |
+| Bent | COMMONS-SI-UTHMAN (Smithsonian); two Computer History Museum photos; Living Computers |
+
+The straight drawing is common, so it is not a mark of only a few machines. No serial number or date for the change has been found. Museum panels can also have been swapped, so a photo dates a machine's panel, not the machine.
 
 ## 5. Parts on the panel
 
@@ -127,7 +139,7 @@ Sources: BYTE-1976-10 (MITS's own technical pages for the 8800a and 8800b), NMAH
 
 ## 7. The simulator's `panel.svg`
 
-`images/panel.svg` (1440 × 644 viewBox, Apache-2.0) **shows the original 8800 panel.** The labels, the two AUX switches, PROTECT/UNPROTECT, "SENSE SW.", "Data/Address" and the name plate all match the 8800 (and the 8800a, which shares the panel). It is not the 8800b panel.
+`images/panel.svg` (1440 × 644 viewBox, Apache-2.0) **shows the original 8800 panel.** The labels, the two AUX switches, PROTECT/UNPROTECT, "SENSE SW.", "Data/Address" and the name plate all match the 8800 (and the 8800a, which shares the panel). It is not the 8800b panel. Its lines are the bent drawing (§4.3), faithfully down to the ticks and the steps at the right end.
 
 Below, SVG units are converted to inches by taking the SVG's lamp pitch (50.5 units) as 0.60 in. Centres are lamp `x + 10, y + 10` and switch `x + 11, y + 15`, from the 20 × 20 lamp and 20 × 30 switch images.
 
@@ -177,7 +189,9 @@ Below, SVG units are converted to inches by taking the SVG's lamp pitch (50.5 un
 | Name plate size and logo | Front detail | Photo with a scale, or a measurement. |
 | Switch and LED bodies (ST-1-1-C, ST-1-3-C, RL-21) | Part shapes behind the panel | Find the 1970s American Switch and Litronix catalogue pages; or use the APEM 5236 drawing as a stand-in. |
 | Paint colours | Look | A colour reading on a well-kept machine. |
-| Gap between the dress panel and the sub-panel | Stack depth | Measure; the manual only shows the two panels together. |
+| Gap between the dress panel and the sub-panel | Stack depth | Measure; the manual only shows the two panels together. The nuts sit in it (DOUGLAS-REVIEW-2026), so it is at least a nut thick. |
+| When the panel drawing changed | Which machines show which | Asked of Mike Douglas. |
+| How the lid fastens at the rear, and the trim's height | Rear and side view | Asked of Mike Douglas. |
 
 ## Sources
 

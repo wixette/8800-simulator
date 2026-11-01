@@ -721,6 +721,8 @@ All on branch `v1.8.0`, in this order. Each step ends with `npm test`,
 | W10 | **Words and docs (V6):** all new strings in ten languages; README section and screenshot, About's licence lines, References (the model's sources) | The l10n key test passes; your read-through |
 | W11 | **Release review:** a Chromebook-class performance check, a full manual pass, `npm version 1.8.0`, PR to `master` | Your manual check and OK |
 
-The model's heavy geometry checks (clearance along every removal path,
-about 25 s) run as `npm run test:model` after a rebuild, not in every
-`npm test`. The fast contract and budget checks are in `npm test`.
+The model's heavy geometry check (clearance along every removal path)
+was to run as `npm run test:model` after a rebuild, not in every
+`npm test`. For v1.8.0 it was run by hand and not kept; v1.8.2 adds it
+([3d-model.md, Part 4](3d-model.md#part-4--the-plan-for-v182)). The
+fast contract and budget checks are in `npm test`.
