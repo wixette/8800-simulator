@@ -252,8 +252,8 @@
         },
         {
           "ref": "8080",
-          "kind": "socket",
-          "type": "8080A in 40-pin socket",
+          "kind": "ceramic_cpu",
+          "type": "Intel C8080A in a 40-pin socket: white ceramic, gold lid",
           "pins": 40,
           "u": 5.29,
           "v": 3.69,
@@ -263,7 +263,7 @@
           "height_conf": "est",
           "rot": 0,
           "conf": "artwork",
-          "note": "0.6 in rows; pin-grid centre; pin 1 at the rear end of the +v row (silk tick; photo notch at the rear). Height = socket + ceramic package"
+          "note": "0.6 in rows; pin-grid centre; pin 1 at the rear end of the +v row (silk tick; photo notch at the rear). Height = socket + ceramic package. The package and lid sizes and the text's way up are from MFE-CPU-SCAN; the marking is a C8080A's (CPUSHACK-C8080A), its lot codes left out"
         },
         {
           "ref": "J-MOLEX",

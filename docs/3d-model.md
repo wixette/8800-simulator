@@ -35,7 +35,7 @@ build of the front panel or the card cage.
 
 The model is in plain git, not LFS ([3d-view.md, M1](3d-view.md#m1--no-git-lfs-the-model-goes-in-plain-git)).
 Budgets: under 300 k triangles and 15 MB, and under 5 MB to stay in
-plain git. Today: 103,547 triangles, 4.1 MB.
+plain git. Today: 104,347 triangles, 4.1 MB.
 
 Checks, in `npm test`: the node contract (Part 2), the budgets, that
 the model's places, ways out and take-apart order agree with
@@ -329,6 +329,8 @@ answers; a better number later is one params entry and a rebuild.
 | DB-25 cut-outs | Rectangles, 43 × 11 mm | D-shaped, the standard DB-25 opening, with its two screw holes | Mike. The sharp corners were SN 220081K's |
 | Card guides | Tan | Blue-green, set by rendering beside his chassis photo | Mike: natural nylon is very rare. Overturns the row above |
 | Terminal block | 2.7 in tall | 5.0 in tall (ten terminals at 0.5 in, the manual's count), up to about 6.3 in above the base; it lifts straight up. That also ends a real fault the new clearance check found in the released model: on Taken apart it went through the parked power board | Mike. Scaling #09 gives 5 to 6 in |
+
+**The 8080, added after his review.** It was a plain black box. The real one is white ceramic with a gold lid, on every Altair CPU card photographed at deramp.com. The model now draws a C8080A, the chip most Altairs carried (MFE-SN220081K-DOC; SN 220081K's own early C8080 is the exception), in its socket: the package 2.0 × 0.6 in and the lid 0.5 in square, from the Rev 0 scan, with the marking as flat lettering, not a photo. It says C8080A and © INTEL '74, as a C8080A's lid does, and leaves out the lot codes, which belong to one chip. The other chips stay black boxes.
 
 ### Data still wanted
 

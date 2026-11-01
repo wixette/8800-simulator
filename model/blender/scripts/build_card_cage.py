@@ -229,6 +229,9 @@ def add_part(mb, c, part):
     if kind in ("crystal", "capacitor") and abs(length - width) < 0.15 * IN:
         mb.prism([(u + du, v + dv) for du, dv in geom.circle(length / 2, 20)], "YZ", x0, x0 + h, mat, smooth=True)
         return
+    if kind == "ceramic_cpu":
+        add_cpu(mb, u, v, x0, h)
+        return
     if kind != "heat_sink":
         mb.prism(geom.rect(u - length / 2, v - width / 2, u + length / 2, v + width / 2), "YZ", x0, x0 + h, mat)
         return
@@ -239,6 +242,27 @@ def add_part(mb, c, part):
     for k in range(n):
         fu = u - length / 2 + (k + 0.5) * length / n
         mb.prism(geom.rect(fu - 0.5, v - width / 2, fu + 0.5, v + width / 2), "YZ", x0 + base, x0 + h, mat)
+
+
+def add_cpu(mb, u, v, x0, h):
+    """The Intel C8080A in its socket: white ceramic, a gold lid, the marking printed on the lid.
+    Sizes from the Rev 0 scan (MFE-CPU-SCAN): the package 2.0 x 0.6 in, the lid 0.5 in square. Its
+    text reads with the card's fingers up, so pin 1, at the rear, is on the reader's left."""
+    socket, top, lid = x0 + 0.14 * IN, x0 + h - 0.01 * IN, 0.5 * IN / 2
+    plen, pwid = 2.0 * IN / 2, 0.6 * IN / 2
+    mb.prism(geom.rect(u - plen - 0.5, v - pwid - 1.0, u + plen + 0.5, v + pwid + 1.0), "YZ", x0, socket, "ic_black")
+    mb.prism(geom.rect(u - plen, v - pwid, u + plen, v + pwid), "YZ", socket, top, "ceramic_white")
+    mb.prism(geom.rect(u - lid, v - lid, u + lid, v + lid), "YZ", top, top + 0.01 * IN, "gold")
+    for k in range(20):                                  # the pins, along both long edges
+        pu = u + (k - 9.5) * 0.1 * IN
+        for side in (-1, 1):
+            w0, w1 = sorted((v + side * pwid, v + side * (pwid + 0.8)))
+            mb.prism(geom.rect(pu - 0.4, w0, pu + 0.4, w1), "YZ", socket - 1.0, socket + 2.0, "gold")
+    face = top + 0.01 * IN + 0.03
+    mb.prism(geom.rect(u + lid - 1.4, v + 1.6, u + lid - 0.5, v + 4.2), "YZ", top + 0.01 * IN, face, "ink_black")   # the short bar by pin 1
+    for line, dv, cap in (("C8080A", -3.2, 1.7), ("\u00a9 INTEL '74", 3.2, 1.25)):
+        verts, faces = bl.glyph_mesh_flat(line, cap / build_front_panel.CAP)
+        mb.add_mesh_data(verts, faces, bl.frame_matrix((face, u, v + dv), (0, -1, 0), (0, 0, -1)), "ink_black")
 
 
 def build(p):

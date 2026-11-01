@@ -41,6 +41,8 @@ MATERIALS = {
     "tin": ((0.70, 0.71, 0.72), 1.0, 0.35, None),                 # leads, pins, crystal cans
     "connector_green": ((0.03, 0.12, 0.05), 0.0, 0.50, None),     # edge connector bodies (SN 220081K)
     "guide_blue": ((0.023, 0.212, 0.342), 0.0, 0.50, None),       # nylon card guides, blue-green (natural nylon is very rare)
+    "ceramic_white": ((0.80, 0.79, 0.74), 0.0, 0.45, None),       # the 8080's ceramic package
+    "gold": ((1.00, 0.71, 0.29), 1.0, 0.30, None),                # its lid and pins
     "nylon_white": ((0.75, 0.74, 0.70), 0.0, 0.55, None),         # Molex wafer connectors
     "cap_body": ((0.05, 0.10, 0.30), 0.0, 0.40, None),            # electrolytic capacitors
     "resistor_tan": ((0.50, 0.38, 0.22), 0.0, 0.55, None),        # rows of resistors
