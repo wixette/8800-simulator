@@ -35,7 +35,7 @@ build of the front panel or the card cage.
 
 The model is in plain git, not LFS ([3d-view.md, M1](3d-view.md#m1--no-git-lfs-the-model-goes-in-plain-git)).
 Budgets: under 300 k triangles and 15 MB, and under 5 MB to stay in
-plain git. Today: 104,503 triangles, 4.1 MB.
+plain git. Today: 105,415 triangles, 4.2 MB.
 
 Checks, in `npm test`: the node contract (Part 2), the budgets, that
 the model's places, ways out and take-apart order agree with
@@ -333,6 +333,8 @@ answers; a better number later is one params entry and a rebuild.
 **The 8080, added after his review.** It was a plain black box. The real one is white ceramic with a gold lid, on every Altair CPU card photographed at deramp.com. The model now draws a C8080A, the chip most Altairs carried (MFE-SN220081K-DOC; SN 220081K's own early C8080 is the exception), in its socket: the package 2.0 × 0.6 in and the lid 0.5 in square, from the Rev 0 scan, with the marking as flat lettering, not a photo. It says C8080A and © INTEL '74, as a C8080A's lid does, and leaves out the lot codes, which belong to one chip. The other chips stay black boxes. The mark by pin 1 is an "i" on its side, a stroke and a dot.
 
 **Rev 0 cards.** A check of the CPU card against the scan found the bottom row a chip and a column of resistors short. The model had been built to the X1 artwork, but Rev 0 is what shipped in 1975, so both cards now carry all their Rev 0 parts (decision 4): on the CPU card a thirteenth IC, the resistor column, two pairs of electrolytics, the two large resistors and the paper-wrapped part; on the 1K card one IC and two electrolytics.
+
+**The power cord.** It ran 6 in straight back, which looked odd and made the box far deeper than it is. It now drops to the table just behind the case and curves along behind the machine toward the DB-25s, within the box's width and about 2 in behind it. The framing still leaves it out, by its material.
 
 ### Data still wanted
 

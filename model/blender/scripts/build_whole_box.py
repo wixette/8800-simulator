@@ -190,8 +190,12 @@ def build_chassis(p, col, root, b):
     for y0g, y1g in ((b.back_in - 1.0, b.back_in), (b.back_out, b.back_out + 1.0)):
         mb.tube(r_hole + 1.5, r_hole, 16, "XZ", y0g, y1g, "cord_black", offset=(cord["x"], 0, cord["z"]))
     cx_, cz_ = cord["x"], cord["z"]
-    bl.tube_path(mb, [(cx_, b.back_in - 12.0, cz_), (cx_, b.back_out + 40.0, cz_), (cx_, b.back_out + 70.0, r_cord + 2.0),
-                      (cx_, b.back_out + 160.0, r_cord + 0.5)], r_cord, "cord_black", bend=30.0)
+    # out past the tray, down to the table, then along behind the machine toward the DB-25s, in easy curves
+    lie = r_cord + 0.5
+    bl.tube_path(mb, [(cx_, b.back_in - 12.0, cz_), (cx_, b.back_out + 26.0, cz_), (cx_ - 6.0, b.back_out + 46.0, lie + 1.0),
+                      (cx_ - 42.0, b.back_out + 60.0, lie), (cx_ - 100.0, b.back_out + 42.0, lie), (cx_ - 158.0, b.back_out + 62.0, lie),
+                      (cx_ - 214.0, b.back_out + 46.0, lie), (cx_ - 258.0, b.back_out + 58.0, lie)],
+                 r_cord, "cord_black", bend=40.0, steps=14)
     # the cross member: a shelf from its front lip back to the back panel
     cx = b.ch_x - mt - 0.1
     mb.prism(geom.rect(-cx, b.cross_front, cx, b.back_in - 0.1), "XY", b.cross_top - mt, b.cross_top, "aluminium_anodised")
