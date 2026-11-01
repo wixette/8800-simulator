@@ -1789,6 +1789,19 @@ export const MESSAGES_3D = {
         'ko': '3D 모델',
     },
 
+    'about-model-review': {
+        'en': 'Model review',
+        'es': 'Revisión 3D',
+        'fr': 'Relecture 3D',
+        'de': 'Modellprüfung',
+        'it': 'Revisione 3D',
+        'pt-BR': 'Revisão 3D',
+        'zh': '模型审阅',
+        'zh-TW': '模型審閱',
+        'ja': 'モデル監修',
+        'ko': '모델 검토',
+    },
+
     'about-license-three': {
         'en': '3D engine',
         'es': 'Motor 3D',

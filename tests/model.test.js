@@ -109,6 +109,18 @@ test('the model was built from the params in the repository', () => {
     assert.strictEqual(root.extras.build, 'whole box');
 });
 
+/** The strokes of an SVG, as their path data, in order. */
+function strokes(file) {
+    const svg = fs.readFileSync(path.join(ROOT, file), 'utf8');
+    return [...svg.matchAll(/<path d="([^"]+)" stroke="white"/g)].map((m) => m[1]);
+}
+
+test('the 3D panel draws the same lines as the 2D panel', () => {
+    const lines = strokes('model/blender/data/front-panel-lines.svg');
+    assert.strictEqual(lines.length, 101);
+    assert.deepStrictEqual(lines, strokes('images/panel.svg'));
+});
+
 test('every part says what it is, and no two names meet once three.js loads them', () => {
     const seen = new Map();
     for (const node of GLTF.nodes) {

@@ -98,6 +98,8 @@ A board-level model that can be taken apart would be new. That is what the 2D si
 
 ### Data still wanted (measurements no public source gives)
 
+Mike Douglas reviewed the released model in November 2026 and settled several of these points; see [docs/3d-model.md](../../docs/3d-model.md#mike-douglass-review-2026-11-01).
+
 1. **One measuring session on a real 1975 Altair 8800.** This is the highest-value step. A collector, a museum, Mike Douglas (deramp.com, owner of early unit SN 220081K) or a local vintage computer group could help. About 15 measurements close every `est` value:
    - the box depth without rear parts;
    - the A0 lamp from two dress-panel edges;

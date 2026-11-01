@@ -21,12 +21,13 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import bpy  # noqa: E402
-from lib import bl, geom, params  # noqa: E402
+from lib import bl, geom, panel_lines, params  # noqa: E402
 from lib.bl import MeshBuilder  # noqa: E402
 from lib.layout import CONTROL_LABELS, LAMP_IDS, MOMENTARY, SWITCH_IDS, Layout, lamp_label, node_id  # noqa: E402
 
 DEFAULT_OUT = os.path.join(params.MACHINE_DIR, "blender", "out", "front-panel.glb")
 TITLE_SVG = os.path.join(params.MACHINE_DIR, "blender", "data", "front-panel-title.svg")
+LINES_SVG = os.path.join(params.MACHINE_DIR, "blender", "data", "front-panel-lines.svg")
 IN = 25.4
 CAP = 0.72          # cap height as a share of the font size (Blender's default face)
 
@@ -38,20 +39,17 @@ def text(mb, s, x, z, cap_mm, y, mat="ink_white", align="CENTER", bold=0.0):
     mb.add_mesh_data(verts, faces, mtx, mat)
 
 
-def strip(mb, x0, x1, z0, z1, y, mat="ink_white"):
-    """A thin printed line on the panel face (a flat rectangle facing -Y)."""
-    base = len(mb.verts)
+def stroke(mb, points, width, y, mat="ink_white"):
+    """A printed line on the panel face: flat quads along (x, z) points, facing -Y, each run
+    half a width past its ends, so the corners close."""
     mi = mb._mat(mat)
-    for x, z in ((x0, z0), (x1, z0), (x1, z1), (x0, z1)):
-        mb.verts.append((x, y, z))
-    mb._add([base, base + 1, base + 2, base + 3], mi, False)
-
-
-def dashed(mb, x, z_top, z_bottom, y, dash=0.08 * IN, gap=0.07 * IN, width=0.45):
-    z = z_top
-    while z - dash > z_bottom:
-        strip(mb, x - width / 2, x + width / 2, z - dash, z, y)
-        z -= dash + gap
+    for (x0, z0), (x1, z1) in zip(points, points[1:]):
+        n = math.hypot(x1 - x0, z1 - z0)
+        ux, uz = (x1 - x0) / n * width / 2, (z1 - z0) / n * width / 2
+        base = len(mb.verts)
+        for x, z in ((x0 - ux + uz, z0 - uz - ux), (x1 + ux + uz, z1 + uz - ux), (x1 + ux - uz, z1 + uz + ux), (x0 - ux - uz, z0 - uz + ux)):
+            mb.verts.append((x, y, z))
+        mb._add([base, base + 1, base + 2, base + 3], mi, False)
 
 
 def build(p):
@@ -85,17 +83,20 @@ def build_panel(p, col, root, chassis=None, bezel_mb=None):
     for r in (geom.rect(-W / 2, 0, W / 2, f), geom.rect(-W / 2, H - f, W / 2, H),
               geom.rect(-W / 2, f, -W / 2 + f, H - f), geom.rect(W / 2 - f, f, W / 2, H - f)):
         mb.prism(r, "XZ", yf, yf + lip, "bezel_blue")
-    # its inner walls, back to the dress panel, which sits one recess deep with nothing in front of it
+    # its inner walls, sloping in to the opening, smaller than the dress panel behind it (no lip)
+    y0, y1 = yf + lip, L.y_dress_front - L.gap
     xi, zi0, zi1 = W / 2 - f, f, H - f
-    yr = yf + L.recess
-    for r in (geom.rect(-xi - lip, zi0 - lip, xi + lip, zi0), geom.rect(-xi - lip, zi1, xi + lip, zi1 + lip),
-              geom.rect(-xi - lip, zi0, -xi, zi1), geom.rect(xi, zi0, xi + lip, zi1)):
-        mb.prism(r, "XZ", yf + lip, L.y_dress_back + L.gap + lip, "bezel_blue")
-    # a flange behind the dress panel's edge, closing the gap between the panel and the walls
-    xb, zb0, zb1 = L.dw / 2 - 1.5, zc - L.dh / 2 + 1.5, zc + L.dh / 2 - 1.5
-    for r in (geom.rect(-xi, zi0, xi, zb0), geom.rect(-xi, zb1, xi, zi1),
-              geom.rect(-xi, zb0, -xb, zb1), geom.rect(xb, zb0, xi, zb1)):
-        mb.prism(r, "XZ", L.y_dress_back + L.gap, L.y_dress_back + L.gap + lip, "bezel_blue")
+    xr, zr0, zr1 = ow / 2, zc - oh / 2, zc + oh / 2
+
+    def walls(x, z0, z1):
+        """The four walls' sections at one depth, mitred, each counter-clockwise from the front."""
+        return ([(-x, z1), (x, z1), (x + lip, z1 + lip), (-x - lip, z1 + lip)],
+                [(-x - lip, z0 - lip), (x + lip, z0 - lip), (x, z0), (-x, z0)],
+                [(-x - lip, z0 - lip), (-x, z0), (-x, z1), (-x - lip, z1 + lip)],
+                [(x, z0), (x + lip, z0 - lip), (x + lip, z1 + lip), (x, z1)])
+
+    for front, rear in zip(walls(xi, zi0, zi1), walls(xr, zr0, zr1)):
+        mb.hexa([(u, y1, w) for u, w in rear], [(u, y0, w) for u, w in front], "bezel_blue")
     ret = p.v("bezel.return_depth")
     for r in (geom.rect(-W / 2, 0, W / 2, lip), geom.rect(-W / 2, H - lip, W / 2, H)):
         mb.prism(r, "XZ", yf + lip, yf + ret, "bezel_blue")
@@ -110,8 +111,9 @@ def build_panel(p, col, root, chassis=None, bezel_mb=None):
     # ------------------------------------------------------------------ dress panel (static)
     dw, dh = L.dw, L.dh
     nut_r = L.nut_circumradius()
+    b_r = p.v("switch.bushing_diameter") / 2
     holes = [(*L.lamp(i), p.v("dress_panel.led_hole_diameter") / 2) for i in LAMP_IDS]
-    holes += [(*L.switch(s), nut_r + p.v("dress_panel.switch_hole_clearance")) for s in SWITCH_IDS]
+    holes += [(*L.switch(s), b_r + p.v("dress_panel.switch_hole_clearance")) for s in SWITCH_IDS]
     plate = MeshBuilder()
     plate.prism(geom.rect(-dw / 2, zc - dh / 2, dw / 2, zc + dh / 2), "XZ", L.y_dress_front, L.y_dress_back, "panel_charcoal")
     verts, faces = bl.cut_holes(plate, holes, "XZ", L.y_dress_front, L.y_dress_back, col)
@@ -138,41 +140,14 @@ def build_panel(p, col, root, chassis=None, bezel_mb=None):
         if lower:
             for n, line in enumerate(lower):
                 text(mb, line, x, z - below_ctl - n * line_gap, cap, ink)
-    w = 0.45
-    # STATUS: a line under MEMR … INT, the word under its middle
-    (x_memr, z1), (x_int, _) = L.lamp("memr"), L.lamp("int")
-    zs = z1 - 0.2 * IN
-    strip(mb, x_memr - 0.2 * IN, x_int + 0.2 * IN, zs - w / 2, zs + w / 2, ink)
-    text(mb, "STATUS", (x_memr + x_int) / 2, zs - 0.12 * IN, cap, ink)   # its caps 1.5 mm under the line
-    # dashed lines: data lamps down to the address lamps, address lamps down to their switches
-    for k in range(8):
-        x, z_d = L.lamp(f"d{k}")
-        _, z_a = L.lamp(f"a{k}")
-        dashed(mb, x, z_d - 0.2 * IN, z_a + above_lamp + cap, ink)
-    for k in range(16):
-        x, z_a = L.lamp(f"a{k}")
-        _, z_s = L.switch(f"s{k}")
-        dashed(mb, x, z_a - 0.2 * IN, z_s + above_sw + cap, ink)
-    # SENSE SW.: the words, then a line along the upper eight switches' numbers
-    x15, z_s = L.switch("s15")
-    z_line = z_s + above_sw
-    text(mb, "SENSE SW.", x15 - 1.2 * IN, z_line, cap, ink)
-    xs = [x15 - 0.85 * IN] + [L.switch(f"s{k}")[0] for k in range(15, 7, -1)]
-    for a, b in zip(xs, xs[1:]):
-        strip(mb, a + 0.13 * IN, b - 0.13 * IN, z_line - w / 2, z_line + w / 2, ink)
-    # group bars under the switches: 15 | 14-12 | 11-9 | 8-6 | 5-3 | 2-0; the data byte doubled
-    z_bar = z_s - p.v("lettering.group_bar_below")
-    groups = [[15], [14, 13, 12], [11, 10, 9], [8, 7, 6], [5, 4, 3], [2, 1, 0]]
-    for g in groups:
-        xa, xb = L.switch(f"s{g[0]}")[0] - 0.22 * IN, L.switch(f"s{g[-1]}")[0] + 0.22 * IN
-        strip(mb, xa, xb, z_bar - w / 2, z_bar + w / 2, ink)
-        if g[0] <= 7 or g == [8, 7, 6]:
-            strip(mb, xa, xb, z_bar - 0.06 * IN - w / 2, z_bar - 0.06 * IN + w / 2, ink)
-    x0 = L.switch("s0")[0]
-    for dz in (0.0, -0.06 * IN):
-        strip(mb, x0 + 0.22 * IN, x0 + 1.25 * IN, z_bar + dz - w / 2, z_bar + dz + w / 2, ink)
-    text(mb, "Data", x0 + 0.55 * IN, z_bar + 0.11 * IN, cap, ink)
-    text(mb, "Address", x0 + 0.6 * IN, z_bar - 0.17 * IN, cap, ink)
+    # the lines, the same drawing as the 2D panel's (docs/3d-model.md, decision 12), and the words that go with them
+    place = panel_lines.Placer(L)
+    for points in panel_lines.strokes(LINES_SVG):
+        stroke(mb, [place(*q) for q in points], 0.45, ink)
+    x_status, z_status = place(*panel_lines.STATUS_LINE)
+    text(mb, "STATUS", x_status, z_status - 0.12 * IN, cap, ink)   # its caps 1.5 mm under the line
+    for word, at in panel_lines.WORDS.items():
+        text(mb, word, *place(*at), cap, ink)
     dress = mb.build("panel.dress", col)
     bl.set_labels(dress, "Dress panel (painted, lettered)")
     dress["motion"] = "static"
@@ -184,10 +159,11 @@ def build_panel(p, col, root, chassis=None, bezel_mb=None):
     ph, pt = p.v("name_plate.height"), p.v("name_plate.thickness")
     z0 = zc - L.dh / 2
     mb = MeshBuilder()
-    g = L.gap   # the plate runs the dress panel's width along its bottom edge, short of its edges
-    mb.prism(geom.rect(-L.dw / 2 + g, z0 + g, L.dw / 2 - g, z0 + ph), "XZ", L.y_dress_front - pt - g, L.y_dress_front - g, "aluminium_brushed")
+    g = L.gap   # the plate fills the opening along its bottom edge, just inside the bezel
+    zp = zc - oh / 2 + g
+    mb.prism(geom.rect(-ow / 2 + g, zp, ow / 2 - g, z0 + ph), "XZ", L.y_dress_front - pt - g, L.y_dress_front - g, "aluminium_brushed")
     yt = L.y_dress_front - pt - g - 0.05   # just in front of the plate's face
-    zt = z0 + ph / 2
+    zt = (zp + z0 + ph) / 2
     # the logo and the title, from the simulator's own SVG (its 2D panel shows the same); the
     # letters' caps (SVG y 4.89-47.79) are plate_text_size high, ALTAIR's left edge where the photo has it
     s = p.v("lettering.plate_text_size") / (47.79 - 4.89)
@@ -205,7 +181,6 @@ def build_panel(p, col, root, chassis=None, bezel_mb=None):
     sw, sh = p.v("sub_panel.size")
     sub = MeshBuilder()
     sub.prism(geom.rect(-sw / 2, zc - sh / 2, sw / 2, zc + sh / 2), "XZ", L.y_sub_front, L.y_sub_back, "aluminium_anodised")
-    b_r = p.v("switch.bushing_diameter") / 2
     led_r = p.v("led.diameter") / 2
     sub_holes = [(*L.lamp(i), led_r + 0.1) for i in LAMP_IDS] + [(*L.switch(s), b_r + 0.3) for s in SWITCH_IDS]
     verts, faces = bl.cut_holes(sub, sub_holes, "XZ", L.y_sub_front, L.y_sub_back, col)
@@ -217,8 +192,8 @@ def build_panel(p, col, root, chassis=None, bezel_mb=None):
         x, z = L.switch(s)
         mb.prism(geom.rect(x - bw / 2, z - bh / 2, x + bw / 2, z + bh / 2), "XZ", L.y_sub_back, L.y_sub_back + bd, "switch_body")
         mb.tube(b_r, bore, 24, "XZ", L.bushing_front, L.y_sub_back, "chrome", offset=(x, 0, z))
-        # the hex nut on the bushing, lying in the dress panel's hole (as thick as the panel)
-        mb.tube(nut_r, b_r, 6, "XZ", L.y_dress_front, L.y_sub_front, "chrome", offset=(x, 0, z))
+        # the hex nut on the bushing, hidden behind the dress panel
+        mb.tube(nut_r, b_r, 6, "XZ", L.y_dress_back + L.gap, L.y_sub_front, "chrome", offset=(x, 0, z))
         for k in (-1, 0, 1):   # three pins into the board
             px = x + k * 0.1 * IN
             mb.prism(geom.rect(px - 0.4, z - 0.4, px + 0.4, z + 0.4), "XZ", L.y_sub_back + bd, L.y_board_back + 1.0, "tin")

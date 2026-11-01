@@ -5,9 +5,9 @@ Run headless (npm run build:model):
 
 Builds, in the machine frame (mm), with each unit's way out in its extras (docs/3d-model.md):
   case.bottom          the blue tray, its walls and the bezel                     (static)
-  case.top             the grey lid, louvred, with its rear flange                (path)
+  case.top             the grey lid, louvred                                      (path)
   panel.dress          the lettered dress panel, with panel.name_plate on it      (path)
-  chassis.frame        side members, back panel, cross member                     (path)
+  chassis.frame        side members, side trims, back panel, cross member         (path)
     panel.*            the front panel
     chassis.card_rail.*, bus.board.*, slot.*, card.*   the card cage
     psu.t1/t2/t3, psu.board, psu.terminal_block, psu.fan   the power supply      (path)
@@ -45,9 +45,8 @@ class Box:
         self.front, self.back = -self.D / 2, self.D / 2
         self.tray_wall = p.v("case.tray_wall_height")
         self.skirt = p.v("case.lid_skirt_bottom")
-        # the lid's skirts are the box's outer faces; the tray's walls stand just inside them
-        self.lid_x = self.W / 2
-        self.tray_x = self.W / 2 - self.t - 0.3
+        # the lid's skirts and the tray's walls are both the box's outer faces; the side trim stands on them
+        self.lid_x = self.tray_x = self.W / 2
         self.lid_front = self.front + p.v("bezel.return_depth") + p.v("case.lid_front_gap")
         self.floor = self.t
         self.ch_bottom = self.floor + p.v("case.chassis_lift")
@@ -62,11 +61,16 @@ class Box:
 def build_case_bottom(p, col, root, b):
     mb = MeshBuilder()
     t = b.t
-    # the floor, and the side walls inside the lid's skirts
+    # the floor, and the side walls below the side trim
     mb.prism(geom.rect(-b.W / 2, b.front, b.W / 2, b.back), "XY", 0.0, t, "bezel_blue")
     for sx in (-1, 1):
         x0, x1 = sorted((sx * b.tray_x, sx * (b.tray_x - t)))
         mb.prism(geom.rect(x0, b.front + p.v("bezel.return_depth"), x1, b.back), "XY", t, b.tray_wall, "bezel_blue")
+        # the two screws that hold the chassis
+        ss = p.v("case.side_screws")
+        x2, x3 = sorted((sx * b.tray_x, sx * (b.tray_x + 0.6)))
+        for y in ss["y"]:
+            mb.prism([(y + u, ss["z"] + w) for u, w in geom.circle(ss["diameter"] / 2, 16)], "YZ", x2, x3, "tin", smooth=True)
     return mb   # the bezel is added by build_panel, then the node is built
 
 
@@ -74,22 +78,55 @@ def build_lid(p, col, root, b):
     t = b.t
     lv = p.v("case.louvres")
     mb = MeshBuilder()
-    mb.prism(geom.rect(-b.lid_x, b.lid_front, b.lid_x, b.back_out + 0.3 + t), "XY", b.H - t, b.H, "case_grey")
+    mb.prism(geom.rect(-b.lid_x, b.lid_front, b.lid_x, b.back), "XY", b.H - t, b.H, "case_grey")
     slots = [geom.rect(lv["first_y"] + k * lv["pitch"], lv["z"][0], lv["first_y"] + k * lv["pitch"] + lv["width"], lv["z"][1]) for k in range(lv["count"])]
     for sx in (-1, 1):
         skirt = MeshBuilder()
         x0, x1 = sorted((sx * b.lid_x, sx * (b.lid_x - t)))
-        skirt.prism(geom.rect(b.lid_front, b.skirt, b.back_out + 0.3 + t, b.H - t), "YZ", x0, x1, "case_grey")
+        skirt.prism(geom.rect(b.lid_front, b.skirt, b.back, b.H - t), "YZ", x0, x1, "case_grey")
         verts, faces = bl.cut_holes(skirt, [], "YZ", x0, x1, col, polys=slots)
         mb.add_mesh_data(verts, faces, bl.Matrix.Identity(4), "case_grey")
-    # the rear flange, down behind the back panel, where its two screws go
-    y0 = b.back_out + 0.3
-    mb.prism(geom.rect(-b.lid_x + t, b.H - p.v("case.lid_flange"), b.lid_x - t, b.H - t), "XZ", y0, y0 + t, "case_grey")
     lid = mb.build("case.top", col)
     bl.set_labels(lid, "Case top (the lid), louvred: comes off backwards, then up")
     finish_unit(p, lid, "case.top")
     bl.parent(lid, root)
     return lid
+
+
+def d_shape(x, z, io):
+    """A DB-25 opening: wide side up, its corners cut, counter-clockwise."""
+    t, u, h, c = io["top"] / 2, io["bottom"] / 2, io["height"] / 2, io["corner"]
+    return [(x + a, z + w) for a, w in ((-u + c, -h), (u - c, -h), (u, -h + c), (t, h - c), (t - c, h), (-t + c, h), (-t, h - c), (-u, -h + c))]
+
+
+def web_profile(p, b, y0, y1, h):
+    """A side member's web, as (y, z): low along the cards, rising at each end to the top of the
+    panel there, with its holes, three rows along it and two columns at each end (y, z, radius)."""
+    e, wh = p.v("chassis.web_ends"), p.v("chassis.web_holes")
+    tip, run, c = e["tip"], e["run"], e["chamfer"]
+    low = b.ch_bottom + h
+    top_r = b.ch_bottom + p.v("chassis.back_panel")[1]
+    top_f = b.L.zc + p.v("sub_panel.size")[1] / 2
+    outline = [(y0, b.ch_bottom), (y1, b.ch_bottom), (y1, top_r), (y1 - tip + c, top_r), (y1 - tip, top_r - c),
+               (y1 - tip - run, low), (y0 + tip + run, low), (y0 + tip, top_f - c), (y0 + tip - c, top_f), (y0, top_f)]
+    r = wh["diameter"] / 2
+    pitch = p.v("chassis.holes")["pitch"]
+    holes = []
+    for row, z in enumerate(wh["rows_z"]):
+        y = y1 - 8.0 - (row % 2) * pitch / 2
+        while y > y0 + 6.0:
+            holes.append((y, b.ch_bottom + z, r))
+            y -= pitch
+    # two upright columns at each end, the second only where the slanted edge leaves room for it
+    for end, top, sign in ((y1, top_r, -1), (y0, top_f, 1)):                # sign: inward from the end
+        for col, inset in enumerate(wh["columns"]):
+            z = top - 5.0 - col * pitch / 2
+            while z > b.ch_bottom + wh["column_bottom"]:
+                width = tip + run * max(0.0, min(1.0, (top - c - z) / (top - c - low)))
+                if inset + r + wh["margin"] <= width:
+                    holes.append((end + sign * inset, z, r))
+                z -= pitch
+    return outline, holes
 
 
 def build_chassis(p, col, root, b):
@@ -100,7 +137,11 @@ def build_chassis(p, col, root, b):
     flange = p.v("chassis.flange")
     for sx in (-1, 1):
         x0, x1 = sorted((sx * b.ch_x, sx * (b.ch_x - mt)))
-        mb.prism(geom.rect(y0, b.ch_bottom, y1, b.ch_bottom + h), "YZ", x0, x1, "aluminium_anodised")
+        web = MeshBuilder()
+        outline, web_holes = web_profile(p, b, y0, y1, h)
+        web.prism(outline, "YZ", x0, x1, "aluminium_anodised")
+        verts, faces = bl.cut_holes(web, web_holes, "YZ", x0, x1, col, segments=8)
+        mb.add_mesh_data(verts, faces, bl.Matrix.Identity(4), "aluminium_anodised")
         f = MeshBuilder()
         fx0, fx1 = sorted((sx * (b.ch_x - mt), sx * (b.ch_x - flange)))
         f.prism(geom.rect(fx0, y0, fx1, y1), "XY", b.ch_bottom, b.ch_bottom + mt, "aluminium_anodised")
@@ -108,22 +149,40 @@ def build_chassis(p, col, root, b):
         hs = [(hx, b.back_in - holes["first_from_back"] - k * holes["pitch"], holes["diameter"] / 2) for k in range(holes["count"])]
         verts, faces = bl.cut_holes(f, hs, "XY", b.ch_bottom, b.ch_bottom + mt, col, segments=12)
         mb.add_mesh_data(verts, faces, bl.Matrix.Identity(4), "aluminium_anodised")
+        # the side trim: bolted down the web, out under the lid's edge and up outside it, on the tray's lip
+        tr = p.v("case.side_trim")
+        z0, z1, foot = b.tray_wall + 0.1, b.tray_wall + 0.1 + tr["height"], b.tray_wall + 0.1 + tr["foot"]
+        out, m = b.W / 2 + 0.1, tr["metal"]
+        section = [(b.ch_x, z0 - tr["leg"]), (b.ch_x + m, z0 - tr["leg"]), (b.ch_x + m, z0), (out + m, z0), (out + m, z1), (out, z1), (out, foot), (b.ch_x, foot)]
+        ty0 = b.front + p.v("bezel.return_depth") + p.v("case.lid_front_gap")
+        mb.prism([(sx * u, w) for u, w in section], "XZ", ty0, b.back_in - 0.1, "aluminium_brushed")   # up to the back panel, not through it
     # the back panel: the fan opening, eight DB-25 openings, the cord's hole
     bw, bh = p.v("chassis.back_panel")
     fan = p.v("chassis.fan_hole")
     cord = p.v("chassis.cord_hole")
     back = MeshBuilder()
     back.prism(geom.rect(-bw / 2, b.ch_bottom, bw / 2, b.ch_bottom + bh), "XZ", b.back_in, b.back_out, "aluminium_anodised")
-    cw, chh = p.v("chassis.io_cutout_size")
-    cutouts = [geom.rect(c["x"] - cw / 2, c["z"] - chh / 2, c["x"] + cw / 2, c["z"] + chh / 2) for c in p.v("chassis.io_cutouts")]
+    io = p.v("chassis.io_cutout_size")
+    cuts = p.v("chassis.io_cutouts")
+    cutouts = [d_shape(c["x"], c["z"], io) for c in cuts]
     holes = [(fan["x"], fan["z"], fan["diameter"] / 2), (cord["x"], cord["z"], cord["diameter"] / 2)]
+    holes += [(c["x"] + sx * io["screw_spacing"] / 2, c["z"], io["screw_diameter"] / 2) for c in cuts for sx in (-1, 1)]
     verts, faces = bl.cut_holes(back, holes, "XZ", b.back_in, b.back_out, col, polys=cutouts)
     mb.add_mesh_data(verts, faces, bl.Matrix.Identity(4), "aluminium_anodised")
     # the mesh screens on the panel's inside: a square one over the fan opening, one behind the DB-25s
     s = p.v("chassis.fan_screen") / 2
     mb.prism(geom.rect(fan["x"] - s, fan["z"] - s, fan["x"] + s, fan["z"] + s), "XZ", b.back_in - 0.6, b.back_in - 0.1, "screen")
-    io = p.v("chassis.io_screen")
-    mb.prism(geom.rect(io["x"][0], io["z"][0], io["x"][1], io["z"][1]), "XZ", b.back_in - 0.6, b.back_in - 0.1, "screen")
+    sc = p.v("chassis.io_screen")
+    mb.prism(geom.rect(sc["x"][0], sc["z"][0], sc["x"][1], sc["z"][1]), "XZ", b.back_in - 0.6, b.back_in - 0.1, "screen")
+    # the clips that tie the side members' tips to the back panel's top corners
+    cl = p.v("chassis.corner_clip")
+    ctop = b.ch_bottom + bh - 3.0
+    for sx in (-1, 1):
+        x0c, x1c = sorted((sx * (b.ch_x - mt - 0.1), sx * (b.ch_x - mt - 0.1 - cl["width"])))
+        mb.prism(geom.rect(x0c, ctop - cl["height"], x1c, ctop), "XZ", b.back_in - cl["metal"] - 0.1, b.back_in - 0.1, "tin")
+        bx = sx * (b.ch_x - mt - 0.1 - cl["width"] / 2)
+        mb.prism([(bx + u, ctop - cl["height"] / 2 + w) for u, w in geom.circle(cl["bolt_diameter"] / 2, 6)], "XZ",
+                 b.back_in - cl["metal"] - 3.0, b.back_in - cl["metal"] - 0.1, "tin")
     # the power cord in its grommet, and a short piece of it outside, down to the table
     r_cord = p.v("harness.power_cord_diameter") / 2
     r_hole = cord["diameter"] / 2
@@ -131,14 +190,18 @@ def build_chassis(p, col, root, b):
     for y0g, y1g in ((b.back_in - 1.0, b.back_in), (b.back_out, b.back_out + 1.0)):
         mb.tube(r_hole + 1.5, r_hole, 16, "XZ", y0g, y1g, "cord_black", offset=(cord["x"], 0, cord["z"]))
     cx_, cz_ = cord["x"], cord["z"]
-    bl.tube_path(mb, [(cx_, b.back_in - 12.0, cz_), (cx_, b.back_out + 40.0, cz_), (cx_, b.back_out + 70.0, r_cord + 2.0),
-                      (cx_, b.back_out + 160.0, r_cord + 0.5)], r_cord, "cord_black", bend=30.0)
+    # out past the tray, down to the table, then along behind the machine toward the DB-25s, in easy curves
+    lie = r_cord + 0.5
+    bl.tube_path(mb, [(cx_, b.back_in - 12.0, cz_), (cx_, b.back_out + 26.0, cz_), (cx_ - 6.0, b.back_out + 46.0, lie + 1.0),
+                      (cx_ - 42.0, b.back_out + 60.0, lie), (cx_ - 100.0, b.back_out + 42.0, lie), (cx_ - 158.0, b.back_out + 62.0, lie),
+                      (cx_ - 214.0, b.back_out + 46.0, lie), (cx_ - 258.0, b.back_out + 58.0, lie)],
+                 r_cord, "cord_black", bend=40.0, steps=14)
     # the cross member: a shelf from its front lip back to the back panel
     cx = b.ch_x - mt - 0.1
     mb.prism(geom.rect(-cx, b.cross_front, cx, b.back_in - 0.1), "XY", b.cross_top - mt, b.cross_top, "aluminium_anodised")
     mb.prism(geom.rect(-cx, b.ch_bottom + mt + 0.1, cx, b.cross_top - mt), "XZ", b.cross_front, b.cross_front + mt, "aluminium_anodised")
     ch = mb.build("chassis.frame", col)
-    bl.set_labels(ch, "Chassis: side members, back panel and cross member; slides out to the rear with everything on it")
+    bl.set_labels(ch, "Chassis: side members, side trims, back panel and cross member; slides out to the rear with everything on it")
     finish_unit(p, ch, "chassis.frame")
     bl.parent(ch, root)
     return ch
@@ -158,9 +221,29 @@ def build_psu(p, col, chassis, b):
                 pts.append((cu + r * math.cos(a), cw + r * math.sin(a)))
         return pts
 
-    def transformer(name, label, x, z0, size, axis):
+    def strap(mb, x, z, y0, length, width, ear, runs):
+        """The steel strap over a transformer's core: a band across its front, y0 to the back
+        panel's legs and ears at each end, running along X or Z (Mike Douglas's sizes, ears apart)."""
+        m = 1.6
+        along, across = (x, z) if runs == "x" else (z, x)
+
+        def box(a0, a1, y1, y2):
+            u0, u1, w0, w1 = a0, a1, across - width / 2, across + width / 2
+            r = geom.rect(u0, w0, u1, w1) if runs == "x" else geom.rect(w0, u0, w1, u1)
+            mb.prism(r, "XZ", y1, y2, "tin")
+
+        half = length / 2 + 0.1
+        box(along - half - m, along + half + m, y0 - m, y0)                  # the band
+        for s in (-1, 1):
+            a0, a1 = sorted((along + s * half, along + s * (half + m)))
+            box(a0, a1, y0, bi - m)                                           # a leg, back to the panel
+            a0, a1 = sorted((along + s * (half + m), along + s * (half + m + ear)))
+            box(a0, a1, bi - m, bi)                                           # its ear
+
+    def transformer(name, label, x, z0, size, axis, sp):
         """A black lamination stack with its bronze coil running through it and bulging out of
-        both sides, up and down (axis "z": T1, T2) or left and right ("x": T3), as in SN #09."""
+        both sides, up and down (axis "z": T1, T2) or left and right ("x": T3), as in SN #09,
+        under its strap."""
         w, d, h = size
         mb = MeshBuilder()
         yc, half_y = bi - d / 2, 0.31 * d                 # the coil keeps clear of the back panel
@@ -172,15 +255,16 @@ def build_psu(p, col, chassis, b):
             mb.prism(geom.rect(x - 0.275 * w, bi - d, x + 0.275 * w, bi), "XY", z0, z0 + h, "laminations")
             r = min(0.2 * w, 0.9 * half_y)
             mb.prism(rounded(x - w / 2, yc - half_y, x + w / 2, yc + half_y, r), "XY", z0 + 0.1 * h, z0 + 0.9 * h, "coil_wrap", smooth=True)
+        strap(mb, x, z0 + h / 2, bi - d - 0.1, sp["strap"][0], sp["strap"][1], sp["ear"], "x" if axis == "z" else "z")
         o = mb.build(name, col)
         bl.set_labels(o, label)
         finish_unit(p, o, name)
         bl.parent(o, chassis)
 
     t1, t2, t3 = p.v("psu.t1"), p.v("psu.t2"), p.v("psu.t3")
-    transformer("psu.t1", "Transformer T1: 7.5 V at 8 A, for the bus's +8 V", t1["x"], ct, t1["size"], "z")
-    transformer("psu.t2", "Transformer T2: +8 V for the front panel, and +16 V", t2["x"], t2["top_z"] - t2["size"][2], t2["size"], "z")
-    transformer("psu.t3", "Transformer T3: 11 V, for -16 V", t3["x"], t3["z"] - t3["size"][2] / 2, t3["size"], "x")
+    transformer("psu.t1", "Transformer T1: 7.5 V at 8 A, for the bus's +8 V", t1["x"], ct, t1["size"], "z", t1)
+    transformer("psu.t2", "Transformer T2: +8 V for the front panel, and +16 V", t2["x"], t2["top_z"] - t2["size"][2], t2["size"], "z", t2)
+    transformer("psu.t3", "Transformer T3: 11 V, for -16 V", t3["x"], t3["z"] - t3["size"][2] / 2, t3["size"], "x", t3)
 
     pb = p.v("psu.board")
     (x0, x1), (y0, y1) = pb["x"], pb["y"]
@@ -213,7 +297,7 @@ def build_psu(p, col, chassis, b):
     for row in (0, 1):
         for k in range(10):
             sx = tx0 + 10 + row * 20
-            sz = tz0 + 5 + k * (tz1 - tz0 - 10) / 9
+            sz = tz0 + 6.35 + k * (tz1 - tz0 - 12.7) / 9
             mb.prism([(sx + u, sz + w) for u, w in geom.circle(2.6, 10)], "XZ", bi - tb["depth"] - 2.0, bi - tb["depth"], "tin", smooth=True)
     o = mb.build("psu.terminal_block", col)
     bl.set_labels(o, "Terminal block: every supply and bus power wire meets here")

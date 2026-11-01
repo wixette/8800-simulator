@@ -45,8 +45,8 @@ are settled in [Part 5](#part-5--settled-questions).
   display/control board, the chassis and back panel, two 88-EC
   expander boards, up to six cards (CPU, 1K memory, two 88-4MCS, SIO,
   2SIO), three transformers, the power supply board, the fan, the
-  terminal block and the wiring harness. About 84 parts, 83,655
-  triangles, **3.0 MB** of `.glb`. There are no `.blend` files: the
+  terminal block and the wiring harness. About 84 parts, 105,415
+  triangles, **4.1 MB** of `.glb`. There are no `.blend` files: the
   scripts build everything from `params/machine.json` and
   `params/cards.json`, and the `.glb` is their output.
 - **The node contract:** node names such as `panel.switch.s15`,
@@ -79,7 +79,7 @@ tests are where the production modules start from.
 - **There are no Blender files to store.** The sources are text
   (Python scripts, JSON params, one SVG). Only the generated `.glb`
   is binary.
-- **It is small:** 3.0 MB, below the 5 MB the model was designed to
+- **It is small:** 4.1 MB, below the 5 MB the model was designed to
   stay under for plain git. Each rebuild that gets committed adds
   about 3 MB to `.git` (16 MB today), so a dozen revisions double it.
   That is acceptable for a model that changes a few times a year.
@@ -183,7 +183,7 @@ no 2D panel to call. Here, the 3D panel must not duplicate it (P2).
 
 ### M5 — Loaded only when first opened
 
-three.js (about 2.1 MB) and the model (3.0 MB) load the first time the
+three.js (about 2.1 MB) and the model (4.1 MB) load the first time the
 reader opens the 3D view, through a dynamic `import()`. The 2D page's
 first load is unchanged. While they load, the stage shows a progress
 bar, and the 3D-only controls are greyed with the reason (P6). The
@@ -721,6 +721,8 @@ All on branch `v1.8.0`, in this order. Each step ends with `npm test`,
 | W10 | **Words and docs (V6):** all new strings in ten languages; README section and screenshot, About's licence lines, References (the model's sources) | The l10n key test passes; your read-through |
 | W11 | **Release review:** a Chromebook-class performance check, a full manual pass, `npm version 1.8.0`, PR to `master` | Your manual check and OK |
 
-The model's heavy geometry checks (clearance along every removal path,
-about 25 s) run as `npm run test:model` after a rebuild, not in every
-`npm test`. The fast contract and budget checks are in `npm test`.
+The model's heavy geometry check (clearance along every removal path)
+runs as `npm run test:model` after a rebuild, not in every `npm test`.
+For v1.8.0 it was run by hand; v1.8.2 keeps it in the repository
+([3d-model.md, Part 4](3d-model.md#part-4--the-plan-for-v182)). The
+fast contract and budget checks are in `npm test`.

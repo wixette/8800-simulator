@@ -14,8 +14,9 @@ changes this document first.
 |---|---|
 | `params/machine.json` | Every dimension and angle, in mm and degrees, each with its source (`src`) and confidence |
 | `params/cards.json` | The parts on each card |
-| `blender/scripts/` | The headless build: `build_whole_box.py` (which builds the front panel and the card cage through `build_front_panel.py` and `build_card_cage.py`), preview renders, and `lib/` |
+| `blender/scripts/` | The headless build: `build_whole_box.py` (which builds the front panel and the card cage through `build_front_panel.py` and `build_card_cage.py`), preview renders, the clearance check, and `lib/` |
 | `blender/data/front-panel-title.svg` | The name plate's title, the drawing the 2D panel uses |
+| `blender/data/front-panel-lines.svg` | The panel's printed lines, a copy of the 2D panel's strokes |
 | `altair-8800.glb` | The built model, served to the page; always rebuildable |
 | `research/` | The research: the report, the source notes, the measured data, the bibliography and the photo credits |
 | `LICENSE` | CC BY-SA 4.0, for the model and its data and notes |
@@ -34,11 +35,13 @@ build of the front panel or the card cage.
 
 The model is in plain git, not LFS ([3d-view.md, M1](3d-view.md#m1--no-git-lfs-the-model-goes-in-plain-git)).
 Budgets: under 300 k triangles and 15 MB, and under 5 MB to stay in
-plain git. Today: 83,655 triangles, 3.0 MB.
+plain git. Today: 105,415 triangles, 4.2 MB.
 
-Checks, in `npm test`: the node contract (Part 2), the budgets, and
-that the model's places, ways out and take-apart order agree with
-`params/machine.json`.
+Checks, in `npm test`: the node contract (Part 2), the budgets, that
+the model's places, ways out and take-apart order agree with
+`params/machine.json`, and that the panel's lines are the 2D panel's.
+The heavy check, `npm run test:model`, needs Blender and runs after a
+rebuild: no two parts meet at rest, on any way out, or taken apart.
 
 ## Part 2 — What the page relies on
 
@@ -76,8 +79,8 @@ carries what is fixed to it.
 | `case.bottom` (the blue tray and bezel) | root | static |
 | `case.top` (the grey lid, louvred) | root | way out |
 | `panel.dress` (the lettered dress panel), with `panel.name_plate` on it | root | way out |
-| `chassis.frame` (side members, back panel, cross member) | root | way out |
-| `panel.assembly` (sub-panel, switch bodies, nuts, LEDs, the display/control board) | `chassis.frame` | static: the harness ties it to the bus |
+| `chassis.frame` (side members, side trims, back panel, cross member) | root | way out |
+| `panel.assembly` (sub-panel, switch bodies, the nuts hidden behind the dress panel, LEDs, the display/control board) | `chassis.frame` | static: the harness ties it to the bus |
 | `panel.switch.<id>` (a bat), 25 | `panel.assembly` | rotates about X: up, centre, down |
 | `panel.lamp.<id>` (an LED dome), 36 | `panel.assembly` | lit or not |
 | `chassis.card_rail.0`, `.1`; `bus.board.0`, `.1` (88-EC) | `chassis.frame` | static: wired to the panel and each other |
@@ -174,12 +177,20 @@ simplification: owners fitted connectors as they bought cards).
   photos are not in this repository; each is credited, with its
   licence and source, in [model/research/photo-credits.md](../model/research/photo-credits.md).
   No photo is used as a texture.
-- **Which machine:** the original 1975 8800 (charcoal dress panel,
-  short round switch bats, 4-slot expander boards, the hand-wired
-  harness, three transformers on the back panel). Museum machines are
-  often upgraded, so every photo was checked against the version
-  notes before it was used. The fan (88-FAN) was an option; the model
-  has it.
+- **An owner's review:** Mike Douglas of deramp.com, who keeps original
+  Altairs, reviewed the model in November 2026 with notes, measurements
+  and photos (see [his review](#mike-douglass-review-2026-11-01)). His
+  photos are reference only and are not in this repository.
+- **Which machine:** a typical original 1975 8800 (charcoal dress
+  panel, short round switch bats, 4-slot expander boards, the
+  hand-wired harness, three transformers on the back panel, blue card
+  guides, the bent Sense Switch line). It is not one serial number:
+  SN 220081K is the best-documented machine and most of the model is
+  scaled from its photos, but it is a very early unit and differs from
+  the usual machine in its case, card guides, panel lettering and
+  rear cut-outs. Museum machines are often upgraded, so every photo
+  was checked against the version notes before it was used. The fan
+  (88-FAN) was an option; the model has it.
 
 Start with [model/research/REPORT.md](../model/research/REPORT.md),
 then the notes in `model/research/sources/`; every source is in
@@ -188,24 +199,30 @@ key the params cite.
 
 ### Decisions in the model
 
-1. **The dress panel lies on the sub-panel**, and the switch nuts sit
-   in its holes, flush with its face. No fastener holds it: the
-   Assembly Manual says it falls free once the chassis is out.
+1. **The dress panel sits between the bezel and the switch nuts.** It
+   goes in from behind, and its edge bears on the back of the bezel,
+   whose opening is smaller than the panel. The nuts hold the switches
+   to the sub-panel, in a gap behind the dress panel, so only the
+   bushings come through its holes. No fastener holds it: the Assembly
+   Manual says it falls free once the chassis is out, and it comes out
+   backward, the way it went in.
 2. **The display/control board is held by the switches**, 0.6 in
    behind the sub-panel (the errata: "held by the switch nuts only").
 3. **The bat's pivot is 1.8 mm inside the bushing, the throw ±16°**
    (`design`), so a bat clears its own bushing.
-4. **The CPU and 1K cards are the revision MITS's 1:1 artwork shows.**
-   The Rev 0 boards in the photos carry a few extra parts; they stay in
-   `research/data/card_layouts.json`, so a Rev 0 card is a data change.
+4. **The CPU and 1K cards are Rev 0, as they shipped in 1975:** the
+   positions from MITS's 1:1 artwork, plus the parts the Rev 0 boards
+   carry beyond it, from the scans (`conf` `photo` in `params/cards.json`).
 5. **The card guides taper** (16.75 mm deep at the base, 7.5 mm at the
    top, from an owner's measurements of an original). Straight posts
    cut into the CPU's heat sink.
 6. **Parts never touch:** 0.1 mm gaps where the real ones bear on each
-   other (the dress panel behind the bezel, the expander boards on the
-   tape the manual puts under them).
-7. **The case's outline is the case:** 17.0 × 17.5 × 7.0 in. The
-   switch bats stand 3 mm proud of the bezel.
+   other (the dress panel behind the bezel, the side trims on the
+   tray's lips, the expander boards on the tape the manual puts under
+   them).
+7. **The case's outline is the case:** 17.0 × 17.5 × 7.0 in. The lid
+   and the tray end together at the back, and the back panel stands
+   0.6 in inside them. The switch bats stand 3 mm proud of the bezel.
 8. **The back panel is 16.7 in wide**, not the photo's 16.85 ± 0.2,
    to clear the tray's walls as the chassis slides out.
 9. **The expander boards and the front panel don't come off the
@@ -215,6 +232,15 @@ key the params cite.
     measured from the photos.
 11. **Every material is single-sided:** every part is closed or faces
     the viewer.
+12. **The panel's lines have one source:** the strokes of the 2D
+    panel, `images/panel.svg`. The 3D build reads a copy of them,
+    placed by the model's own lamp and switch grid, and a test keeps
+    the copy equal to the 2D drawing, so the two panels cannot drift
+    apart. Both show the bent drawing (see the review below).
+13. **Two early traits stay until a later back panel is documented:**
+    the round fan opening and the mesh screens. Later panels are known
+    to differ (the Assembly Manual's errata mention fan slots), but no
+    good view of one has been found.
 
 ### Fidelity checks
 
@@ -228,6 +254,8 @@ key the params cite.
   photo scaling gives.
 - **Clearance:** at rest, along every unit's way out (in 2 mm steps,
   with everything else in), and taken all apart, no two parts meet.
+  Run it with `npm run test:model` after a rebuild
+  (`blender/scripts/check_clearance.py`), for each memory size.
 - **Readouts:** from the front, the closed box shows the bezel and the
   panel and nothing of the inside; every LED and bat is first in line
   from the front.
@@ -255,18 +283,110 @@ The eleven weakest dimensions were checked against the reference photos (MFE-SN2
 
 **A check that missed a collision.** The review found T1 inside T2 in the taken-apart view, though the way-out clearance check passed. Two causes: that check never looked at the taken-apart state as a whole, and its box pre-test read each part's world matrix before it was brought up to date, so a part could be tested at its previous pose. The check now updates each part's matrices first, and adds the taken-apart state. With the fix, it also caught T1 meeting the parked T2 on its way up.
 
+### Mike Douglas's review (2026-11-01)
+
+Mike Douglas looked at the released model and sent nine corrections,
+with measurements and photos of original machines. All nine were
+accepted. Several of them overturn rows of the fidelity review above,
+which is kept as the record of what was thought then.
+
+**Two panels, not one.** Original 8800s carry two line drawings:
+
+| | The straight drawing | The bent drawing |
+|---|---|---|
+| Sense Switch line | Short pieces between the numbers of switches 15 to 8, level with the numbers | From SENSE SW. it bends down below the switches and runs on as one line, with small ticks, to switch 8 |
+| The right end | The bars run straight out to Data and Address | The two lines step up to Data and Address |
+| Seen on | SN 220081K; COMMONS-FP-CROMEMCO; the Intel Museum, MfK Bern, Colegrove and rack-mounted machines; the May 1975 MITS advert | The Smithsonian, Computer History Museum (two) and Living Computers machines |
+
+DERAMP-EARLY names the straight line as a sign of a very early unit,
+and the May 1975 advert shows it, so it came first. When the drawing
+changed is not known, and the straight one is not rare. In both, the
+doubling covers switches 7 to 0: the upper line is the data byte, and
+the model's double bar under switch 8 was wrong in either drawing.
+The bent drawing also explains itself: its upper line is the Sense
+Switches, then the data byte, and its lower line is the address.
+
+**Decided:** both views show the bent drawing, the one the 2D panel
+has always had, from one source (decision 12). The model aims at a
+typical 1975 machine, not at SN 220081K, since Mike's other corrections
+(blue guides, D-shaped cut-outs) are themselves the usual machine, not
+that early one. The lid keeps its colour: the warm off-white in the
+photos is aged paint and colour shift. Nothing waits for further
+answers; a better number later is one params entry and a rebuild.
+
+| What | Was | Now | Why |
+|---|---|---|---|
+| Panel lines | The straight drawing, doubled from switch 8 | The bent drawing, from the 2D panel's strokes | Above |
+| Switch nuts | In the dress panel's holes, flush with its face | Behind the panel: holes 7.2 mm across (the bushing, 6.35 mm, plus 0.4 mm all round). `dress_panel.nut_gap`, 2.4 mm (`est`), opens behind the panel, so the sub-panel and the D/C board move 2.4 mm back and the card front gap becomes 0.60 in, within the side view's 0.45 to 0.7. The bushing stays 7.5 mm, so about 1.1 mm of it shows in front of the panel, as in the photos; the bat grows from 11.5 to 13.9 mm, so its tip stays where it was | Mike. Most photos agree. Living Computers' machine does show nuts: "typically", as he says |
+| Panel lettering | Moved clear of the nuts: 7.2, 7.4 / 7.4 mm | Back to the photo's 5.3 and 6.35 mm above; 7.4 mm below, as before, not the photo's 5.1: the page's front view looks down on the panel, and at less the bats cover RUN, CLR and DEPOSIT. STATUS stays 3.0 mm under its line | That move answered a hole that is no longer there |
+| Bezel | Straight walls, wider than the panel, and a blue flange behind the panel's edge closing the gap | Walls that slope in from the front face (0.19 in) to the opening at the panel (`bezel.opening`, 415.3 × 161.5 mm, 0.325 in from the outside), no flange, the panel's edge behind the opening | Mike: no lip, and the opening is slightly smaller than the panel. Near the corner, #02's band is 0.25 in wide at the sides and 0.18 in at the top: perspective alone would give a ratio of 2.4, and a slope of 0.135 in fits both. Face plus slope is the 0.32 in seen head-on |
+| The dress panel's way out | Forward, through the bezel | 40 mm backward, up, then forward to where it used to park, clear of the parked lid | It goes in from behind. The order is unchanged |
+| Lid | Stopped at the back panel, with a rear flange; skirts to 2.45 in | Ends with the tray, 0.6 in behind the back panel; no flange. Its skirts come down behind the side trim to 2.275 in, nearly to the tray. The Assembly Manual's two rear screws are not modelled | Mike; past the trim's end, his side photo shows the lid reaching the blue. Its way out is unchanged |
+| Tray walls | 2.55 in, inside the lid's skirts | 2.20 in, flush with the outer face, with the chassis's screws showing on each side | The trim sits between them |
+| Side trim | None | A 0.25 in (`measured`) aluminium strip along each side, part of `chassis.frame`, from the bezel to the back panel, resting on the tray's lip. In section, a leg bolted down the side member, a foot out under the lid's edge and a lip up outside it, one metal thickness proud of the case. Its top is at 2.45 in, where the grey used to end | Mike, his side photo and his chassis photo, which shows the trim's end. Its height above the table is scaled, not measured |
+| Side members | Plain rectangles 2.7 in high, holes only in the flanges | One perforated piece that rises at each end to the top of the back panel and of the sub-panel, a tip one hole wide sloping down over about 4 to 5 holes, three rows of holes along it and two upright columns at each end, only the outer one at the tip; a clip ties each rear tip to the back panel's corner. The tips stop 6 mm under the lid and are not known to carry it | Not one of Mike's nine: it was found checking his photos. SN 220081K (#09), his chassis photo and two more machines show it, and the Clone has no such sub-chassis, so this is the original. The sizes are roughly scaled, and the hole pattern is approximate |
+| Transformers | T1 3.1 in, T2 3.0 in wide, no straps | T1 3.0 in, T2 2.375 in wide, T3 2.0 in tall, each under a strap with its ears: 3 × 1.375, 2.375 × 1 and 2 × 0.75 in. The straps belong to their transformers' nodes. T1's runs across its front with short ears, a simplification: the real one runs front to back | Mike. Read as the strap's length by its width, which fits all three cores (each strap's width is just under its core): still to confirm |
+| DB-25 cut-outs | Rectangles, 43 × 11 mm | D-shaped, the standard DB-25 opening, with its two screw holes | Mike. The sharp corners were SN 220081K's |
+| Card guides | Tan | Blue-green, set by rendering beside his chassis photo | Mike: natural nylon is very rare. Overturns the row above |
+| Terminal block | 2.7 in tall | 5.0 in tall (ten terminals at 0.5 in, the manual's count), up to about 6.3 in above the base; it lifts straight up. That also ends a real fault the new clearance check found in the released model: on Taken apart it went through the parked power board | Mike. Scaling #09 gives 5 to 6 in |
+
+**The 8080, added after his review.** It was a plain black box. The real one is white ceramic with a gold lid, on every Altair CPU card photographed at deramp.com. The model now draws a C8080A, the chip most Altairs carried (MFE-SN220081K-DOC; SN 220081K's own early C8080 is the exception), in its socket: the package 2.0 × 0.6 in and the lid 0.5 in square, from the Rev 0 scan, with the marking as flat lettering, not a photo. It says C8080A and © INTEL '74, as a C8080A's lid does, and leaves out the lot codes, which belong to one chip. The other chips stay black boxes. The mark by pin 1 is an "i" on its side, a stroke and a dot.
+
+**Rev 0 cards.** A check of the CPU card against the scan found the bottom row a chip and a column of resistors short. The model had been built to the X1 artwork, but Rev 0 is what shipped in 1975, so both cards now carry all their Rev 0 parts (decision 4): on the CPU card a thirteenth IC, the resistor column, two pairs of electrolytics, the two large resistors and the paper-wrapped part; on the 1K card one IC and two electrolytics.
+
+**The power cord.** It ran 6 in straight back, which looked odd and made the box far deeper than it is. It now drops to the table just behind the case and curves along behind the machine toward the DB-25s, within the box's width and about 2 in behind it. The framing still leaves it out, by its material.
+
 ### Data still wanted
 
-The weakest values are the cross member's height (T1 and the power
-board sit on it), the card rails' section, the box's depth (17.5 or
-18.5 in), the dress panel's grid position (±2.5 mm), and the display/
-control board's length. About fifteen measurements of a real 1975
-machine would turn every `photo` and `est` value into a measured one;
-`model/research/REPORT.md` §6 lists them. Each is one params entry and
-a rebuild.
+Mike has been asked three things: when the panel drawing changed,
+whether the bracket sizes are a strap's length by its width (and the
+terminal block's height), and how the lid fastens at the rear and how
+high the trim stands. The other weak values are the cross member's
+height (T1 and the power board sit on it), the card rails' section, the
+box's depth (17.5 or 18.5 in), the dress panel's grid position
+(±2.5 mm), the display/control board's length, and a later back panel.
+About fifteen measurements of a real 1975 machine would turn every
+`photo` and `est` value into a measured one; `model/research/REPORT.md`
+§6 lists them. Each is one params entry and a rebuild.
 
 Not modelled: the red power wiring, the grounding braids, the AC cord
 inside the box.
+
+## Part 4 — The plan for v1.8.2
+
+All on branch `v1.8.2`, in this order. It takes in Mike Douglas's review
+above: params 0.2.0 → 0.3.1, `reference_machine` reworded. The state
+machine, the units, the order they come out in and the node names do
+not change, so `js/box.js` and its tests stay as they are, apart from a
+path in the params. Each step ends with `npm test`, `npm run typecheck`,
+`npm run build:model` where the model changed, and a commit.
+
+| # | Step | Done when |
+|---|---|---|
+| P1 | **The clearance check, first.** `model/blender/scripts/check_clearance.py` and `npm run test:model`: at rest, along every way out in 2 mm steps, and taken all apart, each part's matrices brought up to date first. Run it on today's model, before anything moves | It passes on the released model, or what it finds is listed, and it fails on a part moved into another on purpose |
+| P2 | **One source for the lines (decision 12).** `blender/data/front-panel-lines.svg`, a copy of all 101 strokes of `images/panel.svg`. `build_front_panel.py` reads it in place of its hand-made `strip` and `dashed` loops. Place points piecewise from the model's grid: the 16 dash columns to the switch columns, the lamp and switch rows to theirs, so nothing relies on the 2D drawing's scale. SENSE SW., Data and Address move with their lines. A test in `tests/model.test.js`: every stroke in the copy is in `images/panel.svg`, and the other way round | Beside the Smithsonian's photo, every line, tick and step is there, and the doubled line starts at switch 7 |
+| P3 | **The switches.** `dress_panel.nut_gap`, the holes round the bushing, the nuts behind the panel, the longer bat, the lettering back to the photo's spacing | The bats' tips are where they were, to 0.01 mm. From the front no nut shows; every LED and bat is still first in line |
+| P4 | **The bezel and the dress panel.** Sloping walls, no flange, `bezel.opening`, the panel's new way out | Beside #02 and Mike's corner photo. The panel comes out backward, through nothing |
+| P5 | **The case.** The lid and tray to the full depth, the lid's flange gone, the tray's walls lowered and flush, the side trims on `chassis.frame`, the side screws | Beside Mike's side photo: the proportions, the trim stopping at the back panel, the recess |
+| P6 | **The back panel.** D-shaped cut-outs and their screw holes; the taller terminal block and its new way out | Beside #09. Clearance passes with the block's new path |
+| P7 | **The power supply.** T1 and T2's new widths, T3's height, the straps and ears | Beside #09. Clearance passes |
+| P8 | **The card guides.** The new colour, its material renamed | Beside his chassis photo, in the page's own lighting |
+| P9 | **Credits and words.** Mike by name, as promised, in the model's data (`model/research`, the params' sources), the README's credits, `docs/3d-model.md` and the About box, in all ten languages. Bibliography entry. README's notes on the model. The part names and roles need no change, except a look at the chassis's for the trim | `npm test`; About read in English and one other language |
+| P10 | **Release review.** Every model view seen in the page, not only in Blender. `npm run test:model`, `npm run test:browser`. README screenshots retaken with `tools/shots.mjs`. Triangles and size updated in Part 1. Any answer from Mike by then goes in; the rest follows. `npm version 1.8.2`, PR to `master` | Your manual check and OK |
+
+**What could go wrong.** The panel stack moves everything behind the
+dress panel, so P3 is the step most likely to reach further than it
+looks: the harness, the data cable, the D/C board's way of hanging on
+the switches. The taller terminal block sits behind the power board,
+so its way out and T3's are the ones to watch. The bezel's slope is
+reasoned from photos, so if it does not look right in P4, a straight
+wall with a wider face is the fallback: Mike's rule, that the opening
+is smaller than the panel, is what must hold.
+
+**Done:** P1 to P10, released as v1.8.2. Mike's three questions are still open; each answer is a params entry and a rebuild.
+
+**Not in this release:** a later back panel's fan slots, the lid's rear
+screws, and any change to the 2D panel.
 
 ## Licences
 

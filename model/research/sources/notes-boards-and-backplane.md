@@ -74,7 +74,7 @@
 
 **Joining boards.** Only the first board is wired to the front panel in the Assembly Manual. Further boards were joined **wire by wire** through the staggered holes (CCTALK-GUZIS-2005). No 88-EC manual with this step was found. Processor Technology's MB-1 (1975) was a one-piece, 1/8 in thick motherboard that replaced three or four 88-ECs (BYTE-1975-09).
 
-**Card guides.** Plastic U-channel posts, one at each end of a slot, screwed into the hole pairs on the expander board (#6-32 × 3/8 in screws, p.68). Normally blue; very early ones natural nylon (MFE-SN220081K-DOC). The top has a notch; the bottom is stepped (photo #18). A reproduction model (PLANET-KAUFMAN, `Altair_card_rail.stl`) measures **139.8 × 12.8 × 16.5** (units not stated; mm gives 5.50 × 0.50 × 0.65 in, which fits the photos).
+**Card guides.** Plastic U-channel posts, one at each end of a slot, screwed into the hole pairs on the expander board (#6-32 × 3/8 in screws, p.68). Normally blue/green; natural nylon is very rare, and seen on very early machines (MFE-SN220081K-DOC, DOUGLAS-REVIEW-2026). The top has a notch; the bottom is stepped (photo #18). A reproduction model (PLANET-KAUFMAN, `Altair_card_rail.stl`) measures **139.8 × 12.8 × 16.5** (units not stated; mm gives 5.50 × 0.50 × 0.65 in, which fits the photos).
 
 **Card-cage height.** Not given. Card top above the expander board = connector seat height + 5.3 in card. The guide model suggests a cage about 5.5 in tall above the board.
 

@@ -1,6 +1,6 @@
 {
   "name": "8800-simulator",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "private": true,
   "type": "module",
   "description": "The Altair 8800 in your browser: a working front panel, an ASR-33 Teletype, Microsoft's original 4K BASIC, and an 8080 assembler.",
@@ -8,6 +8,7 @@
   "scripts": {
     "test": "node --test",
     "test:browser": "node tests/browser/run.mjs",
+    "test:model": "\"${BLENDER:-/Applications/Blender.app/Contents/MacOS/Blender}\" --background --factory-startup --python-exit-code 1 --python model/blender/scripts/check_clearance.py",
     "stamp": "node tools/stamp.mjs",
     "icons": "node tools/icons.mjs",
     "shots": "node tools/shots.mjs",

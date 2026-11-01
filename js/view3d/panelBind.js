@@ -230,7 +230,7 @@ export class PanelBinding {
      * The switch, and the way, a click on the model means: on a bat, the
      * half of it clicked, as it looks from where the camera is (a
      * latching switch flips); on the panel's own face near a switch,
-     * above or below its pivot.
+     * above or below the bat as drawn.
      * @param {!THREE.Object3D} object What the pointer's ray hit.
      * @param {!THREE.Vector3} point Where, in the world.
      * @param {!THREE.Camera} camera The camera it was seen with.
@@ -241,12 +241,7 @@ export class PanelBinding {
         for (let n = object; n; n = n.parent) {
             const id = n.userData.switch_id;
             if (id) {
-                // The middle of the bat as drawn: from above, all that
-                // shows of a bat sticking straight out is its top, every
-                // point of it above the pivot, so the world's up and down
-                // cannot tell its halves apart, but the screen's can.
-                const middle = new THREE.Box3().setFromObject(n).getCenter(new THREE.Vector3());
-                return this.throwFor(id, n, point, middle, camera);
+                return this.throwFor(id, n, point, camera);
             }
         }
         if (!onPanel(object)) {
@@ -258,7 +253,7 @@ export class PanelBinding {
             if (Math.abs(point.x - pivot.x) <= zone.x &&
                 Math.abs(point.y - pivot.y) <= zone.y &&
                 Math.abs(point.z - pivot.z) <= ZONE_DEPTH) {
-                return this.throwFor(id, bat.node, point, pivot, camera);
+                return this.throwFor(id, bat.node, point, camera);
             }
         }
         return null;
@@ -269,14 +264,18 @@ export class PanelBinding {
      * @param {string} id The switch.
      * @param {!THREE.Object3D} node Its node.
      * @param {!THREE.Vector3} point Where the click landed.
-     * @param {!THREE.Vector3} middle Where above is up from, and below down.
      * @param {!THREE.Camera} camera The camera it was seen with.
      * @return {{id: string, dir: string}}
      */
-    throwFor(id, node, point, middle, camera) {
+    throwFor(id, node, point, camera) {
         if (latches(node)) {
             return {id: id, dir: this.panel.switchPosition(id) > 0 ? 'down' : 'up'};
         }
+        // Up from the middle of the bat as drawn, on the screen: from above,
+        // all that shows of a bat sticking straight out is its top, every
+        // point of it above the pivot, and the bushing's rim can hide the
+        // rest, so the world's up and down cannot tell its halves apart.
+        const middle = new THREE.Box3().setFromObject(node).getCenter(new THREE.Vector3());
         const up = point.clone().project(camera).y >= middle.clone().project(camera).y;
         return {id: id, dir: up ? 'up' : 'down'};
     }

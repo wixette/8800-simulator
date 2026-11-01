@@ -230,7 +230,7 @@ panel, not a picture of it: click a switch on it and it does what the
   the panel and the parts behind it, pointing at each one.
 
 The 3D view needs WebGL 2, and loads only the first time you choose
-it (about 5 MB). How the model was made, and from what, is in
+it (about 6 MB). How the model was made, and from what, is in
 [docs/3d-model.md](docs/3d-model.md).
 
 ### The Teletype
@@ -362,6 +362,7 @@ back). On a phone, the source and its bytes take turns, under the
   next to the program's listing, like this one, which lights 10001100
   on the data lamps and halts:
   **[Run it](https://wixette.github.io/8800-simulator/?hex=3E8CD3FF76)**.
+  The format is in [docs/development.md](docs/development.md#the-link-format).
 
 ## For developers
 
@@ -374,204 +375,16 @@ installed, Python has one built in:
 python3 -m http.server 8000
 ```
 
-Then open <http://localhost:8000/>. To deploy, copy the whole
-directory to a web server; there is nothing to build, and no
-dependencies.
+Then open <http://localhost:8000/>. Opening `index.html` straight off
+the disk does not work, since a browser runs no ES module in a `file://`
+page; the page says so. To deploy, copy the whole directory to a web
+server: there is nothing to build, and no dependencies.
 
-Opening `index.html` straight off the disk does not work, since
-v1.7.0: the page's scripts are ES modules, and a browser runs no module
-in a `file://` page. Opened that way, the page shows only a notice that
-says so and gives the command above.
+### Everything else
 
-### Deploying behind a cache
-
-Every file `index.html` names carries the version, `css/style.css?v=1.7.0`,
-and so does every module the scripts import, through the page's import
-map. A release asks for new names, so a cache can keep each file as long
-as it likes and still never give an old one to the new page. Only
-`index.html` itself must not be kept. On a server or a CDN that lets you
-set the headers:
-
-| What | `Cache-Control` |
-| --- | --- |
-| `index.html` (and `/`) | `no-cache`: kept, but checked with the server each time, which costs a reply with no body when nothing changed |
-| Everything asked for with `?v=` | `public, max-age=31536000, immutable` |
-| `package.json`, `examples/`, `roms/` | `no-cache`; the page fetches these itself, and asks for a check anyway |
-
-A CDN must count the query string in its cache key (most do unless told
-not to), and should be told to purge `index.html` on each deploy.
-GitHub Pages sets no headers you can change and keeps everything for 10
-minutes, so there a release reaches everyone within 10 minutes.
-
-The version is kept in one place, `package.json`; the names in
-`index.html` are copies, written from it and never by hand. Set it with
-npm, which writes them too:
-
-```
-npm version 1.7.0        # or: npm version patch | minor | major
-```
-
-It sets the version, then runs `npm run stamp`
-([tools/stamp.mjs](tools/stamp.mjs)) to write it into `index.html`'s
-file names and import map, and stops there: it does not commit or tag
-([.npmrc](.npmrc)), since a release is tagged on GitHub, on its merge
-commit. Commit the two files as usual. A version changed any other way,
-by hand in `package.json`, needs `npm run stamp` after it; until then
-`npm test` fails and says so, so a release cannot go out half stamped.
-
-### The logo and icons
-
-The logo is in [images/](images/) in three forms: the machine alone, 16:9
-(`8800-simulator-logo.svg`), and the machine with its name, 8:1, in
-white for dark backgrounds and black for light ones
-(`8800-simulator-logo-text-white.svg`, `-text-black.svg`). The toolbar
-shows the one with the name, and on a phone the machine alone; this
-README shows the name in whichever colour suits the reader's theme.
-
-The favicons and home screen icons are drawn from the 16:9 one, and
-kept with it in `images/`: `favicon.svg`, `favicon.ico` (16, 32 and 48
-pixels), and the 180, 192 and 512 pixel PNGs that `index.html` and
-[manifest.webmanifest](manifest.webmanifest) name. After a change to
-the logo, draw them again (it needs Chrome, as the browser checks do):
-
-```
-npm run icons
-```
-
-`npm test` fails until they have been, since it checks that the SVG
-favicon still has the logo's drawing.
-
-### How it is built
-
-| File | What it is |
-| --- | --- |
-| [index.html](index.html), [css/style.css](css/style.css) | The page: toolbar, panel, dock, dialogs |
-| [js/main.js](js/main.js), [js/app.js](js/app.js) | The page's one script, and the app it starts; every file is an ES module |
-| [js/8080.js](js/8080.js) | The Intel 8080 CPU core, [maly/8080js](https://github.com/maly/8080js) |
-| [js/sim8800.js](js/sim8800.js) | The machine: memory, the front panel's logic, the ports |
-| [js/sio.js](js/sio.js), [js/teletype.js](js/teletype.js) | The serial boards, and the Teletype's paper |
-| [js/panel.js](js/panel.js) | The page's own logic, at its core: the status line, About, and building the page |
-| [js/panel-front.js](js/panel-front.js) | The front panel: its switches, lamps and sounds, and the big switches under it |
-| [js/panel-load.js](js/panel-load.js) | Putting a program in: Load, the examples, 4K BASIC, files, the Memory menu |
-| [js/panel-debug.js](js/panel-debug.js) | The Debugger: the memory dump and its editing, the next instruction, the memory map |
-| [js/panel-link.js](js/panel-link.js), [js/panel-tty.js](js/panel-tty.js), [js/panel-dock.js](js/panel-dock.js) | Program links and Share; the Teletype; the dock and its tabs |
-| [js/link.js](js/link.js) | The program link format |
-| [js/asm8080.js](js/asm8080.js), [js/asmtab.js](js/asmtab.js) | The 8080 assembler, and its tab |
-| [js/dropdown.js](js/dropdown.js), [js/dialog.js](js/dialog.js) | The menus and the dialogs |
-| [js/l10n.js](js/l10n.js), [js/l10n-3d.js](js/l10n-3d.js) | Every message, in ten languages |
-| [js/panel-view.js](js/panel-view.js), [js/panel-tutorial.js](js/panel-tutorial.js) | The 2D / 3D toggle; the Tutorial's lessons, remembered, and Show chips |
-| [js/box.js](js/box.js) | The machine's box: which parts are out, in what order they come out, and so whether it may switch on |
-| [js/view3d/](js/view3d/) | The 3D view, loaded when first chosen: the renderer and camera, the 3D panel, the box's parts, the Views and Show menus, and its state machine ([stage-state.js](js/view3d/stage-state.js)) |
-| [model/](model/) | The 3D model: its params, its Blender build (`npm run build:model`), its research, and the built `.glb` |
-| [vendor/three/](vendor/three/) | three.js, pinned (`node tools/vendor.mjs`) |
-| [tools/stamp.mjs](tools/stamp.mjs), [tools/icons.mjs](tools/icons.mjs), [tools/vendor.mjs](tools/vendor.mjs) | Not part of the page: the version stamp, drawing the icons from the logo, and vendoring three.js |
-| [tools/shots.mjs](tools/shots.mjs), [tools/video.mjs](tools/video.mjs) | Not part of the page either: the screenshots and the video clips, below |
-
-The design notes say why things are the way they are:
-[docs/ui-design.md](docs/ui-design.md) for the layout and its
-principles, [docs/ms-basic-4k.md](docs/ms-basic-4k.md) for the
-memory, the serial boards, the Teletype and BASIC,
-[docs/assembler.md](docs/assembler.md) for the assembler and the
-language it takes, [docs/kill-the-bit.md](docs/kill-the-bit.md)
-for the address-bus trick Kill the Bit relies on, and
-[docs/3d-view.md](docs/3d-view.md) and [docs/3d-model.md](docs/3d-model.md)
-for the 3D view and its model.
-
-### Tests
-
-```
-npm test
-```
-
-Node.js 24, nothing to install. The suite covers the 8080 CPU, the
-front panel, the serial boards and the Teletype, the page's own logic
-and translations, the link format, the assembler against Intel's
-manual, every program in [examples/](examples/), 4K BASIC booting
-and running end to end, and the 3D view's logic: the box and the
-power, the model against its params, framing, the toggle, and a walk
-of every state its state machine can reach. It runs on each push and
-pull request.
-
-The page itself - clicks, menus, the Assembler's editor, the layout -
-is checked in a headless Chrome:
-
-```
-npm run test:browser
-npm run test:browser -- sync clear
-```
-
-It takes a minute or so and needs Chrome installed (or `CHROME` set to
-its path, Chromium too), so it is not part of CI: run it by hand
-before a release. The checks are in [tests/browser/](tests/browser/).
-
-The JSDoc types are checked against the code by TypeScript's checker,
-which `npx` fetches for the run; nothing is compiled, and the page
-runs the files as they are. CI runs it after the tests:
-
-```
-npm run typecheck
-```
-
-Only the files that start with `// @ts-check` are checked, so far
-`js/asm8080.js`, `js/sim8800.js`, `js/box.js` and the 3D view's
-framing, views and state; [tsconfig.json](tsconfig.json)
-says how strictly.
-
-### Screenshots and videos
-
-The pictures in this README, and a larger set for posts, are taken from
-the page itself in a headless Chrome, as a reader would leave it:
-
-```
-npm run shots -- --readme            # English, and this README's pictures into screenshots/
-npm run shots -- --lang en,zh        # any languages, into ~/Downloads/8800-simulator-v<version>-media/shots/
-npm run video -- --lang en,zh        # 1080p clips into .../videos/ (needs ffmpeg)
-```
-
-`--only <name>` takes the shots or clips whose names hold it. The clips
-are rendered frame by frame on a clock the tool moves on, so they are
-smooth however slowly the frames are taken, and the 8080 runs at its own
-2 MHz in them. The shots and scenes are listed in
-[tools/shots.mjs](tools/shots.mjs) and [tools/video.mjs](tools/video.mjs).
-
-### The link format
-
-A link opens the simulator with a program loaded at 0000H, ready to
-RUN. The fields go after `?` or `#`:
-
-```
-https://wixette.github.io/8800-simulator/?hex=3E8CD3FF76
-```
-
-[Try it](https://wixette.github.io/8800-simulator/?hex=3E8CD3FF76):
-the bytes are `MVI A,8CH`, `OUT 0FFH` and `HLT`. Click RUN and the
-data lamps show 10001100.
-
-The bytes of `hex` can run together, or be separated by `+` or `%20`.
-Memory is installed to fit, and zeros at the end do not count.
-
-**Share** writes its links after `#`, which is never sent to the web
-server, so a long one is not turned away (GitHub Pages refuses a link
-of 16,000 characters). It leaves out whatever a machine just switched
-on would have anyway. Memory in use that fits in 256 bytes is written
-as hex, so it can be read in the link; past that it is compressed under
-`zip`, and 4K BASIC comes to about 4,500 characters instead of 8,300.
-Every field is optional:
-
-| Field | Holds |
-|---|---|
-| `hex` | Memory from 0000H up, in hex |
-| `zip` | The same memory, deflated and in URL-safe base64, in place of `hex` |
-| `mem` | Installed memory: `256`, `4096` or `8192` (decimal) |
-| `pc`, `sp` | The 16-bit registers, in hex |
-| `a`, `b`, `c`, `d`, `e`, `h`, `l`, `f` | The 8-bit registers, in hex, `f` being the flags |
-| `sw` | The address switches, A15–A0, as a 16-bit hex word |
-| `view` | `3d` to open in the 3D view, `2d` for the front panel (since v1.8.0); a link from Share in 3D carries `view=3d` |
-
-A linked machine always opens stopped. The Teletype's paper and the
-interrupt enable are not in the link. The format is a promise to
-everyone who has put a link in a document: fields may be added, but
-never renamed or read differently ([js/link.js](js/link.js)).
+[docs/development.md](docs/development.md) has the rest: the design
+notes, deploying behind a cache, the logo and icons, the tests and what
+to run for each kind of change, the screenshots, and the link format.
 
 ## References
 
@@ -599,6 +412,8 @@ bitsavers.org and deramp.com; facts only), the Smithsonian's and the
 Computer History Museum's records, and freely licensed photographs by
 Wikimedia Commons and Flickr contributors, credited in
 [model/research/photo-credits.md](model/research/photo-credits.md).
+Mike Douglas of [deramp.com](https://deramp.com/) reviewed it against
+his original Altairs, and his corrections and measurements are in it.
 The model and its data are CC BY-SA 4.0 ([model/LICENSE](model/LICENSE));
 the rest of this repository, apart from the BASIC tape, is Apache 2.0.
 
