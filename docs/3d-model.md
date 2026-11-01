@@ -383,10 +383,7 @@ reasoned from photos, so if it does not look right in P4, a straight
 wall with a wider face is the fallback: Mike's rule, that the opening
 is smaller than the panel, is what must hold.
 
-**Done on the branch, 2026-11-01:** P1 to P9. What is left of P10 waits
-for your manual check and OK: the full checks and the README screenshots
-([development.md](development.md#tests) says what runs when), then `npm version 1.8.2` and
-the PR.
+**Done:** P1 to P10, released as v1.8.2. Mike's three questions are still open; each answer is a params entry and a rebuild.
 
 **Not in this release:** a later back panel's fan slots, the lid's rear
 screws, and any change to the 2D panel.
