@@ -14,8 +14,9 @@ changes this document first.
 |---|---|
 | `params/machine.json` | Every dimension and angle, in mm and degrees, each with its source (`src`) and confidence |
 | `params/cards.json` | The parts on each card |
-| `blender/scripts/` | The headless build: `build_whole_box.py` (which builds the front panel and the card cage through `build_front_panel.py` and `build_card_cage.py`), preview renders, and `lib/` |
+| `blender/scripts/` | The headless build: `build_whole_box.py` (which builds the front panel and the card cage through `build_front_panel.py` and `build_card_cage.py`), preview renders, the clearance check, and `lib/` |
 | `blender/data/front-panel-title.svg` | The name plate's title, the drawing the 2D panel uses |
+| `blender/data/front-panel-lines.svg` | The panel's printed lines, a copy of the 2D panel's strokes |
 | `altair-8800.glb` | The built model, served to the page; always rebuildable |
 | `research/` | The research: the report, the source notes, the measured data, the bibliography and the photo credits |
 | `LICENSE` | CC BY-SA 4.0, for the model and its data and notes |
@@ -34,11 +35,13 @@ build of the front panel or the card cage.
 
 The model is in plain git, not LFS ([3d-view.md, M1](3d-view.md#m1--no-git-lfs-the-model-goes-in-plain-git)).
 Budgets: under 300 k triangles and 15 MB, and under 5 MB to stay in
-plain git. Today: 83,655 triangles, 3.0 MB.
+plain git. Today: 86,303 triangles, 3.3 MB.
 
-Checks, in `npm test`: the node contract (Part 2), the budgets, and
-that the model's places, ways out and take-apart order agree with
-`params/machine.json`.
+Checks, in `npm test`: the node contract (Part 2), the budgets, that
+the model's places, ways out and take-apart order agree with
+`params/machine.json`, and that the panel's lines are the 2D panel's.
+The heavy check, `npm run test:model`, needs Blender and runs after a
+rebuild: no two parts meet at rest, on any way out, or taken apart.
 
 ## Part 2 — What the page relies on
 
@@ -251,9 +254,8 @@ key the params cite.
   photo scaling gives.
 - **Clearance:** at rest, along every unit's way out (in 2 mm steps,
   with everything else in), and taken all apart, no two parts meet.
-  This was checked by hand-run scripts for v1.8.0, which were not
-  kept; Part 4 brings the check into the repository as
-  `npm run test:model`.
+  Run it with `npm run test:model` after a rebuild
+  (`blender/scripts/check_clearance.py`), for each memory size.
 - **Readouts:** from the front, the closed box shows the bezel and the
   panel and nothing of the inside; every LED and bat is first in line
   from the front.
@@ -318,14 +320,14 @@ answers; a better number later is one params entry and a rebuild.
 | Switch nuts | In the dress panel's holes, flush with its face | Behind the panel: holes 7.2 mm across (the bushing, 6.35 mm, plus 0.4 mm all round). `dress_panel.nut_gap`, 2.4 mm (`est`), opens behind the panel, so the sub-panel and the D/C board move 2.4 mm back and the card front gap becomes 0.60 in, within the side view's 0.45 to 0.7. The bushing grows by the same amount, so the bats stay where they are | Mike. Most photos agree. Living Computers' machine does show nuts: "typically", as he says |
 | Panel lettering | Moved clear of the nuts: 7.2, 7.4 / 7.4 mm | Back to the photo's 5.3, 6.35 / 5.1 mm. STATUS stays 3.0 mm under its line | That move answered a hole that is no longer there |
 | Bezel | Straight walls, wider than the panel, and a blue flange behind the panel's edge closing the gap | Walls that slope in from the front face (0.19 in) to the opening at the panel (`bezel.opening`, 415.3 × 161.5 mm, 0.325 in from the outside), no flange, the panel's edge behind the opening | Mike: no lip, and the opening is slightly smaller than the panel. Near the corner, #02's band is 0.25 in wide at the sides and 0.18 in at the top: perspective alone would give a ratio of 2.4, and a slope of 0.135 in fits both. Face plus slope is the 0.32 in seen head-on |
-| The dress panel's way out | Forward, through the bezel | 40 mm backward, then up | It goes in from behind. The order is unchanged |
-| Lid | Stopped at the back panel, with a rear flange | Ends with the tray, 0.6 in behind the back panel; no flange. The Assembly Manual's two rear screws are not modelled | Mike; his side photo shows no flange. Its way out is unchanged |
+| The dress panel's way out | Forward, through the bezel | 40 mm backward, up, then forward to where it used to park, clear of the parked lid | It goes in from behind. The order is unchanged |
+| Lid | Stopped at the back panel, with a rear flange; skirts to 2.45 in | Ends with the tray, 0.6 in behind the back panel; no flange. Its skirts come down behind the side trim to 2.275 in, nearly to the tray. The Assembly Manual's two rear screws are not modelled | Mike; past the trim's end, his side photo shows the lid reaching the blue. Its way out is unchanged |
 | Tray walls | 2.55 in, inside the lid's skirts | 2.20 in, flush with the outer face, with the chassis's screws showing on each side | The trim sits between them |
-| Side trim | None | A 0.25 in (`measured`) aluminium strip along each side, part of `chassis.frame`, from the bezel to the back panel, resting on the tray's lip, its top at the lid's edge (2.45 in, unchanged) | Mike. Its height above the table is scaled, not measured |
-| Transformers | T1 3.1 in, T2 3.0 in wide, no straps | T1 3.0 in, T2 2.375 in wide, T3 2.0 in tall, each under a strap with its ears: 3 × 1.375, 2.375 × 1 and 2 × 0.75 in. The straps belong to their transformers' nodes | Mike. Read as the strap's length by its width: still to confirm |
+| Side trim | None | A 0.25 in (`measured`) aluminium strip along each side, part of `chassis.frame`, from the bezel to the back panel, resting on the tray's lip: a J in section, the lid's edge standing in it, one metal thickness proud of the case. Its top is at 2.45 in, where the grey used to end | Mike, and his side photo. Its height above the table is scaled, not measured, and the J is read from the photo |
+| Transformers | T1 3.1 in, T2 3.0 in wide, no straps | T1 3.0 in, T2 2.375 in wide, T3 2.0 in tall, each under a strap with its ears: 3 × 1.375, 2.375 × 1 and 2 × 0.75 in. The straps belong to their transformers' nodes. T1's runs across its front with short ears, a simplification: the real one runs front to back | Mike. Read as the strap's length by its width, which fits all three cores (each strap's width is just under its core): still to confirm |
 | DB-25 cut-outs | Rectangles, 43 × 11 mm | D-shaped, the standard DB-25 opening, with its two screw holes | Mike. The sharp corners were SN 220081K's |
 | Card guides | Tan | Blue-green, set by rendering beside his chassis photo | Mike: natural nylon is very rare. Overturns the row above |
-| Terminal block | 2.7 in tall | 5.0 in tall (ten terminals at 0.5 in, the manual's count), up to about 6.3 in above the base; it lifts straight up | Mike. Scaling #09 gives 5 to 6 in |
+| Terminal block | 2.7 in tall | 5.0 in tall (ten terminals at 0.5 in, the manual's count), up to about 6.3 in above the base; it lifts straight up. That also ends a real fault the new clearance check found in the released model: on Taken apart it went through the parked power board | Mike. Scaling #09 gives 5 to 6 in |
 
 ### Data still wanted
 

@@ -599,6 +599,8 @@ bitsavers.org and deramp.com; facts only), the Smithsonian's and the
 Computer History Museum's records, and freely licensed photographs by
 Wikimedia Commons and Flickr contributors, credited in
 [model/research/photo-credits.md](model/research/photo-credits.md).
+Mike Douglas of [deramp.com](https://deramp.com/) reviewed it against
+his original Altairs, and his corrections and measurements are in it.
 The model and its data are CC BY-SA 4.0 ([model/LICENSE](model/LICENSE));
 the rest of this repository, apart from the BASIC tape, is Apache 2.0.
 
