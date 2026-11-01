@@ -1,6 +1,6 @@
 {
   "_schema": "Every numeric entry is {v, unit, conf, src, note?}. Units: mm and deg (Blender machine frame: origin at the centre of the base footprint on its bottom face, +X left to right seen from the front, +Y toward the back, +Z up). conf: doc = stated in a document, standard or museum record; artwork = measured on the 1:1 MITS board artwork; photo = scaled from a photo; measured = measured on an original by the person named in src; est = estimate; design = our own choice where sources are silent. Source tags are defined in research/sources/bibliography.md. The sources give inches; each note keeps the inch value. version is the parameter set's own (each .glb records it as params_version).",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "fidelity_target": "B",
   "reference_machine": "A typical MITS Altair 8800, 1975 (the original front panel with the bent Sense Switch line, 4-slot 88-EC expander boards, fan optional); docs/3d-model.md",
   "box": {
@@ -757,11 +757,11 @@
       "note": "a band of vertical slits along each side of the lid, about 4.7 to 6.6 in up (1.9 in long), from about 1 in behind the lid's front edge nearly to its back; counted roughly from the photos"
     },
     "side_trim": {
-      "v": {"height": 6.25, "metal": 1.6, "foot": 1.6},
+      "v": {"height": 6.25, "metal": 1.6, "foot": 1.6, "leg": 14.0},
       "unit": "mm",
       "conf": "measured",
-      "src": "DOUGLAS-REVIEW-2026",
-      "note": "the 1/4 in aluminium strip along each side, built onto the chassis, resting on the tray's lip: a J in section, the lid's edge standing in it, so it stands one metal thickness proud of the case; its height above the table is scaled, not measured"
+      "src": "DOUGLAS-REVIEW-2026; 8800chasis.jpg (deramp.com)",
+      "note": "the 1/4 in aluminium strip along each side, resting on the tray's lip: a leg bolted down the side member, a foot out under the lid's edge and a lip up outside it, so it stands one metal thickness proud of the case; its height above the table is scaled, not measured"
     },
     "side_screws": {
       "v": {"y": [-145.0, 105.0], "z": 28.0, "diameter": 6.0},
@@ -818,6 +818,27 @@
       "conf": "photo",
       "src": "MFE-SN220081K-PHOTOS (research/sources/notes-interior-layout.md)",
       "note": "the row of holes in each flange; the manual counts 13, 21 and 9 of them to the cross member and the rails"
+    },
+    "web_ends": {
+      "v": {"tip": 18.0, "run": 45.0, "chamfer": 6.0},
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS #09; 8800chasis.jpg (deramp.com)",
+      "note": "each side member rises at both ends: to the back panel's top and the sub-panel's top, a narrow tip 0.7 in deep, sloping down over 1.75 in to the web; roughly scaled"
+    },
+    "web_holes": {
+      "v": {"rows_z": [12.0, 19.0, 26.0], "edge_rows": [6.0, 13.0], "diameter": 4.06},
+      "unit": "mm",
+      "conf": "photo",
+      "src": "8800chasis.jpg (deramp.com); MFE-SN220081K-PHOTOS #09",
+      "note": "three staggered rows along each web below the trim, at the flange's pitch, and two along each rising edge, this far in from it; the pattern is approximate"
+    },
+    "corner_clip": {
+      "v": {"width": 12.0, "height": 15.0, "metal": 1.2, "bolt_diameter": 6.0},
+      "unit": "mm",
+      "conf": "photo",
+      "src": "MFE-SN220081K-PHOTOS #09",
+      "note": "the clip and bolt that tie each side member's tip to the back panel's top corner"
     },
     "back_panel_y": {
       "v": 207.01,

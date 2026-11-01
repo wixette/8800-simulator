@@ -35,7 +35,7 @@ build of the front panel or the card cage.
 
 The model is in plain git, not LFS ([3d-view.md, M1](3d-view.md#m1--no-git-lfs-the-model-goes-in-plain-git)).
 Budgets: under 300 k triangles and 15 MB, and under 5 MB to stay in
-plain git. Today: 86,303 triangles, 3.3 MB.
+plain git. Today: 103,127 triangles, 4.1 MB.
 
 Checks, in `npm test`: the node contract (Part 2), the budgets, that
 the model's places, ways out and take-apart order agree with
@@ -323,7 +323,8 @@ answers; a better number later is one params entry and a rebuild.
 | The dress panel's way out | Forward, through the bezel | 40 mm backward, up, then forward to where it used to park, clear of the parked lid | It goes in from behind. The order is unchanged |
 | Lid | Stopped at the back panel, with a rear flange; skirts to 2.45 in | Ends with the tray, 0.6 in behind the back panel; no flange. Its skirts come down behind the side trim to 2.275 in, nearly to the tray. The Assembly Manual's two rear screws are not modelled | Mike; past the trim's end, his side photo shows the lid reaching the blue. Its way out is unchanged |
 | Tray walls | 2.55 in, inside the lid's skirts | 2.20 in, flush with the outer face, with the chassis's screws showing on each side | The trim sits between them |
-| Side trim | None | A 0.25 in (`measured`) aluminium strip along each side, part of `chassis.frame`, from the bezel to the back panel, resting on the tray's lip: a J in section, the lid's edge standing in it, one metal thickness proud of the case. Its top is at 2.45 in, where the grey used to end | Mike, and his side photo. Its height above the table is scaled, not measured, and the J is read from the photo |
+| Side trim | None | A 0.25 in (`measured`) aluminium strip along each side, part of `chassis.frame`, from the bezel to the back panel, resting on the tray's lip. In section, a leg bolted down the side member, a foot out under the lid's edge and a lip up outside it, one metal thickness proud of the case. Its top is at 2.45 in, where the grey used to end | Mike, his side photo and his chassis photo, which shows the trim's end. Its height above the table is scaled, not measured |
+| Side members | Plain rectangles 2.7 in high, holes only in the flanges | One perforated piece that rises at each end to the top of the back panel and of the sub-panel, a narrow tip sloping down to the web, three rows of holes along it and two up each edge; a clip ties each rear tip to the back panel's corner. The tips stop 6 mm under the lid and are not known to carry it | Not one of Mike's nine: it was found checking his photos. SN 220081K (#09), his chassis photo and two more machines show it, and the Clone has no such sub-chassis, so this is the original. The sizes are roughly scaled, and the hole pattern is approximate |
 | Transformers | T1 3.1 in, T2 3.0 in wide, no straps | T1 3.0 in, T2 2.375 in wide, T3 2.0 in tall, each under a strap with its ears: 3 × 1.375, 2.375 × 1 and 2 × 0.75 in. The straps belong to their transformers' nodes. T1's runs across its front with short ears, a simplification: the real one runs front to back | Mike. Read as the strap's length by its width, which fits all three cores (each strap's width is just under its core): still to confirm |
 | DB-25 cut-outs | Rectangles, 43 × 11 mm | D-shaped, the standard DB-25 opening, with its two screw holes | Mike. The sharp corners were SN 220081K's |
 | Card guides | Tan | Blue-green, set by rendering beside his chassis photo | Mike: natural nylon is very rare. Overturns the row above |
@@ -348,7 +349,7 @@ inside the box.
 ## Part 4 — The plan for v1.8.2
 
 All on branch `v1.8.2`, in this order. It takes in Mike Douglas's review
-above: params 0.2.0 → 0.3.0, `reference_machine` reworded. The state
+above: params 0.2.0 → 0.3.1, `reference_machine` reworded. The state
 machine, the units, the order they come out in and the node names do
 not change, so `js/box.js` and its tests stay as they are, apart from a
 path in the params. Each step ends with `npm test`, `npm run typecheck`,

@@ -99,6 +99,37 @@ def d_shape(x, z, io):
     return [(x + a, z + w) for a, w in ((-u + c, -h), (u - c, -h), (u, -h + c), (t, h - c), (t - c, h), (-t + c, h), (-t, h - c), (-u, -h + c))]
 
 
+def web_profile(p, b, y0, y1, h):
+    """A side member's web, as (y, z): low along the cards, rising at each end to the top of the
+    panel there, with its holes, three rows along it and two up each rising edge (y, z, radius)."""
+    e, wh = p.v("chassis.web_ends"), p.v("chassis.web_holes")
+    tip, run, c = e["tip"], e["run"], e["chamfer"]
+    low = b.ch_bottom + h
+    top_r = b.ch_bottom + p.v("chassis.back_panel")[1]
+    top_f = b.L.zc + p.v("sub_panel.size")[1] / 2
+    outline = [(y0, b.ch_bottom), (y1, b.ch_bottom), (y1, top_r), (y1 - tip + c, top_r), (y1 - tip, top_r - c),
+               (y1 - tip - run, low), (y0 + tip + run, low), (y0 + tip, top_f - c), (y0 + tip - c, top_f), (y0, top_f)]
+    r = wh["diameter"] / 2
+    pitch = p.v("chassis.holes")["pitch"]
+    holes = []
+    for row, z in enumerate(wh["rows_z"]):
+        y = y1 - 8.0 - (row % 2) * pitch / 2
+        while y > y0 + 6.0:
+            holes.append((y, b.ch_bottom + z, r))
+            y -= pitch
+    for ey, top, sign in ((y1 - tip, top_r, -1), (y0 + tip, top_f, 1)):  # sign: which way the edge runs down
+        rise = top - c - low
+        n = math.hypot(run, rise)
+        dy, dz = sign * run / n, -rise / n                               # down the edge
+        iy, iz = -sign * rise / n, -run / n                              # in from it
+        for row, off in enumerate(wh["edge_rows"]):
+            d = 5.0 + row * pitch / 2
+            while d < n - 12.0:
+                holes.append((ey + dy * d + iy * off, top - c + dz * d + iz * off, r))
+                d += pitch
+    return outline, holes
+
+
 def build_chassis(p, col, root, b):
     mb = MeshBuilder()
     mt, h = b.mt, p.v("chassis.web_height")
@@ -107,7 +138,11 @@ def build_chassis(p, col, root, b):
     flange = p.v("chassis.flange")
     for sx in (-1, 1):
         x0, x1 = sorted((sx * b.ch_x, sx * (b.ch_x - mt)))
-        mb.prism(geom.rect(y0, b.ch_bottom, y1, b.ch_bottom + h), "YZ", x0, x1, "aluminium_anodised")
+        web = MeshBuilder()
+        outline, web_holes = web_profile(p, b, y0, y1, h)
+        web.prism(outline, "YZ", x0, x1, "aluminium_anodised")
+        verts, faces = bl.cut_holes(web, web_holes, "YZ", x0, x1, col, segments=8)
+        mb.add_mesh_data(verts, faces, bl.Matrix.Identity(4), "aluminium_anodised")
         f = MeshBuilder()
         fx0, fx1 = sorted((sx * (b.ch_x - mt), sx * (b.ch_x - flange)))
         f.prism(geom.rect(fx0, y0, fx1, y1), "XY", b.ch_bottom, b.ch_bottom + mt, "aluminium_anodised")
@@ -115,11 +150,11 @@ def build_chassis(p, col, root, b):
         hs = [(hx, b.back_in - holes["first_from_back"] - k * holes["pitch"], holes["diameter"] / 2) for k in range(holes["count"])]
         verts, faces = bl.cut_holes(f, hs, "XY", b.ch_bottom, b.ch_bottom + mt, col, segments=12)
         mb.add_mesh_data(verts, faces, bl.Matrix.Identity(4), "aluminium_anodised")
-        # the side trim: a J, from the web under the lid's edge and up outside it, on the tray's lip
+        # the side trim: bolted down the web, out under the lid's edge and up outside it, on the tray's lip
         tr = p.v("case.side_trim")
         z0, z1, foot = b.tray_wall + 0.1, b.tray_wall + 0.1 + tr["height"], b.tray_wall + 0.1 + tr["foot"]
-        out = b.W / 2 + 0.1
-        section = [(b.ch_x, z0), (out + tr["metal"], z0), (out + tr["metal"], z1), (out, z1), (out, foot), (b.ch_x, foot)]
+        out, m = b.W / 2 + 0.1, tr["metal"]
+        section = [(b.ch_x, z0 - tr["leg"]), (b.ch_x + m, z0 - tr["leg"]), (b.ch_x + m, z0), (out + m, z0), (out + m, z1), (out, z1), (out, foot), (b.ch_x, foot)]
         ty0 = b.front + p.v("bezel.return_depth") + p.v("case.lid_front_gap")
         mb.prism([(sx * u, w) for u, w in section], "XZ", ty0, b.back_out, "aluminium_brushed")
     # the back panel: the fan opening, eight DB-25 openings, the cord's hole
@@ -140,6 +175,15 @@ def build_chassis(p, col, root, b):
     mb.prism(geom.rect(fan["x"] - s, fan["z"] - s, fan["x"] + s, fan["z"] + s), "XZ", b.back_in - 0.6, b.back_in - 0.1, "screen")
     sc = p.v("chassis.io_screen")
     mb.prism(geom.rect(sc["x"][0], sc["z"][0], sc["x"][1], sc["z"][1]), "XZ", b.back_in - 0.6, b.back_in - 0.1, "screen")
+    # the clips that tie the side members' tips to the back panel's top corners
+    cl = p.v("chassis.corner_clip")
+    ctop = b.ch_bottom + bh - 3.0
+    for sx in (-1, 1):
+        x0c, x1c = sorted((sx * (b.ch_x - mt - 0.1), sx * (b.ch_x - mt - 0.1 - cl["width"])))
+        mb.prism(geom.rect(x0c, ctop - cl["height"], x1c, ctop), "XZ", b.back_in - cl["metal"] - 0.1, b.back_in - 0.1, "tin")
+        bx = sx * (b.ch_x - mt - 0.1 - cl["width"] / 2)
+        mb.prism([(bx + u, ctop - cl["height"] / 2 + w) for u, w in geom.circle(cl["bolt_diameter"] / 2, 6)], "XZ",
+                 b.back_in - cl["metal"] - 3.0, b.back_in - cl["metal"] - 0.1, "tin")
     # the power cord in its grommet, and a short piece of it outside, down to the table
     r_cord = p.v("harness.power_cord_diameter") / 2
     r_hole = cord["diameter"] / 2
