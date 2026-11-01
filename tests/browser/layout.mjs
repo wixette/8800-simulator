@@ -156,12 +156,12 @@ export async function logo(h) {
  * About: headed by the logo, its licences one line each on a wide
  * screen, and no taller than before the logo was added (v1.7.0), but
  * for the two licence lines the 3D view brought, the Tutorial's photo's
- * (v1.8.0) and the model's reviewer's (v1.8.2), at about 21px each.
+ * (v1.8.0), at about 21px each, and the model's reviewer's (v1.8.2), 25px.
  */
 export async function about(h) {
     const {js, viewport, fresh, press, verify, sleep} = h;
     await viewport(1280, 860); await fresh();
-    for (const [locale, before] of [['en', 635], ['de', 656]]) {
+    for (const [locale, before] of [['en', 639], ['de', 660]]) {
         await js(`l10n.setLocale('${locale}')`); await sleep(150);
         await press('#about-button'); await sleep(500);
         const m = await js(`(() => { const d = document.getElementById('about-dialog'), l = document.getElementById('about-logo');
