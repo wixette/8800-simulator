@@ -500,9 +500,22 @@ npm run test:browser
 npm run test:browser -- sync clear
 ```
 
-It takes a minute or so and needs Chrome installed (or `CHROME` set to
-its path, Chromium too), so it is not part of CI: run it by hand
-before a release. The checks are in [tests/browser/](tests/browser/).
+It needs Chrome installed (or `CHROME` set to its path, Chromium too),
+so it is not part of CI, and the whole of it takes several minutes, so
+it is not run on every change either. The checks are in
+[tests/browser/](tests/browser/). Run what a change can affect, and
+name the checks to run only those:
+
+| What changed | What to run |
+|---|---|
+| Docs or text | `npm test` |
+| How a part of the model looks, nothing moved | `npm run build:model`, `npm test`, and a look at a render beside its reference photo |
+| A part moved, resized or added, or a way out changed | The above, and `npm run test:model` |
+| Anything near the switches or what can be clicked in 3D | The above, and `npm run test:browser -- view3d` |
+| Page code | `npm test`, `npm run typecheck`, and the browser checks for that area |
+| Before a release, or for a really large commit | All of it: every browser check, `npm run test:model`, and the README's screenshots (`npm run shots -- --readme`) |
+
+Don't commit while one of these is failing.
 
 The JSDoc types are checked against the code by TypeScript's checker,
 which `npx` fetches for the run; nothing is compiled, and the page

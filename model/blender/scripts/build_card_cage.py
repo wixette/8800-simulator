@@ -45,7 +45,7 @@ ROLES = {"cpu": "cpu", "mem1k": "memory", "mem4k_0": "memory", "mem4k_1": "memor
 MATERIAL = {
     "dip": "ic_black", "socket": "ic_black", "regulator": "ic_black", "heat_sink": "heat_sink",
     "crystal": "tin", "connector": "nylon_white", "capacitor": "cap_body", "resistor": "resistor_tan",
-    "transistor": "ic_black", "switch": "switch_body",
+    "transistor": "ic_black", "switch": "switch_body", "paper_wrapped": "resistor_tan",
     "resistor_group": "resistor_tan", "capacitor_group": "cap_disc",
 }
 GROUP_HEIGHT = 0.1   # in: a row of small parts is shown as a low strip, not a block
@@ -259,7 +259,8 @@ def add_cpu(mb, u, v, x0, h):
             w0, w1 = sorted((v + side * pwid, v + side * (pwid + 0.8)))
             mb.prism(geom.rect(pu - 0.4, w0, pu + 0.4, w1), "YZ", socket - 1.0, socket + 2.0, "gold")
     face = top + 0.01 * IN + 0.03
-    mb.prism(geom.rect(u + lid - 1.4, v + 1.6, u + lid - 0.5, v + 4.2), "YZ", top + 0.01 * IN, face, "ink_black")   # the short bar by pin 1
+    for w0, w1 in ((1.65, 4.05), (0.5, 1.35)):            # the mark by pin 1, an "i" on its side: stroke and dot
+        mb.prism(geom.rect(u + lid - 1.8, v + w0, u + lid - 0.9, v + w1), "YZ", top + 0.01 * IN, face, "ink_black")
     for line, dv, cap in (("C8080A", -3.2, 1.7), ("\u00a9 INTEL '74", 3.2, 1.25)):
         verts, faces = bl.glyph_mesh_flat(line, cap / build_front_panel.CAP)
         mb.add_mesh_data(verts, faces, bl.frame_matrix((face, u, v + dv), (0, -1, 0), (0, 0, -1)), "ink_black")

@@ -35,7 +35,7 @@ build of the front panel or the card cage.
 
 The model is in plain git, not LFS ([3d-view.md, M1](3d-view.md#m1--no-git-lfs-the-model-goes-in-plain-git)).
 Budgets: under 300 k triangles and 15 MB, and under 5 MB to stay in
-plain git. Today: 104,347 triangles, 4.1 MB.
+plain git. Today: 104,503 triangles, 4.1 MB.
 
 Checks, in `npm test`: the node contract (Part 2), the budgets, that
 the model's places, ways out and take-apart order agree with
@@ -210,9 +210,9 @@ key the params cite.
    behind the sub-panel (the errata: "held by the switch nuts only").
 3. **The bat's pivot is 1.8 mm inside the bushing, the throw ±16°**
    (`design`), so a bat clears its own bushing.
-4. **The CPU and 1K cards are the revision MITS's 1:1 artwork shows.**
-   The Rev 0 boards in the photos carry a few extra parts; they stay in
-   `research/data/card_layouts.json`, so a Rev 0 card is a data change.
+4. **The CPU and 1K cards are Rev 0, as they shipped in 1975:** the
+   positions from MITS's 1:1 artwork, plus the parts the Rev 0 boards
+   carry beyond it, from the scans (`conf` `photo` in `params/cards.json`).
 5. **The card guides taper** (16.75 mm deep at the base, 7.5 mm at the
    top, from an owner's measurements of an original). Straight posts
    cut into the CPU's heat sink.
@@ -330,7 +330,9 @@ answers; a better number later is one params entry and a rebuild.
 | Card guides | Tan | Blue-green, set by rendering beside his chassis photo | Mike: natural nylon is very rare. Overturns the row above |
 | Terminal block | 2.7 in tall | 5.0 in tall (ten terminals at 0.5 in, the manual's count), up to about 6.3 in above the base; it lifts straight up. That also ends a real fault the new clearance check found in the released model: on Taken apart it went through the parked power board | Mike. Scaling #09 gives 5 to 6 in |
 
-**The 8080, added after his review.** It was a plain black box. The real one is white ceramic with a gold lid, on every Altair CPU card photographed at deramp.com. The model now draws a C8080A, the chip most Altairs carried (MFE-SN220081K-DOC; SN 220081K's own early C8080 is the exception), in its socket: the package 2.0 × 0.6 in and the lid 0.5 in square, from the Rev 0 scan, with the marking as flat lettering, not a photo. It says C8080A and © INTEL '74, as a C8080A's lid does, and leaves out the lot codes, which belong to one chip. The other chips stay black boxes.
+**The 8080, added after his review.** It was a plain black box. The real one is white ceramic with a gold lid, on every Altair CPU card photographed at deramp.com. The model now draws a C8080A, the chip most Altairs carried (MFE-SN220081K-DOC; SN 220081K's own early C8080 is the exception), in its socket: the package 2.0 × 0.6 in and the lid 0.5 in square, from the Rev 0 scan, with the marking as flat lettering, not a photo. It says C8080A and © INTEL '74, as a C8080A's lid does, and leaves out the lot codes, which belong to one chip. The other chips stay black boxes. The mark by pin 1 is an "i" on its side, a stroke and a dot.
+
+**Rev 0 cards.** A check of the CPU card against the scan found the bottom row a chip and a column of resistors short. The model had been built to the X1 artwork, but Rev 0 is what shipped in 1975, so both cards now carry all their Rev 0 parts (decision 4): on the CPU card a thirteenth IC, the resistor column, two pairs of electrolytics, the two large resistors and the paper-wrapped part; on the 1K card one IC and two electrolytics.
 
 ### Data still wanted
 
@@ -379,10 +381,10 @@ reasoned from photos, so if it does not look right in P4, a straight
 wall with a wider face is the fallback: Mike's rule, that the opening
 is smaller than the panel, is what must hold.
 
-**Done on the branch, 2026-11-01:** P1 to P9, and P10 up to your manual
-check: `npm run test:model` passes, as do `npm test` and
-`npm run test:browser`, and the README screenshots are retaken. What
-is left of P10 waits for your OK: `npm version 1.8.2` and the PR.
+**Done on the branch, 2026-11-01:** P1 to P9. What is left of P10 waits
+for your manual check and OK: the full checks and the README screenshots
+(the README's table says what runs when), then `npm version 1.8.2` and
+the PR.
 
 **Not in this release:** a later back panel's fan slots, the lid's rear
 screws, and any change to the 2D panel.

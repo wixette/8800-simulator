@@ -7,7 +7,7 @@
   },
   "cards": {
     "cpu": {
-      "source": "MITS-ART-CPU (1:1 X1 artwork, front copper + back copper + silkscreen); photo extras from MFE-CPU-SCAN (Rev 0 front scan, registered to the artwork by the 8080, 8212 and IC M; checked on the tab ends)",
+      "source": "MITS-ART-CPU (1:1 X1 artwork, front copper + back copper + silkscreen); Rev 0's further parts from MFE-CPU-SCAN (Rev 0 front scan, registered to the artwork by the 8080, 8212 and IC M; checked on the tab ends)",
       "component_side": "silkscreen (\"Front\") side; faces the right-hand side of the box (seen from the front). Viewed on this side with the fingers down, the front end is on the left.",
       "parts": [
         {
@@ -371,11 +371,130 @@
           "rot": 0,
           "conf": "artwork",
           "note": "column of 0.1 uF disc capacitors in pairs/triples along u at v 2.15-2.73 (silk); photo \"SC1-SC20\", green discs standing up, about 0.3 in tall (est)"
+        },
+        {
+          "ref": "Rev0-XTAL",
+          "kind": "paper_wrapped",
+          "u": 1.45,
+          "v": 3.53,
+          "len": 0.98,
+          "wid": 0.84,
+          "height": 0.4,
+          "height_conf": "est",
+          "rot": 0,
+          "conf": "photo",
+          "note": "Rev 0 board only (MFE-CPU-SCAN): a part wrapped in tan paper/tape, taken to be the crystal in earlier notes. Not on the X1 silkscreen or legend. Outline u 0.96-1.94, v 3.11-3.95"
+        },
+        {
+          "ref": "Rev0-C11",
+          "kind": "capacitor",
+          "u": 0.47,
+          "v": 2.71,
+          "len": 0.75,
+          "wid": 0.34,
+          "height": 0.34,
+          "height_conf": "est",
+          "rot": 90,
+          "conf": "photo",
+          "note": "Rev 0 only: axial electrolytic lying along v (TE-1159 type)"
+        },
+        {
+          "ref": "Rev0-C12",
+          "kind": "capacitor",
+          "u": 0.89,
+          "v": 2.75,
+          "len": 0.77,
+          "wid": 0.36,
+          "height": 0.36,
+          "height_conf": "est",
+          "rot": 90,
+          "conf": "photo",
+          "note": "Rev 0 only: axial electrolytic lying along v"
+        },
+        {
+          "ref": "Rev0-C9",
+          "kind": "capacitor",
+          "u": 6.42,
+          "v": 4.59,
+          "len": 0.71,
+          "wid": 0.35,
+          "height": 0.35,
+          "height_conf": "est",
+          "rot": 0,
+          "conf": "photo",
+          "note": "Rev 0 only: axial electrolytic (Sprague) lying along u near the top edge"
+        },
+        {
+          "ref": "Rev0-C10",
+          "kind": "capacitor",
+          "u": 7.55,
+          "v": 4.6,
+          "len": 0.73,
+          "wid": 0.37,
+          "height": 0.37,
+          "height_conf": "est",
+          "rot": 0,
+          "conf": "photo",
+          "note": "Rev 0 only: axial electrolytic lying along u"
+        },
+        {
+          "ref": "Rev0-R46",
+          "kind": "resistor",
+          "u": 0.4,
+          "v": 0.71,
+          "len": 0.84,
+          "wid": 0.33,
+          "height": 0.33,
+          "height_conf": "est",
+          "rot": 90,
+          "conf": "photo",
+          "note": "Rev 0 only: large resistor lying along v near the front-bottom corner"
+        },
+        {
+          "ref": "Rev0-R47",
+          "kind": "resistor",
+          "u": 0.74,
+          "v": 0.71,
+          "len": 0.84,
+          "wid": 0.33,
+          "height": 0.33,
+          "height_conf": "est",
+          "rot": 90,
+          "conf": "photo",
+          "note": "Rev 0 only: second large resistor beside R46"
+        },
+        {
+          "ref": "Rev0-IC",
+          "kind": "dip",
+          "type": "7400",
+          "pins": 14,
+          "u": 0.4,
+          "v": 1.53,
+          "len": 0.75,
+          "wid": 0.25,
+          "height": 0.2,
+          "height_conf": "est",
+          "rot": 90,
+          "conf": "photo",
+          "note": "Rev 0 only: a 13th 14-pin DIP (SN7400N) in the finger-side row at the front end; the X1 artwork has none there"
+        },
+        {
+          "ref": "R-col",
+          "kind": "resistor_group",
+          "u": 2.19,
+          "v": 1.5,
+          "len": 0.38,
+          "wid": 0.85,
+          "height": 0.12,
+          "height_conf": "est",
+          "rot": 0,
+          "conf": "photo",
+          "note": "Rev 0: six resistors, R18 to R20 and their neighbours, in a column between the left three ICs and the ten on their right (MFE-CPU-SCAN)"
         }
       ]
     },
     "mem1k": {
-      "source": "MITS-ART-1K (1:1 X1 artwork, front copper + silkscreen); photo extras from MFE-1MCS-SCAN (Rev 0, registered to the artwork by MA1, MD2; checked on H and the regulator screw)",
+      "source": "MITS-ART-1K (1:1 X1 artwork, front copper + silkscreen); Rev 0's further parts from MFE-1MCS-SCAN (Rev 0, registered to the artwork by MA1, MD2; checked on H and the regulator screw)",
       "component_side": "silkscreen side; same orientation in the box as the CPU (faces the right-hand side)",
       "parts": [
         {
@@ -741,6 +860,47 @@
           "rot": 0,
           "conf": "artwork",
           "note": "three plated holes in a line at u 9.93, v 4.06 / 4.31 / 4.56 (purpose unknown; empty in the photo)"
+        },
+        {
+          "ref": "Rev0-ICG",
+          "kind": "dip",
+          "type": "14-pin TTL",
+          "pins": 14,
+          "u": 9.34,
+          "v": 0.76,
+          "len": 0.75,
+          "wid": 0.25,
+          "height": 0.2,
+          "height_conf": "est",
+          "rot": 90,
+          "conf": "photo",
+          "note": "Rev 0 only (MFE-1MCS-SCAN): a 14-pin DIP labelled G in the A/B row; no footprint in the X1 artwork"
+        },
+        {
+          "ref": "Rev0-C1",
+          "kind": "capacitor",
+          "u": 7.06,
+          "v": 4.64,
+          "len": 0.72,
+          "wid": 0.25,
+          "height": 0.25,
+          "height_conf": "est",
+          "rot": 0,
+          "conf": "photo",
+          "note": "axial electrolytic (30 uF 12 V) lying along u at the top edge"
+        },
+        {
+          "ref": "Rev0-C2",
+          "kind": "capacitor",
+          "u": 9.68,
+          "v": 3.32,
+          "len": 0.8,
+          "wid": 0.25,
+          "height": 0.25,
+          "height_conf": "est",
+          "rot": 90,
+          "conf": "photo",
+          "note": "axial electrolytic lying along v near the rear end"
         }
       ]
     },

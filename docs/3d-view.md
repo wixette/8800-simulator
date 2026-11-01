@@ -45,7 +45,7 @@ are settled in [Part 5](#part-5--settled-questions).
   display/control board, the chassis and back panel, two 88-EC
   expander boards, up to six cards (CPU, 1K memory, two 88-4MCS, SIO,
   2SIO), three transformers, the power supply board, the fan, the
-  terminal block and the wiring harness. About 84 parts, 104,347
+  terminal block and the wiring harness. About 84 parts, 104,503
   triangles, **4.1 MB** of `.glb`. There are no `.blend` files: the
   scripts build everything from `params/machine.json` and
   `params/cards.json`, and the `.glb` is their output.

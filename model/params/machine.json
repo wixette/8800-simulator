@@ -1,6 +1,6 @@
 {
   "_schema": "Every numeric entry is {v, unit, conf, src, note?}. Units: mm and deg (Blender machine frame: origin at the centre of the base footprint on its bottom face, +X left to right seen from the front, +Y toward the back, +Z up). conf: doc = stated in a document, standard or museum record; artwork = measured on the 1:1 MITS board artwork; photo = scaled from a photo; measured = measured on an original by the person named in src; est = estimate; design = our own choice where sources are silent. Source tags are defined in research/sources/bibliography.md. The sources give inches; each note keeps the inch value. version is the parameter set's own (each .glb records it as params_version).",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "fidelity_target": "B",
   "reference_machine": "A typical MITS Altair 8800, 1975 (the original front panel with the bent Sense Switch line, 4-slot 88-EC expander boards, fan optional); docs/3d-model.md",
   "box": {
