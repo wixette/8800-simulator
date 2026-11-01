@@ -292,10 +292,11 @@
       "note": "room for the bat to swing inside the bushing"
     },
     "bushing_length": {
-      "v": 9.9,
+      "v": 7.5,
       "unit": "mm",
       "conf": "est",
-      "src": "APEM-5236; photos"
+      "src": "APEM-5236; photos",
+      "note": "it stands about 1.1 mm proud of the dress panel, a little, as the photos show"
     },
     "nut_across_flats": {
       "v": 8.0,
@@ -315,11 +316,11 @@
       "note": "width x depth x height behind the sub-panel"
     },
     "bat_length": {
-      "v": 11.5,
+      "v": 13.9,
       "unit": "mm",
       "conf": "est",
       "src": "photos (MFE-SN220081K-PHOTOS #29, COMMONS-FP-CROMEMCO); APEM-5236; a review of the reference photos, 2026-10-30 (docs/3d-model.md, fidelity review)",
-      "note": "from the pivot to the tip; shorter than the 13 mm first used"
+      "note": "from the pivot to the tip; 11.5 mm before the nuts went behind the panel: the pivot moved 2.4 mm back with the sub-panel, and the tip stays 13 mm in front of the dress panel, as in the photos"
     },
     "bat_radius": {
       "v": [
