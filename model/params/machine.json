@@ -35,7 +35,7 @@
       "unit": "mm",
       "conf": "photo",
       "src": "COMMONS-FP-CROMEMCO",
-      "note": "16.35 x 6.36 in; the visible panel as the photo shows it, centred in the box front; the name plate's lettering is placed from its left edge"
+      "note": "16.35 x 6.36 in; the visible panel, centred in the box front: the opening at the back of the bezel, slightly smaller than the dress panel (DOUGLAS-REVIEW-2026), which bears on it from behind; the name plate's lettering is placed from its left edge"
     },
     "lip_thickness": {
       "v": 1.2,
@@ -49,14 +49,14 @@
       "unit": "mm",
       "conf": "photo",
       "src": "COMMONS-FP-CROMEMCO, MFE-SN220081K-PHOTOS #01; a review of the reference photos, 2026-10-30 (docs/3d-model.md, fidelity review)",
-      "note": "0.19 in: the frame's front face, all round. Seen head-on the blue border is about 0.32 in, but most of that is the retaining lip, one recess deeper"
+      "note": "0.19 in: the frame's front face, all round. Its inner walls slope in from there to the opening, 0.135 in more, the 0.32 in seen head-on"
     },
     "recess_depth": {
       "v": 10.0,
       "unit": "mm",
       "conf": "photo",
       "src": "MFE-SN220081K-PHOTOS #01, COMMONS-SI-UTHMAN; a review of the reference photos, 2026-10-30 (docs/3d-model.md, fidelity review)",
-      "note": "about 0.4 in: the frame stands this far in front of the dress panel; its inner walls run straight back to the panel, with no lip in front of it (a flange behind the panel's edge closes the gap)"
+      "note": "about 0.4 in: the frame stands this far in front of the dress panel; its inner walls slope back to the opening, with no lip behind the panel"
     },
     "return_depth": {
       "v": 25.0,
@@ -105,14 +105,21 @@
       "unit": "mm",
       "conf": "design",
       "src": "",
-      "note": "the hole clears the switch nut by this much all round, so the nut sits in it"
+      "note": "the hole clears the switch bushing by this much all round; the nut stays behind the panel"
+    },
+    "nut_gap": {
+      "v": 2.4,
+      "unit": "mm",
+      "conf": "est",
+      "src": "DOUGLAS-REVIEW-2026",
+      "note": "between the dress panel and the sub-panel: the switch nuts sit in it, so a nut's thickness and a little"
     },
     "gap": {
       "v": 0.1,
       "unit": "mm",
       "conf": "design",
       "src": "",
-      "note": "between the bezel's lip and the dress panel, and between the dress panel and the sub-panel: it is held between them, not fastened, and the model's parts never touch"
+      "note": "between the bezel and the dress panel: it is held there by the switch nuts, not fastened, and the model's parts never touch"
     }
   },
   "grid": {
@@ -285,7 +292,7 @@
       "note": "room for the bat to swing inside the bushing"
     },
     "bushing_length": {
-      "v": 7.5,
+      "v": 9.9,
       "unit": "mm",
       "conf": "est",
       "src": "APEM-5236; photos"
@@ -447,11 +454,11 @@
       "note": "0.2 in: label centre above the lamp centre (0.16 and 0.23 in on the two photos)"
     },
     "switch_label_above": {
-      "v": 7.2,
+      "v": 5.33,
       "unit": "mm",
-      "conf": "design",
+      "conf": "photo",
       "src": "FLICKR-DUNN-PANEL, COMMONS-FP-CROMEMCO (photo overlay, docs/3d-model.md)",
-      "note": "switch number (and the SENSE SW. line) above the pivot; moved clear of the switch nut's hole (r 5.0 mm) after a review against the photos, 2026-10-30; the photo gave 0.21 in"
+      "note": "switch number above the pivot, 0.21 in, as the photos have it, now no nut stands in the way"
     },
     "plate_text_size": {
       "v": 11.0,
@@ -461,18 +468,18 @@
       "note": "cap height of ALTAIR 8800 COMPUTER (~0.43 in); the original face is a wide stencil-like display type, approximated"
     },
     "control_label_above": {
-      "v": 7.4,
+      "v": 6.35,
       "unit": "mm",
-      "conf": "design",
+      "conf": "photo",
       "src": "FLICKR-DUNN-PANEL, COMMONS-FP-CROMEMCO (photo overlay, docs/3d-model.md)",
-      "note": "the upper command's line nearest the switch; moved clear of the switch nut's hole (r 5.0 mm) after a review against the photos, 2026-10-30; the photo gave 0.25 in"
+      "note": "the upper command's line nearest the switch, 0.25 in, as the photos have it"
     },
     "control_label_below": {
-      "v": 7.4,
+      "v": 5.08,
       "unit": "mm",
-      "conf": "design",
+      "conf": "photo",
       "src": "FLICKR-DUNN-PANEL, COMMONS-FP-CROMEMCO (photo overlay, docs/3d-model.md)",
-      "note": "the lower command's first line; moved clear of the switch nut's hole (r 5.0 mm) after a review against the photos, 2026-10-30; the photo gave 0.2 in"
+      "note": "the lower command's first line, 0.2 in, as the photos have it"
     }
   },
   "card": {
@@ -1148,16 +1155,9 @@
         ]
       ],
       "panel.dress": [
-        [
-          0,
-          -40,
-          0
-        ],
-        [
-          0,
-          0,
-          200
-        ]
+        [0, 40, 0],
+        [0, 0, 200],
+        [0, -80, 0]
       ]
     },
     "unit": "mm",

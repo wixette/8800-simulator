@@ -83,17 +83,20 @@ def build_panel(p, col, root, chassis=None, bezel_mb=None):
     for r in (geom.rect(-W / 2, 0, W / 2, f), geom.rect(-W / 2, H - f, W / 2, H),
               geom.rect(-W / 2, f, -W / 2 + f, H - f), geom.rect(W / 2 - f, f, W / 2, H - f)):
         mb.prism(r, "XZ", yf, yf + lip, "bezel_blue")
-    # its inner walls, back to the dress panel, which sits one recess deep with nothing in front of it
+    # its inner walls, sloping in to the opening, smaller than the dress panel behind it (no lip)
+    y0, y1 = yf + lip, L.y_dress_front - L.gap
     xi, zi0, zi1 = W / 2 - f, f, H - f
-    yr = yf + L.recess
-    for r in (geom.rect(-xi - lip, zi0 - lip, xi + lip, zi0), geom.rect(-xi - lip, zi1, xi + lip, zi1 + lip),
-              geom.rect(-xi - lip, zi0, -xi, zi1), geom.rect(xi, zi0, xi + lip, zi1)):
-        mb.prism(r, "XZ", yf + lip, L.y_dress_back + L.gap + lip, "bezel_blue")
-    # a flange behind the dress panel's edge, closing the gap between the panel and the walls
-    xb, zb0, zb1 = L.dw / 2 - 1.5, zc - L.dh / 2 + 1.5, zc + L.dh / 2 - 1.5
-    for r in (geom.rect(-xi, zi0, xi, zb0), geom.rect(-xi, zb1, xi, zi1),
-              geom.rect(-xi, zb0, -xb, zb1), geom.rect(xb, zb0, xi, zb1)):
-        mb.prism(r, "XZ", L.y_dress_back + L.gap, L.y_dress_back + L.gap + lip, "bezel_blue")
+    xr, zr0, zr1 = ow / 2, zc - oh / 2, zc + oh / 2
+
+    def walls(x, z0, z1):
+        """The four walls' sections at one depth, mitred, each counter-clockwise from the front."""
+        return ([(-x, z1), (x, z1), (x + lip, z1 + lip), (-x - lip, z1 + lip)],
+                [(-x - lip, z0 - lip), (x + lip, z0 - lip), (x, z0), (-x, z0)],
+                [(-x - lip, z0 - lip), (-x, z0), (-x, z1), (-x - lip, z1 + lip)],
+                [(x, z0), (x + lip, z0 - lip), (x + lip, z1 + lip), (x, z1)])
+
+    for front, rear in zip(walls(xi, zi0, zi1), walls(xr, zr0, zr1)):
+        mb.hexa([(u, y1, w) for u, w in rear], [(u, y0, w) for u, w in front], "bezel_blue")
     ret = p.v("bezel.return_depth")
     for r in (geom.rect(-W / 2, 0, W / 2, lip), geom.rect(-W / 2, H - lip, W / 2, H)):
         mb.prism(r, "XZ", yf + lip, yf + ret, "bezel_blue")
@@ -108,8 +111,9 @@ def build_panel(p, col, root, chassis=None, bezel_mb=None):
     # ------------------------------------------------------------------ dress panel (static)
     dw, dh = L.dw, L.dh
     nut_r = L.nut_circumradius()
+    b_r = p.v("switch.bushing_diameter") / 2
     holes = [(*L.lamp(i), p.v("dress_panel.led_hole_diameter") / 2) for i in LAMP_IDS]
-    holes += [(*L.switch(s), nut_r + p.v("dress_panel.switch_hole_clearance")) for s in SWITCH_IDS]
+    holes += [(*L.switch(s), b_r + p.v("dress_panel.switch_hole_clearance")) for s in SWITCH_IDS]
     plate = MeshBuilder()
     plate.prism(geom.rect(-dw / 2, zc - dh / 2, dw / 2, zc + dh / 2), "XZ", L.y_dress_front, L.y_dress_back, "panel_charcoal")
     verts, faces = bl.cut_holes(plate, holes, "XZ", L.y_dress_front, L.y_dress_back, col)
@@ -155,10 +159,11 @@ def build_panel(p, col, root, chassis=None, bezel_mb=None):
     ph, pt = p.v("name_plate.height"), p.v("name_plate.thickness")
     z0 = zc - L.dh / 2
     mb = MeshBuilder()
-    g = L.gap   # the plate runs the dress panel's width along its bottom edge, short of its edges
-    mb.prism(geom.rect(-L.dw / 2 + g, z0 + g, L.dw / 2 - g, z0 + ph), "XZ", L.y_dress_front - pt - g, L.y_dress_front - g, "aluminium_brushed")
+    g = L.gap   # the plate fills the opening along its bottom edge, just inside the bezel
+    zp = zc - oh / 2 + g
+    mb.prism(geom.rect(-ow / 2 + g, zp, ow / 2 - g, z0 + ph), "XZ", L.y_dress_front - pt - g, L.y_dress_front - g, "aluminium_brushed")
     yt = L.y_dress_front - pt - g - 0.05   # just in front of the plate's face
-    zt = z0 + ph / 2
+    zt = (zp + z0 + ph) / 2
     # the logo and the title, from the simulator's own SVG (its 2D panel shows the same); the
     # letters' caps (SVG y 4.89-47.79) are plate_text_size high, ALTAIR's left edge where the photo has it
     s = p.v("lettering.plate_text_size") / (47.79 - 4.89)
@@ -176,7 +181,6 @@ def build_panel(p, col, root, chassis=None, bezel_mb=None):
     sw, sh = p.v("sub_panel.size")
     sub = MeshBuilder()
     sub.prism(geom.rect(-sw / 2, zc - sh / 2, sw / 2, zc + sh / 2), "XZ", L.y_sub_front, L.y_sub_back, "aluminium_anodised")
-    b_r = p.v("switch.bushing_diameter") / 2
     led_r = p.v("led.diameter") / 2
     sub_holes = [(*L.lamp(i), led_r + 0.1) for i in LAMP_IDS] + [(*L.switch(s), b_r + 0.3) for s in SWITCH_IDS]
     verts, faces = bl.cut_holes(sub, sub_holes, "XZ", L.y_sub_front, L.y_sub_back, col)
@@ -188,8 +192,8 @@ def build_panel(p, col, root, chassis=None, bezel_mb=None):
         x, z = L.switch(s)
         mb.prism(geom.rect(x - bw / 2, z - bh / 2, x + bw / 2, z + bh / 2), "XZ", L.y_sub_back, L.y_sub_back + bd, "switch_body")
         mb.tube(b_r, bore, 24, "XZ", L.bushing_front, L.y_sub_back, "chrome", offset=(x, 0, z))
-        # the hex nut on the bushing, lying in the dress panel's hole (as thick as the panel)
-        mb.tube(nut_r, b_r, 6, "XZ", L.y_dress_front, L.y_sub_front, "chrome", offset=(x, 0, z))
+        # the hex nut on the bushing, hidden behind the dress panel
+        mb.tube(nut_r, b_r, 6, "XZ", L.y_dress_back + L.gap, L.y_sub_front, "chrome", offset=(x, 0, z))
         for k in (-1, 0, 1):   # three pins into the board
             px = x + k * 0.1 * IN
             mb.prism(geom.rect(px - 0.4, z - 0.4, px + 0.4, z + 0.4), "XZ", L.y_sub_back + bd, L.y_board_back + 1.0, "tin")

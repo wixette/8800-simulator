@@ -50,10 +50,10 @@ class Layout:
         self.dw, self.dh = p.v("dress_panel.size")
         self.dt = p.v("dress_panel.thickness")
         self.gap = p.v("dress_panel.gap")
-        self.y_dress_front = self.y_front + self.recess + self.gap   # behind the retaining lip
+        self.y_dress_front = self.y_front + self.recess + self.gap   # against the back of the bezel
         self.y_dress_back = self.y_dress_front + self.dt
         self.st = p.v("sub_panel.thickness")
-        self.y_sub_front = self.y_dress_back + self.gap   # the dress panel lies against the sub-panel
+        self.y_sub_front = self.y_dress_back + p.v("dress_panel.nut_gap")   # the switch nuts sit between them
         self.y_sub_back = self.y_sub_front + self.st
         self.y_board_front = self.y_sub_back + p.v("dc_board.spacer")
         self.y_board_back = self.y_board_front + p.v("dc_board.thickness")
