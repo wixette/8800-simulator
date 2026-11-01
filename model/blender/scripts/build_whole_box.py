@@ -155,7 +155,7 @@ def build_chassis(p, col, root, b):
         out, m = b.W / 2 + 0.1, tr["metal"]
         section = [(b.ch_x, z0 - tr["leg"]), (b.ch_x + m, z0 - tr["leg"]), (b.ch_x + m, z0), (out + m, z0), (out + m, z1), (out, z1), (out, foot), (b.ch_x, foot)]
         ty0 = b.front + p.v("bezel.return_depth") + p.v("case.lid_front_gap")
-        mb.prism([(sx * u, w) for u, w in section], "XZ", ty0, b.back_out, "aluminium_brushed")
+        mb.prism([(sx * u, w) for u, w in section], "XZ", ty0, b.back_in - 0.1, "aluminium_brushed")   # up to the back panel, not through it
     # the back panel: the fan opening, eight DB-25 openings, the cord's hole
     bw, bh = p.v("chassis.back_panel")
     fan = p.v("chassis.fan_hole")
