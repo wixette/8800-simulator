@@ -124,7 +124,7 @@ def add_guide(mb, c, x, sign):
         ys_t = sorted((y(d0_top), y(d1_top)))
         bottom = [(x + xa, ys_b[0], z0), (x + xb, ys_b[0], z0), (x + xb, ys_b[1], z0), (x + xa, ys_b[1], z0)]
         top = [(x + xa, ys_t[0], z1), (x + xb, ys_t[0], z1), (x + xb, ys_t[1], z1), (x + xa, ys_t[1], z1)]
-        mb.hexa(bottom, top, "guide_tan")
+        mb.hexa(bottom, top, "guide_blue")
 
     back0, back1 = gd - cheek0, gd_top - cheek1    # the back's depth behind the floor
     post(-gw / 2, -ch / 2, -cheek0, 0.0, -cheek1, 0.0)    # cheek, left

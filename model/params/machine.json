@@ -719,18 +719,18 @@
       "note": "the steel of the lid and the tray"
     },
     "tray_wall_height": {
-      "v": 64.77,
+      "v": 55.88,
       "unit": "mm",
       "conf": "photo",
-      "src": "MFE-SN220081K-PHOTOS #03, #08; COMMONS-SI-UTHMAN; MITS_Altair_8800_microcomputer_-_Computer_History_Museum.jpg; a review of the reference photos, 2026-10-30 (docs/3d-model.md, fidelity review)",
-      "note": "2.55 in: the tray's side walls, 0.1 in above the lid's skirts, which hide their tops"
+      "src": "DOUGLAS-REVIEW-2026; COMMONS-SI-UTHMAN; MFE-SN220081K-PHOTOS #03",
+      "note": "2.20 in: the tray's side walls, flush with the box's sides; the side trim rests on their top edge"
     },
     "lid_skirt_bottom": {
-      "v": 62.23,
+      "v": 57.78,
       "unit": "mm",
       "conf": "photo",
       "src": "MFE-SN220081K-PHOTOS #03; COMMONS-SI-UTHMAN; MITS_Altair_8800_microcomputer_-_Computer_History_Museum.jpg; a review of the reference photos, 2026-10-30 (docs/3d-model.md, fidelity review)",
-      "note": "2.45 in: how far down the lid's sides come; on the side the grey lid shows about 1.86 times the blue below it (7.0 / 2.86)"
+      "note": "2.275 in: the lid's sides come down behind the side trim, nearly to the tray, as Mike Douglas's side photo shows past the trim's end. What shows of the lid still ends at 2.45 in, the top of the trim; on the side the grey shows about 1.86 times what is below it (7.0 / 2.86)"
     },
     "lid_front_gap": {
       "v": 0.5,
@@ -738,13 +738,6 @@
       "conf": "design",
       "src": "",
       "note": "between the lid's front edge and the bezel's returns"
-    },
-    "lid_flange": {
-      "v": 25.0,
-      "unit": "mm",
-      "conf": "est",
-      "src": "MITS-ASM-1975 printed p.76",
-      "note": "the lid's rear flange, down behind the back panel, where its two screws go"
     },
     "louvres": {
       "v": {
@@ -761,6 +754,20 @@
       "conf": "photo",
       "src": "COMMONS-SI-UTHMAN, MITS_Altair_8800_microcomputer_-_Computer_History_Museum.jpg, MFE-SN220081K-PHOTOS #01; a review of the reference photos, 2026-10-30 (docs/3d-model.md, fidelity review)",
       "note": "a band of vertical slits along each side of the lid, about 4.7 to 6.6 in up (1.9 in long), from about 1 in behind the lid's front edge nearly to its back; counted roughly from the photos"
+    },
+    "side_trim": {
+      "v": {"height": 6.25, "metal": 1.6, "foot": 1.6},
+      "unit": "mm",
+      "conf": "measured",
+      "src": "DOUGLAS-REVIEW-2026",
+      "note": "the 1/4 in aluminium strip along each side, built onto the chassis, resting on the tray's lip: a J in section, the lid's edge standing in it, so it stands one metal thickness proud of the case; its height above the table is scaled, not measured"
+    },
+    "side_screws": {
+      "v": {"y": [-145.0, 105.0], "z": 28.0, "diameter": 6.0},
+      "unit": "mm",
+      "conf": "photo",
+      "src": "DOUGLAS-REVIEW-2026; COMMONS-SI-UTHMAN; MITS-ASM-1975 p.16",
+      "note": "the chassis's four #6-32 screws, two each side, through the tray's walls"
     },
     "chassis_lift": {
       "v": 0.2,
@@ -880,14 +887,11 @@
       "note": "eight DB-25 openings, 4 rows x 2, beside the fan opening on the side away from the transformers (4.46 and 6.80 in from the centre; 5.50, 4.39, 3.25 and 2.15 in up)"
     },
     "io_cutout_size": {
-      "v": [
-        43.0,
-        11.0
-      ],
+      "v": {"top": 39.0, "bottom": 36.0, "height": 11.3, "corner": 1.5, "screw_spacing": 47.04, "screw_diameter": 3.2},
       "unit": "mm",
-      "conf": "photo",
-      "src": "MFE-SN220081K-PHOTOS #03",
-      "note": "1.7 x 0.43 in, width x height"
+      "conf": "doc",
+      "src": "DOUGLAS-REVIEW-2026; the DB-25 shell's standard panel opening",
+      "note": "D-shaped, wide side up, with a screw hole on each side; SN 220081K's rectangles with sharp corners are an early trait"
     },
     "io_screen": {
       "v": {
@@ -936,48 +940,25 @@
   },
   "psu": {
     "t1": {
-      "v": {
-        "x": 161.29,
-        "size": [
-          78.74,
-          73.66,
-          76.2
-        ]
-      },
+      "v": {"x": 161.29, "size": [76.2, 73.66, 76.2], "strap": [76.2, 34.93], "ear": 2.0},
       "unit": "mm",
-      "conf": "photo",
-      "src": "MFE-SN220081K-PHOTOS (research/sources/notes-interior-layout.md)",
-      "note": "centre x; width x depth (from the back panel) x height; it rests on the cross member. The photos put its top at 4.4 in, against T2's bottom at 4.3 in; the model makes it 3.0 in tall (top 4.1 in), so its coil clears T2 by about 9 mm. Separated after a review against the photos (2026-10-30): the three transformers stand apart, as in #07 and #09."
+      "conf": "measured",
+      "src": "DOUGLAS-REVIEW-2026; MFE-SN220081K-PHOTOS (research/sources/notes-interior-layout.md)",
+      "note": "centre x; width x depth (from the back panel) x height; strap: its length x width without the ears, read so from Mike Douglas's 3 x 1.375 in, and the ears' reach. It rests on the cross member; the ears are short to clear the side member (a simplification: the real strap runs front to back). 3.0 in tall, clearing T2's coil by about 9 mm."
     },
     "t2": {
-      "v": {
-        "x": 160.02,
-        "size": [
-          76.2,
-          58.42,
-          54.61
-        ],
-        "top_z": 167.64
-      },
+      "v": {"x": 160.02, "size": [60.33, 58.42, 54.61], "top_z": 167.64, "strap": [60.33, 25.4], "ear": 9.0},
       "unit": "mm",
-      "conf": "photo",
-      "src": "MFE-SN220081K-PHOTOS (research/sources/notes-interior-layout.md)",
-      "note": "above T1, against the back panel; its top 6.6 in up"
+      "conf": "measured",
+      "src": "DOUGLAS-REVIEW-2026; MFE-SN220081K-PHOTOS (research/sources/notes-interior-layout.md)",
+      "note": "above T1, against the back panel; its top 6.6 in up; strap as T1's (2.375 x 1 in)"
     },
     "t3": {
-      "v": {
-        "x": 98.0,
-        "z": 124.46,
-        "size": [
-          33.02,
-          50.8,
-          48.26
-        ]
-      },
+      "v": {"x": 98.0, "z": 124.46, "size": [33.02, 50.8, 50.8], "strap": [50.8, 19.05], "ear": 9.0},
       "unit": "mm",
-      "conf": "photo",
-      "src": "MFE-SN220081K-PHOTOS (research/sources/notes-interior-layout.md)",
-      "note": "on its U bracket, left of T1 and T2; centre 3.86 in right, about 8 mm clear of T1 and T2. Separated after a review against the photos (2026-10-30): the three transformers stand apart, as in #07 and #09."
+      "conf": "measured",
+      "src": "DOUGLAS-REVIEW-2026; MFE-SN220081K-PHOTOS (research/sources/notes-interior-layout.md)",
+      "note": "on its U bracket, left of T1 and T2; centre 3.86 in right, about 8 mm clear of both; strap as T1's (2 x 0.75 in), running up and down"
     },
     "board": {
       "v": {
@@ -997,21 +978,11 @@
       "note": "8.35 x 3.0 in, on 0.375 in spacers on the cross member"
     },
     "terminal_block": {
-      "v": {
-        "x": [
-          42.5,
-          78.5
-        ],
-        "z": [
-          62.0,
-          130.0
-        ],
-        "depth": 15.0
-      },
+      "v": {"x": [42.5, 78.5], "z": [33.0, 160.0], "depth": 15.0},
       "unit": "mm",
-      "conf": "est",
-      "src": "MITS-ASM-1975 printed p.55",
-      "note": "two rows of ten, on the back panel between the fan's screen and T3"
+      "conf": "photo",
+      "src": "DOUGLAS-REVIEW-2026; MFE-SN220081K-PHOTOS #09; MITS-ASM-1975 printed p.55",
+      "note": "ten terminals at 0.5 in, 5.0 in tall, on the back panel between the fan's screen and T3; it reaches behind the power board"
     },
     "fan": {
       "v": {
@@ -1136,16 +1107,8 @@
         ]
       ],
       "psu.terminal_block": [
-        [
-          0,
-          -20,
-          0
-        ],
-        [
-          0,
-          0,
-          160
-        ]
+        [0, -3, 0],
+        [0, 0, 200]
       ],
       "chassis.frame": [
         [
