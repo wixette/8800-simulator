@@ -820,18 +820,18 @@
       "note": "the row of holes in each flange; the manual counts 13, 21 and 9 of them to the cross member and the rails"
     },
     "web_ends": {
-      "v": {"tip": 18.0, "run": 45.0, "chamfer": 6.0},
+      "v": {"tip": 10.0, "run": 23.0, "chamfer": 3.0},
       "unit": "mm",
       "conf": "photo",
       "src": "MFE-SN220081K-PHOTOS #09; 8800chasis.jpg (deramp.com)",
-      "note": "each side member rises at both ends: to the back panel's top and the sub-panel's top, a narrow tip 0.7 in deep, sloping down over 1.75 in to the web; roughly scaled"
+      "note": "each side member rises at both ends: to the back panel's top and the sub-panel's top. The tip is one hole and its margins wide, and the slanted edge comes down to the web about 4 to 5 holes from the end (33 mm); roughly scaled"
     },
     "web_holes": {
-      "v": {"rows_z": [12.0, 19.0, 26.0], "edge_rows": [6.0, 13.0], "diameter": 4.06},
+      "v": {"rows_z": [12.0, 19.0, 26.0], "columns": [5.0, 11.6], "margin": 2.5, "column_bottom": 35.0, "diameter": 4.06},
       "unit": "mm",
       "conf": "photo",
       "src": "8800chasis.jpg (deramp.com); MFE-SN220081K-PHOTOS #09",
-      "note": "three staggered rows along each web below the trim, at the flange's pitch, and two along each rising edge, this far in from it; the pattern is approximate"
+      "note": "three staggered rows along each web below the trim, at the flange's pitch, and two staggered upright columns at each end, this far in from the end; a hole is left out where the slanted edge leaves it less than the margin, so the tip has only the outer column"
     },
     "corner_clip": {
       "v": {"width": 12.0, "height": 15.0, "metal": 1.2, "bolt_diameter": 6.0},

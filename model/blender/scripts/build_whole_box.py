@@ -101,7 +101,7 @@ def d_shape(x, z, io):
 
 def web_profile(p, b, y0, y1, h):
     """A side member's web, as (y, z): low along the cards, rising at each end to the top of the
-    panel there, with its holes, three rows along it and two up each rising edge (y, z, radius)."""
+    panel there, with its holes, three rows along it and two columns at each end (y, z, radius)."""
     e, wh = p.v("chassis.web_ends"), p.v("chassis.web_holes")
     tip, run, c = e["tip"], e["run"], e["chamfer"]
     low = b.ch_bottom + h
@@ -117,16 +117,15 @@ def web_profile(p, b, y0, y1, h):
         while y > y0 + 6.0:
             holes.append((y, b.ch_bottom + z, r))
             y -= pitch
-    for ey, top, sign in ((y1 - tip, top_r, -1), (y0 + tip, top_f, 1)):  # sign: which way the edge runs down
-        rise = top - c - low
-        n = math.hypot(run, rise)
-        dy, dz = sign * run / n, -rise / n                               # down the edge
-        iy, iz = -sign * rise / n, -run / n                              # in from it
-        for row, off in enumerate(wh["edge_rows"]):
-            d = 5.0 + row * pitch / 2
-            while d < n - 12.0:
-                holes.append((ey + dy * d + iy * off, top - c + dz * d + iz * off, r))
-                d += pitch
+    # two upright columns at each end, the second only where the slanted edge leaves room for it
+    for end, top, sign in ((y1, top_r, -1), (y0, top_f, 1)):                # sign: inward from the end
+        for col, inset in enumerate(wh["columns"]):
+            z = top - 5.0 - col * pitch / 2
+            while z > b.ch_bottom + wh["column_bottom"]:
+                width = tip + run * max(0.0, min(1.0, (top - c - z) / (top - c - low)))
+                if inset + r + wh["margin"] <= width:
+                    holes.append((end + sign * inset, z, r))
+                z -= pitch
     return outline, holes
 
 
