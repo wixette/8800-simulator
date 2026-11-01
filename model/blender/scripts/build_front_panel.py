@@ -21,12 +21,13 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import bpy  # noqa: E402
-from lib import bl, geom, params  # noqa: E402
+from lib import bl, geom, panel_lines, params  # noqa: E402
 from lib.bl import MeshBuilder  # noqa: E402
 from lib.layout import CONTROL_LABELS, LAMP_IDS, MOMENTARY, SWITCH_IDS, Layout, lamp_label, node_id  # noqa: E402
 
 DEFAULT_OUT = os.path.join(params.MACHINE_DIR, "blender", "out", "front-panel.glb")
 TITLE_SVG = os.path.join(params.MACHINE_DIR, "blender", "data", "front-panel-title.svg")
+LINES_SVG = os.path.join(params.MACHINE_DIR, "blender", "data", "front-panel-lines.svg")
 IN = 25.4
 CAP = 0.72          # cap height as a share of the font size (Blender's default face)
 
@@ -38,20 +39,17 @@ def text(mb, s, x, z, cap_mm, y, mat="ink_white", align="CENTER", bold=0.0):
     mb.add_mesh_data(verts, faces, mtx, mat)
 
 
-def strip(mb, x0, x1, z0, z1, y, mat="ink_white"):
-    """A thin printed line on the panel face (a flat rectangle facing -Y)."""
-    base = len(mb.verts)
+def stroke(mb, points, width, y, mat="ink_white"):
+    """A printed line on the panel face: flat quads along (x, z) points, facing -Y, each run
+    half a width past its ends, so the corners close."""
     mi = mb._mat(mat)
-    for x, z in ((x0, z0), (x1, z0), (x1, z1), (x0, z1)):
-        mb.verts.append((x, y, z))
-    mb._add([base, base + 1, base + 2, base + 3], mi, False)
-
-
-def dashed(mb, x, z_top, z_bottom, y, dash=0.08 * IN, gap=0.07 * IN, width=0.45):
-    z = z_top
-    while z - dash > z_bottom:
-        strip(mb, x - width / 2, x + width / 2, z - dash, z, y)
-        z -= dash + gap
+    for (x0, z0), (x1, z1) in zip(points, points[1:]):
+        n = math.hypot(x1 - x0, z1 - z0)
+        ux, uz = (x1 - x0) / n * width / 2, (z1 - z0) / n * width / 2
+        base = len(mb.verts)
+        for x, z in ((x0 - ux + uz, z0 - uz - ux), (x1 + ux + uz, z1 + uz - ux), (x1 + ux - uz, z1 + uz + ux), (x0 - ux - uz, z0 - uz + ux)):
+            mb.verts.append((x, y, z))
+        mb._add([base, base + 1, base + 2, base + 3], mi, False)
 
 
 def build(p):
@@ -138,41 +136,14 @@ def build_panel(p, col, root, chassis=None, bezel_mb=None):
         if lower:
             for n, line in enumerate(lower):
                 text(mb, line, x, z - below_ctl - n * line_gap, cap, ink)
-    w = 0.45
-    # STATUS: a line under MEMR … INT, the word under its middle
-    (x_memr, z1), (x_int, _) = L.lamp("memr"), L.lamp("int")
-    zs = z1 - 0.2 * IN
-    strip(mb, x_memr - 0.2 * IN, x_int + 0.2 * IN, zs - w / 2, zs + w / 2, ink)
-    text(mb, "STATUS", (x_memr + x_int) / 2, zs - 0.12 * IN, cap, ink)   # its caps 1.5 mm under the line
-    # dashed lines: data lamps down to the address lamps, address lamps down to their switches
-    for k in range(8):
-        x, z_d = L.lamp(f"d{k}")
-        _, z_a = L.lamp(f"a{k}")
-        dashed(mb, x, z_d - 0.2 * IN, z_a + above_lamp + cap, ink)
-    for k in range(16):
-        x, z_a = L.lamp(f"a{k}")
-        _, z_s = L.switch(f"s{k}")
-        dashed(mb, x, z_a - 0.2 * IN, z_s + above_sw + cap, ink)
-    # SENSE SW.: the words, then a line along the upper eight switches' numbers
-    x15, z_s = L.switch("s15")
-    z_line = z_s + above_sw
-    text(mb, "SENSE SW.", x15 - 1.2 * IN, z_line, cap, ink)
-    xs = [x15 - 0.85 * IN] + [L.switch(f"s{k}")[0] for k in range(15, 7, -1)]
-    for a, b in zip(xs, xs[1:]):
-        strip(mb, a + 0.13 * IN, b - 0.13 * IN, z_line - w / 2, z_line + w / 2, ink)
-    # group bars under the switches: 15 | 14-12 | 11-9 | 8-6 | 5-3 | 2-0; the data byte doubled
-    z_bar = z_s - p.v("lettering.group_bar_below")
-    groups = [[15], [14, 13, 12], [11, 10, 9], [8, 7, 6], [5, 4, 3], [2, 1, 0]]
-    for g in groups:
-        xa, xb = L.switch(f"s{g[0]}")[0] - 0.22 * IN, L.switch(f"s{g[-1]}")[0] + 0.22 * IN
-        strip(mb, xa, xb, z_bar - w / 2, z_bar + w / 2, ink)
-        if g[0] <= 7 or g == [8, 7, 6]:
-            strip(mb, xa, xb, z_bar - 0.06 * IN - w / 2, z_bar - 0.06 * IN + w / 2, ink)
-    x0 = L.switch("s0")[0]
-    for dz in (0.0, -0.06 * IN):
-        strip(mb, x0 + 0.22 * IN, x0 + 1.25 * IN, z_bar + dz - w / 2, z_bar + dz + w / 2, ink)
-    text(mb, "Data", x0 + 0.55 * IN, z_bar + 0.11 * IN, cap, ink)
-    text(mb, "Address", x0 + 0.6 * IN, z_bar - 0.17 * IN, cap, ink)
+    # the lines, the same drawing as the 2D panel's (docs/3d-model.md, decision 12), and the words that go with them
+    place = panel_lines.Placer(L)
+    for points in panel_lines.strokes(LINES_SVG):
+        stroke(mb, [place(*q) for q in points], 0.45, ink)
+    x_status, z_status = place(*panel_lines.STATUS_LINE)
+    text(mb, "STATUS", x_status, z_status - 0.12 * IN, cap, ink)   # its caps 1.5 mm under the line
+    for word, at in panel_lines.WORDS.items():
+        text(mb, word, *place(*at), cap, ink)
     dress = mb.build("panel.dress", col)
     bl.set_labels(dress, "Dress panel (painted, lettered)")
     dress["motion"] = "static"

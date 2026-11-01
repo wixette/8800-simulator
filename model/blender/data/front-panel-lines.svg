@@ -1,0 +1,104 @@
+<!-- The panel's lines: every stroke of images/panel.svg, unchanged (tests/model.test.js holds the two equal). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 644" fill="none">
+<path d="M287.609 144.43H678.323" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M417.829 374.704H548.99" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M633.518 349.698V370.537" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M456.384 349.698V370.537" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1134.04 370.533H1262.72L1268.21 362.445L1327.09 362.818" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1134.04 375.317H1264.58L1270.15 367.841H1327.1" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M824.197 370.536H907.555" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M953.528 370.536H1084.69" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M953.528 374.704H1084.69" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M776.393 374.704H907.554" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M594.964 374.704H726.125" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M339.707 374.704H376.151" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M297.364 328.858H313.633L338.989 370.537H803.359V349.697" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M483 255V264.688" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M534 255V264.688" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M610 255V264.688" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M660 255V264.688" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M711 255V264.688" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M789 255V264.688" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M431 255V264.688" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M357 255V264.688" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M1147 255V264.688" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M1198 255V264.688" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M1248 255V264.688" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M891 255V264.688" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M840 255V264.688" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M970 255V264.688" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M1019 255V264.688" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M1068 255V264.688" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M483 272.438V282.125" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M534 272.438V282.125" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M610 272.438V282.125" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M660 272.438V282.125" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M711 272.438V282.125" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M789 272.438V282.125" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M431 272.438V282.125" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M357 272.438V282.125" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M1147 272.438V282.125" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M1198 272.438V282.125" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M1248 272.438V282.125" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M891 272.438V282.125" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M840 272.438V282.125" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M970 272.438V282.125" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M1019 272.438V282.125" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M1068 272.438V282.125" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M483 289.875V299.563" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M534 289.875V299.563" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M610 289.875V299.563" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M660 289.875V299.563" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M711 289.875V299.563" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M789 289.875V299.563" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M431 289.875V299.563" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M357 289.875V299.563" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M1147 289.875V299.563" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M1198 289.875V299.563" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M1248 289.875V299.563" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M891 289.875V299.563" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M840 289.875V299.563" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M970 289.875V299.563" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M1019 289.875V299.563" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M1068 289.875V299.563" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M483 307.312V317" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M534 307.312V317" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M610 307.312V317" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M660 307.312V317" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M711 307.312V317" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M789 307.312V317" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M431 307.312V317" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M357 307.312V317" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M1147 307.312V317" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M1198 307.312V317" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M1248 307.312V317" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M891 307.312V317" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M840 307.312V317" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M970 307.312V317" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M1019 307.312V317" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M1068 307.312V317" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round"/>
+<path d="M1147 190V200" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1198 190V200" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1248 190V200" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M891 190V200" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M841 190V200" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M969 190V200" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1019 190V200" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1069 190V200" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1147 174V184" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1198 174V184" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1248 174V184" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M891 174V184" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M841 174V184" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M969 174V184" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1019 174V184" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1069 174V184" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1147 158V168" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1198 158V168" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1248 158V168" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M891 158V168" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M841 158V168" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M969 158V168" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1019 158V168" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1069 158V168" stroke="white" stroke-width="2" stroke-miterlimit="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
