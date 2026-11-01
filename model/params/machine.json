@@ -475,11 +475,11 @@
       "note": "the upper command's line nearest the switch, 0.25 in, as the photos have it"
     },
     "control_label_below": {
-      "v": 6.4,
+      "v": 7.4,
       "unit": "mm",
       "conf": "design",
       "src": "FLICKR-DUNN-PANEL, COMMONS-FP-CROMEMCO (photo overlay, docs/3d-model.md)",
-      "note": "the lower command's first line; the photos give 0.2 in (5.08 mm), but at that the bats cover RUN, CLR and ON from the page's front view"
+      "note": "the lower command's first line; the photos give 0.2 in (5.08 mm), but the page's front view looks down on the panel, so a bat's tip lands about 5.75 mm below its pivot and would cover RUN, CLR and DEPOSIT"
     }
   },
   "card": {
