@@ -230,7 +230,7 @@ panel, not a picture of it: click a switch on it and it does what the
   the panel and the parts behind it, pointing at each one.
 
 The 3D view needs WebGL 2, and loads only the first time you choose
-it (about 5 MB). How the model was made, and from what, is in
+it (about 6 MB). How the model was made, and from what, is in
 [docs/3d-model.md](docs/3d-model.md).
 
 ### The Teletype
