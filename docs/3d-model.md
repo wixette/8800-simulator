@@ -35,7 +35,7 @@ build of the front panel or the card cage.
 
 The model is in plain git, not LFS ([3d-view.md, M1](3d-view.md#m1--no-git-lfs-the-model-goes-in-plain-git)).
 Budgets: under 300 k triangles and 15 MB, and under 5 MB to stay in
-plain git. Today: 105,415 triangles, 4.2 MB.
+plain git. Today: 105,699 triangles, 4.2 MB.
 
 Checks, in `npm test`: the node contract (Part 2), the budgets, that
 the model's places, ways out and take-apart order agree with
@@ -222,7 +222,7 @@ key the params cite.
    them).
 7. **The case's outline is the case:** 17.0 × 17.5 × 7.0 in. The lid
    and the tray end together at the back, and the back panel stands
-   0.6 in inside them. The switch bats stand 3 mm proud of the bezel.
+   0.6 in inside them, with the lid's rear flange on its outer face. The switch bats stand 3 mm proud of the bezel.
 8. **The back panel is 16.7 in wide**, not the photo's 16.85 ± 0.2,
    to clear the tray's walls as the chassis slides out.
 9. **The expander boards and the front panel don't come off the
@@ -336,12 +336,28 @@ answers; a better number later is one params entry and a rebuild.
 
 **The power cord.** It ran 6 in straight back, which looked odd and made the box far deeper than it is. It now drops to the table just behind the case and curves along behind the machine toward the DB-25s, within the box's width and about 2 in behind it. The framing still leaves it out, by its material.
 
+### Mike Douglas's answers (2026-11-02)
+
+He answered the three questions his review left open, with a photo of the inside of a lid (reference only, not in this repository).
+
+| Question | His answer | In the model |
+|---|---|---|
+| When the panel drawing changed | The straight line came first and the bent one later. He does not know when, but the "Merry MITS-Mas" advert of late 1975 has the bent one | No change. It supports the bent drawing for a typical 1975 machine; a machine from early in the year may well have the straight one |
+| The transformers | Oriented correctly | No change. Whether a bracket's size is its strap's length by its width, and the terminal block's height, stay unanswered; they do not matter enough to chase |
+| How the lid fastens at the rear | A hem fold on the back edge, then a 90 degree fold down to a 5/8 in flange, with two holes 2.5 in from the outer edges, screwed to the rear panel. Hem folds on the short vertical rear edges too | Built as he says. See below |
+| How high the trim stands | The tray's sides are 2.375 in, and the trim sits directly on them (he first wrote 3.375 in and corrected it) | The tray rises from 2.20 in, the trim's top from 2.45 to 2.625 in, the lid's sides with them |
+
+**The hem's width is our reading.** The back panel stands 0.6 in forward of the lid's back edge, so a flange at that edge could not reach it. It does if the hem folds forward under the lid for that 0.6 in and the flange turns down from there, which is what "a hem fold, then a fold downward" describes and what the photo looks like. Nothing measures it directly.
+
+**From the photo, scaled by the two holes:** the flange stops about 0.6 in from each outer edge; a notch 0.57 by 0.17 in in its lower edge, about 4.36 in from the outer edge at +X, purpose unknown; the sides' rear hems about 1/4 in. The slits along the band count 46, so the model goes from a rough 50 to 46, over the same stretch of the lid.
+
+**A change you can see:** on the side the grey now shows about 1.67 times what is below it, not the 1.86 scaled from photos in the fidelity review. His measurement wins.
+
+The lid's way out does not change: it goes backward first, which is away from the back panel, and the flange leaves with it. The two screw heads are part of the lid, since the page takes it off in one piece. On the real machine they come out first.
+
 ### Data still wanted
 
-Mike has been asked three things: when the panel drawing changed,
-whether the bracket sizes are a strap's length by its width (and the
-terminal block's height), and how the lid fastens at the rear and how
-high the trim stands. The other weak values are the cross member's
+Mike's answers leave two small points: whether the bracket sizes are a strap's length by its width, and the terminal block's height. The other weak values are the cross member's
 height (T1 and the power board sit on it), the card rails' section, the
 box's depth (17.5 or 18.5 in), the dress panel's grid position
 (±2.5 mm), the display/control board's length, and a later back panel.
@@ -387,6 +403,20 @@ is smaller than the panel, is what must hold.
 
 **Not in this release:** a later back panel's fan slots, the lid's rear
 screws, and any change to the 2D panel.
+
+## Part 5 — The plan for v1.8.3
+
+All on branch `v1.8.3`. It takes in [Mike Douglas's answers](#mike-douglass-answers-2026-11-02): params 0.3.3 → 0.3.4. The state machine, the ways out and the node names do not change, so `js/` stays as it is.
+
+| # | Step | Done when |
+|---|---|---|
+| L1 | **The tray and the trim.** `tray_wall_height` 2.375 in; `lid_skirt_bottom` rises with it | Beside Mike's side photo: trim on the tray, nothing else moved |
+| L2 | **The lid's back.** The hem, the flange with its ends and notch, the two screw heads, the sides' rear hems, two holes in the back panel | From behind and from inside, beside his photo. `npm run test:model` passes |
+| L3 | **The louvres.** 46 slits, the same stretch of the lid | Seen in the page |
+| L4 | **Words.** This document, the bibliography, the research notes | `npm test` |
+| L5 | **Release review.** The full chain, README screenshots, `npm version 1.8.3`, PR to `master` | Your manual check and OK |
+
+**Done:** L1 to L5, released as v1.8.3. Whether a bracket's size is its strap's length by its width, and the terminal block's height, stay unanswered, and were judged not to matter to anyone using the page.
 
 ## Licences
 

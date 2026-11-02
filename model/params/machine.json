@@ -1,6 +1,6 @@
 {
   "_schema": "Every numeric entry is {v, unit, conf, src, note?}. Units: mm and deg (Blender machine frame: origin at the centre of the base footprint on its bottom face, +X left to right seen from the front, +Y toward the back, +Z up). conf: doc = stated in a document, standard or museum record; artwork = measured on the 1:1 MITS board artwork; photo = scaled from a photo; measured = measured on an original by the person named in src; est = estimate; design = our own choice where sources are silent. Source tags are defined in research/sources/bibliography.md. The sources give inches; each note keeps the inch value. version is the parameter set's own (each .glb records it as params_version).",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "fidelity_target": "B",
   "reference_machine": "A typical MITS Altair 8800, 1975 (the original front panel with the bent Sense Switch line, 4-slot 88-EC expander boards, fan optional); docs/3d-model.md",
   "box": {
@@ -720,18 +720,39 @@
       "note": "the steel of the lid and the tray"
     },
     "tray_wall_height": {
-      "v": 55.88,
+      "v": 60.33,
       "unit": "mm",
-      "conf": "photo",
-      "src": "DOUGLAS-REVIEW-2026; COMMONS-SI-UTHMAN; MFE-SN220081K-PHOTOS #03",
-      "note": "2.20 in: the tray's side walls, flush with the box's sides; the side trim rests on their top edge"
+      "conf": "measured",
+      "src": "DOUGLAS-LID-2026",
+      "note": "2.375 in, measured on an original: the tray's side walls, flush with the box's sides; the side trim sits directly on their top edge"
     },
     "lid_skirt_bottom": {
-      "v": 57.78,
+      "v": 62.23,
+      "unit": "mm",
+      "conf": "design",
+      "src": "DOUGLAS-REVIEW-2026; DOUGLAS-LID-2026",
+      "note": "2.45 in: the lid's sides come down behind the side trim, just clear of its foot, nearly to the tray, as Mike Douglas's side photo shows past the trim's end. What shows of the lid ends at 2.625 in, the top of the trim; on the side the grey shows about 1.67 times what is below it"
+    },
+    "lid_flange": {
+      "v": {"height": 15.88, "screw_from_edge": 63.5},
+      "unit": "mm",
+      "conf": "measured",
+      "src": "DOUGLAS-LID-2026",
+      "note": "the 5/8 in flange down across the lid's back, with two holes 2.5 in from the outer edges that screw it to the back panel. A hem folds forward from the lid's back edge and the flange turns down from the hem, so the flange lies on the recessed back panel's outer face; the hem's width is that recess, 0.6 in, and is not itself measured"
+    },
+    "lid_flange_shape": {
+      "v": {"end_from_edge": 15.24, "notch_from_edge": 110.7, "notch_width": 14.5, "notch_depth": 4.3, "side_hem": 6.35},
       "unit": "mm",
       "conf": "photo",
-      "src": "MFE-SN220081K-PHOTOS #03; COMMONS-SI-UTHMAN; MITS_Altair_8800_microcomputer_-_Computer_History_Museum.jpg; a review of the reference photos, 2026-10-30 (docs/3d-model.md, fidelity review)",
-      "note": "2.275 in: the lid's sides come down behind the side trim, nearly to the tray, as Mike Douglas's side photo shows past the trim's end. What shows of the lid still ends at 2.45 in, the top of the trim; on the side the grey shows about 1.86 times what is below it (7.0 / 2.86)"
+      "src": "DOUGLAS-LID-2026",
+      "note": "scaled from his photo by the two screw holes, 12 in apart: the flange stops about 0.6 in from each outer edge; a notch 0.57 by 0.17 in in its lower edge, centred about 4.36 in from the outer edge at +X, purpose unknown; the hems on the sides' rear edges are about 1/4 in, folded inward"
+    },
+    "lid_screw": {
+      "v": {"head_diameter": 7.0, "head_height": 2.0, "hole_diameter": 3.5},
+      "unit": "mm",
+      "conf": "design",
+      "src": "MITS-ASM-1975 printed p.76",
+      "note": "the manual's two #6-32 screws: the heads are part of the lid, since the page takes it off in one piece; the holes are in the back panel"
     },
     "lid_front_gap": {
       "v": 0.5,
@@ -742,8 +763,8 @@
     },
     "louvres": {
       "v": {
-        "count": 50,
-        "pitch": 7.5,
+        "count": 46,
+        "pitch": 8.18,
         "width": 2.5,
         "z": [
           119.38,
@@ -753,15 +774,15 @@
       },
       "unit": "mm",
       "conf": "photo",
-      "src": "COMMONS-SI-UTHMAN, MITS_Altair_8800_microcomputer_-_Computer_History_Museum.jpg, MFE-SN220081K-PHOTOS #01; a review of the reference photos, 2026-10-30 (docs/3d-model.md, fidelity review)",
-      "note": "a band of vertical slits along each side of the lid, about 4.7 to 6.6 in up (1.9 in long), from about 1 in behind the lid's front edge nearly to its back; counted roughly from the photos"
+      "src": "COMMONS-SI-UTHMAN, MITS_Altair_8800_microcomputer_-_Computer_History_Museum.jpg, MFE-SN220081K-PHOTOS #01; DOUGLAS-LID-2026; a review of the reference photos, 2026-10-30 (docs/3d-model.md, fidelity review)",
+      "note": "a band of vertical slits along each side of the lid, about 4.7 to 6.6 in up (1.9 in long), from about 1 in behind the lid's front edge nearly to its back; 46 counted along the band in Mike Douglas's photo of an underside"
     },
     "side_trim": {
       "v": {"height": 6.25, "metal": 1.6, "foot": 1.6, "leg": 14.0},
       "unit": "mm",
       "conf": "measured",
-      "src": "DOUGLAS-REVIEW-2026; 8800chasis.jpg (deramp.com)",
-      "note": "the 1/4 in aluminium strip along each side, resting on the tray's lip: a leg bolted down the side member, a foot out under the lid's edge and a lip up outside it, so it stands one metal thickness proud of the case; its height above the table is scaled, not measured"
+      "src": "DOUGLAS-REVIEW-2026; DOUGLAS-LID-2026; 8800chasis.jpg (deramp.com)",
+      "note": "the 1/4 in aluminium strip along each side, directly on the tray's lip: a leg bolted down the side member, a foot out under the lid's edge and a lip up outside it, so it stands one metal thickness proud of the case"
     },
     "side_screws": {
       "v": {"y": [-145.0, 105.0], "z": 28.0, "diameter": 6.0},
