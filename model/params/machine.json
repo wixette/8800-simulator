@@ -763,8 +763,8 @@
     },
     "louvres": {
       "v": {
-        "count": 47,
-        "pitch": 8.0,
+        "count": 46,
+        "pitch": 8.18,
         "width": 2.5,
         "z": [
           119.38,
@@ -775,7 +775,7 @@
       "unit": "mm",
       "conf": "photo",
       "src": "COMMONS-SI-UTHMAN, MITS_Altair_8800_microcomputer_-_Computer_History_Museum.jpg, MFE-SN220081K-PHOTOS #01; DOUGLAS-LID-2026; a review of the reference photos, 2026-10-30 (docs/3d-model.md, fidelity review)",
-      "note": "a band of vertical slits along each side of the lid, about 4.7 to 6.6 in up (1.9 in long), from about 1 in behind the lid's front edge nearly to its back; about 46 to 47 counted along the band in Mike Douglas's photo of an underside, seen at a steep angle"
+      "note": "a band of vertical slits along each side of the lid, about 4.7 to 6.6 in up (1.9 in long), from about 1 in behind the lid's front edge nearly to its back; 46 counted along the band in Mike Douglas's photo of an underside"
     },
     "side_trim": {
       "v": {"height": 6.25, "metal": 1.6, "foot": 1.6, "leg": 14.0},
