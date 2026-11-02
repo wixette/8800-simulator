@@ -74,6 +74,34 @@ def build_case_bottom(p, col, root, b):
     return mb   # the bezel is added by build_panel, then the node is built
 
 
+def build_lid_rear(p, mb, b):
+    """The lid's back: a hem folded forward, a flange down from it onto the back panel, the sides' rear hems."""
+    t = b.t
+    fl, sh, sc = p.v("case.lid_flange"), p.v("case.lid_flange_shape"), p.v("case.lid_screw")
+    inner = b.lid_x - t
+    # the hem runs from the back edge forward to the flange, which lies on the recessed back panel's outer face
+    y0, y1 = b.back_out + 0.1, b.back_out + 0.1 + t
+    mb.prism(geom.rect(-inner, y0, inner, b.back), "XY", b.H - 2 * t, b.H - t, "case_grey")
+    # the flange, with its notch in the lower edge at +X
+    x = b.lid_x - sh["end_from_edge"]
+    z0, z1 = b.H - fl["height"], b.H - 2 * t
+    nx, nw, nd = b.lid_x - sh["notch_from_edge"], sh["notch_width"], sh["notch_depth"]
+    outline = [(-x, z0), (nx - nw / 2, z0), (nx - nw / 2, z0 + nd), (nx + nw / 2, z0 + nd), (nx + nw / 2, z0), (x, z0), (x, z1), (-x, z1)]
+    mb.prism(outline, "XZ", y0, y1, "case_grey")
+    # the two screw heads, in the lid since it comes off in one piece
+    for sx in (-1, 1):
+        mb.prism([(sx * (b.lid_x - fl["screw_from_edge"]) + u, screw_z(b, fl) + w) for u, w in geom.circle(sc["head_diameter"] / 2, 16)],
+                 "XZ", y1, y1 + sc["head_height"], "tin", smooth=True)
+        # the sides' rear hems, folded inward against the sides
+        x0, x1 = sorted((sx * inner, sx * (inner - t)))
+        mb.prism(geom.rect(x0, b.back - sh["side_hem"], x1, b.back), "XY", b.skirt, b.H - 2 * t, "case_grey")
+
+
+def screw_z(b, fl):
+    """The height of the lid's two rear screws: halfway down the flange."""
+    return b.H - fl["height"] / 2
+
+
 def build_lid(p, col, root, b):
     t = b.t
     lv = p.v("case.louvres")
@@ -86,6 +114,7 @@ def build_lid(p, col, root, b):
         skirt.prism(geom.rect(b.lid_front, b.skirt, b.back, b.H - t), "YZ", x0, x1, "case_grey")
         verts, faces = bl.cut_holes(skirt, [], "YZ", x0, x1, col, polys=slots)
         mb.add_mesh_data(verts, faces, bl.Matrix.Identity(4), "case_grey")
+    build_lid_rear(p, mb, b)
     lid = mb.build("case.top", col)
     bl.set_labels(lid, "Case top (the lid), louvred: comes off backwards, then up")
     finish_unit(p, lid, "case.top")
@@ -149,7 +178,7 @@ def build_chassis(p, col, root, b):
         hs = [(hx, b.back_in - holes["first_from_back"] - k * holes["pitch"], holes["diameter"] / 2) for k in range(holes["count"])]
         verts, faces = bl.cut_holes(f, hs, "XY", b.ch_bottom, b.ch_bottom + mt, col, segments=12)
         mb.add_mesh_data(verts, faces, bl.Matrix.Identity(4), "aluminium_anodised")
-        # the side trim: bolted down the web, out under the lid's edge and up outside it, on the tray's lip
+        # the side trim: bolted down the web, out under the lid's edge and up outside it, directly on the tray's lip
         tr = p.v("case.side_trim")
         z0, z1, foot = b.tray_wall + 0.1, b.tray_wall + 0.1 + tr["height"], b.tray_wall + 0.1 + tr["foot"]
         out, m = b.W / 2 + 0.1, tr["metal"]
@@ -167,6 +196,9 @@ def build_chassis(p, col, root, b):
     cutouts = [d_shape(c["x"], c["z"], io) for c in cuts]
     holes = [(fan["x"], fan["z"], fan["diameter"] / 2), (cord["x"], cord["z"], cord["diameter"] / 2)]
     holes += [(c["x"] + sx * io["screw_spacing"] / 2, c["z"], io["screw_diameter"] / 2) for c in cuts for sx in (-1, 1)]
+    # the two holes the lid's rear screws go into
+    fl = p.v("case.lid_flange")
+    holes += [(sx * (b.lid_x - fl["screw_from_edge"]), screw_z(b, fl), p.v("case.lid_screw")["hole_diameter"] / 2) for sx in (-1, 1)]
     verts, faces = bl.cut_holes(back, holes, "XZ", b.back_in, b.back_out, col, polys=cutouts)
     mb.add_mesh_data(verts, faces, bl.Matrix.Identity(4), "aluminium_anodised")
     # the mesh screens on the panel's inside: a square one over the fan opening, one behind the DB-25s
