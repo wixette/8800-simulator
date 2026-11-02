@@ -416,7 +416,7 @@ All on branch `v1.8.3`. It takes in [Mike Douglas's answers](#mike-douglass-answ
 | L4 | **Words.** This document, the bibliography, the research notes | `npm test` |
 | L5 | **Release review.** The full chain, README screenshots, `npm version 1.8.3`, PR to `master` | Your manual check and OK |
 
-**Done:** L1 to L4. L5 waits for your manual check.
+**Done:** L1 to L5, released as v1.8.3. Whether a bracket's size is its strap's length by its width, and the terminal block's height, stay unanswered, and were judged not to matter to anyone using the page.
 
 ## Licences
 
