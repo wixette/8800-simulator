@@ -18,6 +18,7 @@
  * panel namespace, which js/panel.js declares (see there).
  */
 
+import {CPU8080} from './8080.js';
 import {l10n} from './l10n.js';
 import {panel} from './panel.js';
 import {Sim8800} from './sim8800.js';
@@ -73,6 +74,18 @@ panel.debugControlReasons = function() {
     reasons['debug-fill-zero'] = on ? null : {id: 'zero-mem-off', params: {}};
     // A machine that is off has nothing in it to link to.
     reasons['copy-link'] = on ? null : {id: 'copy-link-off', params: {}};
+    // Step and Run to act on a stopped machine only, as SINGLE STEP
+    // does (#28).
+    ['debug-step', 'debug-run-to'].forEach(function(id) {
+        if (!on) {
+            reasons[id] = {id: 'debug-step-off', params: {}};
+        } else if (panel.sim.isRunning) {
+            reasons[id] = {id: 'debug-running',
+                           params: {name: l10n.getMessage(id)}};
+        } else {
+            reasons[id] = null;
+        }
+    });
     return reasons;
 };
 
@@ -104,6 +117,104 @@ panel.updateDebugControls = function() {
             elem.classList.toggle('disabled', !!reasons[id]);
         }
     }
+};
+
+/**
+ * The most instructions one press of Step runs: as many as fit its box.
+ * @type {number}
+ */
+panel.MAX_STEP_COUNT = 99999;
+
+/**
+ * When Step is pressed: runs the number of instructions in the box next
+ * to it, as that many presses of SINGLE STEP would (#28), and says how
+ * many ran and where the program counter is now.
+ */
+panel.onStepMany = function() {
+    if (panel.reportIfUnavailable('debug-step')) {
+        return;
+    }
+    var field = document.getElementById('debug-step-count');
+    var text = field.value.trim();
+    var count = /^[0-9]{1,5}$/.test(text) ? parseInt(text, 10) : 0;
+    if (count < 1 || count > panel.MAX_STEP_COUNT) {
+        panel.setStatus('step-count-bad', {}, 'warn');
+        return;
+    }
+    field.value = String(count);
+    var wasHalted = panel.sim.halted;
+    var ran = panel.sim.stepMany(count);
+    panel.followPc(true);
+    if (panel.sim.halted) {
+        // Already halted, nothing ran: the same as SINGLE STEP says.
+        if (wasHalted && !ran) {
+            panel.setStatus('status-halted');
+        } else {
+            panel.setStatus('status-stepped-halted', {count: ran});
+        }
+    } else if (panel.sim.blockedWrites) {
+        var blocked = panel.blockedParams();
+        panel.setStatus('status-stepped-blocked',
+                        {count: ran, blocked: blocked.count,
+                         address: blocked.address}, 'warn');
+    } else {
+        panel.setStatus('status-stepped',
+                        {count: ran,
+                         pc: Sim8800.toHex(CPU8080.status().pc, 4)});
+    }
+};
+
+/**
+ * When Run to is pressed: runs the program until the program counter
+ * reaches the address in the box next to it (#28). STOP, or a HLT,
+ * ends it sooner.
+ */
+panel.onRunTo = function() {
+    if (panel.reportIfUnavailable('debug-run-to')) {
+        return;
+    }
+    var field = document.getElementById('debug-run-to-address');
+    var text = field.value.trim();
+    if (!/^[0-9a-f]{1,4}$/i.test(text)) {
+        panel.setStatus('run-to-bad', {}, 'warn');
+        return;
+    }
+    var address = parseInt(text, 16);
+    field.value = Sim8800.toHex(address, 4);
+    // A running machine is not edited, as with RUN.
+    panel.clearMemSelection();
+    panel.sim.runTo(address);
+    panel.setStatus('status-running-to',
+                    {address: Sim8800.toHex(address, 4)});
+};
+
+/**
+ * When a run started by Run to gets to its address.
+ * @param {number} address Where it stopped.
+ */
+panel.onBreak = function(address) {
+    panel.followPc(true);
+    panel.setStatus('status-reached', {address: Sim8800.toHex(address, 4)});
+};
+
+/**
+ * Lets Step and Run to be pressed, and Enter in either box press its
+ * button.
+ */
+panel.initStepTools = function() {
+    [['debug-step', 'debug-step-count', panel.onStepMany],
+     ['debug-run-to', 'debug-run-to-address', panel.onRunTo]].forEach(
+        function(tool) {
+            panel.makePressable(document.getElementById(tool[0]), tool[2]);
+            document.getElementById(tool[1]).addEventListener(
+                'keydown', function(event) {
+                    if (event.key == 'Enter') {
+                        event.preventDefault();
+                        tool[2]();
+                    }
+                }, false);
+        });
+    panel.sim.onBreak = panel.onBreak;
 };
 
 /**

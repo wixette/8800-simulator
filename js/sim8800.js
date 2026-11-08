@@ -69,6 +69,22 @@ export class Sim8800 {
          * @type {boolean}
          */
         this.halted = false;
+        /**
+         * Where a run started by runTo() stops, or null. Tooling the
+         * real machine never had, for the Debugger's Run to (#28).
+         * @type {?number}
+         */
+        this.breakAt = null;
+        /**
+         * Called when a run started by runTo() stops at its address.
+         * @type {?function(number): void}
+         */
+        this.onBreak = null;
+        /**
+         * How many instructions the last step() ran to the end.
+         * @type {number}
+         */
+        this.lastStepCount = 0;
         this.lastAddress = 0;
         /**
          * The address on the bus, as the address lamps show it while
@@ -961,6 +977,8 @@ export class Sim8800 {
             return;
         var wasRunning = this.isRunning;
         this.isRunning = false;
+        // Any stop ends a Run to: STOP, a HLT, or the address itself.
+        this.breakAt = null;
         if (this.setWaitLedCallback) {
             this.setWaitLedCallback(this.isRunning);
         }
@@ -1007,11 +1025,13 @@ export class Sim8800 {
     }
 
     /**
-     * Runs a given number of CPU cycles.
+     * Runs a given number of CPU cycles, or instructions.
      * @param {number} cycles The number of CPU cycles to step on.
+     * @param {number=} maxInstructions Stops after this many
+     *     instructions, however few cycles they took.
      * @return {number|undefined} The address shown on the address LEDs.
      */
-    step(cycles) {
+    step(cycles, maxInstructions = Infinity) {
         if (!this.isPoweredOn)
             return;
         // Single stepping counts as taking the lamps over too.
@@ -1024,7 +1044,8 @@ export class Sim8800 {
         // https://github.com/wixette/8800-simulator/issues/1
         var ldaxAddress = null;
         var executed = 0;
-        while (executed < cycles) {
+        var instructions = 0;
+        while (executed < cycles && instructions < maxInstructions) {
             let cpu = CPU8080.status();
             let opcode = this.readByte(cpu.pc);
             let before = CPU8080.T();
@@ -1040,6 +1061,12 @@ export class Sim8800 {
                 this.halt();
                 break;
             }
+            instructions++;
+            // Stepped, the lamps show the last instruction's address
+            // only; running, the last LDAX of the batch, as before.
+            if (maxInstructions !== Infinity) {
+                ldaxAddress = null;
+            }
             if (opcode == 0x0a) {
                 /* LDAX B */
                 ldaxAddress = (cpu.b << 8) | cpu.c;
@@ -1054,7 +1081,19 @@ export class Sim8800 {
                 this.halt();
                 break;
             }
+            if (this.breakAt != null && CPU8080.status().pc == this.breakAt) {
+                // Run to: the program counter has got there. Checked
+                // after an instruction, so that a run to where the PC
+                // already is goes round once rather than not at all.
+                var reached = this.breakAt;
+                this.stop();
+                if (this.onBreak) {
+                    this.onBreak(reached);
+                }
+                break;
+            }
         }
+        this.lastStepCount = instructions;
         this.requestDump();
         var address = ldaxAddress != null ? ldaxAddress : CPU8080.status().pc;
         this.busAddress = address;
@@ -1081,15 +1120,49 @@ export class Sim8800 {
             return null;
         if (!this.isPoweredOn)
             return;
+        this.stepMany(1);
+    }
+
+    /**
+     * Runs a number of instructions at once, as that many presses of
+     * SINGLE STEP would, for the Debugger's Step (#28). Stops early on
+     * a HLT. The lamps, the dumps and the data LEDs are brought up to
+     * date once, at the end, as after the last press.
+     * @param {number} count How many instructions, at least one.
+     * @return {?number} How many instructions ran to the end; null if
+     *     the machine is off or running, when nothing is done.
+     */
+    stepMany(count) {
+        // Like the real panel, only a stopped machine takes it.
+        if (this.isRunning || !this.isPoweredOn)
+            return null;
         // Each step is a run of its own, so a write it makes to
         // protected memory is reported every time.
         this.clearBlockedWrites();
         // Switched on, so step() gives the address it stopped at.
-        var address = /** @type {number} */ (this.step(1));
+        var address = /** @type {number} */ (
+            this.step(Infinity, Math.max(1, Math.floor(count))));
         if (this.setDataLedsCallback) {
             this.setDataLedsCallback(
                 Sim8800.parseBits(this.readByte(address), 8));
         }
+        return this.lastStepCount;
+    }
+
+    /**
+     * Runs the program, as RUN does, until the program counter reaches
+     * an address, for the Debugger's Run to (#28). STOP or a HLT ends
+     * it sooner. onBreak is called if it gets there.
+     * @param {number} address Where to stop.
+     * @return {boolean} Whether it started: not if the machine is off
+     *     or already running.
+     */
+    runTo(address) {
+        if (this.isRunning || !this.isPoweredOn)
+            return false;
+        this.start();
+        this.breakAt = address & 0xffff;
+        return true;
     }
 
     /**

@@ -233,7 +233,11 @@ dock shrinks the panel, keeping its shape, rather than pushing it off
 the top of the screen. The dock is kept to what leaves the panel at
 least 160 px, on top of the Switch Board Helper when that is showing.
 On a phone the panel takes the height its width gives it and the dock
-the rest, with no handle to drag (P9).
+the rest, with no handle to drag (P9) - but never less than 30% of the
+height (#29): the 3D view, which can be drawn at any shape, gives way
+first, down to 140 px. The Switch Board Helper packs down there too:
+the longer names shortened (STEP, EXAM, DEP, NEXT), and the address
+switches a byte to a row, A15-A8 over A7-A0.
 
 ---
 
@@ -406,7 +410,11 @@ button at all; the panel's levers answer that on the status line.
   instruction, side by side and the same height, stacked in a narrow
   dock - and memory under them, the whole width, with its toolbar on
   one line and Zero All Memory kept apart at the far right. The flags
-  are shown by letter, S Z AC P CY, each lit when set.
+  are shown by letter, S Z AC P CY, each lit when set. Step and Run to
+  (#28) sit on the foot of the next instruction's box, which they act
+  on, rather than on the Switch Board Helper, which stays the panel's
+  own switches and nothing else; each button has its box beside it,
+  and a narrow row breaks between the two pairs, never inside one.
 - **Editing a byte (#14):** typed over in place, as in a hex editor,
   rather than in an edit box: click a byte, and two hex digits write
   it whole and pick the next, the rhythm of DEPOSIT NEXT. The picked

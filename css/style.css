@@ -974,6 +974,12 @@ a {
     padding: 2px 4px;
 }
 
+/* A name with a shorter form for a phone (#29): the full one
+   elsewhere. */
+.label-short {
+    display: none;
+}
+
 /* Between A08 and A07: the line the panel draws between the high byte
    and the low. */
 .byte-divider {
@@ -1174,6 +1180,62 @@ a {
 .debug-box > #instr-pane {
     box-sizing: border-box;
     flex: 1;
+}
+
+/* Step and Run to (#28), on the foot of the box of the instruction
+   they act on: the pane gives up its rounded bottom to them, and they
+   sit on a darker strip of its grey, so that the two read as one box.
+   Each button keeps its box beside it; a row too narrow for both
+   breaks between them, never inside one. */
+.debug-box > #instr-pane {
+    border-radius: 10px 10px 0 0;
+}
+
+.instr-tools {
+    align-items: center;
+    background-color: #b4b4b4;
+    border-radius: 0 0 10px 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    padding: 6px 10px;
+}
+
+.instr-tool {
+    align-items: center;
+    display: flex;
+    gap: 4px;
+}
+
+.debug-field {
+    background-color: #eee;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    box-sizing: content-box;
+    color: #222;
+    font-size: 14px;
+    height: 2em;
+    padding: 2px 8px;
+    text-align: right;
+    /* Wide enough for its most digits: five for a count, four for an
+       address. */
+    width: 5.2ch;
+}
+
+#debug-run-to-address {
+    text-align: left;
+    text-transform: uppercase;
+    width: 4.2ch;
+}
+
+#debug-run-to-address::placeholder {
+    color: #999;
+    text-transform: none;
+}
+
+.debug-field:focus-visible {
+    border-color: #f90;
+    outline: none;
 }
 
 /* The dump's own toolbar: one row, on one baseline, with the one
@@ -2335,12 +2397,103 @@ a {
         height: auto;
     }
 
+    /* The stage gives way before the dock does (#29): it may shrink,
+       and the dock keeps a floor of its own, so that a tall 3D view,
+       the switch strip and a two-line status message cannot leave the
+       open tab no room at all. */
+    #stage {
+        flex: 0 1 auto;
+        min-height: 0;
+    }
+
     /* The 3D view has no shape of its own to keep: on a phone it takes
-       a near-square of the width, as the panel takes its own shape. */
+       a near-square of the width, as the panel takes its own shape -
+       but it is the one part of the stage that shrinks, since the
+       camera draws the machine at any shape, which the panel's
+       artwork cannot. */
     #stage3d {
         aspect-ratio: 5 / 4;
-        flex: none;
-        max-height: 55vh;
+        flex: 0 1 auto;
+        min-height: 140px;
+    }
+
+    /* The switch strip, packed down (#29). The longer names shortened;
+       the full ones stay, out of sight, for a screen reader. */
+    .label-short {
+        display: inline;
+    }
+
+    .label-long {
+        clip-path: inset(50%);
+        height: 1px;
+        overflow: hidden;
+        position: absolute;
+        white-space: nowrap;
+        width: 1px;
+    }
+
+    .strip-body {
+        padding: 6px 8px;
+    }
+
+    .strip-row {
+        gap: 6px 8px;
+    }
+
+    .strip-row + .strip-row {
+        margin-top: 6px;
+    }
+
+    .strip-body .button {
+        min-width: 0;
+        padding: 2px 7px;
+    }
+
+    .strip-body .button.power-button {
+        padding: 2px 10px;
+    }
+
+    /* The address switches a byte to a row, A15-A8 over A7-A0: the
+       line between the bytes becomes the break between the rows. Each
+       row as wide as the strip, every switch the same width, for the
+       largest thumb target the width allows. */
+    .strip-address .byte-divider {
+        flex-basis: 100%;
+        height: 0;
+        visibility: hidden;
+    }
+
+    .strip-address {
+        gap: 6px 8px;
+    }
+
+    .strip-address .octal {
+        flex: 1 1 0;
+    }
+
+    .strip-address .octal:has(> :nth-child(2)) {
+        flex-grow: 2;
+    }
+
+    .strip-address .octal:has(> :nth-child(3)) {
+        flex-grow: 3;
+    }
+
+    .strip-address .octal .button {
+        flex: 1 1 0;
+        padding: 2px 0;
+    }
+
+    /* The fold tab is small to look at, but takes a thumb: its hit area
+       reaches past its edges, with no room taken from the page. */
+    .strip-tab {
+        position: relative;
+    }
+
+    .strip-tab::after {
+        content: '';
+        inset: -10px -16px -4px;
+        position: absolute;
     }
 
     #view-tools {
@@ -2354,10 +2507,13 @@ a {
     #dock {
         flex: 1 1 0;
         height: auto;
+        min-height: 30vh;
+        min-height: 30dvh;
     }
 
     .dock-closed #dock {
         flex: none;
+        min-height: 0;
     }
 
     /* Five tabs across a phone: the icons alone. The names stay for

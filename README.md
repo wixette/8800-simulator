@@ -184,6 +184,11 @@ program with SINGLE STEP and watch it work:
 - **The next instruction**: its address, its bytes, its mnemonic with
   the operand named as instruction tables name it (`LDA a16`,
   `MVI B,d8`), and the operand's value this time.
+- **Step and Run to**, under the next instruction: **Step** runs as
+  many instructions as its box says, as that many presses of SINGLE
+  STEP would, stopping early on a HLT; **Run to** runs the program
+  until the program counter reaches the hex address in its box. STOP
+  ends it sooner.
 - **The memory dump**, one 256-byte page at a time, with the
   instruction at the program counter marked. With more than 256 bytes
   installed, a map strip above it shows every page, shaded by how full

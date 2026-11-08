@@ -248,3 +248,30 @@ export async function switches(h) {
     verify('examine: its lower half throws it down, to EXAMINE NEXT', (await throwOf('examine', 'lower')) == 'down');
     verify('examine: and its upper half up', (await throwOf('examine', 'upper')) == 'up');
 }
+
+/**
+ * On a phone the open tab always has room (#29): the 3D view gives way
+ * before the dock does, and the switch strip is packed down, a byte of
+ * address switches to a row.
+ */
+export async function phoneDock(h) {
+    const {js, viewport, fresh, press, verify, sleep} = h;
+    const sizes = {};
+    for (const [w, ht] of [[375, 667], [360, 640]]) {
+        await viewport(w, ht); await fresh();
+        await js(`panel.onPowerOn()`); await sleep(200);
+        await js(`panel.showTab('debug')`); await sleep(200);
+        await press('#view-3d'); await sleep(2500);
+        // A two-line message, as the 3D view's own first one is.
+        await js(`panel.setStatus('status-reached', {address: 'A long message that needs a second line on a phone, 0010'})`); await sleep(150);
+        const r = await js(`(() => { const d = document.getElementById('dock').getBoundingClientRect(), v = document.getElementById('stage3d').getBoundingClientRect(),
+            body = document.getElementById('dock-body'), s = (id) => Math.round(document.getElementById(id).getBoundingClientRect().top);
+            return {dock: Math.round(d.height), view: Math.round(v.height), shown: body.clientHeight - parseFloat(getComputedStyle(body).paddingBottom),
+                    high: s('s-s15') === s('s-s8'), split: s('s-s7') > s('s-s8'), low: s('s-s7') === s('s-s0'), strip: Math.round(document.getElementById('switch-strip').getBoundingClientRect().height)}; })()`);
+        sizes[w] = r;
+        verify(`at ${w}x${ht} in 3D the dock keeps at least 30% of the height`, r.dock >= Math.floor(ht * 0.3), JSON.stringify(r));
+        verify(`  and shows over 100 px of the open tab under a two-line status`, r.shown > 100, JSON.stringify(r));
+        verify(`  the 3D view shrinks, but no smaller than 140 px`, r.view >= 140 && r.view < (w - 12) * 0.8, JSON.stringify(r));
+        verify(`  A15-A8 on one row, A7-A0 on the next`, r.high && r.split && r.low, JSON.stringify(r));
+    }
+}

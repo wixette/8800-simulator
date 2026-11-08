@@ -86,6 +86,8 @@ panel.TOOLTIPS = {
     'load-button': 'load-menu',
     'dock-splitter': 'splitter-label',
     'mem-page-prev': 'mem-page-prev-title',
+    'debug-step-count': 'debug-step-count-title',
+    'debug-run-to-address': 'debug-run-to-address-title',
     'mem-page-next': 'mem-page-next-title',
     'share-button': 'share-menu',
     'switch-locale': 'language-menu',
@@ -553,6 +555,7 @@ panel.init = function() {
         'click', function() { panel.onMemPage(1); }, false);
     document.getElementById('mem-follow-pc').addEventListener(
         'click', panel.onToggleFollowPc, false);
+    panel.initStepTools();
     // One listener on the strip rather than one per cell, so that
     // cells can come and go when the memory size changes.
     document.getElementById('mem-map').addEventListener(

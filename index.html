@@ -233,7 +233,9 @@
              the command switches by lever, the address switches in the
              octal groups of the silkscreen, parted between the high
              byte and the low as the panel parts them. Shown unless folded away,
-             from the tab on its own top edge. -->
+             from the tab on its own top edge. On a phone the longer
+             names are shortened, and the address switches go in two
+             rows, a byte each (#29). -->
         <div id="switch-strip">
           <div id="strip-tab" class="strip-tab" role="button" tabindex="0"
                aria-controls="switch-helper" aria-expanded="true">
@@ -243,11 +245,11 @@
             <div class="strip-row">
               <div class="lever"><div id="s-off-on" class="button power-button">OFF/ON</div></div>
               <div class="lever pair"><div id="s-sw-stop" class="button">STOP</div><div id="s-sw-run" class="button">RUN</div></div>
-              <div class="lever"><div id="s-sw-single" class="button">SINGLE STEP</div></div>
-              <div class="lever pair"><div id="s-sw-examine" class="button">EXAMINE</div><div id="s-sw-examine-next" class="button">EXAMINE-NEXT</div></div>
-              <div class="lever pair"><div id="s-sw-deposit" class="button">DEPOSIT</div><div id="s-sw-deposit-next" class="button">DEPOSIT-NEXT</div></div>
+              <div class="lever"><div id="s-sw-single" class="button"><span class="label-long">SINGLE STEP</span><span class="label-short" aria-hidden="true">STEP</span></div></div>
+              <div class="lever pair"><div id="s-sw-examine" class="button"><span class="label-long">EXAMINE</span><span class="label-short" aria-hidden="true">EXAM</span></div><div id="s-sw-examine-next" class="button"><span class="label-long">EXAMINE-NEXT</span><span class="label-short" aria-hidden="true">NEXT</span></div></div>
+              <div class="lever pair"><div id="s-sw-deposit" class="button"><span class="label-long">DEPOSIT</span><span class="label-short" aria-hidden="true">DEP</span></div><div id="s-sw-deposit-next" class="button"><span class="label-long">DEPOSIT-NEXT</span><span class="label-short" aria-hidden="true">NEXT</span></div></div>
               <div class="lever pair"><div id="s-sw-reset" class="button">RESET</div><div id="s-sw-clr" class="button">CLR</div></div>
-              <div class="lever pair strip-protect"><div id="s-sw-protect" class="button">PROTECT</div><div id="s-sw-unprotect" class="button">UNPROTECT</div></div>
+              <div class="lever pair strip-protect"><div id="s-sw-protect" class="button"><span class="label-long">PROTECT</span><span class="label-short" aria-hidden="true">PROT</span></div><div id="s-sw-unprotect" class="button"><span class="label-long">UNPROTECT</span><span class="label-short" aria-hidden="true">UNPROT</span></div></div>
             </div>
             <div class="strip-row strip-address">
               <div class="octal"><div id="s-s15" class="button">A15</div></div>
@@ -363,6 +365,22 @@
               <div class="debug-box">
                 <div id="instr-title" class="section-label l10n">Next Instruction</div>
                 <div id="instr-pane"></div>
+                <!-- Under the instruction they act on: step through that
+                     many, or run until the PC gets somewhere (#28). -->
+                <div class="instr-tools">
+                  <div class="instr-tool">
+                    <div id="debug-step" class="button l10n" role="button">Step</div>
+                    <input id="debug-step-count" class="debug-field" type="text"
+                           inputmode="numeric" maxlength="5" value="10"
+                           autocomplete="off" autocorrect="off" spellcheck="false">
+                  </div>
+                  <div class="instr-tool">
+                    <div id="debug-run-to" class="button l10n" role="button">Run to</div>
+                    <input id="debug-run-to-address" class="debug-field" type="text"
+                           maxlength="4" placeholder="0000" autocapitalize="characters"
+                           autocomplete="off" autocorrect="off" spellcheck="false">
+                  </div>
+                </div>
               </div>
             </div>
             <div class="mem-toolbar">

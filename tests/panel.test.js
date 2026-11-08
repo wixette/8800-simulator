@@ -206,10 +206,12 @@ function buttonsIn(regionId) {
     const end = rest.length ? Math.min(...rest) : html.length;
     const chunk = html.slice(start, end);
     const found = [];
+    // A label may be in spans, a long and a short form (#29); each is
+    // read, so both must keep the rule.
     const button =
-          /<div id="([^"]+)" class="([^"]*\bbutton\b[^"]*)"[^>]*>([^<]*)<\/div>/g;
+          /<div id="([^"]+)" class="([^"]*\bbutton\b[^"]*)"[^>]*>((?:[^<]|<span[^>]*>[^<]*<\/span>)*)<\/div>/g;
     for (const m of chunk.matchAll(button)) {
-        const text = m[3].trim();
+        const text = m[3].replace(/<[^>]*>/g, ' ').trim();
         if (!text || text.startsWith('&#')) {
             continue;  // A glyph, with no case to have.
         }
@@ -574,6 +576,7 @@ test('stopping after writes to protected memory says how many were refused', (t)
     t.after(() => { panel.sim = savedSim; panel.isPoweredOn = savedOn; });
     t.mock.method(panel, 'setStatus', (...args) => said.push(args));
     t.mock.method(panel, 'setLed', () => {});
+    t.mock.method(panel, 'updateDebugControls', () => {});
     t.mock.method(asmtab, 'requestPc', () => {});
     panel.sim = {blockedWrites: 3412, firstBlockedAddress: 0x0123,
                  halted: false, stop() {}};
