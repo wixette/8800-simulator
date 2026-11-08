@@ -386,6 +386,102 @@ test('singleStep is a no-op while powered off', () => {
     assert.strictEqual(state.dataLeds, null);
 });
 
+test('stepMany runs that many instructions, as that many SINGLE STEPs (#28)', () => {
+    const {sim, state} = poweredOnSim();
+    sim.loadDataAsHexString(0, '00 00 00 3e 42 00 76');  // NOPs, MVI A,42h, NOP, HLT
+    assert.strictEqual(sim.stepMany(3), 3);
+    assert.strictEqual(CPU8080.status().pc, 3);
+    assert.strictEqual(bitsToNumber(state.addressLeds), 3);
+    assert.strictEqual(bitsToNumber(state.dataLeds), 0x3e, 'the next opcode');
+    assert.strictEqual(sim.stepMany(1), 1);
+    assert.strictEqual(CPU8080.status().a, 0x42);
+    assert.strictEqual(CPU8080.status().pc, 5);
+});
+
+test('stepMany stops early on a HLT, and counts only what ran', () => {
+    const {sim} = poweredOnSim();
+    sim.loadDataAsHexString(0, '00 00 76 00');  // NOP, NOP, HLT
+    assert.strictEqual(sim.stepMany(100), 3);
+    assert.strictEqual(sim.halted, true);
+    assert.strictEqual(sim.stepMany(100), 0, 'a halted CPU runs nothing');
+});
+
+test('stepMany shows the last instruction\'s LDAX only, not an earlier one', () => {
+    const {sim, state} = poweredOnSim();
+    sim.loadDataAsHexString(0, '11 34 12 1a 00');  // LXI D,1234h; LDAX D; NOP
+    sim.stepMany(2);
+    assert.strictEqual(bitsToNumber(state.addressLeds), 0x1234, 'ended on LDAX');
+    sim.reset();
+    sim.stepMany(3);
+    assert.strictEqual(bitsToNumber(state.addressLeds), 5, 'ended on the NOP');
+});
+
+test('stepMany does nothing while off or running', () => {
+    const {sim} = createSim();
+    assert.strictEqual(sim.stepMany(5), null);
+    sim.powerOn();
+    flushTimers();
+    sim.start();
+    assert.strictEqual(sim.stepMany(5), null);
+    sim.stop();
+});
+
+test('runTo runs until the program counter gets there (#28)', () => {
+    const {sim} = poweredOnSim();
+    // A loop at 0000-0002, a way out of it never taken; 0010 is reached
+    // by counting B down from 3.
+    sim.loadDataAsHexString(0, '06 03 05 c2 02 00 c3 10 00');
+    sim.loadDataAsHexString(0x10, '00 c3 10 00');
+    let reached = null;
+    sim.onBreak = (address) => { reached = address; };
+    assert.strictEqual(sim.runTo(0x0010), true);
+    assert.strictEqual(sim.isRunning, true);
+    sim.step(10000);
+    assert.strictEqual(reached, 0x0010);
+    assert.strictEqual(sim.isRunning, false, 'it stopped there');
+    assert.strictEqual(CPU8080.status().pc, 0x0010);
+    assert.strictEqual(sim.breakAt, null);
+});
+
+test('runTo to where the PC already is goes round once', () => {
+    const {sim} = poweredOnSim();
+    sim.loadDataAsHexString(0, '00 c3 00 00');  // NOP; JMP 0000h
+    let reached = null;
+    sim.onBreak = (address) => { reached = address; };
+    sim.runTo(0);
+    sim.step(10000);
+    assert.strictEqual(reached, 0);
+    assert.strictEqual(sim.lastStepCount, 2, 'the NOP and the JMP');
+});
+
+test('STOP or a HLT ends a runTo, which is then forgotten', () => {
+    const {sim} = poweredOnSim();
+    sim.loadDataAsHexString(0, '00 00 76');
+    let reached = null;
+    sim.onBreak = (address) => { reached = address; };
+    sim.runTo(0x0100);
+    sim.step(10000);
+    assert.strictEqual(sim.halted, true);
+    assert.strictEqual(reached, null);
+    assert.strictEqual(sim.breakAt, null);
+    sim.reset();
+    sim.loadDataAsHexString(0, 'c3 00 00');
+    sim.runTo(0x0100);
+    sim.stop();
+    assert.strictEqual(sim.breakAt, null);
+    assert.strictEqual(sim.runTo(0x0100), true);
+    assert.strictEqual(sim.runTo(0x0200), false, 'not while running');
+    sim.stop();
+});
+
+test('switching off forgets a runTo, so the next RUN is a plain RUN', () => {
+    const {sim} = poweredOnSim();
+    sim.loadDataAsHexString(0, 'c3 00 00');
+    sim.runTo(0x0100);
+    sim.powerOff();
+    assert.strictEqual(sim.breakAt, null);
+});
+
 test('free-running step leaves the data LEDs to OUT FFh', () => {
     const {sim, state} = poweredOnSim();
     sim.loadDataAsHexString(0, PATTERN_SHIFT);

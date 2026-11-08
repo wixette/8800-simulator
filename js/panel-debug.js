@@ -18,6 +18,7 @@
  * panel namespace, which js/panel.js declares (see there).
  */
 
+import {CPU8080} from './8080.js';
 import {l10n} from './l10n.js';
 import {panel} from './panel.js';
 import {Sim8800} from './sim8800.js';
@@ -73,6 +74,18 @@ panel.debugControlReasons = function() {
     reasons['debug-fill-zero'] = on ? null : {id: 'zero-mem-off', params: {}};
     // A machine that is off has nothing in it to link to.
     reasons['copy-link'] = on ? null : {id: 'copy-link-off', params: {}};
+    // Step and Run to act on a stopped machine only, as SINGLE STEP
+    // does (#28).
+    ['debug-step', 'debug-run-to'].forEach(function(id) {
+        if (!on) {
+            reasons[id] = {id: 'debug-step-off', params: {}};
+        } else if (panel.sim.isRunning) {
+            reasons[id] = {id: 'debug-running',
+                           params: {name: l10n.getMessage(id)}};
+        } else {
+            reasons[id] = null;
+        }
+    });
     return reasons;
 };
 
@@ -104,6 +117,104 @@ panel.updateDebugControls = function() {
             elem.classList.toggle('disabled', !!reasons[id]);
         }
     }
+};
+
+/**
+ * The most instructions one press of Step runs: as many as fit its box.
+ * @type {number}
+ */
+panel.MAX_STEP_COUNT = 99999;
+
+/**
+ * When Step is pressed: runs the number of instructions in the box next
+ * to it, as that many presses of SINGLE STEP would (#28), and says how
+ * many ran and where the program counter is now.
+ */
+panel.onStepMany = function() {
+    if (panel.reportIfUnavailable('debug-step')) {
+        return;
+    }
+    var field = document.getElementById('debug-step-count');
+    var text = field.value.trim();
+    var count = /^[0-9]{1,5}$/.test(text) ? parseInt(text, 10) : 0;
+    if (count < 1 || count > panel.MAX_STEP_COUNT) {
+        panel.setStatus('step-count-bad', {}, 'warn');
+        return;
+    }
+    field.value = String(count);
+    var wasHalted = panel.sim.halted;
+    var ran = panel.sim.stepMany(count);
+    panel.followPc(true);
+    if (panel.sim.halted) {
+        // Already halted, nothing ran: the same as SINGLE STEP says.
+        if (wasHalted && !ran) {
+            panel.setStatus('status-halted');
+        } else {
+            panel.setStatus('status-stepped-halted', {count: ran});
+        }
+    } else if (panel.sim.blockedWrites) {
+        var blocked = panel.blockedParams();
+        panel.setStatus('status-stepped-blocked',
+                        {count: ran, blocked: blocked.count,
+                         address: blocked.address}, 'warn');
+    } else {
+        panel.setStatus('status-stepped',
+                        {count: ran,
+                         pc: Sim8800.toHex(CPU8080.status().pc, 4)});
+    }
+};
+
+/**
+ * When Run to is pressed: runs the program until the program counter
+ * reaches the address in the box next to it (#28). STOP, or a HLT,
+ * ends it sooner.
+ */
+panel.onRunTo = function() {
+    if (panel.reportIfUnavailable('debug-run-to')) {
+        return;
+    }
+    var field = document.getElementById('debug-run-to-address');
+    var text = field.value.trim();
+    if (!/^[0-9a-f]{1,4}$/i.test(text)) {
+        panel.setStatus('run-to-bad', {}, 'warn');
+        return;
+    }
+    var address = parseInt(text, 16);
+    field.value = Sim8800.toHex(address, 4);
+    // A running machine is not edited, as with RUN.
+    panel.clearMemSelection();
+    panel.sim.runTo(address);
+    panel.setStatus('status-running-to',
+                    {address: Sim8800.toHex(address, 4)});
+};
+
+/**
+ * When a run started by Run to gets to its address.
+ * @param {number} address Where it stopped.
+ */
+panel.onBreak = function(address) {
+    panel.followPc(true);
+    panel.setStatus('status-reached', {address: Sim8800.toHex(address, 4)});
+};
+
+/**
+ * Lets Step and Run to be pressed, and Enter in either box press its
+ * button.
+ */
+panel.initStepTools = function() {
+    [['debug-step', 'debug-step-count', panel.onStepMany],
+     ['debug-run-to', 'debug-run-to-address', panel.onRunTo]].forEach(
+        function(tool) {
+            panel.makePressable(document.getElementById(tool[0]), tool[2]);
+            document.getElementById(tool[1]).addEventListener(
+                'keydown', function(event) {
+                    if (event.key == 'Enter') {
+                        event.preventDefault();
+                        tool[2]();
+                    }
+                }, false);
+        });
+    panel.sim.onBreak = panel.onBreak;
 };
 
 /**
@@ -429,14 +540,56 @@ panel.renderMemSelection = function() {
  * When CPU dumps the CPU status for debug.
  */
 panel.dumpCpuCallback = function(dumpHtml) {
-    document.getElementById('cpu-dump').innerHTML = dumpHtml;
+    document.getElementById('cpu-dump').innerHTML =
+        dumpHtml || panel.offCpuHtml();
 };
+
+/**
+ * The registers of a machine that is off: laid out as a live one's,
+ * with dashes for values, so that the box keeps its size and switching
+ * the machine on fills it in rather than moving everything below.
+ * @return {string} HTML.
+ */
+panel.offCpuHtml = function() {
+    var flags = ['S', 'Z', 'AC', 'P', 'CY'].map(function(name) {
+        return '<span class="flag">' + name + '</span>';
+    }).join(' ');
+    return '<pre class="dump-off">' +
+        'PC = ----  SP = ----\n' +
+        'A = --  B = --  C = --  D = --\n' +
+        'E = --  F = --  H = --  L = --\n' +
+        'FLAGS ' + flags + '\n</pre>';
+};
+
+/**
+ * The memory dump of a machine that is off: as tall as a page of a
+ * live one, with what to do about it in the middle, as the Teletype's
+ * empty paper says what to do. Redrawn on a change of language.
+ */
+panel.renderMemOff = function() {
+    var elem = document.getElementById('mem-dump');
+    if (elem && panel.memDumpOff) {
+        elem.innerHTML = '<div class="mem-off"><p class="dump-empty"></p></div>';
+        elem.querySelector('p').textContent = l10n.getMessage('mem-dump-off');
+    }
+};
+
+/**
+ * Whether the memory dump is showing a machine that is off.
+ * @type {boolean}
+ */
+panel.memDumpOff = false;
 
 /**
  * When CPU dumps the MEM contents for debug.
  */
 panel.dumpMemCallback = function(dumpHtml, pages, instr) {
-    document.getElementById('mem-dump').innerHTML = dumpHtml;
+    panel.memDumpOff = !dumpHtml;
+    if (panel.memDumpOff) {
+        panel.renderMemOff();
+    } else {
+        document.getElementById('mem-dump').innerHTML = dumpHtml;
+    }
     // The bytes were all replaced, the picked one among them.
     panel.memSelectedElem = null;
     panel.renderMemSelection();
@@ -467,9 +620,9 @@ panel.renderInstrPane = function() {
     if (!elem) {
         return;
     }
-    // Blank while the machine is off, like the dumps.
+    // Dashes while the machine is off, like the registers.
     if (!instr) {
-        elem.textContent = '';
+        elem.innerHTML = '<pre class="dump-off">----</pre>';
         return;
     }
     var hex = instr.bytes.map(function(b) {

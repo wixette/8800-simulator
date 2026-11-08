@@ -248,3 +248,88 @@ export async function switches(h) {
     verify('examine: its lower half throws it down, to EXAMINE NEXT', (await throwOf('examine', 'lower')) == 'down');
     verify('examine: and its upper half up', (await throwOf('examine', 'upper')) == 'up');
 }
+
+/**
+ * On a phone the open tab always has room (#29): the 3D view gives way
+ * before the dock does, and the switch strip is packed down, a byte of
+ * address switches to a row.
+ */
+export async function phoneDock(h) {
+    const {js, viewport, fresh, press, verify, sleep} = h;
+    const sizes = {};
+    for (const [w, ht] of [[375, 667], [360, 640]]) {
+        await viewport(w, ht); await fresh();
+        await js(`panel.onPowerOn()`); await sleep(200);
+        await js(`panel.showTab('debug')`); await sleep(200);
+        await press('#view-3d'); await sleep(2500);
+        // A two-line message, as the 3D view's own first one is.
+        await js(`panel.setStatus('status-reached', {address: 'A long message that needs a second line on a phone, 0010'})`); await sleep(150);
+        const r = await js(`(() => { const d = document.getElementById('dock').getBoundingClientRect(), v = document.getElementById('stage3d').getBoundingClientRect(),
+            body = document.getElementById('dock-body'), s = (id) => Math.round(document.getElementById(id).getBoundingClientRect().top);
+            return {dock: Math.round(d.height), view: Math.round(v.height), shown: body.clientHeight - parseFloat(getComputedStyle(body).paddingBottom),
+                    high: s('s-s15') === s('s-s8'), split: s('s-s7') > s('s-s8'), low: s('s-s7') === s('s-s0'), strip: Math.round(document.getElementById('switch-strip').getBoundingClientRect().height)}; })()`);
+        sizes[w] = r;
+        verify(`at ${w}x${ht} in 3D the dock keeps at least 30% of the height`, r.dock >= Math.floor(ht * 0.3), JSON.stringify(r));
+        verify(`  and shows over 100 px of the open tab under a two-line status`, r.shown > 100, JSON.stringify(r));
+        verify(`  the 3D view shrinks, but no smaller than 140 px`, r.view >= 140 && r.view < (w - 12) * 0.8, JSON.stringify(r));
+        verify(`  A15-A8 on one row, A7-A0 on the next`, r.high && r.split && r.low, JSON.stringify(r));
+    }
+}
+
+/**
+ * On a phone the Teletype's paper fills the open tab, and its keys are
+ * under it, scrolled to: above it, three rows of them left a slit of
+ * paper. Scrolled to the end, the last of them clears a two-line
+ * status message.
+ */
+export async function phoneTeletype(h) {
+    const {js, viewport, fresh, verify, sleep} = h;
+    await viewport(375, 667); await fresh();
+    await js(`panel.showTab('tty')`); await sleep(300);
+    await js(`panel.setStatus('status-reached', {address: 'A long message that needs a second line on a phone, 0010'})`); await sleep(150);
+    const at = () => js(`(() => { const b = (s) => document.querySelector(s).getBoundingClientRect(), body = document.getElementById('dock-body');
+        return {paper: Math.round(b('#tty-paper').height), shown: body.clientHeight, keysTop: Math.round(b('.tty-keys').top), paperBottom: Math.round(b('#tty-paper').bottom),
+                clearBottom: Math.round(b('#tty-clear').bottom), statusTop: Math.round(b('#status-text').top)}; })()`);
+    const r = await at();
+    verify('the paper takes the dock\'s height', r.paper >= r.shown - 40, JSON.stringify(r));
+    verify('and the keys are under it', r.keysTop > r.paperBottom, JSON.stringify(r));
+    await js(`document.getElementById('dock-body').scrollTop = 1e6`); await sleep(150);
+    const e = await at();
+    verify('scrolled to the end, CLEAR PAPER clears the status message', e.clearBottom <= e.statusTop, JSON.stringify(e));
+}
+
+/**
+ * Every tab on a phone, in 2D, off and on (P9, P11): the toolbar on one
+ * row, the whole switch strip above the dock, its buttons a thumb's
+ * size, the page never scrolling sideways, and Step and Run to each
+ * beside its box.
+ */
+export async function phoneSweep(h) {
+    const {js, viewport, fresh, verify, sleep} = h;
+    for (const [w, ht] of [[375, 667], [360, 640]]) {
+        await viewport(w, ht); await fresh();
+        const bad = [];
+        for (const on of [false, true]) {
+            if (on) { await js(`panel.onPowerOn()`); await sleep(200); }
+            for (const tab of ['tty', 'asm', 'debug', 'ref', 'links']) {
+                await js(`panel.showTab('${tab}')`); await sleep(200);
+                const r = await js(`(() => { const b = (s) => document.querySelector(s).getBoundingClientRect();
+                    // One row of 32-34 px controls makes a toolbar under 60 px.
+                    return {page: document.documentElement.scrollWidth, toolbarRows: b('#toolbar').height < 60 ? 1 : 2,
+                            stripBottom: Math.round(b('#switch-strip').bottom), dockTop: Math.round(b('#dock').top)}; })()`);
+                const where = (on ? 'on' : 'off') + ' ' + tab + ': ' + JSON.stringify(r);
+                if (r.page > w) bad.push('scrolls sideways, ' + where);
+                if (r.toolbarRows != 1) bad.push('toolbar wraps, ' + where);
+                if (r.stripBottom > r.dockTop) bad.push('strip under the dock, ' + where);
+            }
+        }
+        verify(`at ${w}x${ht}, every tab off and on: one toolbar row, the strip above the dock, no sideways scroll`, bad.length === 0, bad.join(' | '));
+        const sizes = await js(`(() => { const r = (id) => document.getElementById(id).getBoundingClientRect();
+            return {tall: Math.min(...[...document.querySelectorAll('#switch-helper .button')].filter((e) => e.offsetParent).map((e) => e.getBoundingClientRect().height)),
+                    wide: Math.min(...[...document.querySelectorAll('.strip-address .button')].map((e) => e.getBoundingClientRect().width))}; })()`);
+        verify(`  the strip's buttons at least 30 px tall, the address switches 36 px wide`, sizes.tall >= 30 && sizes.wide >= 36, JSON.stringify(sizes));
+        await js(`panel.showTab('debug')`); await sleep(200);
+        const pairs = await js(`[...document.querySelectorAll('.instr-tool')].map((t) => { const [b, f] = t.children; return Math.abs(b.getBoundingClientRect().top + b.offsetHeight / 2 - f.getBoundingClientRect().top - f.offsetHeight / 2) < 2; })`);
+        verify(`  Step and Run to each beside its box`, pairs.length === 2 && pairs.every(Boolean), JSON.stringify(pairs));
+    }
+}

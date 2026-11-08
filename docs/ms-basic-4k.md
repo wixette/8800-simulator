@@ -1077,6 +1077,9 @@ that without touching the vendored core.
 Minimalist, and consistent with the visual language already in
 `css/style.css`: `#ccc` rounded panels with `#222` monospace text,
 `#666` subheader bars, `#eee` buttons, `#f90` for the selected nav.
+(Since v1.9.0 the panels are dark wells and the buttons Material's;
+the paper alone keeps its own colour. See P11 in
+[ui-design.md](ui-design.md).)
 
 ```
  ┌────────────────────────────────────────────────┐

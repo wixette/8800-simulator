@@ -86,6 +86,8 @@ panel.TOOLTIPS = {
     'load-button': 'load-menu',
     'dock-splitter': 'splitter-label',
     'mem-page-prev': 'mem-page-prev-title',
+    'debug-step-count': 'debug-step-count-title',
+    'debug-run-to-address': 'debug-run-to-address-title',
     'mem-page-next': 'mem-page-next-title',
     'share-button': 'share-menu',
     'switch-locale': 'language-menu',
@@ -533,6 +535,7 @@ panel.init = function() {
         panel.refreshStatus();
         panel.refreshPlaceholders();
         panel.renderInstrPane();
+        panel.renderMemOff();
         panel.refreshDockToggle();
         panel.refreshStripTab();
         panel.refreshViewSwitch();
@@ -553,6 +556,7 @@ panel.init = function() {
         'click', function() { panel.onMemPage(1); }, false);
     document.getElementById('mem-follow-pc').addEventListener(
         'click', panel.onToggleFollowPc, false);
+    panel.initStepTools();
     // One listener on the strip rather than one per cell, so that
     // cells can come and go when the memory size changes.
     document.getElementById('mem-map').addEventListener(
@@ -569,6 +573,10 @@ panel.init = function() {
     memInput.addEventListener('input', panel.onMemInput, false);
     memInput.addEventListener('blur', panel.clearMemSelection, false);
     panel.updateMemoryControls();
+    // The machine comes up switched off: the Debugger shows an off
+    // machine's dumps, the same size as a live one's.
+    panel.dumpCpuCallback('');
+    panel.dumpMemCallback('', null);
     // The machine comes up switched off, and the empty dump and dark
     // panel should say why rather than look broken.
     panel.setStatus('status-off');

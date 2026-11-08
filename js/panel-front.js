@@ -314,6 +314,8 @@ panel.sayMachineState = function() {
  */
 panel.setWaitLedCallback = function(isRunning) {
     panel.setLed('wait', !isRunning);
+    // Step and Run to grey out while it runs.
+    panel.updateDebugControls();
     // A machine that stopped by itself ran into a HLT. The lamp says
     // so to anyone who knows the panel; the status line says it to
     // everyone else (D26). A stop asked for from the panel writes its
