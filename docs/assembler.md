@@ -681,26 +681,27 @@ always agree with what the assembler accepts:
 | Token | Example | Look |
 | --- | --- | --- |
 | Comment | `; rotate` | grey, italic |
-| Label, name | `LOOP:`, `PORT` | dark blue |
-| Mnemonic | `MVI`, `JMP` | crimson, bold |
-| Pseudo-instruction | `ORG`, `DB`, `MACRO` | purple |
-| Register | `A`, `M`, `SP` | dark teal |
-| Number, `$` | `0FFH`, `$` | dark olive |
+| Label, name | `LOOP:`, `PORT` | light blue |
+| Mnemonic | `MVI`, `JMP` | coral, bold |
+| Pseudo-instruction | `ORG`, `DB`, `MACRO` | lilac |
+| Register | `A`, `M`, `SP` | teal |
+| Number, `$` | `0FFH`, `$` | yellow |
 | String | `'HELLO'` | green |
-| Macro name, where used | `SHRT` | purple, italic |
-| Operator word | `MOD`, `AND` | purple |
+| Macro name, where used | `SHRT` | lilac, italic |
+| Operator word | `MOD`, `AND` | lilac |
 | Unknown word | `MVX` | red, wavy underline |
 
-On the light background the dump and the paper already use, each
-colour meets 4.5:1 contrast, on the tinted rows of the PC's line and
-an error's too. Colour is never the only sign: errors are also marked
+On the dark well the dumps use too (*since v1.9.0*, P11 in
+[ui-design.md](ui-design.md); before it, a light grey), each colour
+meets 4.5:1 contrast, on the tinted rows of the PC's line and an
+error's too. Colour is never the only sign: errors are also marked
 in the gutter and listed.
 
 The listing is coloured too (*since v1.7.0*): its addresses in the grey
 of the line numbers, positions rather than data, and the bytes, and a
 name's value after its `=`, in the colour of numbers. The band on the
-caret's line (U2) is lighter, not darker, so that every colour on it
-gains contrast rather than losing it.
+caret's line (U2) is lighter, a faint band that every colour keeps
+its contrast on.
 
 ### H3 — Cost
 
@@ -760,7 +761,7 @@ is kept up, which is cheap.
   caret and the layers to the end of a scroll (`caret`), the editor's
   keys, menu and phone view (`editor`), the Debugger's dump and the
   switches while a program runs (`debugger`), the dock and dialogs at
-  every width (`layout`), and the page's font (`fonts`).
+  every width (`layout`), and the page's two fonts (`fonts`).
 
 ### T3 — Example sources
 

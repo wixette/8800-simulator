@@ -891,6 +891,10 @@ export class Sim8800 {
         // set, the clock goes on ticking every millisecond, stepping a
         // CPU that has no power, until the next power-on clears it.
         this.isRunning = false;
+        // Nor running to anywhere: a Run to left set would stop the next
+        // RUN, after the power comes back, at an address nobody asked
+        // for this time.
+        this.breakAt = null;
         this.halted = false;
         this.updateLamps();
     }

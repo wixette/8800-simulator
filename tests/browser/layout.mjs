@@ -297,3 +297,39 @@ export async function phoneTeletype(h) {
     const e = await at();
     verify('scrolled to the end, CLEAR PAPER clears the status message', e.clearBottom <= e.statusTop, JSON.stringify(e));
 }
+
+/**
+ * Every tab on a phone, in 2D, off and on (P9, P11): the toolbar on one
+ * row, the whole switch strip above the dock, its buttons a thumb's
+ * size, the page never scrolling sideways, and Step and Run to each
+ * beside its box.
+ */
+export async function phoneSweep(h) {
+    const {js, viewport, fresh, verify, sleep} = h;
+    for (const [w, ht] of [[375, 667], [360, 640]]) {
+        await viewport(w, ht); await fresh();
+        const bad = [];
+        for (const on of [false, true]) {
+            if (on) { await js(`panel.onPowerOn()`); await sleep(200); }
+            for (const tab of ['tty', 'asm', 'debug', 'ref', 'links']) {
+                await js(`panel.showTab('${tab}')`); await sleep(200);
+                const r = await js(`(() => { const b = (s) => document.querySelector(s).getBoundingClientRect();
+                    // One row of 32-34 px controls makes a toolbar under 60 px.
+                    return {page: document.documentElement.scrollWidth, toolbarRows: b('#toolbar').height < 60 ? 1 : 2,
+                            stripBottom: Math.round(b('#switch-strip').bottom), dockTop: Math.round(b('#dock').top)}; })()`);
+                const where = (on ? 'on' : 'off') + ' ' + tab + ': ' + JSON.stringify(r);
+                if (r.page > w) bad.push('scrolls sideways, ' + where);
+                if (r.toolbarRows != 1) bad.push('toolbar wraps, ' + where);
+                if (r.stripBottom > r.dockTop) bad.push('strip under the dock, ' + where);
+            }
+        }
+        verify(`at ${w}x${ht}, every tab off and on: one toolbar row, the strip above the dock, no sideways scroll`, bad.length === 0, bad.join(' | '));
+        const sizes = await js(`(() => { const r = (id) => document.getElementById(id).getBoundingClientRect();
+            return {tall: Math.min(...[...document.querySelectorAll('#switch-helper .button')].filter((e) => e.offsetParent).map((e) => e.getBoundingClientRect().height)),
+                    wide: Math.min(...[...document.querySelectorAll('.strip-address .button')].map((e) => e.getBoundingClientRect().width))}; })()`);
+        verify(`  the strip's buttons at least 30 px tall, the address switches 36 px wide`, sizes.tall >= 30 && sizes.wide >= 36, JSON.stringify(sizes));
+        await js(`panel.showTab('debug')`); await sleep(200);
+        const pairs = await js(`[...document.querySelectorAll('.instr-tool')].map((t) => { const [b, f] = t.children; return Math.abs(b.getBoundingClientRect().top + b.offsetHeight / 2 - f.getBoundingClientRect().top - f.offsetHeight / 2) < 2; })`);
+        verify(`  Step and Run to each beside its box`, pairs.length === 2 && pairs.every(Boolean), JSON.stringify(pairs));
+    }
+}

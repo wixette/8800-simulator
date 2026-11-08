@@ -474,6 +474,14 @@ test('STOP or a HLT ends a runTo, which is then forgotten', () => {
     sim.stop();
 });
 
+test('switching off forgets a runTo, so the next RUN is a plain RUN', () => {
+    const {sim} = poweredOnSim();
+    sim.loadDataAsHexString(0, 'c3 00 00');
+    sim.runTo(0x0100);
+    sim.powerOff();
+    assert.strictEqual(sim.breakAt, null);
+});
+
 test('free-running step leaves the data LEDs to OUT FFh', () => {
     const {sim, state} = poweredOnSim();
     sim.loadDataAsHexString(0, PATTERN_SHIFT);

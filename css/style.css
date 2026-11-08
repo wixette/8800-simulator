@@ -1590,7 +1590,7 @@ a {
 }
 
 .lesson-photo img {
-    border-radius: 8px;
+    border-radius: var(--r-s);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
     display: block;
     height: auto;
@@ -1621,7 +1621,7 @@ a {
 .tutorial-note {
     background-color: var(--t-blue-bg);
     border-left: 3px solid var(--t-blue);
-    border-radius: 6px;
+    border-radius: var(--r-s);
     margin: 0;
     padding: 10px 14px;
 }
@@ -1643,7 +1643,7 @@ a {
 .tutorial-code {
     background-color: var(--c-well);
     border: 1px solid var(--t-edge);
-    border-radius: 8px;
+    border-radius: var(--r-s);
     color: #d6dbe0;
     font-size: 13px;
     line-height: 1.5;
@@ -1709,7 +1709,7 @@ a {
 
 .steps > li.result > span {
     background-color: var(--t-green-bg);
-    border-radius: 6px;
+    border-radius: var(--r-xs);
     color: var(--t-green);
     display: inline-block;
     padding: 1px 8px;
