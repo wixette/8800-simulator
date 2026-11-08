@@ -540,14 +540,56 @@ panel.renderMemSelection = function() {
  * When CPU dumps the CPU status for debug.
  */
 panel.dumpCpuCallback = function(dumpHtml) {
-    document.getElementById('cpu-dump').innerHTML = dumpHtml;
+    document.getElementById('cpu-dump').innerHTML =
+        dumpHtml || panel.offCpuHtml();
 };
+
+/**
+ * The registers of a machine that is off: laid out as a live one's,
+ * with dashes for values, so that the box keeps its size and switching
+ * the machine on fills it in rather than moving everything below.
+ * @return {string} HTML.
+ */
+panel.offCpuHtml = function() {
+    var flags = ['S', 'Z', 'AC', 'P', 'CY'].map(function(name) {
+        return '<span class="flag">' + name + '</span>';
+    }).join(' ');
+    return '<pre class="dump-off">' +
+        'PC = ----  SP = ----\n' +
+        'A = --  B = --  C = --  D = --\n' +
+        'E = --  F = --  H = --  L = --\n' +
+        'FLAGS ' + flags + '\n</pre>';
+};
+
+/**
+ * The memory dump of a machine that is off: as tall as a page of a
+ * live one, with what to do about it in the middle, as the Teletype's
+ * empty paper says what to do. Redrawn on a change of language.
+ */
+panel.renderMemOff = function() {
+    var elem = document.getElementById('mem-dump');
+    if (elem && panel.memDumpOff) {
+        elem.innerHTML = '<div class="mem-off"><p class="dump-empty"></p></div>';
+        elem.querySelector('p').textContent = l10n.getMessage('mem-dump-off');
+    }
+};
+
+/**
+ * Whether the memory dump is showing a machine that is off.
+ * @type {boolean}
+ */
+panel.memDumpOff = false;
 
 /**
  * When CPU dumps the MEM contents for debug.
  */
 panel.dumpMemCallback = function(dumpHtml, pages, instr) {
-    document.getElementById('mem-dump').innerHTML = dumpHtml;
+    panel.memDumpOff = !dumpHtml;
+    if (panel.memDumpOff) {
+        panel.renderMemOff();
+    } else {
+        document.getElementById('mem-dump').innerHTML = dumpHtml;
+    }
     // The bytes were all replaced, the picked one among them.
     panel.memSelectedElem = null;
     panel.renderMemSelection();
@@ -578,9 +620,9 @@ panel.renderInstrPane = function() {
     if (!elem) {
         return;
     }
-    // Blank while the machine is off, like the dumps.
+    // Dashes while the machine is off, like the registers.
     if (!instr) {
-        elem.textContent = '';
+        elem.innerHTML = '<pre class="dump-off">----</pre>';
         return;
     }
     var hex = instr.bytes.map(function(b) {

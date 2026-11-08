@@ -535,6 +535,7 @@ panel.init = function() {
         panel.refreshStatus();
         panel.refreshPlaceholders();
         panel.renderInstrPane();
+        panel.renderMemOff();
         panel.refreshDockToggle();
         panel.refreshStripTab();
         panel.refreshViewSwitch();
@@ -572,6 +573,10 @@ panel.init = function() {
     memInput.addEventListener('input', panel.onMemInput, false);
     memInput.addEventListener('blur', panel.clearMemSelection, false);
     panel.updateMemoryControls();
+    // The machine comes up switched off: the Debugger shows an off
+    // machine's dumps, the same size as a live one's.
+    panel.dumpCpuCallback('');
+    panel.dumpMemCallback('', null);
     // The machine comes up switched off, and the empty dump and dark
     // panel should say why rather than look broken.
     panel.setStatus('status-off');

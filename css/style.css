@@ -3,18 +3,72 @@ body {
     height: 100%;
 }
 
-/* The one hover the dark chrome uses - toolbar buttons, dock tabs, the
-   strip's tab - so that every flat control answers the pointer alike,
-   and visibly. */
+/* The design tokens: Material 3's roles, shapes and states, in a dark
+   scheme around the panel's amber (docs/ui-design.md, P11). Every
+   control takes its colours, corners and type from here, so that one
+   kind of thing looks the same wherever it is. The Teletype's paper is
+   the one surface outside the scheme: it is paper. */
 :root {
-    --hover-bg: rgba(255, 255, 255, 0.14);
-    --open-bg: rgba(255, 255, 255, 0.2);
+    /* Surfaces, from the darkest - the wells that hold code and data -
+       up through the page, the dock and the chrome, to the dialogs and
+       the tonal buttons. */
+    --c-well: #171717;
+    --c-surface: #1f1f1f;
+    --c-surface-low: #242424;
+    --c-surface-container: #2b2b2b;
+    --c-surface-high: #333;
+    --c-tonal: #464646;
+    --c-divider: #111;
+    --c-on-surface: #e6e6e6;
+    --c-on-surface-variant: #a8a8a8;
+    --c-on-tonal: #ededed;
+    --c-outline: #8c8c8c;
+    --c-outline-variant: #444;
+    /* The amber: what is active, raised, or to be pressed. */
+    --c-primary: #f90;
+    --c-on-primary: #241500;
+    --c-primary-text: #ffb340;
+    --c-primary-container: rgba(255, 153, 0, 0.18);
+    --c-on-primary-container: #ffc670;
+    /* A machine that is on; the power switch while it is off. */
+    --c-success: #3ddc63;
+    --c-on-success: #0b2a14;
+    --c-info: #4da3ff;
+    --c-link: #8ab4f8;
+    --c-warn-container: #5a4a1a;
+    --c-on-warn-container: #ffd98a;
+    --c-error: #ff8a80;
+    --c-error-container: #5a2323;
+    --c-on-error-container: #ffb4b4;
+    /* A control that cannot be used just now: on-surface at 12% and
+       38%, as Material greys one out. */
+    --c-disabled-bg: rgba(230, 230, 230, 0.12);
+    --c-disabled: rgba(230, 230, 230, 0.38);
+    /* State layers: the control's own text colour laid over its fill,
+       so that a grey, an amber and a green button all answer alike. */
+    --layer-hover: color-mix(in srgb, currentColor 8%, transparent);
+    --layer-press: color-mix(in srgb, currentColor 14%, transparent);
+    /* The flat chrome's hover - toolbar buttons, dock tabs, the strip's
+       tab - and a menu button's while its menu is open. */
+    --hover-bg: color-mix(in srgb, var(--c-on-surface) 8%, transparent);
+    --open-bg: color-mix(in srgb, var(--c-on-surface) 14%, transparent);
+    /* Corners. */
+    --r-xs: 4px;
+    --r-s: 8px;
+    --r-m: 12px;
+    --r-l: 16px;
+    --r-xl: 28px;
+    --r-full: 999px;
+    /* Type: the app's own words in the system's sans, and the machine's
+       - its legends, dumps, paper and code - in monospace. */
+    --font-ui: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-mono: 'Consolas', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New', monospace;
 }
 
 body {
-    background-color: #222;
-    color: #eee;
-    font-family: 'Consolas', 'Monaco', 'Menlo', 'Ubuntu Mono', 'Liberation Mono', 'DejaVu Sans Mono', 'Courier New', monospace;
+    background-color: var(--c-surface);
+    color: var(--c-on-surface);
+    font-family: var(--font-ui);
     font-size: 16px;
     margin: 0;
     padding: 0;
@@ -33,10 +87,32 @@ body {
 }
 
 /* Browsers give form controls and preformatted text a font of their
-   own; every one here takes the page's, so a new button cannot come out
-   in Arial, nor the Teletype's paper in Courier. */
-button, input, select, textarea, pre, code, kbd, samp {
+   own. A control takes the page's; text, code and the machine's own
+   things take the monospace - so that a new button cannot come out in
+   Arial, nor the Teletype's paper in Courier. */
+button, input, select {
     font-family: inherit;
+}
+
+textarea, pre, code, kbd, samp,
+#cpu-dump, #mem-dump, #instr-pane, #mem-window-label, .debug-field,
+#tty-paper, .tty-keys, .strip-body, .asm-editor, .asm-listing,
+.dialog-field, #debug-data-input {
+    font-family: var(--font-mono);
+}
+
+/* One focus ring for every control, drawn the same way everywhere: the
+   keyboard's place, in the amber of what is active. */
+button:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+.button:focus-visible,
+.dock-tab:focus-visible,
+.dock-tool:focus-visible,
+.view-tab:focus-visible,
+.strip-tab:focus-visible {
+    outline: 2px solid var(--c-primary);
+    outline-offset: 2px;
 }
 
 /* Controls are pressed, not read. Dragging across one, or pressing it
@@ -66,7 +142,7 @@ div, img, pre {
 }
 
 a {
-    color: #6cf;
+    color: var(--c-link);
 }
 
 .mt-8 {
@@ -77,8 +153,8 @@ a {
    (P4), then the app's own actions on the right (U3). */
 #toolbar {
     align-items: center;
-    background-color: #2b2b2b;
-    border-bottom: 1px solid #111;
+    background-color: var(--c-surface-container);
+    border-bottom: 1px solid var(--c-divider);
     display: flex;
     flex: none;
     flex-wrap: wrap;
@@ -116,26 +192,25 @@ a {
     align-items: center;
     background: none;
     border: 0;
-    border-radius: 6px;
-    color: #eee;
+    border-radius: var(--r-full);
+    color: var(--c-on-surface);
     cursor: pointer;
     display: flex;
     font-size: 14px;
+    font-weight: 500;
     gap: 6px;
     line-height: 20px;
-    padding: 5px 10px;
+    padding: 6px 10px;
     white-space: nowrap;
 }
 
-.tool-button:hover,
-.tool-button:focus-visible {
+.tool-button:hover {
     background-color: var(--hover-bg);
     color: #fff;
-    outline: none;
 }
 
 .tool-value {
-    color: #f90;
+    color: var(--c-primary-text);
 }
 
 /* A toolbar action shown as an icon alone: Share, About. Its name is in
@@ -144,8 +219,8 @@ a {
     align-items: center;
     background: none;
     border: 0;
-    border-radius: 50%;
-    color: #ddd;
+    border-radius: var(--r-full);
+    color: var(--c-on-surface);
     cursor: pointer;
     display: flex;
     height: 34px;
@@ -154,11 +229,9 @@ a {
     width: 34px;
 }
 
-.icon-button:hover,
-.icon-button:focus-visible {
+.icon-button:hover {
     background-color: var(--hover-bg);
     color: #fff;
-    outline: none;
 }
 
 .icon {
@@ -176,8 +249,10 @@ a {
 /* A heading inside a menu or a tool. Small and quiet: the dock is a
    tool, and reads like one rather than like a page (P5). */
 .section-label {
-    color: #999;
+    color: var(--c-on-surface-variant);
     font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
     line-height: 20px;
     margin: 6px 4px 2px 4px;
     white-space: nowrap;
@@ -186,15 +261,16 @@ a {
 /* Dialogs: for what needs more than a choice from a menu. A title,
    what it is for, the controls, and the actions at the bottom right.
    See js/dialog.js. The padding is on the body, so that a click on the
-   <dialog> itself can only be on the backdrop. */
+   <dialog> itself can only be on the backdrop. Material's dialog: a
+   raised surface with large corners, its title in the headline type. */
 .dialog {
-    background-color: #2b2b2b;
-    border: 1px solid #444;
-    border-radius: 12px;
-    /* So the title band keeps the rounded corners. */
+    background-color: var(--c-surface-high);
+    border: 0;
+    border-radius: var(--r-xl);
+    /* So the body's scrolling keeps the rounded corners. */
     overflow: hidden;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
-    color: #eee;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+    color: var(--c-on-surface);
     max-width: calc(100vw - 24px);
     padding: 0;
     width: 480px;
@@ -219,56 +295,58 @@ a {
 .dialog-body {
     min-height: 0;
     overflow-y: auto;
-    padding: 16px 20px 18px 20px;
+    padding: 8px 24px 20px 24px;
 }
 
-/* The title, in a lighter band across the top, as a dialog's title bar
-   is. */
+/* The title, and the close button at its right: it stays at the top
+   while a long body scrolls under it. */
 .dialog-head {
     align-items: center;
-    background-color: #3a3a3a;
-    border-bottom: 1px solid #4a4a4a;
     display: flex;
     justify-content: space-between;
-    padding: 8px 10px 8px 20px;
+    padding: 18px 14px 6px 24px;
 }
 
 .dialog-title {
-    font-size: 16px;
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 28px;
     margin: 0;
 }
 
 .dialog-subtitle {
-    color: #999;
-    font-size: 13px;
-    font-weight: normal;
+    color: var(--c-on-surface-variant);
+    font-size: 14px;
+    font-weight: 500;
     margin: 16px 0 6px 0;
 }
 
 .dialog-text {
-    color: #ccc;
+    color: var(--c-on-surface-variant);
     font-size: 14px;
     line-height: 1.5;
     margin: 0 0 12px 0;
 }
 
 .dialog-error {
-    color: #ffb4b4;
+    color: var(--c-error);
     font-size: 14px;
     line-height: 1.5;
     margin: 8px 0 0 0;
 }
 
+/* Material's outlined text field: an outline that turns amber, and
+   thicker, while it has the keyboard. */
 #debug-data-input,
 .dialog-field {
-    background-color: #1f1f1f;
-    border: 1px solid #555;
-    border-radius: 8px;
+    background-color: transparent;
+    border: 1px solid var(--c-outline);
+    border-radius: var(--r-xs);
     box-sizing: border-box;
-    color: #eee;
+    color: var(--c-on-surface);
     font-size: 14px;
     line-height: 1.5;
-    padding: 8px 10px;
+    padding: 9px 12px;
     width: 100%;
 }
 
@@ -276,16 +354,22 @@ a {
     resize: vertical;
 }
 
+#debug-data-input:hover,
+.dialog-field:hover {
+    border-color: var(--c-on-surface);
+}
+
 #debug-data-input:focus,
 .dialog-field:focus {
-    border-color: #f90;
+    border-color: var(--c-primary);
+    box-shadow: inset 0 0 0 1px var(--c-primary);
     outline: none;
 }
 
 /* A choice with a line saying what it means, under its name. */
 .dialog-option {
     align-items: flex-start;
-    border-radius: 8px;
+    border-radius: var(--r-s);
     cursor: pointer;
     display: flex;
     gap: 10px;
@@ -294,11 +378,11 @@ a {
 }
 
 .dialog-option:hover {
-    background-color: #333;
+    background-color: var(--hover-bg);
 }
 
 .dialog-option input {
-    accent-color: #f90;
+    accent-color: var(--c-primary);
     margin: 3px 0 0 0;
 }
 
@@ -313,7 +397,7 @@ a {
 }
 
 .dialog-option-desc {
-    color: #999;
+    color: var(--c-on-surface-variant);
     font-size: 13px;
 }
 
@@ -325,41 +409,47 @@ a {
     display: flex;
     gap: 8px;
     justify-content: flex-end;
-    margin-top: 16px;
+    margin-top: 20px;
 }
 
+/* Material's text button for the other actions - Cancel, References -
+   and its filled button for the one the dialog is for. */
 .dialog-button {
-    background-color: #3a3a3a;
+    background-color: transparent;
     border: 0;
-    border-radius: 8px;
-    color: #eee;
+    border-radius: var(--r-full);
+    color: var(--c-primary-text);
     cursor: pointer;
     font-size: 14px;
-    padding: 7px 16px;
+    font-weight: 500;
+    height: 40px;
+    letter-spacing: 0.01em;
+    padding: 0 16px;
 }
 
 .dialog-button:hover {
-    background-color: #474747;
+    background-image: linear-gradient(var(--layer-hover), var(--layer-hover));
 }
 
-/* The orange says enough: an action button keeps the ordinary weight,
+.dialog-button:active {
+    background-image: linear-gradient(var(--layer-press), var(--layer-press));
+}
+
+/* The amber says enough: an action button keeps the ordinary weight,
    like every other button. (A button holding a state - Follow PC, a
    raised switch - is bold as well, to mark the state.) */
 .dialog-button.primary {
-    background-color: #f90;
-    color: #222;
-}
-
-/* A shade darker, as .button:hover makes Assemble's. */
-.dialog-button.primary:hover {
-    background-color: #e08700;
+    background-color: var(--c-primary);
+    color: var(--c-on-primary);
+    padding: 0 24px;
 }
 
 /* Copy Link while there is nothing to copy: it still answers. */
 .dialog-button.disabled,
 .dialog-button.primary.disabled:hover {
-    background-color: #555;
-    color: #999;
+    background-color: var(--c-disabled-bg);
+    background-image: none;
+    color: var(--c-disabled);
 }
 
 /* The logo heads About, the version under it, both centred. */
@@ -371,7 +461,7 @@ a {
 }
 
 .about-version {
-    color: #999;
+    color: var(--c-on-surface-variant);
     text-align: center;
 }
 
@@ -389,7 +479,7 @@ a {
 
 /* What, then whose: a label column as wide as the longest label. */
 .about-licences {
-    color: #ccc;
+    color: var(--c-on-surface);
     column-gap: 14px;
     display: grid;
     font-size: 14px;
@@ -400,7 +490,7 @@ a {
 }
 
 .about-licences dt {
-    color: #999;
+    color: var(--c-on-surface-variant);
 }
 
 .about-licences dd {
@@ -425,19 +515,20 @@ a {
 
 .dropdown > button {
     align-items: center;
-    background-color: #eee;
+    background-color: var(--c-tonal);
     border: none;
-    border-radius: 10px;
+    border-radius: var(--r-full);
     box-sizing: border-box;
-    color: #222;
+    color: var(--c-on-tonal);
     cursor: pointer;
     display: flex;
     font-size: 14px;
+    font-weight: 500;
     /* Roomier on the right so the arrow is not against the edge. */
     gap: 10px;
     /* The same 32px the buttons beside it come to. */
     height: 32px;
-    padding: 0 14px;
+    padding: 0 14px 0 16px;
 }
 
 .dropdown-arrow {
@@ -445,11 +536,15 @@ a {
     line-height: 1;
 }
 
+/* Material's menu: a raised surface, a little lighter than what it
+   opens over. */
 .dropdown ul {
-    background-color: #eee;
-    border-radius: 10px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-    color: #222;
+    background-color: var(--c-surface-high);
+    /* Its padding inside the height Dropdown.fit() gives it. */
+    box-sizing: border-box;
+    border-radius: var(--r-s);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    color: var(--c-on-surface);
     left: 0;
     list-style: none;
     margin: 0;
@@ -457,7 +552,7 @@ a {
     /* Never wider than the window, however long an entry is. */
     max-width: calc(100vw - 32px);
     overflow-y: auto;
-    padding: 4px 0;
+    padding: 6px 0;
     /* Always directly under the button, never over it. */
     position: absolute;
     top: calc(100% + 6px);
@@ -471,68 +566,69 @@ a {
     font-size: 14px;
     gap: 24px;
     justify-content: space-between;
-    padding: 8px 18px;
+    padding: 10px 16px;
     white-space: nowrap;
 }
 
 /* What an item is, or why it is grey, quieter at its right. */
 .dropdown-detail {
-    color: #777;
+    color: var(--c-on-surface-variant);
     font-size: 12px;
 }
 
 /* Names the group of items under it. Not an item - the arrow keys step
-   over it - so it is a band across the menu, ruled off, rather than
-   another line of text that might be chosen. Its grey sits between the
-   menu's and the hover's, so that it never reads as an item pointed at. */
+   over it - so it is a label under a rule, in the small quiet type of
+   a heading, never filled as an item pointed at is. */
 .dropdown li.dropdown-heading {
-    background-color: #e8e8e8;
-    border-bottom: 1px solid #d0d0d0;
-    border-top: 1px solid #d0d0d0;
-    color: #777;
+    border-top: 1px solid var(--c-outline-variant);
+    color: var(--c-on-surface-variant);
     cursor: default;
     font-size: 12px;
-    font-weight: bold;
-    margin: 4px 0 2px 0;
-    padding: 5px 18px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    margin: 6px 0 0 0;
+    padding: 10px 16px 4px;
+}
+
+.dropdown li.dropdown-heading:first-child {
+    border-top: 0;
+    margin-top: 0;
 }
 
 /* An item that cannot be used just now. It still answers, in the status
    line (D19). */
 .dropdown li.disabled {
-    color: #999;
+    color: var(--c-disabled);
 }
 
 .dropdown li:hover,
 .dropdown li:focus {
-    background-color: #ddd;
+    background-color: var(--hover-bg);
     outline: none;
 }
 
 .dropdown li.dropdown-heading:hover {
-    background-color: #e8e8e8;
+    background-color: transparent;
 }
 
 .dropdown li[aria-selected='true'] {
-    background-color: #369;
-    color: #6cf;
+    background-color: var(--c-primary-container);
+    color: var(--c-on-primary-container);
 }
 
 /* The toolbar's menu buttons are tool buttons, not the light buttons
    a dropdown has elsewhere. */
 #toolbar .dropdown > .tool-button {
     background: none;
-    border-radius: 6px;
-    color: #eee;
+    border-radius: var(--r-full);
+    color: var(--c-on-surface);
     height: auto;
-    padding: 5px 10px;
+    padding: 6px 10px;
 }
 
-#toolbar .dropdown > .tool-button:hover,
-#toolbar .dropdown > .tool-button:focus-visible {
+#toolbar .dropdown > .tool-button:hover {
     background-color: var(--hover-bg);
     color: #fff;
-    outline: none;
 }
 
 #toolbar .dropdown > .tool-button[aria-expanded="true"] {
@@ -562,7 +658,7 @@ a {
 
 /* The Tutorial's headings: it is a document, so it has them. */
 .subheader-bar {
-    color: #eee;
+    color: var(--c-on-surface);
     font-size: 15px;
     font-weight: bold;
     margin: 18px 0 8px 0;
@@ -604,49 +700,53 @@ a {
     margin-bottom: 4px;
 }
 
+/* Material's segmented button: one outline round both, the chosen one
+   filled. */
 #view-switch {
-    border: 1px solid #555;
-    border-radius: 6px;
+    border: 1px solid var(--c-outline);
+    border-radius: var(--r-full);
     display: flex;
     order: 2;
     overflow: hidden;
 }
 
 .view-tab {
-    color: #aaa;
+    color: var(--c-on-surface);
     cursor: pointer;
     font-size: 13px;
+    font-weight: 500;
     line-height: 20px;
-    padding: 3px 12px;
+    padding: 4px 14px;
     position: relative;
 }
 
 .view-tab + .view-tab {
-    border-left: 1px solid #555;
+    border-left: 1px solid var(--c-outline);
 }
 
-.view-tab:hover,
-.view-tab:focus-visible {
+.view-tab:hover {
     background-color: var(--hover-bg);
     color: #fff;
-    outline: none;
+}
+
+.view-tab:focus-visible {
+    outline-offset: -2px;
 }
 
 .view-tab.selected {
-    background-color: #3a3a3a;
-    color: #f90;
+    background-color: var(--c-primary-container);
+    color: var(--c-on-primary-container);
     cursor: default;
-    font-weight: bold;
 }
 
 .view-tab.disabled {
-    color: #666;
+    color: var(--c-disabled);
     cursor: default;
 }
 
 /* Until the 3D view has been seen once: the dock tabs' activity dot. */
 .view-tab.has-news::after {
-    background-color: #f90;
+    background-color: var(--c-primary);
     border-radius: 50%;
     content: '';
     height: 6px;
@@ -680,26 +780,24 @@ a {
 #view3d-tools .icon-button.disabled,
 #view3d-tools.loading .icon-button,
 #view3d-tools.loading .tool-button {
-    color: #666;
+    color: var(--c-disabled);
     cursor: default;
 }
 
 /* The 3D view's menu buttons are tool buttons, as the toolbar's are. */
 #view3d-tools .dropdown > .tool-button {
     background: none;
-    border-radius: 6px;
-    color: #eee;
+    border-radius: var(--r-full);
+    color: var(--c-on-surface);
     font-size: 13px;
     gap: 6px;
     height: 30px;
-    padding: 0 8px;
+    padding: 0 10px;
 }
 
-#view3d-tools .dropdown > .tool-button:hover,
-#view3d-tools .dropdown > .tool-button:focus-visible {
+#view3d-tools .dropdown > .tool-button:hover {
     background-color: var(--hover-bg);
     color: #fff;
-    outline: none;
 }
 
 #view3d-tools .dropdown > .tool-button[aria-expanded="true"] {
@@ -709,7 +807,7 @@ a {
 /* A Show other than the whole machine: the button says something is
    left out, as a changed setting does on the toolbar. */
 #view3d-tools #show-button.changed {
-    color: #f90;
+    color: var(--c-primary-text);
 }
 
 #views-list,
@@ -750,7 +848,7 @@ a {
 /* The whole machine in 3D: it takes the room the panel would. */
 #stage3d {
     background: radial-gradient(ellipse at 50% 40%, #3a3a3a 0%, #262626 70%);
-    border-radius: 8px;
+    border-radius: var(--r-m);
     flex: 1 1 0;
     min-height: 0;
     overflow: hidden;
@@ -770,7 +868,7 @@ a {
 }
 
 #stage3d canvas:focus-visible {
-    outline: 2px solid #f90;
+    outline: 2px solid var(--c-primary);
     outline-offset: -2px;
 }
 
@@ -799,7 +897,7 @@ a {
 }
 
 .stage3d-progress > div {
-    background-color: #f90;
+    background-color: var(--c-primary);
     height: 100%;
     transform: scaleX(var(--progress, 0));
     transform-origin: left;
@@ -810,14 +908,15 @@ a {
 /* What the pointer is over: beside it once it rests, gone at a press
    (js/view3d/view3d.js places it). */
 .part-label {
-    background-color: rgba(20, 20, 20, 0.85);
-    border: 1px solid #555;
-    border-radius: 6px;
+    background-color: rgba(51, 51, 51, 0.94);
+    border: 0;
+    border-radius: var(--r-s);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
     box-sizing: border-box;
-    color: #eee;
+    color: var(--c-on-surface);
     font-size: 12px;
     max-width: min(320px, calc(100% - 16px));
-    padding: 5px 8px;
+    padding: 8px 12px;
     pointer-events: none;
     position: absolute;
     z-index: 2;
@@ -828,31 +927,32 @@ a {
 }
 
 .part-label .part-role {
-    color: #bbb;
+    color: var(--c-on-surface-variant);
     margin-top: 2px;
 }
 
 .part-label .part-hint {
-    color: #f90;
+    color: var(--c-primary-text);
     margin-top: 4px;
 }
 
+/* Material's extended floating action button. */
 .box-restore {
     align-items: center;
-    background-color: #f90;
+    background-color: var(--c-primary);
     border: 0;
-    border-radius: 18px;
+    border-radius: var(--r-l);
     bottom: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-    color: #222;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    color: var(--c-on-primary);
     cursor: pointer;
     display: flex;
     font: inherit;
     font-size: 14px;
-    font-weight: bold;
-    gap: 6px;
+    font-weight: 500;
+    gap: 8px;
     left: 50%;
-    padding: 7px 16px 7px 12px;
+    padding: 10px 18px 10px 14px;
     position: absolute;
     transform: translateX(-50%);
     white-space: nowrap;
@@ -863,11 +963,12 @@ a {
     display: none;
 }
 
-.box-restore:hover,
+.box-restore:hover {
+    background-image: linear-gradient(var(--layer-hover), var(--layer-hover));
+}
+
 .box-restore:focus-visible {
-    background-color: #ffb340;
-    outline: 2px solid #fff;
-    outline-offset: 1px;
+    outline-color: #fff;
 }
 
 /* The Switch Board Helper, a strip under the panel and as wide as its
@@ -884,11 +985,11 @@ a {
 
 .strip-tab {
     align-items: center;
-    background-color: #2b2b2b;
-    border: 1px solid #3a3a3a;
+    background-color: var(--c-surface-container);
+    border: 1px solid var(--c-outline-variant);
     border-bottom: 0;
-    border-radius: 8px 8px 0 0;
-    color: #999;
+    border-radius: var(--r-s) var(--r-s) 0 0;
+    color: var(--c-on-surface-variant);
     cursor: pointer;
     display: flex;
     height: 14px;
@@ -896,11 +997,9 @@ a {
     width: 44px;
 }
 
-.strip-tab:hover,
-.strip-tab:focus-visible {
-    background-color: #3a3a3a;
+.strip-tab:hover {
+    background-color: var(--c-surface-high);
     color: #fff;
-    outline: none;
 }
 
 .strip-tab .icon {
@@ -910,8 +1009,8 @@ a {
 }
 
 #switch-strip.folded .strip-tab {
-    border-bottom: 1px solid #3a3a3a;
-    border-radius: 8px;
+    border-bottom: 1px solid var(--c-outline-variant);
+    border-radius: var(--r-s);
 }
 
 #switch-strip.folded .strip-tab .icon {
@@ -923,9 +1022,9 @@ a {
 }
 
 .strip-body {
-    background-color: #2b2b2b;
-    border: 1px solid #3a3a3a;
-    border-radius: 10px;
+    background-color: var(--c-surface-container);
+    border: 1px solid var(--c-outline-variant);
+    border-radius: var(--r-l);
     box-sizing: border-box;
     padding: 8px 10px;
     width: 100%;
@@ -944,27 +1043,37 @@ a {
     margin-top: 8px;
 }
 
-/* One lever, or one octal digit of the address: its buttons touch. */
+/* One lever, or one octal digit of the address: Material's connected
+   button group, round at its two ends and nearly square where its
+   buttons meet. A lever with two directions - STOP and RUN, EXAMINE
+   and EXAMINE-NEXT - is one control with two halves, as on the metal. */
 .lever,
 .octal {
     display: flex;
-    gap: 3px;
+    gap: 2px;
 }
 
-/* A lever with two directions - STOP and RUN, EXAMINE and EXAMINE-NEXT -
-   is one control with two halves, as on the metal. */
-.lever.pair .button:first-child {
-    border-radius: 10px 0 0 10px;
+.lever .button:not(:first-child),
+.octal .button:not(:first-child) {
+    border-bottom-left-radius: var(--r-xs);
+    border-top-left-radius: var(--r-xs);
 }
 
-.lever.pair .button:last-child {
-    border-radius: 0 10px 10px 0;
+.lever .button:not(:last-child),
+.octal .button:not(:last-child) {
+    border-bottom-right-radius: var(--r-xs);
+    border-top-right-radius: var(--r-xs);
 }
 
 .strip-body .button {
     font-size: 13px;
+    font-weight: normal;
+    /* 30px tall, a step denser than the app's other buttons: the strip
+       is two rows on a desktop and four on a phone, and every pixel it
+       takes comes out of the panel or the dock. */
+    line-height: 26px;
     min-width: 30px;
-    padding: 2px 8px;
+    padding: 2px 10px;
     /* A label never breaks inside its button: a row too narrow for
        its levers wraps between them instead. */
     white-space: nowrap;
@@ -984,7 +1093,7 @@ a {
    and the low. */
 .byte-divider {
     align-self: stretch;
-    background-color: #666;
+    background-color: var(--c-outline-variant);
     flex: none;
     width: 2px;
 }
@@ -1020,7 +1129,7 @@ a {
 
 /* The handle between the panel and the dock. */
 #dock-splitter {
-    background-color: #111;
+    background-color: var(--c-divider);
     cursor: row-resize;
     flex: none;
     height: 6px;
@@ -1029,7 +1138,7 @@ a {
 }
 
 #dock-splitter::after {
-    background-color: #555;
+    background-color: var(--c-outline-variant);
     border-radius: 2px;
     content: '';
     height: 2px;
@@ -1043,7 +1152,7 @@ a {
 #dock-splitter:hover,
 #dock-splitter:focus-visible,
 #dock-splitter.dragging {
-    background-color: #f90;
+    background-color: var(--c-primary);
     outline: none;
 }
 
@@ -1053,7 +1162,7 @@ a {
 
 /* The dock: one tool at a time, under the panel (P3). */
 #dock {
-    background-color: #262626;
+    background-color: var(--c-surface-low);
     display: flex;
     flex: none;
     flex-direction: column;
@@ -1070,8 +1179,8 @@ a {
    under the fold button rather than pushing it off. */
 #dock-tabs {
     align-items: stretch;
-    background-color: #2b2b2b;
-    border-bottom: 1px solid #111;
+    background-color: var(--c-surface-container);
+    border-bottom: 1px solid var(--c-divider);
     display: flex;
     flex: none;
     min-height: 34px;
@@ -1086,7 +1195,7 @@ a {
 }
 
 #dock-toggle {
-    background-color: #2b2b2b;
+    background-color: var(--c-surface-container);
     position: sticky;
     right: 0;
 }
@@ -1101,16 +1210,17 @@ a {
     border-bottom: 0;
 }
 
-/* Flat, underlined, dense: a tool's tabs, not a page's. */
+/* Material's primary tabs, dense: a tool's tabs, not a page's. The open
+   one in amber, over an indicator with rounded ends. */
 .dock-tab {
     align-items: center;
-    border-bottom: 2px solid transparent;
-    color: #999;
+    color: var(--c-on-surface-variant);
     cursor: pointer;
     display: flex;
     font-size: 14px;
+    font-weight: 500;
     padding: 0 14px;
-    /* For the activity dot below. */
+    /* For the activity dot and the indicator below. */
     position: relative;
     white-space: nowrap;
 }
@@ -1120,14 +1230,28 @@ a {
     color: #fff;
 }
 
+.dock-tab:focus-visible {
+    outline-offset: -2px;
+}
+
 .dock-tab.selected {
-    border-bottom-color: #f90;
-    color: #eee;
+    color: var(--c-primary-text);
+}
+
+.dock-tab.selected::before {
+    background-color: var(--c-primary);
+    border-radius: 3px 3px 0 0;
+    bottom: 0;
+    content: '';
+    height: 3px;
+    left: 8px;
+    position: absolute;
+    right: 8px;
 }
 
 .dock-tool {
     align-items: center;
-    color: #999;
+    color: var(--c-on-surface-variant);
     cursor: pointer;
     display: flex;
     font-size: 14px;
@@ -1188,13 +1312,16 @@ a {
    Each button keeps its box beside it; a row too narrow for both
    breaks between them, never inside one. */
 .debug-box > #instr-pane {
-    border-radius: 10px 10px 0 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 .instr-tools {
     align-items: center;
-    background-color: #b4b4b4;
-    border-radius: 0 0 10px 10px;
+    background-color: var(--c-surface-container);
+    border: 1px solid var(--c-outline-variant);
+    border-radius: 0 0 var(--r-m) var(--r-m);
+    border-top: 0;
     display: flex;
     flex-wrap: wrap;
     gap: 6px 18px;
@@ -1207,15 +1334,16 @@ a {
     gap: 4px;
 }
 
+/* Material's outlined text field, dense, beside the button it feeds. */
 .debug-field {
-    background-color: #eee;
-    border: 1px solid transparent;
-    border-radius: 10px;
+    background-color: var(--c-well);
+    border: 1px solid var(--c-outline);
+    border-radius: var(--r-xs);
     box-sizing: content-box;
-    color: #222;
+    color: var(--c-on-surface);
     font-size: 14px;
-    height: 2em;
-    padding: 2px 8px;
+    height: 30px;
+    padding: 0 8px;
     text-align: right;
     /* Wide enough for its most digits: five for a count, four for an
        address. */
@@ -1229,12 +1357,17 @@ a {
 }
 
 #debug-run-to-address::placeholder {
-    color: #999;
+    color: var(--c-disabled);
     text-transform: none;
 }
 
-.debug-field:focus-visible {
-    border-color: #f90;
+.debug-field:hover {
+    border-color: var(--c-on-surface);
+}
+
+.debug-field:focus {
+    border-color: var(--c-primary);
+    box-shadow: inset 0 0 0 1px var(--c-primary);
     outline: none;
 }
 
@@ -1254,29 +1387,60 @@ a {
 
 /* The flags by letter, lit when set. */
 .flag {
-    color: #999;
+    color: var(--c-on-surface-variant);
 }
 
 .flag-set {
-    background-color: #555;
+    background-color: #5c5c5c;
     border-radius: 3px;
     color: #fff;
     padding: 0 2px;
 }
 
+/* The machine's state, read out: wells of the darkest surface, under
+   a quiet outline, as code is shown. */
 #cpu-dump,
 #mem-dump,
 #instr-pane {
-    background-color: #ccc;
-    border-radius: 10px;
-    color: #222;
+    background-color: var(--c-well);
+    border: 1px solid var(--c-outline-variant);
+    border-radius: var(--r-m);
+    color: var(--c-on-surface);
     font-size: 14px;
     line-height: 24px;
     min-height: 24px;
     /* Fixed width text: a narrow window scrolls across it rather than
        cutting the right hand columns off. */
     overflow-x: auto;
-    padding: 5px 10px;
+    padding: 5px 12px;
+}
+
+/* A machine that is off: the registers' layout with dashes, the
+   instruction a dash too, and the memory a page tall with what to do
+   in the middle of it, so that switching on fills the boxes in rather
+   than moving everything under them. */
+.dump-off {
+    color: var(--c-on-surface-variant);
+}
+
+.mem-off {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    /* Sixteen lines, as a page of a live machine's memory is. */
+    min-height: calc(16 * 24px);
+}
+
+.dump-empty {
+    color: var(--c-on-surface-variant);
+    font-family: var(--font-ui);
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+    max-width: 420px;
+    padding: 0 16px;
+    text-align: center;
+    white-space: normal;
 }
 
 /* The Tutorial (docs/ui-design.md, U11): a bar of numbered lessons,
@@ -1307,7 +1471,7 @@ a {
    lesson scrolls under it. Its rule runs the dock's width; its tabs
    line up with the lesson's column under them. */
 .lesson-bar {
-    background-color: #262626;
+    background-color: var(--c-surface-low);
     border-bottom: 1px solid var(--t-edge);
     display: flex;
     gap: 4px;
@@ -1477,7 +1641,7 @@ a {
 }
 
 .tutorial-code {
-    background-color: #17191c;
+    background-color: var(--c-well);
     border: 1px solid var(--t-edge);
     border-radius: 8px;
     color: #d6dbe0;
@@ -1553,11 +1717,12 @@ a {
 
 /* A step's Show: it points at what the step is about, an eye before its
    word - look - in the amber of something to press. */
+/* Material's assist chip. */
 .show-chip {
     align-items: center;
     background-color: var(--t-amber-bg);
     border: 1px solid var(--t-amber);
-    border-radius: 12px;
+    border-radius: var(--r-s);
     color: var(--t-amber);
     cursor: pointer;
     display: inline-flex;
@@ -1586,17 +1751,19 @@ a {
 }
 
 /* On to the next lesson, at the end of each. */
+/* Material's outlined button. */
 .lesson-next {
     background: none;
-    border: 1px solid var(--t-edge);
-    border-radius: 8px;
+    border: 1px solid var(--c-outline);
+    border-radius: var(--r-full);
     color: var(--t-text);
     cursor: pointer;
     display: block;
     font: inherit;
-    font-size: 13px;
+    font-size: 14px;
+    font-weight: 500;
     margin: 24px 0 0 auto;
-    padding: 8px 14px;
+    padding: 9px 20px;
 }
 
 .lesson-next:hover,
@@ -1633,7 +1800,7 @@ a {
 }
 
 .link-list li::before {
-    color: #777;
+    color: var(--c-on-surface-variant);
     content: '\2022';
     left: 2px;
     position: absolute;
@@ -1648,24 +1815,32 @@ a {
     text-decoration: underline;
 }
 
+/* Material's tonal button: the app's ordinary button, 32px, dense. */
 .button {
-    background-color: #eee;
+    background-color: var(--c-tonal);
     border: 0;
-    border-radius: 10px;
-    color: #222;
+    border-radius: var(--r-full);
+    box-sizing: border-box;
+    color: var(--c-on-tonal);
     cursor: pointer;
     font-size: 14px;
-    line-height: 2em;
-    padding: 2px 10px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    line-height: 28px;
+    padding: 2px 16px;
     text-align: center;
 }
 
-/* Every light button answers the pointer, as the toolbar, the dock and
-   the dialogs do. A shade darker rather than a fixed colour, so that a
-   raised switch's orange, a live OFF/ON's green and a greyed button
-   each keep their own colour under it. */
+/* Every button answers the pointer, as the toolbar, the dock and the
+   dialogs do: a state layer of its own text colour over its fill, so
+   that a raised switch's amber, a live OFF/ON's green and a grey
+   button each keep their own colour under it. */
 .button:hover {
-    filter: brightness(0.88);
+    background-image: linear-gradient(var(--layer-hover), var(--layer-hover));
+}
+
+.button:active {
+    background-image: linear-gradient(var(--layer-press), var(--layer-press));
 }
 
 /* The hidden attribute has to beat author rules such as .mem-map's
@@ -1688,7 +1863,7 @@ a {
 }
 
 .mem-page {
-    background-color: #ddd;
+    background-color: #353535;
     border-bottom: 3px solid transparent;
     border-top: 3px solid transparent;
     cursor: pointer;
@@ -1700,34 +1875,33 @@ a {
 /* Shaded by how much of the page is not zero, so that the shape of
    what is loaded - a program, a BASIC interpreter - is visible at a
    glance. */
-.mem-page-1 { background-color: #bbb; }
-.mem-page-2 { background-color: #999; }
-.mem-page-3 { background-color: #777; }
-.mem-page-4 { background-color: #555; }
+.mem-page-1 { background-color: #555; }
+.mem-page-2 { background-color: #787878; }
+.mem-page-3 { background-color: #9c9c9c; }
+.mem-page-4 { background-color: #c4c4c4; }
 
 /* The page the dump is printing. An outline, so that it does not paint
    over the PC and SP marks below. No :hover rule: it would use the
    same property and hide this one on the very cell it marks. */
 .mem-page-shown {
-    outline: 2px solid #f90;
+    outline: 2px solid var(--c-primary);
 }
 
 /* Where the program counter and the stack pointer are. These sit on
-   cells that may be filled dark, and often on the outlined cell too,
-   so they are brighter than the marks used on the light background of
-   the dump below. */
+   cells that may be filled light or dark, and often on the outlined
+   cell too, so they are brighter than the marks the dump below uses. */
 .mem-page-pc { border-bottom-color: #3ddc63; }
 .mem-page-sp { border-top-color: #4da3ff; }
 
 /* The same two, on the byte itself inside the dump. */
 .at-pc {
     background-color: #157a35;
-    color: #eee;
+    color: #fff;
 }
 
 .at-sp {
     background-color: #36c;
-    color: #eee;
+    color: #fff;
 }
 
 /* The bytes after the opcode that belong to the same instruction: the
@@ -1740,11 +1914,20 @@ a {
 /* A button holding a current choice: Follow PC while it is on.
    Matches the selected dock tab. A helper
    button standing for a raised address switch reads the same way -
-   orange means active, wherever it appears. */
+   amber means active, wherever it appears - filled, as Material's
+   selected toggle button is. */
 .button.selected,
 .button.switch-on {
-    background-color: #f90;
+    background-color: var(--c-primary);
+    color: var(--c-on-primary);
     font-weight: bold;
+}
+
+/* Material's filled button: the one action a place is for. */
+.button.filled,
+.asm-assemble {
+    background-color: var(--c-primary);
+    color: var(--c-on-primary);
 }
 
 /* A control that cannot be used just now. It keeps the pointer cursor
@@ -1754,42 +1937,46 @@ a {
    in a dialog grey out by their own rules. */
 .button.disabled,
 .button.disabled.selected {
-    background-color: #bbb;
-    color: #777;
+    background-color: var(--c-disabled-bg);
+    background-image: none;
+    color: var(--c-disabled);
     font-weight: normal;
 }
 
 /* The power switch, the one control that has to be found before
    anything else works, so the loudest thing on the helper board: a
-   ring while off, green and glowing while on. No orange, which here
+   ring while off, green and glowing while on. No amber, which here
    means a raised address switch, and no red: switched off is not
    faulty. */
 .button.power-button {
-    background-color: #eee;
-    box-shadow: 0 0 0 3px #4da3ff;
-    color: #222;
+    background-color: var(--c-tonal);
+    box-shadow: 0 0 0 2px var(--c-info);
+    color: var(--c-on-tonal);
     font-weight: bold;
     letter-spacing: 1px;
     padding: 2px 18px;
 }
 
 .button.power-button.on {
-    background-color: #3ddc63;
+    background-color: var(--c-success);
     box-shadow: 0 0 12px rgba(61, 220, 99, 0.6);
-    color: #123;
+    color: var(--c-on-success);
 }
 
 /* Copy Link, for a moment after it has copied. The same green as a
    machine that is on. */
 .dialog-button.copied,
 .dialog-button.copied:hover {
-    background-color: #3ddc63;
-    color: #123;
+    background-color: var(--c-success);
+    color: var(--c-on-success);
 }
 
 /* The Teletype. A printer, not a screen: paper coloured stock, 72
    columns wide, scrolled to wherever the carriage is. The paper takes
-   the dock's height, less the row of keys above it. */
+   the dock's height, less the row of keys above it. It is the one
+   surface outside the colour scheme (P11): a roll of the canary paper
+   of the time, with a grain, a shadow where it comes up from behind
+   the platen, and ink that sits a little soft in it. */
 #tab-tty:not([hidden]) {
     display: flex;
     flex-direction: column;
@@ -1797,9 +1984,15 @@ a {
 }
 
 #tty-paper {
-    background-color: #e8e2d0;
-    border-radius: 10px;
-    color: #222;
+    background-color: #ebe3cb;
+    /* The grain: a fine noise, in the paper's own browns, that scrolls
+       with what is printed on it. */
+    background-attachment: local;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.38 0 0 0 0 0.25 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23g)'/%3E%3C/svg%3E");
+    border-radius: var(--r-xs);
+    /* Where the paper comes up from behind the platen. */
+    box-shadow: inset 0 12px 10px -10px rgba(60, 45, 20, 0.35);
+    color: #2a2620;
     cursor: text;
     flex: 1 1 0;
     font-size: 16px;
@@ -1838,15 +2031,18 @@ a {
     width: 520px;
 }
 
+/* The typeface struck through a ribbon: a little soft at its edges. */
 #tty-text {
+    text-shadow: 0 0 0.7px rgba(42, 38, 32, 0.55);
     white-space: pre;
 }
 
 /* The carriage. It only blinks while the machine is on, so a dark
    panel is visibly a dark panel. */
 .tty-cursor {
-    background-color: #222;
-    color: #e8e2d0;
+    background-color: #2a2620;
+    color: #ebe3cb;
+    text-shadow: none;
 }
 
 .powered-on .tty-cursor {
@@ -1856,7 +2052,7 @@ a {
 @keyframes tty-blink {
     50% {
         background-color: transparent;
-        color: #222;
+        color: #2a2620;
     }
 }
 
@@ -1874,23 +2070,23 @@ a {
 }
 
 #mem-dump span[data-a]:hover {
-    box-shadow: inset 0 0 0 2em rgba(0, 0, 0, 0.12);
+    box-shadow: inset 0 0 0 2em rgba(255, 255, 255, 0.16);
 }
 
-/* The byte picked for editing: filled with the orange that means
+/* The byte picked for editing: filled with the amber that means
    active, over the pointer's tint and the marks of PC and SP alike. */
 #mem-dump span.mem-selected,
 #mem-dump span.mem-selected:hover {
-    background-color: #f90;
+    background-color: var(--c-primary);
     box-shadow: none;
-    color: #222;
+    color: var(--c-on-primary);
 }
 
 /* Where the next hex digit goes: an underline cursor, the sign of
    typing over rather than inserting, blinking as cursors do. */
 #mem-dump .mem-caret {
     animation: mem-caret-blink 1s steps(1) infinite;
-    box-shadow: inset 0 -2px 0 #222;
+    box-shadow: inset 0 -2px 0 var(--c-on-primary);
 }
 
 @keyframes mem-caret-blink {
@@ -1927,19 +2123,15 @@ a {
     margin-bottom: 6px;
 }
 
-.asm-assemble {
-    background-color: #f90;
-    color: #222;
-}
-
 /* The tabs on the editor's top edge: only a phone has them (U2). */
 .asm-views {
     display: none;
 }
 
 .asm-work {
-    background-color: #ccc;
-    border-radius: 10px;
+    background-color: var(--c-well);
+    border: 1px solid var(--c-outline-variant);
+    border-radius: var(--r-m);
     display: flex;
     flex: 1 1 0;
     min-height: 120px;
@@ -1983,8 +2175,8 @@ a {
 }
 
 .asm-gutter {
-    background-color: #bdbdbd;
-    color: #4a4a4a;
+    background-color: #1e1e1e;
+    color: #7f7f7f;
     flex: none;
     overflow: hidden;
     padding-left: 6px;
@@ -2002,7 +2194,7 @@ a {
 }
 
 .asm-gutter-error {
-    color: #900020;
+    color: var(--c-error);
     font-weight: bold;
 }
 
@@ -2033,7 +2225,7 @@ a {
 }
 
 .asm-highlight {
-    color: #222;
+    color: #d8d8d8;
     overflow: hidden;
     padding-right: calc(10px + var(--asm-bar-beside, 0px));
     pointer-events: none;
@@ -2060,8 +2252,8 @@ a {
    rate. It holds still while the cursor moves, and for readers who ask
    their system for less motion. */
 .asm-caret {
-    background-color: #222;
-    color: #ccc;
+    background-color: #e6e6e6;
+    color: var(--c-well);
     pointer-events: none;
     position: absolute;
     white-space: pre;
@@ -2102,11 +2294,11 @@ a {
    have them. Clear stands a little apart: the two do very different
    things. */
 .asm-corner {
-    background-color: rgba(255, 255, 255, 0.55);
-    border-radius: 6px;
-    color: #333;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: var(--r-full);
+    color: var(--c-on-surface);
     height: 30px;
-    opacity: 0.75;
+    opacity: 0.8;
     position: absolute;
     top: 6px;
     width: 30px;
@@ -2121,27 +2313,27 @@ a {
     right: 60px;
 }
 
-/* On the editor's light grey, pointing darkens the icon - not the
-   white the dark toolbar's icon buttons turn. */
+/* On the editor's dark, pointing lightens the icon, as the toolbar's
+   icon buttons do. */
 .asm-corner:hover,
 .asm-corner:focus-visible {
-    background-color: rgba(255, 255, 255, 0.85);
-    color: #000;
+    background-color: rgba(255, 255, 255, 0.16);
+    color: #fff;
     opacity: 1;
 }
 
 /* Pointed at and focused look alike; the keyboard's focus also gets a
    ring, so it can be told where it is. */
 .asm-corner:focus-visible {
-    outline: 2px solid #f90;
+    outline: 2px solid var(--c-primary);
     outline-offset: 1px;
 }
 
 /* Nothing to clear. */
 .asm-corner:disabled,
 .asm-corner:disabled:hover {
-    background-color: rgba(255, 255, 255, 0.55);
-    color: #333;
+    background-color: rgba(255, 255, 255, 0.08);
+    color: var(--c-on-surface);
     cursor: default;
     opacity: 0.3;
 }
@@ -2152,41 +2344,41 @@ a {
 }
 
 .asm-copy.copied .asm-copied-icon {
-    color: #1b5e20;
+    color: #81c784;
     display: block;
 }
 
 .asm-source::selection {
-    background-color: rgba(51, 102, 204, 0.3);
+    background-color: rgba(130, 170, 255, 0.3);
     color: transparent;
 }
 
 .asm-line-error,
 .asm-listing-error {
-    background-color: rgba(176, 0, 32, 0.08);
+    background-color: rgba(255, 82, 82, 0.13);
 }
 
-/* The colours (H2), each 4.5:1 or more on the editor's grey. Bold
+/* The colours (H2), each 4.5:1 or more on the editor's dark. Bold
    alone is not enough for mnemonics: some monospaced fonts have no
    bold face, and the browser's stand-in barely shows. */
-.asm-comment { color: #4d4d4d; font-style: italic; }
-.asm-label { color: #0d3c8c; }
-.asm-mnemonic { color: #9a101e; font-weight: bold; }
-.asm-pseudo { color: #6a1b9a; }
-.asm-macro { color: #6a1b9a; font-style: italic; }
-.asm-register { color: #00574b; }
-.asm-number { color: #505000; }
-.asm-string { color: #19581e; }
-.asm-operator { color: #6a1b9a; }
+.asm-comment { color: #9a9a9a; font-style: italic; }
+.asm-label { color: #82aaff; }
+.asm-mnemonic { color: #ff9e80; font-weight: bold; }
+.asm-pseudo { color: #c792ea; }
+.asm-macro { color: #c792ea; font-style: italic; }
+.asm-register { color: #5fd3bc; }
+.asm-number { color: #e6d36b; }
+.asm-string { color: #a5d6a7; }
+.asm-operator { color: #c792ea; }
 .asm-bad {
-    color: #9e001d;
-    text-decoration: underline wavy #b00020;
+    color: #ff8a80;
+    text-decoration: underline wavy #ff5370;
 }
 
 .asm-listing {
-    background-color: #d6d6d6;
-    border-left: 1px solid #b0b0b0;
-    color: #333;
+    background-color: #1c1c1c;
+    border-left: 1px solid var(--c-outline-variant);
+    color: #cfcfcf;
     flex: none;
     overflow: hidden;
     padding-left: 10px;
@@ -2198,33 +2390,32 @@ a {
    grey of the line numbers, a position rather than data; the bytes,
    and a name's value after its =, in the colour of numbers. */
 .asm-listing .asm-addr {
-    color: #4a4a4a;
+    color: #7f7f7f;
 }
 
 .asm-listing .asm-bytes {
-    color: #505000;
+    color: #e6d36b;
 }
 
 /* The line the caret is on, across the line numbers, the source and
    the listing, so that a line's bytes can be followed across to it
    (U2): lighter, over whatever the line already shows - an error's
-   red too - so that its dark text only gains contrast. The PC's line
-   is marked already, in green, and keeps it. */
+   red too. The PC's line is marked already, in green, and keeps it. */
 .asm-current:not(.asm-line-pc):not(.asm-gutter-pc):not(.asm-listing-pc) {
-    box-shadow: inset 0 0 0 100vmax rgba(255, 255, 255, 0.4);
+    box-shadow: inset 0 0 0 100vmax rgba(255, 255, 255, 0.07);
 }
 
 /* The line the program counter is on, in the green the Debugger's dump
    marks the PC with (U7): the line tinted, its number marked, its
    bytes in the listing filled. */
 .asm-line-pc {
-    background-color: rgba(31, 157, 69, 0.15);
+    background-color: rgba(61, 220, 99, 0.13);
 }
 
 .asm-gutter-line.asm-gutter-pc,
 .asm-listing-line.asm-listing-pc {
     background-color: #157a35;
-    color: #eee;
+    color: #fff;
 }
 
 /* On the PC's green, the parts are its light text, as the rest is. */
@@ -2245,7 +2436,8 @@ a {
 .asm-error {
     background: none;
     border: 0;
-    color: #ffb4b4;
+    border-radius: var(--r-xs);
+    color: var(--c-on-error-container);
     cursor: pointer;
     display: block;
     font-size: 13px;
@@ -2280,7 +2472,7 @@ a {
 /* Marks the Teletype tab while its machine is printing and you are
    looking at something else. Out of the flow, so the tab does not move. */
 .dock-tab.has-activity::after {
-    background-color: #f90;
+    background-color: var(--c-primary);
     border-radius: 50%;
     content: '';
     height: 7px;
@@ -2300,9 +2492,9 @@ a {
    pushing the page up - which shrank the panel, and the 3D view with
    it, each time a two-line message gave way to a one-line one. */
 #status-bar {
-    background-color: #333;
+    background-color: var(--c-surface-container);
     box-sizing: border-box;
-    color: #ccc;
+    color: var(--c-on-surface);
     flex: none;
     font-size: 14px;
     height: 33px;
@@ -2313,7 +2505,7 @@ a {
 
 #status-text {
     background-color: inherit;
-    border-top: 1px solid #111;
+    border-top: 1px solid var(--c-divider);
     bottom: 0;
     box-sizing: border-box;
     left: 0;
@@ -2345,10 +2537,10 @@ a {
 }
 
 #file-notice {
-    background-color: #5a4a1a;
-    border-radius: 10px;
+    background-color: var(--c-warn-container);
+    border-radius: var(--r-m);
     box-sizing: border-box;
-    color: #ffd98a;
+    color: var(--c-on-warn-container);
     font-size: 16px;
     line-height: 1.6;
     margin: 0 auto;
@@ -2366,17 +2558,17 @@ a {
 }
 
 #status-bar.status-warn {
-    background-color: #5a4a1a;
-    color: #ffd98a;
+    background-color: var(--c-warn-container);
+    color: var(--c-on-warn-container);
 }
 
 #status-bar.status-error {
-    background-color: #5a2323;
-    color: #ffb4b4;
+    background-color: var(--c-error-container);
+    color: var(--c-on-error-container);
 }
 
 #mem-window-label {
-    color: #999;
+    color: var(--c-on-surface-variant);
     font-size: 14px;
     padding: 0 6px 0 0;
     white-space: nowrap;
@@ -2397,11 +2589,12 @@ a {
         height: auto;
     }
 
-    /* The stage gives way before the dock does (#29): it may shrink,
-       and the dock keeps a floor of its own, so that a tall 3D view,
-       the switch strip and a two-line status message cannot leave the
-       open tab no room at all. */
-    #stage {
+    /* In 3D the stage gives way before the dock does (#29): it may
+       shrink, and the dock keeps a floor of its own, so that a tall 3D
+       view, the switch strip and a two-line status message cannot leave
+       the open tab no room at all. The 2D panel cannot shrink, so in
+       2D the stage keeps its height, strip and all. */
+    .view-3d #stage {
         flex: 0 1 auto;
         min-height: 0;
     }
@@ -2432,56 +2625,16 @@ a {
         width: 1px;
     }
 
-    .strip-body {
-        padding: 6px 8px;
-    }
-
-    .strip-row {
-        gap: 6px 8px;
-    }
-
     .strip-row + .strip-row {
         margin-top: 6px;
     }
 
     .strip-body .button {
         min-width: 0;
-        padding: 2px 7px;
     }
 
     .strip-body .button.power-button {
         padding: 2px 10px;
-    }
-
-    /* The address switches a byte to a row, A15-A8 over A7-A0: the
-       line between the bytes becomes the break between the rows. Each
-       row as wide as the strip, every switch the same width, for the
-       largest thumb target the width allows. */
-    .strip-address .byte-divider {
-        flex-basis: 100%;
-        height: 0;
-        visibility: hidden;
-    }
-
-    .strip-address {
-        gap: 6px 8px;
-    }
-
-    .strip-address .octal {
-        flex: 1 1 0;
-    }
-
-    .strip-address .octal:has(> :nth-child(2)) {
-        flex-grow: 2;
-    }
-
-    .strip-address .octal:has(> :nth-child(3)) {
-        flex-grow: 3;
-    }
-
-    .strip-address .octal .button {
-        flex: 1 1 0;
-        padding: 2px 0;
     }
 
     /* The fold tab is small to look at, but takes a thumb: its hit area
@@ -2507,11 +2660,16 @@ a {
     #dock {
         flex: 1 1 0;
         height: auto;
+    }
+
+    /* The floor the 3D view gives way to (#29). */
+    .view-3d #dock {
         min-height: 30vh;
         min-height: 30dvh;
     }
 
-    .dock-closed #dock {
+    .dock-closed #dock,
+    .view-3d.dock-closed #dock {
         flex: none;
         min-height: 0;
     }
@@ -2585,17 +2743,19 @@ a {
        carried up into the tab, its name in bold; the other is the
        darker grey of the gutter, behind. */
     .asm-views {
-        border-radius: 10px 10px 0 0;
+        border: 1px solid var(--c-outline-variant);
+        border-bottom: 0;
+        border-radius: var(--r-m) var(--r-m) 0 0;
         display: flex;
         flex: none;
         overflow: hidden;
     }
 
     .asm-view {
-        background-color: #a8a8a8;
+        background-color: var(--c-surface-container);
         border: 0;
-        border-bottom: 1px solid #949494;
-        color: #333;
+        border-bottom: 1px solid var(--c-outline-variant);
+        color: var(--c-on-surface-variant);
         cursor: pointer;
         flex: 1 1 0;
         font-size: 14px;
@@ -2609,35 +2769,36 @@ a {
     }
 
     .asm-view + .asm-view {
-        border-left: 1px solid #949494;
+        border-left: 1px solid var(--c-outline-variant);
     }
 
     .asm-view:hover {
-        background-color: #b4b4b4;
+        background-color: var(--c-surface-high);
     }
 
     .asm-view[aria-selected="true"] {
         border-bottom-color: transparent;
-        color: #111;
+        color: var(--c-on-surface);
         cursor: default;
         font-weight: bold;
     }
 
     #asm-view-source[aria-selected="true"] {
-        background-color: #ccc;
+        background-color: var(--c-well);
     }
 
     #asm-view-bytes[aria-selected="true"] {
-        background-color: #d6d6d6;
+        background-color: #1c1c1c;
     }
 
     .asm-view:focus-visible {
-        outline: 2px solid #f90;
+        outline: 2px solid var(--c-primary);
         outline-offset: -2px;
     }
 
     /* The box's top corners are the tabs'. */
     #tab-asm .asm-work {
+        border-top: 0;
         border-top-left-radius: 0;
         border-top-right-radius: 0;
     }

@@ -49,10 +49,18 @@ export async function stepTools(h) {
     const {js, viewport, fresh, press, verify, statusText, sleep} = h;
     await viewport(1280, 860); await fresh();
     await js(`panel.showTab('debug')`); await sleep(300);
+    // Off, the boxes keep a live machine's size: registers as dashes,
+    // and a page of memory with what to do in the middle of it.
+    const off = await js(`(() => { const m = document.getElementById('mem-dump'); return {cpu: document.getElementById('cpu-dump').textContent, instr: document.getElementById('instr-pane').textContent,
+        says: m.textContent, tall: m.getBoundingClientRect().height}; })()`);
+    verify('off, the registers are dashes', off.cpu.startsWith('PC = ----  SP = ----') && off.instr.trim() === '----', JSON.stringify(off));
+    verify('and the memory a page tall, saying why it is empty', off.tall >= 16 * 24 && off.says.startsWith('The machine is off, so there is no memory to show'), JSON.stringify(off));
     verify('off, Step is greyed', await js(`document.getElementById('debug-step').classList.contains('disabled')`));
     await press('#debug-step');
     verify('and says why', (await statusText()).startsWith('The machine is off, so there is no program to step through'), await statusText());
     await js(`panel.onPowerOn()`); await sleep(300);
+    const on = await js(`(() => { const m = document.getElementById('mem-dump'); return {cpu: document.getElementById('cpu-dump').textContent, rows: m.querySelectorAll('span[data-a]').length, tall: m.getBoundingClientRect().height}; })()`);
+    verify('on, they fill in, at the same height', !on.cpu.includes('--') && on.rows === 256 && Math.abs(on.tall - off.tall) <= 2, JSON.stringify([on, off.tall]));
     verify('on, Step and Run to can be pressed', await js(`!document.getElementById('debug-step').classList.contains('disabled') && !document.getElementById('debug-run-to').classList.contains('disabled')`));
     // B counts down from 5 in a loop at 0002; 0010 is past it.
     await js(`document.getElementById('debug-data-input').value = '06 05 05 c2 02 00 c3 10 00 00 00 00 00 00 00 00 00 c3 10 00'; panel.debugLoadData(); panel.onReset()`);

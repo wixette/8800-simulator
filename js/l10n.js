@@ -1738,6 +1738,19 @@ l10n.MESSAGES = {
         'ko': '여기까지 실행에서 지정한 대로 {address}H에서 멈췄습니다.',
     },
 
+    'mem-dump-off': {
+        'en': 'The machine is off, so there is no memory to show. Switch it on with OFF/ON.',
+        'es': 'La máquina está apagada, así que no hay memoria que mostrar. Enciéndela con OFF/ON.',
+        'fr': 'La machine est éteinte, il n’y a donc pas de mémoire à afficher. Allumez-la avec OFF/ON.',
+        'de': 'Die Maschine ist aus, es gibt also keinen Speicher zum Anzeigen. Schalten Sie sie mit OFF/ON ein.',
+        'it': 'La macchina è spenta, quindi non c’è memoria da mostrare. Accendila con OFF/ON.',
+        'pt-BR': 'A máquina está desligada, então não há memória para mostrar. Ligue-a com OFF/ON.',
+        'zh': '机器已关闭，没有内存可以显示。请用 OFF/ON 开机。',
+        'zh-TW': '機器已關閉，沒有記憶體可以顯示。請用 OFF/ON 開機。',
+        'ja': '電源が入っていないので、表示するメモリがありません。OFF/ON で電源を入れてください。',
+        'ko': '기계가 꺼져 있어 표시할 메모리가 없습니다. OFF/ON으로 전원을 켜세요.',
+    },
+
     'debug-fill-zero': {
         'en': 'Zero All Memory',
         'es': 'Poner Memoria a Cero',

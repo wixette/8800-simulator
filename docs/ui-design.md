@@ -157,20 +157,68 @@ Each kind of control is one component, used the same way everywhere:
 | Component | For | Rule |
 | --- | --- | --- |
 | Menu | choosing one thing: Load, Memory, the language | items only - no text boxes, no buttons, no menu over a menu; one open at a time; a group heading is a ruled band, not another item; an item that cannot be used is greyed, with why at its right |
-| Dialog | anything that needs input or explaining: hex bytes, Share, About | a title in a lighter band across the top, what it is for, the controls, and the actions at the bottom right; Escape or a click outside closes it |
+| Dialog | anything that needs input or explaining: hex bytes, Share, About | a title in the headline type at the top, with its close button, what it is for, the controls, and the actions at the bottom right - the one it is for filled, the others text buttons; Escape or a click outside closes it |
 | Icon button | familiar app-level actions: Share, the language, About; folding the switch strip | always with a tooltip and a screen-reader name, both translated |
 | Empty state | guidance that matters only until something happens: the teletype's hint | shown inside the empty area, and gone once there is content |
 
-These are Material Design's patterns, not its look: the simulator keeps
-its own dark, period style. Every flat control on that dark chrome -
-toolbar buttons, dock tabs, the strip's tab - answers the pointer with
-the same highlight.
+These are Material Design's patterns, and since v1.8.4 its look too
+(P11). Every flat control on the dark chrome - toolbar buttons, dock
+tabs, the strip's tab - answers the pointer with the same highlight.
 
 *Why:* the first toolbar put the old Debugger sections into it as they
 were - a menu opening over another menu, a text box beside buttons in
 a popup. Each piece worked; together they looked like a different app
 in each place. A reader who has used one menu, or one dialog, then
 knows how all of them behave.
+
+
+### P11 — Material 3's tokens, not its components
+
+Since v1.8.4 every control takes its colours, corners, type and states
+from one set of design tokens on `:root` in `css/style.css`: Material 3's
+roles in a dark scheme around the panel's amber. The page's own
+elements are styled with them; no Material library is loaded.
+
+- **Colour roles:** surfaces from the darkest well (code and data) up
+  through the page, the dock, the chrome and the dialogs; on-surface
+  and its variant; outline and its variant; amber as primary - what is
+  active, raised, or the one action a place is for - with its
+  container for what is chosen (a menu's item, 2D or 3D); green for a
+  machine that is on; warning and error containers for the status line.
+- **Shapes:** 4, 8, 12, 16 and 28 px, and full. Buttons are full;
+  text fields 4; data wells and the strip 12 and 16; dialogs 28.
+- **Type:** the app's own words in the system's sans; the machine's -
+  the panel's legends on the strip, the Teletype's keys and paper, the
+  dumps, the assembler, typed hex - in monospace.
+- **States:** a layer of the control's own text colour over its fill,
+  8% under the pointer and 14% pressed, so that a grey, an amber and a
+  green button answer alike; one amber focus ring everywhere; a control
+  that cannot be used at 12% and 38%, as Material greys one out.
+
+Each control is the Material component it is:
+
+| Control | Material 3 |
+| --- | --- |
+| Assemble, Load Data, Copy Link, Put it all back | filled button (Put it all back, an extended FAB) |
+| Cancel, References in About | text button |
+| Every other button: Examples, Follow PC, Step, the Teletype's keys | tonal button, 32 px |
+| The strip's levers and octal groups | connected button group, 30 px: round at the ends, nearly square where its buttons meet |
+| An address switch | toggle button: raised is selected, filled amber |
+| 2D \| 3D | segmented button |
+| The dock's tabs | primary tabs |
+| The Load, Memory, language and Examples menus | menu |
+| Step's and Run to's boxes, the hex bytes, Share's link | outlined text field |
+| The dumps, the assembler | dark wells under a quiet outline |
+| Show in the Tutorial | assist chip |
+
+The Teletype's paper is the one surface outside the scheme: it is
+paper - canary roll stock with a grain, a shadow where it comes up from
+behind the platen, and ink a little soft where the type struck it.
+
+*Why:* six years of rules each picked its own grey, radius and size -
+68 colours and 12 radii in all - and light grey boxes on a dark app
+read as from another time. One set of tokens makes a new control look
+right by default.
 
 ---
 
@@ -233,7 +281,7 @@ dock shrinks the panel, keeping its shape, rather than pushing it off
 the top of the screen. The dock is kept to what leaves the panel at
 least 160 px, on top of the Switch Board Helper when that is showing.
 On a phone the panel takes the height its width gives it and the dock
-the rest, with no handle to drag (P9) - but never less than 30% of the
+the rest, with no handle to drag (P9) - and in 3D never less than 30% of the
 height (#29): the 3D view, which can be drawn at any shape, gives way
 first, down to 140 px. The Switch Board Helper packs down there too:
 the longer names shortened (STEP, EXAM, DEP, NEXT), and the address
@@ -408,6 +456,11 @@ button at all; the panel's levers answer that on the status line.
   hint is an empty state (P10): centred in the paper until anything
   prints, back after CLEAR PAPER. Nothing but the status line sits at
   the dock's foot.
+- **Debugger, switched off:** each box keeps the size it has with the
+  machine on - the registers' layout with dashes, the instruction a
+  dash, the memory a page tall with why it is empty in the middle, the
+  Teletype's empty state - so that switching on fills them in rather
+  than moving everything under them. The controls stay, greyed (D18).
 - **Debugger:** the CPU across the top - the registers and the next
   instruction, side by side and the same height, stacked in a narrow
   dock - and memory under them, the whole width, with its toolbar on
