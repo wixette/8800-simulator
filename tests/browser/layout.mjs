@@ -275,3 +275,25 @@ export async function phoneDock(h) {
         verify(`  A15-A8 on one row, A7-A0 on the next`, r.high && r.split && r.low, JSON.stringify(r));
     }
 }
+
+/**
+ * On a phone the Teletype's paper fills the open tab, and its keys are
+ * under it, scrolled to: above it, three rows of them left a slit of
+ * paper. Scrolled to the end, the last of them clears a two-line
+ * status message.
+ */
+export async function phoneTeletype(h) {
+    const {js, viewport, fresh, verify, sleep} = h;
+    await viewport(375, 667); await fresh();
+    await js(`panel.showTab('tty')`); await sleep(300);
+    await js(`panel.setStatus('status-reached', {address: 'A long message that needs a second line on a phone, 0010'})`); await sleep(150);
+    const at = () => js(`(() => { const b = (s) => document.querySelector(s).getBoundingClientRect(), body = document.getElementById('dock-body');
+        return {paper: Math.round(b('#tty-paper').height), shown: body.clientHeight, keysTop: Math.round(b('.tty-keys').top), paperBottom: Math.round(b('#tty-paper').bottom),
+                clearBottom: Math.round(b('#tty-clear').bottom), statusTop: Math.round(b('#status-text').top)}; })()`);
+    const r = await at();
+    verify('the paper takes the dock\'s height', r.paper >= r.shown - 40, JSON.stringify(r));
+    verify('and the keys are under it', r.keysTop > r.paperBottom, JSON.stringify(r));
+    await js(`document.getElementById('dock-body').scrollTop = 1e6`); await sleep(150);
+    const e = await at();
+    verify('scrolled to the end, CLEAR PAPER clears the status message', e.clearBottom <= e.statusTop, JSON.stringify(e));
+}

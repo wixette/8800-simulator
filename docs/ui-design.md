@@ -402,7 +402,9 @@ button at all; the panel's levers answer that on the status line.
 ### U5 — Each tool laid out as a tool
 
 - **Teletype:** the keys a PC keyboard lacks are the paper's toolbar,
-  above it as a console's is, with CLEAR PAPER apart at the right. The
+  above it as a console's is, with CLEAR PAPER apart at the right. On
+  a phone, where they wrap to three rows, they go under the paper,
+  which fills the open tab, and are scrolled to. The
   hint is an empty state (P10): centred in the paper until anything
   prints, back after CLEAR PAPER. Nothing but the status line sits at
   the dock's foot.
