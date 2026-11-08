@@ -161,7 +161,7 @@ Each kind of control is one component, used the same way everywhere:
 | Icon button | familiar app-level actions: Share, the language, About; folding the switch strip | always with a tooltip and a screen-reader name, both translated |
 | Empty state | guidance that matters only until something happens: the teletype's hint | shown inside the empty area, and gone once there is content |
 
-These are Material Design's patterns, and since v1.8.4 its look too
+These are Material Design's patterns, and since v1.9.0 its look too
 (P11). Every flat control on the dark chrome - toolbar buttons, dock
 tabs, the strip's tab - answers the pointer with the same highlight.
 
@@ -174,7 +174,7 @@ knows how all of them behave.
 
 ### P11 — Material 3's tokens, not its components
 
-Since v1.8.4 every control takes its colours, corners, type and states
+Since v1.9.0 every control takes its colours, corners, type and states
 from one set of design tokens on `:root` in `css/style.css`: Material 3's
 roles in a dark scheme around the panel's amber. The page's own
 elements are styled with them; no Material library is loaded.

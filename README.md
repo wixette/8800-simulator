@@ -27,10 +27,10 @@ nothing to install, on a desktop or a phone, in ten languages.
 </tr>
 <tr>
 <td><b>Boot Microsoft 4K BASIC</b><br>Bill Gates and Paul Allen's 1975 BASIC, unmodified, on a Teletype.<br><img src="./screenshots/teletype.jpg" alt="Microsoft 4K BASIC on the Teletype: a short program typed in, and its sine wave of stars printed down the paper"></td>
-<td><b>Write 8080 assembly</b><br>Intel's own language, macros and all, assembled as you type.<br><img src="./screenshots/assembler.jpg" alt="The Assembler with the Macros example: coloured source on the left, each line's address and bytes on the right, the line being run marked in green"></td>
+<td><b>Write 8080 assembly</b><br>Intel's own language, macros and all, assembled as you type.<br><img src="./screenshots/assembler.jpg" alt="The Assembler with the Macros example: coloured source on the left, each line's address and bytes on the right, running"></td>
 </tr>
 <tr>
-<td><b>Watch the CPU work</b><br>Registers, the next instruction and memory, a step at a time.<br><img src="./screenshots/debugger.jpg" alt="The Debugger part way through the adder: the registers beside the next instruction, LDA 0081H, and the memory dump marking its three bytes"></td>
+<td><b>Watch the CPU work</b><br>Registers, the next instruction and memory, a step at a time.<br><img src="./screenshots/debugger.jpg" alt="The Debugger part way through the adder: the registers beside the next instruction, LDA 0081H, with Step and Run to under it, and the memory dump marking its three bytes"></td>
 <td><b>Learn as you go</b><br>Four lessons, from meeting the machine to running BASIC.<br><img src="./screenshots/tutorial.jpg" alt="The Tutorial's first lesson, Meet the Machine, under the front panel: a photo of an Altair 8800 beside a Teletype, and a paragraph on its history"></td>
 </tr>
 </table>
@@ -93,8 +93,10 @@ whole of the way in and out.
 The switches come in groups of three because 8080 programmers wrote
 bytes in octal: `00 111 010` is 072 octal, or 3AH. Click the panel's
 own switches, or the large buttons on the strip under it, which are
-easier to hit and show which switches are up. The small arrow on the
-strip's top edge folds it away.
+easier to hit and show which switches are up. On a phone the strip
+shortens the longer names (STEP, EXAM, DEP, NEXT) and puts the address
+switches a byte to a row. The small arrow on the strip's top edge
+folds it away.
 
 **One simplification.** SINGLE STEP here always runs one whole
 instruction, as the Altair's Operator's Manual describes it. The
@@ -176,9 +178,10 @@ tools below it, and a status line along the foot.
   the whole machine in 3D, and back (below).
 
 The **Debugger** is a view the real Altair never had. Step through a
-program with SINGLE STEP and watch it work:
+program, with SINGLE STEP or with its own Step and Run to, and watch
+it work:
 
-![The Debugger part way through the adder: the registers beside the next instruction, LDA 0081H, and the memory dump marking its three bytes](./screenshots/debugger.jpg)
+![The Debugger part way through the adder: the registers beside the next instruction, LDA 0081H, with Step and Run to under it, and the memory dump marking its three bytes](./screenshots/debugger.jpg)
 
 - **The registers**, with the flags S Z AC P CY lit when set.
 - **The next instruction**: its address, its bytes, its mnemonic with
@@ -256,7 +259,8 @@ Try the *Teletype Examples* from the Load menu, in this order:
    five tries.
 
 The keys a PC keyboard lacks, such as BREAK, RUBOUT and LINE FEED, are
-along the top of the paper.
+along the top of the paper; on a phone, where the paper takes the whole
+tab, they are under it.
 
 ### Microsoft 4K BASIC
 
@@ -307,7 +311,7 @@ Intel's answer, the same year, was assembly language: you write
 tab, under the panel, takes the language exactly as Intel's *8080
 Assembly Language Programming Manual* defines it, macros and all.
 
-![The Assembler with the Macros example: coloured source on the left, each line's address and bytes on the right, the line being run marked in green](./screenshots/assembler.jpg)
+![The Assembler with the Macros example: coloured source on the left, each line's address and bytes on the right, running](./screenshots/assembler.jpg)
 
 Here is that first program again, with names for its addresses
 instead of the numbers. It makes exactly the bytes you toggled in:
