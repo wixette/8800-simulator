@@ -2531,6 +2531,31 @@ a {
         width: 1px;
     }
 
+    /* The Teletype's paper takes the whole of the open tab, and its
+       keys go under it, to scroll down to: three rows of them above
+       it left a phone a slit of paper. */
+    #dock-body {
+        container-type: size;
+    }
+
+    #tab-tty:not([hidden]) {
+        height: auto;
+    }
+
+    /* As tall as the dock shows, less the pane's top padding; the
+       keys come after it, in the flow, so that scrolled to the end
+       they clear a status message risen over the dock. */
+    #tty-paper {
+        flex: none;
+        height: calc(100cqh - 8px);
+        order: 1;
+    }
+
+    .tty-keys {
+        margin: 8px 0 0;
+        order: 2;
+    }
+
     /* The Assembler's source and listing take turns. */
     #tab-asm .asm-listing {
         display: none;
